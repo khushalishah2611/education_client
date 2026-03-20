@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 
 import '../core/app_localizations.dart';
 import '../widgets/common_widgets.dart';
+import 'home_screen.dart';
 
 class AcademicInfoScreen extends StatelessWidget {
   const AcademicInfoScreen({super.key});
@@ -13,10 +14,10 @@ class AcademicInfoScreen extends StatelessWidget {
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            const LanguageButton(),
-            const SizedBox(height: 8),
+            const FakeStatusBar(),
+            const SizedBox(height: 16),
             const AppLogo(center: true),
-            const SizedBox(height: 28),
+            const SizedBox(height: 34),
             AppDropdownField(
               label: context.l10n.text('country'),
               value: context.l10n.text('arab'),
@@ -41,8 +42,14 @@ class AcademicInfoScreen extends StatelessWidget {
               value: context.l10n.text('bachelorCs'),
               icon: Icons.menu_book_outlined,
             ),
-            const SizedBox(height: 30),
-            AppPrimaryButton(label: context.l10n.text('continue'), onPressed: () {}),
+            const SizedBox(height: 32),
+            AppPrimaryButton(
+              label: context.l10n.text('continue'),
+              onPressed: () => Navigator.of(context).pushAndRemoveUntil(
+                MaterialPageRoute(builder: (_) => const HomeScreen()),
+                (route) => false,
+              ),
+            ),
           ],
         ),
       ),
