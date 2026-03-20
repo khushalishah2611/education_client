@@ -3,6 +3,7 @@ import 'package:flutter/material.dart';
 import '../core/app_localizations.dart';
 import '../core/app_theme.dart';
 import '../widgets/common_widgets.dart';
+import 'home_screen.dart';
 
 class VerifyOtpScreen extends StatelessWidget {
   const VerifyOtpScreen({super.key});
@@ -13,16 +14,18 @@ class VerifyOtpScreen extends StatelessWidget {
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          const LanguageButton(),
-          const SizedBox(height: 16),
+          const FakeStatusBar(),
+          const SizedBox(height: 18),
           Text(context.l10n.text('verifyOtp'), style: Theme.of(context).textTheme.headlineMedium),
-          const SizedBox(height: 22),
-          Text(
-            context.l10n.text('otpHelp'),
-            textAlign: TextAlign.center,
-            style: Theme.of(context).textTheme.titleMedium,
-          ),
           const SizedBox(height: 24),
+          Center(
+            child: Text(
+              context.l10n.text('otpHelp'),
+              textAlign: TextAlign.center,
+              style: Theme.of(context).textTheme.titleMedium,
+            ),
+          ),
+          const SizedBox(height: 28),
           const _OtpRow(),
           const SizedBox(height: 10),
           Center(
@@ -31,14 +34,12 @@ class VerifyOtpScreen extends StatelessWidget {
               style: Theme.of(context).textTheme.titleMedium?.copyWith(fontWeight: FontWeight.w500),
             ),
           ),
-          const SizedBox(height: 28),
-          AppPrimaryButton(label: context.l10n.text('verifyAndLogin'), onPressed: () {}),
-          const SizedBox(height: 12),
-          Center(
-            child: Text(
-              context.l10n.text('otpDemoHint'),
-              textAlign: TextAlign.center,
-              style: Theme.of(context).textTheme.bodyMedium?.copyWith(color: AppColors.textMuted),
+          const SizedBox(height: 36),
+          AppPrimaryButton(
+            label: context.l10n.text('verifyAndLogin'),
+            onPressed: () => Navigator.of(context).pushAndRemoveUntil(
+              MaterialPageRoute(builder: (_) => const HomeScreen()),
+              (route) => false,
             ),
           ),
         ],
