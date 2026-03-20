@@ -13,12 +13,9 @@ class LoginScreen extends StatelessWidget {
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          const LanguageButton(),
-          const SizedBox(height: 16),
-          Text(
-            context.l10n.text('loginWithOtp'),
-            style: Theme.of(context).textTheme.headlineMedium,
-          ),
+          const FakeStatusBar(),
+          const SizedBox(height: 18),
+          Text(context.l10n.text('loginWithOtp'), style: Theme.of(context).textTheme.headlineMedium),
           const SizedBox(height: 24),
           AppTextField(
             label: context.l10n.text('email'),
@@ -29,9 +26,9 @@ class LoginScreen extends StatelessWidget {
           const SizedBox(height: 30),
           AppPrimaryButton(
             label: context.l10n.text('sendOtp'),
-            onPressed: () {
-              Navigator.of(context).push(MaterialPageRoute(builder: (_) => const VerifyOtpScreen()));
-            },
+            onPressed: () => Navigator.of(context).push(
+              MaterialPageRoute(builder: (_) => const VerifyOtpScreen()),
+            ),
           ),
         ],
       ),
