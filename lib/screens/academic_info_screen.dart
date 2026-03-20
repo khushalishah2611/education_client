@@ -5,7 +5,9 @@ import '../widgets/common_widgets.dart';
 import 'home_screen.dart';
 
 class AcademicInfoScreen extends StatelessWidget {
-  const AcademicInfoScreen({super.key});
+  const AcademicInfoScreen({super.key, required this.flowLabel});
+
+  final String flowLabel;
 
   @override
   Widget build(BuildContext context) {
@@ -44,7 +46,9 @@ class AcademicInfoScreen extends StatelessWidget {
             ),
             const SizedBox(height: 32),
             AppPrimaryButton(
-              label: context.l10n.text('continue'),
+              label: flowLabel == 'Register'
+                  ? context.l10n.text('createAccount')
+                  : context.l10n.text('continue'),
               onPressed: () => Navigator.of(context).pushAndRemoveUntil(
                 MaterialPageRoute(builder: (_) => const HomeScreen()),
                 (route) => false,
