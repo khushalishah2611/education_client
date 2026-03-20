@@ -5,7 +5,7 @@ import '../widgets/common_widgets.dart';
 import 'home_screen.dart';
 
 class AcademicInfoScreen extends StatelessWidget {
-  const AcademicInfoScreen({super.key, required String flowLabel});
+  const AcademicInfoScreen({super.key});
 
   @override
   Widget build(BuildContext context) {
