@@ -15,10 +15,10 @@ class CreateAccountScreen extends StatelessWidget {
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            const LanguageButton(),
-            const SizedBox(height: 8),
-            const AppLogo(),
-            const SizedBox(height: 28),
+            const FakeStatusBar(),
+            const SizedBox(height: 16),
+            const AppLogo(center: true),
+            const SizedBox(height: 34),
             Text(context.l10n.text('createYourAccount'), style: Theme.of(context).textTheme.headlineMedium),
             const SizedBox(height: 20),
             AppTextField(
@@ -37,7 +37,7 @@ class CreateAccountScreen extends StatelessWidget {
             AppTextField(
               label: context.l10n.text('mobileNumber'),
               hint: context.l10n.text('mobileNumber'),
-              icon: Icons.phone_in_talk_outlined,
+              icon: Icons.phone_outlined,
               keyboardType: TextInputType.phone,
             ),
             const SizedBox(height: 18),
@@ -49,25 +49,18 @@ class CreateAccountScreen extends StatelessWidget {
             const SizedBox(height: 30),
             AppPrimaryButton(
               label: context.l10n.text('createAccount'),
-              onPressed: () {
-                Navigator.of(context).push(MaterialPageRoute(builder: (_) => const AcademicInfoScreen()));
-              },
-            ),
-            const SizedBox(height: 14),
-            Center(
-              child: AppTextLink(
-                prefix: context.l10n.text('termsPrefix'),
-                link: context.l10n.text('termsLink'),
+              onPressed: () => Navigator.of(context).push(
+                MaterialPageRoute(builder: (_) => const AcademicInfoScreen()),
               ),
             ),
+            const SizedBox(height: 12),
+            Center(child: AppTextLink(prefix: context.l10n.text('termsPrefix'), link: context.l10n.text('termsLink'))),
             const SizedBox(height: 10),
             Center(
               child: AppTextLink(
-                prefix: context.l10n.text('alreadyHaveAccount'),
-                link: context.l10n.text('login'),
-                onTap: () {
-                  Navigator.of(context).push(MaterialPageRoute(builder: (_) => const LoginScreen()));
-                },
+                prefix: 'Don’t have an account? ',
+                link: 'login',
+                onTap: () => Navigator.of(context).push(MaterialPageRoute(builder: (_) => const LoginScreen())),
               ),
             ),
           ],

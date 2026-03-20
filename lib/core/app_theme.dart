@@ -1,17 +1,20 @@
 import 'package:flutter/material.dart';
 
 class AppColors {
-  static const background = Color(0xFFFFFBF5);
-  static const peach = Color(0xFFFEE3CB);
-  static const peachSoft = Color(0xFFFFF4EA);
-  static const primary = Color(0xFF9BE0BE);
-  static const primaryDark = Color(0xFF66C9A0);
+  static const background = Color(0xFFFFFAF5);
+  static const peach = Color(0xFFFDE1CC);
+  static const peachSoft = Color(0xFFFFF6EE);
+  static const primary = Color(0xFFA0E1BE);
+  static const primaryDark = Color(0xFF65C898);
   static const logo = Color(0xFF4A2132);
-  static const accent = Color(0xFFE78A2C);
+  static const accent = Color(0xFFE98A2B);
   static const text = Color(0xFF111111);
   static const textMuted = Color(0xFF757575);
-  static const border = Color(0xFFDFE4EA);
+  static const border = Color(0xFFD9DEE6);
   static const white = Colors.white;
+  static const card = Color(0xFFFFFFFF);
+  static const shadow = Color(0x14000000);
+  static const softOrange = Color(0xFFFFB567);
 }
 
 class AppTheme {
@@ -25,7 +28,7 @@ class AppTheme {
         surface: AppColors.background,
       ),
       textTheme: const TextTheme(
-        displaySmall: TextStyle(fontSize: 42, fontWeight: FontWeight.w900),
+        displaySmall: TextStyle(fontSize: 34, fontWeight: FontWeight.w900),
         headlineLarge: TextStyle(fontSize: 42, fontWeight: FontWeight.w800),
         headlineMedium: TextStyle(fontSize: 28, fontWeight: FontWeight.w800),
         titleLarge: TextStyle(fontSize: 20, fontWeight: FontWeight.w700),
@@ -37,6 +40,7 @@ class AppTheme {
         filled: true,
         fillColor: AppColors.white,
         contentPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 18),
+        hintStyle: const TextStyle(color: AppColors.textMuted),
         border: OutlineInputBorder(
           borderRadius: BorderRadius.circular(12),
           borderSide: const BorderSide(color: AppColors.border),

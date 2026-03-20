@@ -1,87 +1,56 @@
 import 'package:flutter/material.dart';
 
-import '../widgets/input_field.dart';
-import 'dashboard_screen.dart';
+import '../core/app_localizations.dart';
+import '../widgets/common_widgets.dart';
+import 'home_screen.dart';
 
 class AcademicInfoScreen extends StatelessWidget {
-  const AcademicInfoScreen({super.key, required this.flowLabel});
-
-  final String flowLabel;
-
-  void _openDashboard(BuildContext context) {
-    Navigator.of(context).pushAndRemoveUntil(
-      MaterialPageRoute<void>(builder: (_) => const DashboardScreen()),
-      (route) => false,
-    );
-  }
+  const AcademicInfoScreen({super.key});
 
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
-      appBar: AppBar(
-        backgroundColor: Colors.transparent,
-        elevation: 0,
-        leading: IconButton(
-          icon: const Icon(Icons.arrow_back_ios_new_rounded),
-          onPressed: () => Navigator.of(context).pop(),
-        ),
-      ),
-      body: SafeArea(
-        child: SingleChildScrollView(
-          padding: const EdgeInsets.fromLTRB(20, 8, 20, 20),
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              Text(
-                '$flowLabel Academic Info',
-                style: const TextStyle(fontSize: 28, fontWeight: FontWeight.w800),
+    return AppScaffoldBody(
+      child: SingleChildScrollView(
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            const FakeStatusBar(),
+            const SizedBox(height: 16),
+            const AppLogo(center: true),
+            const SizedBox(height: 34),
+            AppDropdownField(
+              label: context.l10n.text('country'),
+              value: context.l10n.text('arab'),
+              icon: Icons.public,
+            ),
+            const SizedBox(height: 18),
+            AppDropdownField(
+              label: context.l10n.text('latestAcademic'),
+              value: context.l10n.text('latestAcademic'),
+              icon: Icons.account_balance_outlined,
+            ),
+            const SizedBox(height: 18),
+            AppTextField(
+              label: context.l10n.text('inputResult'),
+              hint: context.l10n.text('inputResult'),
+              icon: Icons.insert_chart_outlined,
+              keyboardType: TextInputType.number,
+            ),
+            const SizedBox(height: 18),
+            AppDropdownField(
+              label: context.l10n.text('courseOrProgram'),
+              value: context.l10n.text('bachelorCs'),
+              icon: Icons.menu_book_outlined,
+            ),
+            const SizedBox(height: 32),
+            AppPrimaryButton(
+              label: context.l10n.text('continue'),
+              onPressed: () => Navigator.of(context).pushAndRemoveUntil(
+                MaterialPageRoute(builder: (_) => const HomeScreen()),
+                (route) => false,
               ),
-              const SizedBox(height: 10),
-              const Text(
-                'Complete this academic information form. After tapping continue, the dashboard will open.',
-                style: TextStyle(fontSize: 15, color: Color(0xFF666666)),
-              ),
-              const SizedBox(height: 24),
-              const InputField(
-                label: 'Highest Qualification',
-                hintText: '12th pass / Diploma / Bachelor',
-              ),
-              const SizedBox(height: 16),
-              const InputField(
-                label: 'Preferred Program',
-                hintText: 'Engineering / Business / Medicine',
-              ),
-              const SizedBox(height: 16),
-              const InputField(
-                label: 'Preferred Intake',
-                hintText: 'September 2026',
-              ),
-              const SizedBox(height: 16),
-              const InputField(
-                label: 'Country Preference',
-                hintText: 'UAE / Jordan / Lebanon',
-              ),
-              const SizedBox(height: 28),
-              SizedBox(
-                width: double.infinity,
-                child: ElevatedButton(
-                  onPressed: () => _openDashboard(context),
-                  style: ElevatedButton.styleFrom(
-                    backgroundColor: const Color(0xFF95E1B0),
-                    foregroundColor: Colors.black,
-                    padding: const EdgeInsets.symmetric(vertical: 16),
-                    shape: RoundedRectangleBorder(
-                      borderRadius: BorderRadius.circular(18),
-                    ),
-                  ),
-                  child: const Text(
-                    'Continue',
-                    style: TextStyle(fontSize: 16, fontWeight: FontWeight.w700),
-                  ),
-                ),
-              ),
-            ],
-          ),
+            ),
+          ],
         ),
       ),
     );
