@@ -33,7 +33,6 @@ class _CourseListScreenState extends State<CourseListScreen> {
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  const FakeStatusBar(),
                   Row(
                     children: [
                       _RoundIconButton(icon: Icons.menu_rounded, onTap: () => _scaffoldKey.currentState?.openDrawer()),

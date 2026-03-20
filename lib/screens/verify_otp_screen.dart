@@ -14,7 +14,6 @@ class VerifyOtpScreen extends StatelessWidget {
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          const FakeStatusBar(),
           const SizedBox(height: 18),
           Text(context.l10n.text('verifyOtp'), style: Theme.of(context).textTheme.headlineMedium),
           const SizedBox(height: 24),

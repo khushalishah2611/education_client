@@ -16,7 +16,6 @@ class AcademicInfoScreen extends StatelessWidget {
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            const FakeStatusBar(),
             const SizedBox(height: 16),
             const AppLogo(center: true),
             const SizedBox(height: 34),

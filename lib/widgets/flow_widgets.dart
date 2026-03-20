@@ -19,7 +19,6 @@ class TopRoundedHeader extends StatelessWidget {
       ),
       child: Column(
         children: [
-          const FakeStatusBar(),
           Row(
             children: [
               InkWell(
