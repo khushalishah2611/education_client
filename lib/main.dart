@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 
-import 'app/arab_universities_app.dart';
+import 'app.dart';
 
 void main() {
-  runApp(const ArabUniversitiesApp());
+  runApp(const EducationApp());
 }
