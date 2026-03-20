@@ -32,14 +32,16 @@ class AppLogo extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final logo = Image.asset(
+      'assets/images/logo.webp',
+      height: compact ? 42 : 72,
+      fit: BoxFit.contain,
+    );
+
     final content = Column(
       mainAxisSize: MainAxisSize.min,
       crossAxisAlignment: center ? CrossAxisAlignment.center : CrossAxisAlignment.start,
-      children: [
-        Image.asset(
-        'assets/images/logo.webp'
-        ),
-      ],
+      children: [logo],
     );
 
     return center ? Center(child: content) : content;
@@ -141,6 +143,7 @@ class AppTextField extends StatelessWidget {
     this.icon,
     this.controller,
     this.keyboardType,
+    this.height = 45,
   });
 
   final String label;
@@ -148,6 +151,7 @@ class AppTextField extends StatelessWidget {
   final IconData? icon;
   final TextEditingController? controller;
   final TextInputType? keyboardType;
+  final double height;
 
   @override
   Widget build(BuildContext context) {
@@ -156,12 +160,17 @@ class AppTextField extends StatelessWidget {
       children: [
         Text(label, style: const TextStyle(fontSize: 15, fontWeight: FontWeight.w500, color: AppColors.text)),
         const SizedBox(height: 10),
-        TextField(
-          controller: controller,
-          keyboardType: keyboardType,
-          decoration: InputDecoration(
-            hintText: hint,
-            prefixIcon: icon == null ? null : Icon(icon, color: AppColors.textMuted),
+        SizedBox(
+          height: height,
+          child: TextField(
+            controller: controller,
+            keyboardType: keyboardType,
+            textAlignVertical: TextAlignVertical.center,
+            decoration: InputDecoration(
+              hintText: hint,
+              contentPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 0),
+              prefixIcon: icon == null ? null : Icon(icon, color: AppColors.textMuted, size: 20),
+            ),
           ),
         ),
       ],

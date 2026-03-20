@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 
+import '../core/app_localizations.dart';
 import '../core/app_theme.dart';
 import 'common_widgets.dart';
 
@@ -109,15 +110,15 @@ class BottomTabBarCard extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    const items = [
-      (Icons.account_balance_outlined, 'University'),
-      (Icons.school_outlined, 'College'),
-      (Icons.corporate_fare_outlined, 'Private School'),
-      (Icons.location_on_outlined, 'Location'),
+    final items = [
+      (Icons.account_balance_outlined, context.l10n.text('university')),
+      (Icons.school_outlined, context.l10n.text('college')),
+      (Icons.corporate_fare_outlined, context.l10n.text('privateSchool')),
+      (Icons.location_on_outlined, context.l10n.text('location')),
     ];
 
     return Container(
-      padding: const EdgeInsets.fromLTRB(6, 10, 6, 8),
+      padding: const EdgeInsets.fromLTRB(0, 8, 0, 4),
       decoration: const BoxDecoration(
         color: Colors.white,
         borderRadius: BorderRadius.vertical(top: Radius.circular(20)),
@@ -136,24 +137,30 @@ class BottomTabBarCard extends StatelessWidget {
                     mainAxisSize: MainAxisSize.min,
                     children: [
                       Container(
-                        width: 42,
-                        height: 42,
+                        width: 40,
+                        height: 40,
                         decoration: BoxDecoration(
                           color: isActive ? const Color(0xFFFF9F2E) : Colors.transparent,
                           shape: BoxShape.circle,
                         ),
                         child: Icon(item.$1, color: isActive ? Colors.white : AppColors.textMuted),
                       ),
-                      const SizedBox(height: 6),
-                      Text(item.$2, style: const TextStyle(fontSize: 12.5)),
+                      const SizedBox(height: 4),
+                      Text(
+                        item.$2,
+                        textAlign: TextAlign.center,
+                        maxLines: 1,
+                        overflow: TextOverflow.ellipsis,
+                        style: const TextStyle(fontSize: 11.5),
+                      ),
                     ],
                   ),
                 ),
               );
             }),
           ),
-          const SizedBox(height: 6),
-          Container(width: 130, height: 4, decoration: BoxDecoration(color: Colors.black, borderRadius: BorderRadius.circular(100))),
+          const SizedBox(height: 4),
+          Container(width: 110, height: 3, decoration: BoxDecoration(color: Colors.black, borderRadius: BorderRadius.circular(100))),
         ],
       ),
     );

@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 
+import '../core/app_localizations.dart';
 import '../core/app_theme.dart';
 
 class CommonSideMenu extends StatelessWidget {
@@ -8,16 +9,16 @@ class CommonSideMenu extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final items = [
-      (Icons.home_outlined, 'Dashboard', false),
-      (Icons.assignment_outlined, 'Track My Applications', false),
-      (Icons.person_outline, 'My Profile', false),
-      (Icons.description_outlined, 'Manage Documents', false),
-      (Icons.payments_outlined, 'Payments', false),
-      (Icons.notifications_none_rounded, 'Notifications', false),
-      (Icons.verified_user_outlined, 'Terms & Conditions', false),
-      (Icons.support_agent_outlined, 'Emergency Contact', false),
-      (Icons.translate_outlined, 'Change Language', false),
-      (Icons.logout, 'Logout', true),
+      (Icons.home_outlined, context.l10n.text('dashboard'), false),
+      (Icons.assignment_outlined, context.l10n.text('trackApplications'), false),
+      (Icons.person_outline, context.l10n.text('myProfile'), false),
+      (Icons.description_outlined, context.l10n.text('manageDocuments'), false),
+      (Icons.payments_outlined, context.l10n.text('payments'), false),
+      (Icons.notifications_none_rounded, context.l10n.text('notifications'), false),
+      (Icons.verified_user_outlined, context.l10n.text('termsAndConditions'), false),
+      (Icons.support_agent_outlined, context.l10n.text('emergencyContact'), false),
+      (Icons.translate_outlined, context.l10n.text('changeLanguage'), false),
+      (Icons.logout, context.l10n.text('logout'), true),
     ];
 
     return Drawer(
@@ -81,7 +82,12 @@ class CommonSideMenu extends StatelessWidget {
                         color: item.$3 ? Colors.red : AppColors.text,
                       ),
                     ),
-                    onTap: () => Navigator.of(context).maybePop(),
+                    onTap: () {
+                      Navigator.of(context).maybePop();
+                      if (item.$1 == Icons.translate_outlined) {
+                        context.toggleLanguage();
+                      }
+                    },
                   );
                 },
                 separatorBuilder: (_, __) => const SizedBox(height: 2),
@@ -89,9 +95,12 @@ class CommonSideMenu extends StatelessWidget {
               ),
             ),
             const Divider(height: 1),
-            const Padding(
-              padding: EdgeInsets.symmetric(vertical: 14),
-              child: Text('Version 1.0.0', style: TextStyle(color: AppColors.textMuted)),
+            Padding(
+              padding: const EdgeInsets.symmetric(vertical: 14),
+              child: Text(
+                context.l10n.text('versionLabel'),
+                style: const TextStyle(color: AppColors.textMuted),
+              ),
             ),
           ],
         ),

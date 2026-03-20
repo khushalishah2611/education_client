@@ -22,7 +22,8 @@ class LoginScreen extends StatelessWidget {
               label: context.l10n.text('mobileNumber'),
               hint: context.l10n.text('mobileNumber'),
               icon: Icons.phone,
-              keyboardType: TextInputType.emailAddress,
+              keyboardType: TextInputType.phone,
+              height: 45,
             ),
             const SizedBox(height: 30),
             AppPrimaryButton(

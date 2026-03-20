@@ -66,7 +66,7 @@ class _HomeScreenState extends State<HomeScreen> {
                     style: const TextStyle(fontSize: 15, fontWeight: FontWeight.w500),
                   ),
                   const SizedBox(height: 10),
-                  const TextField(decoration: InputDecoration(hintText: 'University of')),
+                  TextField(decoration: InputDecoration(hintText: context.l10n.text('searchHint'))),
                   const SizedBox(height: 12),
                   Container(
                     width: double.infinity,
@@ -76,17 +76,20 @@ class _HomeScreenState extends State<HomeScreen> {
                       border: Border.all(color: const Color(0xFFF4D2B5)),
                       color: const Color(0xFFFFFCF8),
                     ),
-                    child: const Row(
+                    child: Row(
                       mainAxisAlignment: MainAxisAlignment.center,
                       children: [
-                        Icon(Icons.tune_rounded, color: AppColors.accent),
-                        SizedBox(width: 8),
-                        Text('More Filters', style: TextStyle(color: AppColors.accent, fontSize: 16, fontWeight: FontWeight.w500)),
+                        const Icon(Icons.tune_rounded, color: AppColors.accent),
+                        const SizedBox(width: 8),
+                        Text(
+                          context.l10n.text('moreFilters'),
+                          style: const TextStyle(color: AppColors.accent, fontSize: 16, fontWeight: FontWeight.w500),
+                        ),
                       ],
                     ),
                   ),
                   const SizedBox(height: 16),
-                  const _DiscoverBanner(),
+                  _DiscoverBanner(),
                   const SizedBox(height: 16),
                   SectionTitle(context.l10n.text('popularUniversities')),
                   const SizedBox(height: 12),
@@ -155,14 +158,14 @@ class _CircleIconButton extends StatelessWidget {
 }
 
 class _DiscoverBanner extends StatelessWidget {
-  const _DiscoverBanner();
+  _DiscoverBanner();
 
   @override
   Widget build(BuildContext context) {
     return Container(
       height: 120,
       width: double.infinity,
-      padding: const EdgeInsets.fromLTRB(14, 16, 14, 10),
+      padding: const EdgeInsets.fromLTRB(14, 14, 10, 8),
       decoration: BoxDecoration(
         borderRadius: BorderRadius.circular(14),
         gradient: const LinearGradient(colors: [Color(0xFFFFB867), Color(0xFFF6A650)]),
@@ -170,20 +173,20 @@ class _DiscoverBanner extends StatelessWidget {
       child: Stack(
         children: [
           const Positioned(
-            right: 6,
-            bottom: 4,
-            child: SizedBox(width: 132, height: 90, child: HeroIllustration(showPattern: false, height: 90)),
+            right: 0,
+            bottom: 0,
+            child: SizedBox(width: 124, height: 86, child: HeroIllustration(showPattern: false, height: 86)),
           ),
-          const Positioned(right: 92, top: 4, child: Icon(Icons.cloud, color: Colors.white, size: 30)),
+          const Positioned(right: 82, top: 6, child: Icon(Icons.cloud, color: Colors.white, size: 28)),
           Column(
             crossAxisAlignment: CrossAxisAlignment.start,
-            children: const [
+            children: [
               Text(
-                'Find Your Perfect Arab\nUniversity',
-                style: TextStyle(color: Colors.white, fontSize: 16, fontWeight: FontWeight.w700, height: 1.15),
+                context.l10n.text('findPerfectUniversity'),
+                style: const TextStyle(color: Colors.white, fontSize: 16, fontWeight: FontWeight.w700, height: 1.15),
               ),
-              SizedBox(height: 8),
-              Text('+500 University', style: TextStyle(color: Colors.white, fontSize: 13)),
+              const SizedBox(height: 8),
+              Text(context.l10n.text('universityCount'), style: const TextStyle(color: Colors.white, fontSize: 13)),
             ],
           ),
         ],
@@ -249,7 +252,7 @@ class _UniversityCard extends StatelessWidget {
                 minimumSize: const Size.fromHeight(36),
                 shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8)),
               ),
-              child: const Text('View Details', style: TextStyle(fontWeight: FontWeight.w700)),
+              child: Text(context.l10n.text('viewDetails'), style: const TextStyle(fontWeight: FontWeight.w700)),
             ),
           ),
         ],
