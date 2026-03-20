@@ -87,8 +87,7 @@ class CreateAccountScreen extends StatelessWidget {
                   ],
                 ),
               ),
-            ),
-          ),
+          ));
         },
       ),
     );

@@ -11,37 +11,40 @@ class VerifyOtpScreen extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return AppScaffoldBody(
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          const SizedBox(height: 18),
-          Text(context.l10n.text('verifyOtp'), style: Theme.of(context).textTheme.headlineMedium),
-          const SizedBox(height: 24),
-          Center(
-            child: Text(
-              context.l10n.text('otpHelp'),
-              textAlign: TextAlign.center,
-              style: Theme.of(context).textTheme.titleMedium,
+      child: Padding(
+        padding: const EdgeInsets.all(16.0),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            const SizedBox(height: 18),
+            Text(context.l10n.text('verifyOtp'), style: Theme.of(context).textTheme.headlineMedium),
+            const SizedBox(height: 24),
+            Center(
+              child: Text(
+                context.l10n.text('otpHelp'),
+                textAlign: TextAlign.center,
+                style: Theme.of(context).textTheme.titleMedium,
+              ),
             ),
-          ),
-          const SizedBox(height: 28),
-          const _OtpRow(),
-          const SizedBox(height: 10),
-          Center(
-            child: Text(
-              context.l10n.text('resendOtp'),
-              style: Theme.of(context).textTheme.titleMedium?.copyWith(fontWeight: FontWeight.w500),
+            const SizedBox(height: 28),
+            const _OtpRow(),
+            const SizedBox(height: 10),
+            Center(
+              child: Text(
+                context.l10n.text('resendOtp'),
+                style: Theme.of(context).textTheme.titleMedium?.copyWith(fontWeight: FontWeight.w500),
+              ),
             ),
-          ),
-          const SizedBox(height: 36),
-          AppPrimaryButton(
-            label: context.l10n.text('verifyAndLogin'),
-            onPressed: () => Navigator.of(context).pushAndRemoveUntil(
-              MaterialPageRoute(builder: (_) => const HomeScreen()),
-              (route) => false,
+            const SizedBox(height: 36),
+            AppPrimaryButton(
+              label: context.l10n.text('verifyAndLogin'),
+              onPressed: () => Navigator.of(context).pushAndRemoveUntil(
+                MaterialPageRoute(builder: (_) => const HomeScreen()),
+                (route) => false,
+              ),
             ),
-          ),
-        ],
+          ],
+        ),
       ),
     );
   }
