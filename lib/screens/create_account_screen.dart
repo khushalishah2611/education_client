@@ -19,7 +19,10 @@ class CreateAccountScreen extends StatelessWidget {
             const SizedBox(height: 16),
             const AppLogo(center: true),
             const SizedBox(height: 34),
-            Text(context.l10n.text('createYourAccount'), style: Theme.of(context).textTheme.headlineMedium),
+            Text(
+              context.l10n.text('createYourAccount'),
+              style: Theme.of(context).textTheme.headlineMedium,
+            ),
             const SizedBox(height: 20),
             AppTextField(
               label: context.l10n.text('fullName'),
@@ -50,17 +53,26 @@ class CreateAccountScreen extends StatelessWidget {
             AppPrimaryButton(
               label: context.l10n.text('createAccount'),
               onPressed: () => Navigator.of(context).push(
-                MaterialPageRoute(builder: (_) => const AcademicInfoScreen()),
+                MaterialPageRoute(
+                  builder: (_) => const AcademicInfoScreen(flowLabel: 'Register'),
+                ),
               ),
             ),
             const SizedBox(height: 12),
-            Center(child: AppTextLink(prefix: context.l10n.text('termsPrefix'), link: context.l10n.text('termsLink'))),
+            Center(
+              child: AppTextLink(
+                prefix: context.l10n.text('termsPrefix'),
+                link: context.l10n.text('termsLink'),
+              ),
+            ),
             const SizedBox(height: 10),
             Center(
               child: AppTextLink(
-                prefix: 'Don’t have an account? ',
-                link: 'login',
-                onTap: () => Navigator.of(context).push(MaterialPageRoute(builder: (_) => const LoginScreen())),
+                prefix: context.l10n.text('alreadyHaveAccount'),
+                link: context.l10n.text('login'),
+                onTap: () => Navigator.of(context).push(
+                  MaterialPageRoute(builder: (_) => const LoginScreen()),
+                ),
               ),
             ),
           ],
