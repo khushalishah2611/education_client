@@ -70,7 +70,7 @@ class WelcomeScreen extends StatelessWidget {
                     ),
                   ),
                   const SizedBox(height: 14),
-                  AppOutlinedButton(
+                  AppPrimaryButton(
                     label: context.l10n.text('createAccount'),
                     onPressed: () => Navigator.of(context).push(
                       MaterialPageRoute(
