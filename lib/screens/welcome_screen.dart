@@ -14,7 +14,6 @@ class WelcomeScreen extends StatelessWidget {
     return AppScaffoldBody(
       child: Stack(
         children: [
-
           SingleChildScrollView(
             child: Column(
               children: const [
@@ -35,9 +34,7 @@ class WelcomeScreen extends StatelessWidget {
               padding: const EdgeInsets.fromLTRB(20, 30, 20, 28),
               decoration: const BoxDecoration(
                 color: AppColors.white,
-                borderRadius: BorderRadius.vertical(
-                  top: Radius.circular(34),
-                ),
+                borderRadius: BorderRadius.vertical(top: Radius.circular(34)),
               ),
               child: Column(
                 mainAxisSize: MainAxisSize.min,
@@ -45,10 +42,9 @@ class WelcomeScreen extends StatelessWidget {
                   Text(
                     context.l10n.text('welcomeTitle'),
                     textAlign: TextAlign.center,
-                    style: Theme.of(context)
-                        .textTheme
-                        .headlineMedium
-                        ?.copyWith(height: 1.15),
+                    style: Theme.of(
+                      context,
+                    ).textTheme.headlineMedium?.copyWith(height: 1.15),
                   ),
                   const SizedBox(height: 14),
                   Text(
@@ -64,9 +60,7 @@ class WelcomeScreen extends StatelessWidget {
                   AppPrimaryButton(
                     label: context.l10n.text('login'),
                     onPressed: () => Navigator.of(context).push(
-                      MaterialPageRoute(
-                        builder: (_) => const LoginScreen(),
-                      ),
+                      MaterialPageRoute(builder: (_) => const LoginScreen()),
                     ),
                   ),
                   const SizedBox(height: 14),
