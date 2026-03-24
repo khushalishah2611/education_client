@@ -22,6 +22,7 @@ class CourseDetailScreen extends StatefulWidget {
 }
 
 class _CourseDetailScreenState extends State<CourseDetailScreen> {
+  /// ✅ Intake Data
   final List<_IntakeOption> _availableIntakes = const [
     _IntakeOption(
       month: 'September',
@@ -42,6 +43,20 @@ class _CourseDetailScreenState extends State<CourseDetailScreen> {
 
   int _selectedIntakeIndex = 0;
 
+  final List<String> eligibilityList = [
+    'Bachelor’s degree from a recognized university',
+    'Minimum 50% aggregate marks',
+    'English proficiency (IELTS/TOEFL if applicable)',
+  ];
+
+  final List<String> documentsList = [
+    'Academic Transcripts',
+    'Passport Copy',
+    'Statement of Purpose (SOP)',
+    'Resume / CV',
+  ];
+
+  @override
   @override
   Widget build(BuildContext context) {
     final selectedIntake = _availableIntakes[_selectedIntakeIndex];
@@ -51,158 +66,144 @@ class _CourseDetailScreenState extends State<CourseDetailScreen> {
         child: SafeArea(
           child: Column(
             children: [
-              Expanded(
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    /// 🔷 TOP IMAGE + CARD
-                    Stack(
-                      clipBehavior: Clip.none,
-                      children: [
-                        /// IMAGE
-                        ClipRRect(
-                          borderRadius: const BorderRadius.vertical(
-                            bottom: Radius.circular(20),
+              /// 🔷 FIXED HEADER (NO SCROLL)
+              Stack(
+                clipBehavior: Clip.none,
+                children: [
+                  ClipRRect(
+                    borderRadius: const BorderRadius.vertical(
+                      bottom: Radius.circular(20),
+                    ),
+                    child: SizedBox(
+                      height: 250,
+                      width: double.infinity,
+                      child: Image.network(
+                        widget.course.image,
+                        fit: BoxFit.cover,
+                        errorBuilder: (_, __, ___) =>
+                            Container(color: const Color(0xFFE2E2E2)),
+                      ),
+                    ),
+                  ),
+
+                  /// 🔷 FLOAT CARD
+                  Positioned(
+                    left: 20,
+                    right: 20,
+                    bottom: -50,
+                    child: Container(
+                      padding: const EdgeInsets.all(14),
+                      decoration: BoxDecoration(
+                        color: Colors.white,
+                        borderRadius: BorderRadius.circular(14),
+                        boxShadow: const [
+                          BoxShadow(
+                            color: AppColors.shadow,
+                            blurRadius: 16,
+                            offset: Offset(0, 8),
                           ),
-                          child: SizedBox(
-                            height: 250,
-                            width: double.infinity,
-                            child: Image.network(
-                              widget.course.image,
-                              fit: BoxFit.cover,
-                              errorBuilder: (_, __, ___) =>
-                                  Container(color: const Color(0xFFE2E2E2)),
-                            ),
-                          ),
-                        ),
-
-                        /// FLOATING CARD
-                        Positioned(
-                          left: 20,
-                          right: 20,
-                          bottom: -50,
-                          child: Container(
-                            padding: const EdgeInsets.all(14),
-                            decoration: BoxDecoration(
-                              color: Colors.white,
-                              borderRadius: BorderRadius.circular(14),
-                              boxShadow: const [
-                                BoxShadow(
-                                  color: AppColors.shadow,
-                                  blurRadius: 16,
-                                  offset: Offset(0, 8),
+                        ],
+                      ),
+                      child: Column(
+                        children: [
+                          Row(
+                            children: [
+                              Container(
+                                width: 58,
+                                height: 58,
+                                alignment: Alignment.center,
+                                decoration: BoxDecoration(
+                                  color: const Color(0xFFF4F4F4),
+                                  borderRadius:
+                                  BorderRadius.circular(10),
                                 ),
-                              ],
-                            ),
-                            child: Column(
-                              children: [
-                                Row(
-                                  children: [
-                                    Container(
-                                      width: 58,
-                                      height: 58,
-                                      alignment: Alignment.center,
-                                      decoration: BoxDecoration(
-                                        color: const Color(0xFFF4F4F4),
-                                        borderRadius:
-                                        BorderRadius.circular(10),
-                                      ),
-                                      child: Text(
-                                        widget.university.shortCode,
-                                        style: TextStyle(
-                                          color: widget.university.color,
-                                          fontWeight: FontWeight.w900,
-                                        ),
-                                      ),
-                                    ),
-                                    const SizedBox(width: 12),
-
-                                    /// TEXT
-                                    Expanded(
-                                      child: Column(
-                                        crossAxisAlignment:
-                                        CrossAxisAlignment.start,
-                                        children: [
-                                          Text(
-                                            widget.university.name,
-                                            style: const TextStyle(
-                                              fontSize: 14,
-                                              fontWeight: FontWeight.w700,
-                                            ),
-                                          ),
-                                          const SizedBox(height: 2),
-                                          Text(
-                                            widget.course.title,
-                                            style: const TextStyle(
-                                              color: AppColors.textMuted,
-                                            ),
-                                          ),
-                                        ],
-                                      ),
-                                    ),
-                                  ],
+                                child: Text(
+                                  widget.university.shortCode,
+                                  style: TextStyle(
+                                    color: widget.university.color,
+                                    fontWeight: FontWeight.w900,
+                                  ),
                                 ),
-
-                                const SizedBox(height: 12),
-
-                                /// LOCATION + RATING
-                                Row(
+                              ),
+                              const SizedBox(width: 12),
+                              Expanded(
+                                child: Column(
+                                  crossAxisAlignment:
+                                  CrossAxisAlignment.start,
                                   children: [
-                                    const Icon(Icons.location_on_outlined,
-                                        size: 15,
-                                        color: AppColors.textMuted),
-                                    const SizedBox(width: 4),
-                                    Expanded(
-                                      child: Text(
-                                        widget.university.location,
-                                        style: const TextStyle(
-                                          color: AppColors.textMuted,
-                                        ),
-                                      ),
-                                    ),
-                                    const Icon(Icons.star,
-                                        color: Color(0xFFFFB300), size: 16),
-                                    const SizedBox(width: 4),
-                                    const Text(
-                                      '4.6',
-                                      style: TextStyle(
-                                          fontWeight: FontWeight.w700),
-                                    ),
-                                  ],
-                                ),
-
-                                const SizedBox(height: 8),
-
-                                /// DURATION + PRICE
-                                Row(
-                                  children: [
-                                    const Icon(Icons.access_time,
-                                        size: 18,
-                                        color: AppColors.textMuted),
-                                    const SizedBox(width: 4),
-                                    Text(widget.course.duration),
-                                    const Spacer(),
-                                    const Text(
-                                      '₹4,50,000 / Year',
-                                      style: TextStyle(
-                                        fontSize: 20,
+                                    Text(
+                                      widget.university.name,
+                                      style: const TextStyle(
+                                        fontSize: 14,
                                         fontWeight: FontWeight.w700,
                                       ),
                                     ),
+                                    Text(
+                                      widget.course.title,
+                                      style: const TextStyle(
+                                        color: AppColors.textMuted,
+                                      ),
+                                    ),
                                   ],
                                 ),
-                              ],
-                            ),
+                              ),
+                            ],
                           ),
-                        ),
+                          const SizedBox(height: 10),
 
-                        /// HEADER
-                        TopRoundedHeader(title: widget.course.title),
-                      ],
+                          Row(
+                            children: [
+                              const Icon(Icons.location_on_outlined,
+                                  size: 15,
+                                  color: AppColors.textMuted),
+                              const SizedBox(width: 4),
+                              Expanded(
+                                child: Text(
+                                  widget.university.location,
+                                  style: const TextStyle(
+                                      color: AppColors.textMuted),
+                                ),
+                              ),
+                              const Icon(Icons.star,
+                                  color: Color(0xFFFFB300), size: 16),
+                              const SizedBox(width: 4),
+                              const Text('4.6'),
+                            ],
+                          ),
+
+                          const SizedBox(height: 8),
+
+                          Row(
+                            children: [
+                              const Icon(Icons.access_time,
+                                  size: 18,
+                                  color: AppColors.textMuted),
+                              const SizedBox(width: 4),
+                              Text(widget.course.duration),
+                              const Spacer(),
+                              const Text(
+                                '₹4,50,000 / Year',
+                                style: TextStyle(
+                                    fontWeight: FontWeight.w700),
+                              ),
+                            ],
+                          ),
+                        ],
+                      ),
                     ),
+                  ),
 
-                    const SizedBox(height: 70),
+                  TopRoundedHeader(title: widget.course.title),
+                ],
+              ),
 
+              const SizedBox(height: 70),
+
+              /// 🔷 SCROLLABLE CONTENT ONLY
+              Expanded(
+                child: ListView(
+                  padding: EdgeInsets.zero,
+                  children: [
                     /// 🔷 ELIGIBILITY
                     const Padding(
                       padding: EdgeInsets.symmetric(horizontal: 20),
@@ -211,16 +212,14 @@ class _CourseDetailScreenState extends State<CourseDetailScreen> {
                               fontSize: 18, fontWeight: FontWeight.w700)),
                     ),
 
-                    const Padding(
-                      padding: EdgeInsets.fromLTRB(20, 10, 20, 0),
+                    Padding(
+                      padding: const EdgeInsets.fromLTRB(20, 10, 20, 0),
                       child: Column(
-                        children: [
-                          _BulletLine(
-                              'Bachelor’s degree from a recognized university'),
-                          _BulletLine('Minimum 50% aggregate marks'),
-                          _BulletLine(
-                              'English proficiency (IELTS/TOEFL if applicable)'),
-                        ],
+                        children: List.generate(
+                          eligibilityList.length,
+                              (index) =>
+                              _BulletLine(eligibilityList[index]),
+                        ),
                       ),
                     ),
 
@@ -234,18 +233,16 @@ class _CourseDetailScreenState extends State<CourseDetailScreen> {
                               fontSize: 18, fontWeight: FontWeight.w700)),
                     ),
 
-                    const Padding(
-                      padding: EdgeInsets.fromLTRB(20, 12, 20, 0),
+                    Padding(
+                      padding: const EdgeInsets.fromLTRB(20, 12, 20, 0),
                       child: Column(
-                        children: [
-                          _DocTile('Academic Transcripts'),
-                          SizedBox(height: 8),
-                          _DocTile('Passport Copy'),
-                          SizedBox(height: 8),
-                          _DocTile('Statement of Purpose (SOP)'),
-                          SizedBox(height: 8),
-                          _DocTile('Resume / CV'),
-                        ],
+                        children: List.generate(
+                          documentsList.length,
+                              (index) => Padding(
+                            padding: const EdgeInsets.only(bottom: 8),
+                            child: _DocTile(documentsList[index]),
+                          ),
+                        ),
                       ),
                     ),
 
@@ -262,10 +259,21 @@ class _CourseDetailScreenState extends State<CourseDetailScreen> {
                         ),
                         child: Column(
                           children: [
-                            Row(
+                             Row(
                               children: [
-                                Icon(Icons.calendar_month_outlined,
-                                    color: AppColors.accent),
+                                Container(
+                                  width: 32,
+                                  height: 32,
+                                  decoration: BoxDecoration(
+                                    color: const Color(0xFFF4F4F4),
+                                    borderRadius: BorderRadius.circular(8),
+                                  ),
+                                  child: const Icon(
+                                    Icons.calendar_month_outlined,
+                                    size: 20,
+                                    color: AppColors.accent,
+                                  ),
+                                ),
                                 SizedBox(width: 8),
                                 Text('Available Intake',
                                     style: TextStyle(
@@ -273,18 +281,23 @@ class _CourseDetailScreenState extends State<CourseDetailScreen> {
                                         fontWeight: FontWeight.w700)),
                               ],
                             ),
-                            SizedBox(height: 16),
+                            const SizedBox(height: 16),
+
                             Wrap(
                               spacing: 10,
                               runSpacing: 10,
                               children: [
-                                for (var i = 0; i < _availableIntakes.length; i++)
+                                for (var i = 0;
+                                i < _availableIntakes.length;
+                                i++)
                                   _IntakeChip(
                                     month: _availableIntakes[i].month,
                                     year: _availableIntakes[i].year,
-                                    isSelected: i == _selectedIntakeIndex,
+                                    isSelected:
+                                    i == _selectedIntakeIndex,
                                     onTap: () {
-                                      setState(() => _selectedIntakeIndex = i);
+                                      setState(() =>
+                                      _selectedIntakeIndex = i);
                                     },
                                   ),
                               ],
@@ -296,80 +309,83 @@ class _CourseDetailScreenState extends State<CourseDetailScreen> {
 
                     const SizedBox(height: 12),
 
+                    /// 🔷 DEADLINE
                     Padding(
                       padding: const EdgeInsets.symmetric(horizontal: 20),
                       child: Container(
-                        width: double.infinity,
                         padding: const EdgeInsets.all(14),
                         decoration: BoxDecoration(
                           color: Colors.white,
                           borderRadius: BorderRadius.circular(12),
-                          border: Border.all(color: const Color(0xFFFFC4C4)),
+                          border: Border.all(
+                              color: const Color(0xFFFFC4C4)),
                         ),
-                        child: Row(
-                          crossAxisAlignment: CrossAxisAlignment.start,
+                        child: Column(
                           children: [
-                            Container(
-                              width: 36,
-                              height: 36,
-                              decoration: BoxDecoration(
-                                color: const Color(0xFFFFF4F4),
-                                borderRadius: BorderRadius.circular(8),
-                              ),
-                              child: const Icon(
-                                Icons.fact_check_outlined,
-                                color: Color(0xFFEB5757),
-                              ),
-                            ),
-                            const SizedBox(width: 10),
-                            Expanded(
-                              child: Column(
-                                crossAxisAlignment: CrossAxisAlignment.start,
-                                children: [
-                                  const Text(
-                                    'Application Deadline',
-                                    style: TextStyle(
-                                      fontSize: 18,
-                                      fontWeight: FontWeight.w700,
-                                    ),
+                            Row(
+                              children: [
+                                Container(
+                                  width: 32,
+                                  height: 32,
+                                  decoration: BoxDecoration(
+                                    color: const Color(0xFFF4F4F4),
+                                    borderRadius: BorderRadius.circular(8),
                                   ),
-                                  const SizedBox(height: 8),
-                                  RichText(
+                                  child: const Icon(
+                                    Icons.fact_check_outlined,
+                                    size: 20,
+                                    color: AppColors.accent,
+                                  ),
+                                ),
+                                SizedBox(width: 8),
+                                Text('Application Deadline',
+                                    style: TextStyle(
+                                        fontSize: 18,
+                                        fontWeight: FontWeight.w700)),
+                              ],
+                            ),
+                            const SizedBox(height: 16),
+
+                            Row(
+                              children: [
+
+                                const SizedBox(width: 10),
+                                Expanded(
+                                  child: RichText(
                                     text: TextSpan(
                                       style: const TextStyle(
-                                        fontSize: 14,
-                                        color: AppColors.textMuted,
-                                      ),
+                                          color: AppColors.textMuted),
                                       children: [
                                         TextSpan(
                                           text: selectedIntake.deadlineDate,
                                           style: const TextStyle(
-                                            color: Color(0xFFEB5757),
-                                            fontWeight: FontWeight.w700,
-                                          ),
+                                              color: Color(0xFFEB5757),
+                                              fontWeight:
+                                              FontWeight.w700),
                                         ),
                                         TextSpan(
                                           text:
-                                              ' (For ${selectedIntake.month} ${selectedIntake.year} Intake)',
+                                          ' (For ${selectedIntake.month} ${selectedIntake.year} Intake)',
                                         ),
                                       ],
                                     ),
                                   ),
-                                ],
-                              ),
+                                ),
+                              ],
                             ),
                           ],
                         ),
                       ),
                     ),
 
+                    const SizedBox(height: 20),
                   ],
                 ),
               ),
 
-              /// 🔷 BUTTON
+              /// 🔷 BUTTON (FIXED)
               Padding(
-                padding: const EdgeInsets.fromLTRB(20, 10, 20, 16),
+                padding: const EdgeInsets.all(16),
                 child: AppPrimaryButton(
                   label: context.l10n.text('Save'),
                   onPressed: () => Navigator.push(
@@ -390,7 +406,6 @@ class _CourseDetailScreenState extends State<CourseDetailScreen> {
     );
   }
 }
-
 class _BulletLine extends StatelessWidget {
   const _BulletLine(this.text);
 
