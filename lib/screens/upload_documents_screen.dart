@@ -16,7 +16,6 @@ class UploadDocumentsScreen extends StatelessWidget {
   Widget build(BuildContext context) {
     final docs = [
       ('Passport', 'Valid for at least 6 months'),
-      ('Academic Transcripts', 'Copies for all semesters'),
       ('Statement of Purpose (SOP)', 'Words about your goals'),
       ('LOR', 'From 2 different academic reference'),
       ('Resume / CV', 'Latest professional experience'),
