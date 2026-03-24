@@ -103,9 +103,9 @@ class FlowStepHeader extends StatelessWidget {
 }
 
 class BottomTabBarCard extends StatelessWidget {
-  const BottomTabBarCard({super.key, this.activeIndex = 0, this.onTap});
+  const BottomTabBarCard({super.key, this.activeIndex, this.onTap});
 
-  final int activeIndex;
+  final int? activeIndex;
   final ValueChanged<int>? onTap;
 
   @override
@@ -129,7 +129,7 @@ class BottomTabBarCard extends StatelessWidget {
           Row(
             children: List.generate(items.length, (index) {
               final item = items[index];
-              final isActive = index == activeIndex;
+              final isActive = activeIndex != null && index == activeIndex;
               return Expanded(
                 child: InkWell(
                   onTap: onTap == null ? null : () => onTap!(index),

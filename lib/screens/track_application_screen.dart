@@ -4,6 +4,7 @@ import '../core/app_theme.dart';
 import '../models/app_models.dart';
 import '../widgets/common_widgets.dart';
 import '../widgets/flow_widgets.dart';
+import 'home_screen.dart';
 
 class TrackApplicationScreen extends StatelessWidget {
   const TrackApplicationScreen({super.key, required this.university, required this.course});
@@ -18,7 +19,13 @@ class TrackApplicationScreen extends StatelessWidget {
         child: AppPageEntrance(
           child: Column(
             children: [
-            const TopRoundedHeader(title: 'Track Application'),
+            TopRoundedHeader(
+              title: 'Track Application',
+              onBack: () => Navigator.of(context).pushAndRemoveUntil(
+                MaterialPageRoute(builder: (_) => const HomeScreen()),
+                (route) => false,
+              ),
+            ),
             Expanded(
               child: ListView(
                 padding: const EdgeInsets.fromLTRB(20, 18, 20, 20),

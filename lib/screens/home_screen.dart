@@ -167,11 +167,6 @@ class _HomeScreenState extends State<HomeScreen> {
                     onTap: (index) {
                       setState(() => _activeTab = index);
 
-                      if (index == 0) {
-                        Navigator.of(
-                          context,
-                        ).push(MaterialPageRoute(builder: (_) => HomeScreen()));
-                      }
                       if (index == 1) {
                         Navigator.of(context).push(
                           MaterialPageRoute(
@@ -284,62 +279,71 @@ class _UniversityCard extends StatelessWidget {
         crossAxisAlignment: CrossAxisAlignment.start,
         mainAxisAlignment: MainAxisAlignment.spaceBetween,
         children: [
-          Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
+          Expanded(
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
               /// IMAGE
-              Container(
-                height: 84,
-                width: double.infinity,
-                decoration: BoxDecoration(
-                  color: const Color(0xFFF5F5F5),
-                  borderRadius: BorderRadius.circular(8),
-                ),
-                child: Center(
-                  child: Text(
-                    data.shortCode,
-                    style: TextStyle(
-                      color: data.color,
-                      fontSize: 24,
-                      fontWeight: FontWeight.w900,
-                    ),
+                Container(
+                  height: 84,
+                  width: double.infinity,
+                  decoration: BoxDecoration(
+                    color: const Color(0xFFF5F5F5),
+                    borderRadius: BorderRadius.circular(8),
                   ),
-                ),
-              ),
-
-              const SizedBox(height: 10),
-
-              /// NAME
-              Text(
-                data.name,
-                maxLines: 2,
-                overflow: TextOverflow.ellipsis,
-                style: const TextStyle(fontWeight: FontWeight.w700),
-              ),
-
-              const SizedBox(height: 6),
-
-              /// LOCATION + RATING
-              Row(
-                children: [
-                  const Icon(Icons.location_on_outlined, size: 14),
-                  Expanded(
+                  child: Center(
                     child: Text(
-                      data.location,
-                      style: const TextStyle(fontSize: 11),
+                      data.shortCode,
+                      style: TextStyle(
+                        color: data.color,
+                        fontSize: 24,
+                        fontWeight: FontWeight.w900,
+                      ),
                     ),
                   ),
-                  const Icon(Icons.star, size: 14),
-                  const Text("4.6"),
-                ],
-              ),
-            ],
-          ),
+                ),
 
-          /// BUTTON
-          AppPrimaryButton(
-            label: context.l10n.text('viewDetails'),
-            onPressed: onTap,
+                const SizedBox(height: 10),
+
+                /// NAME
+                Text(
+                  data.name,
+                  maxLines: 2,
+                  overflow: TextOverflow.ellipsis,
+                  style: const TextStyle(fontWeight: FontWeight.w700),
+                ),
+
+                const SizedBox(height: 6),
+
+                /// LOCATION + RATING
+                Expanded(
+                  child: Row(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      const Icon(Icons.location_on_outlined, size: 14),
+                      Expanded(
+                        child: Text(
+                          data.location,
+                          maxLines: 2,
+                          overflow: TextOverflow.ellipsis,
+                          style: const TextStyle(fontSize: 11),
+                        ),
+                      ),
+                      const Icon(Icons.star, size: 14),
+                      const Text("4.6"),
+                    ),
+                  ),
+                ),
+              ],
+            ),
+          ),
+          const SizedBox(height: 8),
+          SizedBox(
+            width: double.infinity,
+            child: AppPrimaryButton(
+              label: context.l10n.text('viewDetails'),
+              onPressed: onTap,
+            ),
           ),
         ],
       ),

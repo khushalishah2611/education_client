@@ -98,7 +98,7 @@ class _CourseListScreenState extends State<CourseListScreen> {
                       },
                     ),
                   ),
-                  const BottomTabBarCard(activeIndex: 1),
+                  const BottomTabBarCard(),
                 ],
               ),
             ),
