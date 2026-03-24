@@ -2,10 +2,14 @@ import 'package:flutter/material.dart';
 
 import '../core/app_localizations.dart';
 import '../core/app_theme.dart';
-import 'common_widgets.dart';
+
 
 class TopRoundedHeader extends StatelessWidget {
-  const TopRoundedHeader({super.key, required this.title, this.onBack});
+  const TopRoundedHeader({
+    super.key,
+    required this.title,
+    this.onBack,
+  });
 
   final String title;
   final VoidCallback? onBack;
@@ -13,30 +17,58 @@ class TopRoundedHeader extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Container(
-      padding: const EdgeInsets.fromLTRB(20, 8, 20, 18),
+      height: 80,
       decoration: const BoxDecoration(
         color: Colors.white,
-        borderRadius: BorderRadius.vertical(bottom: Radius.circular(22)),
+        borderRadius: BorderRadius.vertical(
+          bottom: Radius.circular(22),
+        ),
       ),
-      child: Column(
-        children: [
-          Row(
-            children: [
-              InkWell(
-                onTap: onBack ?? () => Navigator.of(context).pop(),
-                borderRadius: BorderRadius.circular(20),
-                child: Container(
-                  width: 34,
-                  height: 34,
-                  decoration: const BoxDecoration(color: Color(0xFFF6F6F6), shape: BoxShape.circle),
-                  child: const Icon(Icons.arrow_back_ios_new_rounded, size: 18),
+      child: SafeArea(
+        bottom: false,
+        child: Stack(
+          alignment: Alignment.center,
+          children: [
+            /// BACK BUTTON (LEFT)
+            Align(
+              alignment: Alignment.centerLeft,
+              child: Padding(
+                padding: const EdgeInsets.only(left: 16),
+                child: InkWell(
+                  onTap: onBack ?? () => Navigator.of(context).pop(),
+                  borderRadius: BorderRadius.circular(20),
+                  child: Container(
+                    width: 34,
+                    height: 34,
+                    decoration: const BoxDecoration(
+                      color: Color(0xFFF6F6F6),
+                      shape: BoxShape.circle,
+                    ),
+                    child: const Icon(
+                      Icons.arrow_back_ios_new_rounded,
+                      size: 18,
+                    ),
+                  ),
                 ),
               ),
-              const SizedBox(width: 12),
-              Expanded(child: Text(title, style: const TextStyle(fontSize: 18, fontWeight: FontWeight.w700))),
-            ],
-          ),
-        ],
+            ),
+
+            /// TITLE (PERFECT CENTER)
+            Padding(
+              padding: const EdgeInsets.symmetric(horizontal: 50),
+              child: Text(
+                title,
+                textAlign: TextAlign.center,
+                maxLines: 1,
+                overflow: TextOverflow.ellipsis,
+                style: const TextStyle(
+                  fontSize: 18,
+                  fontWeight: FontWeight.w700,
+                ),
+              ),
+            ),
+          ],
+        ),
       ),
     );
   }

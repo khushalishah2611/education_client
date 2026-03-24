@@ -265,14 +265,45 @@ class AppDropdownField extends StatelessWidget {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        Text(label, style: const TextStyle(fontSize: 15, fontWeight: FontWeight.w500, color: AppColors.text)),
-        const SizedBox(height: 10),
-        InputDecorator(
-          decoration: InputDecoration(
-            prefixIcon: Icon(icon, color: AppColors.textMuted),
-            suffixIcon: const Icon(Icons.keyboard_arrow_down_rounded, color: AppColors.textMuted),
+        Text(
+          label,
+          style: const TextStyle(
+            fontSize: 15,
+            fontWeight: FontWeight.w500,
+            color: AppColors.text,
           ),
-          child: Text(value, style: Theme.of(context).textTheme.bodyLarge?.copyWith(color: AppColors.textMuted)),
+        ),
+        const SizedBox(height: 10),
+
+        /// FIXED HEIGHT CONTAINER
+        Container(
+          height: 45,
+          alignment: Alignment.center,
+          child: InputDecorator(
+            decoration: InputDecoration(
+              isDense: true, // important for compact height
+              contentPadding: const EdgeInsets.symmetric(
+                horizontal: 12,
+                vertical: 10,
+              ),
+              prefixIcon: Icon(icon, color: AppColors.textMuted, size: 20),
+              suffixIcon: const Icon(
+                Icons.keyboard_arrow_down_rounded,
+                color: AppColors.textMuted,
+                size: 20,
+              ),
+              border: OutlineInputBorder(
+                borderRadius: BorderRadius.circular(10),
+              ),
+            ),
+            child: Text(
+              value,
+              style: Theme.of(context)
+                  .textTheme
+                  .bodyLarge
+                  ?.copyWith(color: AppColors.textMuted),
+            ),
+          ),
         ),
       ],
     );

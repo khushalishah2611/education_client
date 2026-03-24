@@ -1,3 +1,4 @@
+import 'package:education/core/app_localizations.dart';
 import 'package:flutter/material.dart';
 
 import '../core/app_theme.dart';
@@ -20,7 +21,7 @@ class UniversityDetailScreen extends StatelessWidget {
           child: AppPageEntrance(
             child: Column(
               children: [
-                TopRoundedHeader(title: data.name),
+
                 Expanded(
                   child: SingleChildScrollView(
                     child: Column(
@@ -31,10 +32,10 @@ class UniversityDetailScreen extends StatelessWidget {
                           children: [
                             ClipRRect(
                               borderRadius: const BorderRadius.vertical(
-                                bottom: Radius.circular(26),
+                                bottom: Radius.circular(20),
                               ),
                               child: SizedBox(
-                                height: 250,
+                                height: 300,
                                 width: double.infinity,
                                 child: Image.network(
                                   data.heroImage,
@@ -143,6 +144,7 @@ class UniversityDetailScreen extends StatelessWidget {
                                 ),
                               ),
                             ),
+                            TopRoundedHeader(title: data.name),
                           ],
                         ),
                         const SizedBox(height: 40),
@@ -187,7 +189,7 @@ class UniversityDetailScreen extends StatelessWidget {
                 Padding(
                   padding: const EdgeInsets.fromLTRB(20, 12, 20, 12),
                   child: AppPrimaryButton(
-                    label: 'View Courses',
+                    label: context.l10n.text('viewCourses'),
                     onPressed: () => Navigator.of(context).push(
                       MaterialPageRoute(
                         builder: (_) => CourseListScreen(university: data),

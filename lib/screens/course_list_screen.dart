@@ -7,17 +7,16 @@ import '../widgets/app_drawer.dart';
 import '../widgets/common_widgets.dart';
 import '../widgets/flow_widgets.dart';
 import 'course_detail_screen.dart';
-import 'home_screen.dart';
 
 class CourseListScreen extends StatefulWidget {
   const CourseListScreen({
     super.key,
     required this.university,
-    this.initialTab = 1,
+
   });
 
   final UniversityData university;
-  final int initialTab;
+
 
   @override
   State<CourseListScreen> createState() => _CourseListScreenState();
@@ -25,13 +24,13 @@ class CourseListScreen extends StatefulWidget {
 
 class _CourseListScreenState extends State<CourseListScreen> {
   final _scaffoldKey = GlobalKey<ScaffoldState>();
-  late int _activeTab;
   bool _isLoading = true;
+
+  int? _activeTab;
 
   @override
   void initState() {
     super.initState();
-    _activeTab = widget.initialTab;
     _loadCourses();
   }
 
@@ -111,12 +110,13 @@ class _CourseListScreenState extends State<CourseListScreen> {
                       ),
                       child: GridView.builder(
                         itemCount: _isLoading ? 6 : courseCatalog.length,
-                        gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
-                          crossAxisCount: 2,
-                          mainAxisSpacing: 8,
-                          crossAxisSpacing: 8,
-                          childAspectRatio: 0.68,
-                        ),
+                        gridDelegate:
+                            const SliverGridDelegateWithFixedCrossAxisCount(
+                              crossAxisCount: 2,
+                              mainAxisSpacing: 8,
+                              crossAxisSpacing: 8,
+                              childAspectRatio: 0.75,
+                            ),
                         itemBuilder: (context, index) {
                           if (_isLoading) {
                             return const _CourseCardShimmer();
@@ -126,7 +126,10 @@ class _CourseListScreenState extends State<CourseListScreen> {
                             course: course,
                             onTap: () => Navigator.of(context).push(
                               MaterialPageRoute(
-                                builder: (_) => CourseDetailScreen(university: widget.university, course: course),
+                                builder: (_) => CourseDetailScreen(
+                                  university: widget.university,
+                                  course: course,
+                                ),
                               ),
                             ),
                           );
@@ -138,18 +141,6 @@ class _CourseListScreenState extends State<CourseListScreen> {
                     activeIndex: _activeTab,
                     onTap: (index) async {
                       setState(() => _activeTab = index);
-
-                      if (index == 0) {
-                        Navigator.of(context).pushAndRemoveUntil(
-                          MaterialPageRoute(builder: (_) => const HomeScreen()),
-                          (route) => false,
-                        );
-                        return;
-                      }
-
-                      if (index == 1 || index == 2) {
-                        await _loadCourses();
-                      }
                     },
                   ),
                 ],
@@ -325,7 +316,8 @@ class _Shimmer extends StatefulWidget {
   State<_Shimmer> createState() => _ShimmerState();
 }
 
-class _ShimmerState extends State<_Shimmer> with SingleTickerProviderStateMixin {
+class _ShimmerState extends State<_Shimmer>
+    with SingleTickerProviderStateMixin {
   late final AnimationController _controller;
 
   @override
@@ -356,7 +348,11 @@ class _ShimmerState extends State<_Shimmer> with SingleTickerProviderStateMixin 
             return LinearGradient(
               begin: Alignment.centerLeft,
               end: Alignment.centerRight,
-              colors: const [Color(0xFFE6E6E6), Color(0xFFF4F4F4), Color(0xFFE6E6E6)],
+              colors: const [
+                Color(0xFFE6E6E6),
+                Color(0xFFF4F4F4),
+                Color(0xFFE6E6E6),
+              ],
               stops: const [0.1, 0.45, 0.9],
               transform: GradientTranslation(offset, 0),
             ).createShader(bounds);

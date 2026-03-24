@@ -186,16 +186,7 @@ class _HomeScreenState extends State<HomeScreen> {
                     onTap: (index) {
                       setState(() => _activeTab = index);
 
-                      if (index == 1 || index == 2) {
-                        Navigator.of(context).push(
-                          MaterialPageRoute(
-                            builder: (_) => CourseListScreen(
-                              university: universityCatalog.first,
-                              initialTab: index,
-                            ),
-                          ),
-                        );
-                      }
+
                     },
                   ),
                 ],
