@@ -4,6 +4,7 @@ import '../core/app_localizations.dart';
 import '../core/app_theme.dart';
 import '../models/app_models.dart';
 import '../widgets/app_drawer.dart';
+import '../widgets/app_shimmer.dart';
 import '../widgets/common_widgets.dart';
 import '../widgets/flow_widgets.dart';
 import 'course_list_screen.dart';
@@ -19,6 +20,16 @@ class HomeScreen extends StatefulWidget {
 class _HomeScreenState extends State<HomeScreen> {
   final _scaffoldKey = GlobalKey<ScaffoldState>();
   int _activeTab = 0;
+  bool _isLoading = true;
+
+  @override
+  void initState() {
+    super.initState();
+    Future<void>.delayed(const Duration(milliseconds: 1200), () {
+      if (!mounted) return;
+      setState(() => _isLoading = false);
+    });
+  }
 
   void _onBottomTabTap(int index) {
     if (_activeTab == index) return;
@@ -161,7 +172,7 @@ class _HomeScreenState extends State<HomeScreen> {
                             const SizedBox(height: 12),
 
                             GridView.builder(
-                              itemCount: universityCatalog.length,
+                              itemCount: _isLoading ? 6 : universityCatalog.length,
                               shrinkWrap: true,
                               physics: const NeverScrollableScrollPhysics(),
                               gridDelegate:
@@ -172,6 +183,9 @@ class _HomeScreenState extends State<HomeScreen> {
                                     childAspectRatio: 0.8,
                                   ),
                               itemBuilder: (context, index) {
+                                if (_isLoading) {
+                                  return const UniversityCardSkeleton();
+                                }
                                 final item = universityCatalog[index];
                                 return _UniversityCard(
                                   data: item,
@@ -299,21 +313,36 @@ class _UniversityCard extends StatelessWidget {
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
               /// IMAGE
-              Container(
-                height: 84,
-                width: double.infinity,
-                decoration: BoxDecoration(
-                  color: const Color(0xFFF5F5F5),
-                  borderRadius: BorderRadius.circular(8),
-                ),
-                child: Center(
-                  child: Text(
-                    data.shortCode,
-                    style: TextStyle(
-                      color: data.color,
-                      fontSize: 24,
-                      fontWeight: FontWeight.w900,
-                    ),
+              ClipRRect(
+                borderRadius: BorderRadius.circular(10),
+                child: SizedBox(
+                  height: 96,
+                  width: double.infinity,
+                  child: Image.network(
+                    data.heroImage,
+                    fit: BoxFit.cover,
+                    loadingBuilder: (context, child, loadingProgress) {
+                      if (loadingProgress == null) return child;
+                      return AppShimmerBox(
+                        borderRadius: BorderRadius.circular(10),
+                        baseColor: const Color(0xFFE9E6E0),
+                        highlightColor: Colors.white,
+                      );
+                    },
+                    errorBuilder: (context, error, stackTrace) {
+                      return Container(
+                        color: const Color(0xFFF5F5F5),
+                        alignment: Alignment.center,
+                        child: Text(
+                          data.shortCode,
+                          style: TextStyle(
+                            color: data.color,
+                            fontSize: 24,
+                            fontWeight: FontWeight.w900,
+                          ),
+                        ),
+                      );
+                    },
                   ),
                 ),
               ),

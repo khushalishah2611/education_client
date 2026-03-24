@@ -2,23 +2,24 @@ import 'package:flutter/material.dart';
 
 import '../core/app_localizations.dart';
 import '../core/app_theme.dart';
+import '../screens/side_menu_screens.dart';
 
 class CommonSideMenu extends StatelessWidget {
   const CommonSideMenu({super.key});
 
   @override
   Widget build(BuildContext context) {
-    final items = [
-      (Icons.home_outlined, context.l10n.text('dashboard'), false),
-      (Icons.assignment_outlined, context.l10n.text('trackApplications'), false),
-      (Icons.person_outline, context.l10n.text('myProfile'), false),
-      (Icons.description_outlined, context.l10n.text('manageDocuments'), false),
-      (Icons.payments_outlined, context.l10n.text('payments'), false),
-      (Icons.notifications_none_rounded, context.l10n.text('notifications'), false),
-      (Icons.verified_user_outlined, context.l10n.text('termsAndConditions'), false),
-      (Icons.support_agent_outlined, context.l10n.text('emergencyContact'), false),
-      (Icons.translate_outlined, context.l10n.text('changeLanguage'), false),
-      (Icons.logout, context.l10n.text('logout'), true),
+    final items = <({IconData icon, String label, bool danger, Widget? screen})>[
+      (icon: Icons.home_outlined, label: context.l10n.text('dashboard'), danger: false, screen: null),
+      (icon: Icons.assignment_outlined, label: context.l10n.text('trackApplications'), danger: false, screen: const TrackMyApplicationsScreen()),
+      (icon: Icons.person_outline, label: context.l10n.text('myProfile'), danger: false, screen: null),
+      (icon: Icons.description_outlined, label: context.l10n.text('manageDocuments'), danger: false, screen: const UploadedDocumentsScreen()),
+      (icon: Icons.payments_outlined, label: context.l10n.text('payments'), danger: false, screen: const PaymentsScreen()),
+      (icon: Icons.notifications_none_rounded, label: context.l10n.text('notifications'), danger: false, screen: const NotificationsScreen()),
+      (icon: Icons.verified_user_outlined, label: context.l10n.text('termsAndConditions'), danger: false, screen: const TermsConditionsScreen()),
+      (icon: Icons.support_agent_outlined, label: context.l10n.text('emergencyContact'), danger: false, screen: const EmergencyContactScreen()),
+      (icon: Icons.translate_outlined, label: context.l10n.text('changeLanguage'), danger: false, screen: const ChangeLanguageScreen()),
+      (icon: Icons.logout, label: context.l10n.text('logout'), danger: true, screen: null),
     ];
 
     return Drawer(
@@ -73,19 +74,23 @@ class CommonSideMenu extends StatelessWidget {
                         color: const Color(0xFFFFF0E5),
                         borderRadius: BorderRadius.circular(16),
                       ),
-                      child: Icon(item.$1, size: 18, color: item.$3 ? Colors.red : AppColors.text),
+                      child: Icon(item.icon, size: 18, color: item.danger ? Colors.red : AppColors.text),
                     ),
                     title: Text(
-                      item.$2,
+                      item.label,
                       style: TextStyle(
                         fontWeight: FontWeight.w600,
-                        color: item.$3 ? Colors.red : AppColors.text,
+                        color: item.danger ? Colors.red : AppColors.text,
                       ),
                     ),
                     onTap: () {
                       Navigator.of(context).maybePop();
-                      if (item.$1 == Icons.translate_outlined) {
-                        context.toggleLanguage();
+                      if (item.icon == Icons.logout) {
+                        showLogoutDialog(context);
+                        return;
+                      }
+                      if (item.screen != null) {
+                        Navigator.of(context).push(MaterialPageRoute(builder: (_) => item.screen!));
                       }
                     },
                   );
