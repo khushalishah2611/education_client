@@ -30,65 +30,89 @@ class _CourseListScreenState extends State<CourseListScreen> {
         body: AppBackground(
           child: AppPageEntrance(
             child: SafeArea(
-              child: Padding(
-              padding: const EdgeInsets.fromLTRB(20, 8, 20, 0),
               child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  Row(
-                    children: [
-                      _RoundIconButton(icon: Icons.menu_rounded, onTap: () => _scaffoldKey.currentState?.openDrawer()),
-                      const Spacer(),
-                      const AppLogo(compact: true, center: true),
-                      const Spacer(),
-                      Stack(
-                        clipBehavior: Clip.none,
-                        children: [
-                          const Icon(Icons.notifications_none_rounded, size: 26),
-                          Positioned(
-                            right: 2,
-                            top: 2,
-                            child: Container(width: 8, height: 8, decoration: BoxDecoration(color: Colors.red, borderRadius: BorderRadius.circular(10))),
-                          ),
-                        ],
-                      ),
-                    ],
-                  ),
-                  const SizedBox(height: 16),
-                  AppTextField(
-                    label: context.l10n.text('cityOrCollege'),
-                    hint: context.l10n.text('searchHint'),
-                    height: 45,
+                  Padding(
+                    padding: const EdgeInsets.all(16.0),
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        Row(
+                          children: [
+                            _RoundIconButton(
+                              icon: Icons.menu_rounded,
+                              onTap: () =>
+                                  _scaffoldKey.currentState?.openDrawer(),
+                            ),
+                            const Spacer(),
+                            const AppLogo(compact: true, center: true),
+                            const Spacer(),
+                            Stack(
+                              clipBehavior: Clip.none,
+                              children: [
+                                const Icon(
+                                  Icons.notifications_none_rounded,
+                                  size: 26,
+                                ),
+                                Positioned(
+                                  right: 2,
+                                  top: 2,
+                                  child: Container(
+                                    width: 8,
+                                    height: 8,
+                                    decoration: BoxDecoration(
+                                      color: Colors.red,
+                                      borderRadius: BorderRadius.circular(10),
+                                    ),
+                                  ),
+                                ),
+                              ],
+                            ),
+                          ],
+                        ),
+                        const SizedBox(height: 16),
+                        AppTextField(
+                          label: context.l10n.text('cityOrCollege'),
+                          hint: context.l10n.text('searchHint'),
+                          height: 45,
+                        ),
+                      ],
+                    ),
                   ),
 
-                  const SizedBox(height: 16),
                   Expanded(
-                    child: GridView.builder(
-                      itemCount: courseCatalog.length,
-                      gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
-                        crossAxisCount: 2,
-                        mainAxisSpacing: 8,
-                        crossAxisSpacing: 8,
-                        childAspectRatio: 0.7,
+                    child: Padding(
+                      padding: const EdgeInsets.only(
+                        left: 16.0,
+                        right: 16.0,
+                        bottom: 16.0,
                       ),
-                      itemBuilder: (context, index) {
-                        final course = courseCatalog[index];
-                        return _CourseCard(
-                          course: course,
-                          onTap: () => Navigator.of(context).push(
-                            MaterialPageRoute(
-                              builder: (_) => CourseDetailScreen(university: widget.university, course: course),
+                      child: GridView.builder(
+                        itemCount: courseCatalog.length,
+                        gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
+                          crossAxisCount: 2,
+                          mainAxisSpacing: 8,
+                          crossAxisSpacing: 8,
+                          childAspectRatio: 0.75,
+                        ),
+                        itemBuilder: (context, index) {
+                          final course = courseCatalog[index];
+                          return _CourseCard(
+                            course: course,
+                            onTap: () => Navigator.of(context).push(
+                              MaterialPageRoute(
+                                builder: (_) => CourseDetailScreen(university: widget.university, course: course),
+                              ),
                             ),
-                          ),
-                        );
-                      },
+                          );
+                        },
+                      ),
                     ),
                   ),
                   const BottomTabBarCard(),
                 ],
               ),
             ),
-          ),
           ),
         ),
       ),
@@ -121,18 +145,46 @@ class _CourseCard extends StatelessWidget {
               height: 112,
               width: double.infinity,
               fit: BoxFit.cover,
-              errorBuilder: (_, __, ___) => Container(height: 112, color: const Color(0xFFE7E7E7)),
+              errorBuilder: (_, __, ___) =>
+                  Container(height: 112, color: const Color(0xFFE7E7E7)),
             ),
           ),
           const SizedBox(height: 8),
-          Text(course.title, maxLines: 2, overflow: TextOverflow.ellipsis, style: const TextStyle(fontSize: 14, fontWeight: FontWeight.w700, height: 1.2)),
+          Text(
+            course.title,
+            maxLines: 2,
+            overflow: TextOverflow.ellipsis,
+            style: const TextStyle(
+              fontSize: 14,
+              fontWeight: FontWeight.w700,
+              height: 1.2,
+            ),
+          ),
           const SizedBox(height: 8),
           Row(
             children: [
-              const Icon(Icons.access_time, size: 13, color: AppColors.textMuted),
+              const Icon(
+                Icons.access_time,
+                size: 13,
+                color: AppColors.textMuted,
+              ),
               const SizedBox(width: 3),
-              Expanded(child: Text(course.duration, style: const TextStyle(fontSize: 10.5, color: AppColors.textMuted))),
-              Text(course.fee, style: const TextStyle(fontSize: 10.5, fontWeight: FontWeight.w600)),
+              Expanded(
+                child: Text(
+                  course.duration,
+                  style: const TextStyle(
+                    fontSize: 10.5,
+                    color: AppColors.textMuted,
+                  ),
+                ),
+              ),
+              Text(
+                course.fee,
+                style: const TextStyle(
+                  fontSize: 10.5,
+                  fontWeight: FontWeight.w600,
+                ),
+              ),
             ],
           ),
           const Spacer(),
@@ -144,9 +196,14 @@ class _CourseCard extends StatelessWidget {
                 backgroundColor: AppColors.primary,
                 foregroundColor: AppColors.text,
                 minimumSize: const Size.fromHeight(36),
-                shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8)),
+                shape: RoundedRectangleBorder(
+                  borderRadius: BorderRadius.circular(8),
+                ),
               ),
-              child: const Text('View Details', style: TextStyle(fontWeight: FontWeight.w700)),
+              child: const Text(
+                'View Details',
+                style: TextStyle(fontWeight: FontWeight.w700),
+              ),
             ),
           ),
         ],
@@ -169,7 +226,10 @@ class _RoundIconButton extends StatelessWidget {
       child: Container(
         width: 40,
         height: 40,
-        decoration: const BoxDecoration(color: Colors.white, shape: BoxShape.circle),
+        decoration: const BoxDecoration(
+          color: Colors.white,
+          shape: BoxShape.circle,
+        ),
         child: Icon(icon, size: 26),
       ),
     );
