@@ -3,6 +3,22 @@ import 'package:flutter/material.dart';
 import '../core/app_localizations.dart';
 import '../core/app_theme.dart';
 
+/// Backward-compatible gradient transform that translates by [dx]/[dy].
+///
+/// Some shimmer implementations reference `GradientTranslation` directly.
+/// Defining it here keeps those widgets compiling across Flutter SDK versions.
+class GradientTranslation extends GradientTransform {
+  const GradientTranslation(this.dx, this.dy);
+
+  final double dx;
+  final double dy;
+
+  @override
+  Matrix4? transform(Rect bounds, {TextDirection? textDirection}) {
+    return Matrix4.translationValues(dx, dy, 0);
+  }
+}
+
 class AppPageEntrance extends StatefulWidget {
   const AppPageEntrance({super.key, required this.child, this.delay = Duration.zero});
 
