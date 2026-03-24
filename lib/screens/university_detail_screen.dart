@@ -20,77 +20,132 @@ class UniversityDetailScreen extends StatelessWidget {
           child: AppPageEntrance(
             child: Column(
               children: [
-              TopRoundedHeader(title: data.name),
-              Expanded(
-                child: SingleChildScrollView(
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      Stack(
-                        children: [
-                          SizedBox(
-                            height: 250,
-                            width: double.infinity,
-                            child: Image.network(
-                              data.heroImage,
-                              fit: BoxFit.cover,
-                              errorBuilder: (_, __, ___) => Container(color: const Color(0xFFE2E2E2)),
-                            ),
-                          ),
-                          Positioned(
-                            left: 20,
-                            right: 20,
-                            bottom: -8,
-                            child: Container(
-                              padding: const EdgeInsets.all(12),
-                              decoration: BoxDecoration(
-                                color: Colors.white,
-                                borderRadius: BorderRadius.circular(14),
-                                boxShadow: const [BoxShadow(color: AppColors.shadow, blurRadius: 18, offset: Offset(0, 8))],
+                TopRoundedHeader(title: data.name),
+                Expanded(
+                  child: SingleChildScrollView(
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        Stack(
+                          clipBehavior: Clip.none,
+                          children: [
+                            ClipRRect(
+                              borderRadius: const BorderRadius.vertical(
+                                bottom: Radius.circular(26),
                               ),
-                              child: Row(
-                                children: [
-                                  Container(
-                                    width: 64,
-                                    height: 64,
-                                    decoration: BoxDecoration(color: const Color(0xFFF3F3F3), borderRadius: BorderRadius.circular(10)),
-                                    alignment: Alignment.center,
-                                    child: Text(data.shortCode, style: TextStyle(color: data.color, fontWeight: FontWeight.w900, fontSize: 18)),
+                              child: SizedBox(
+                                height: 250,
+                                width: double.infinity,
+                                child: Image.network(
+                                  data.heroImage,
+                                  fit: BoxFit.cover,
+                                  errorBuilder: (_, __, ___) => Container(
+                                    color: const Color(0xFFE2E2E2),
                                   ),
-                                  const SizedBox(width: 12),
-                                  Expanded(
-                                    child: Column(
-                                      crossAxisAlignment: CrossAxisAlignment.start,
-                                      children: [
-                                        const Row(
-                                          children: [
-                                            Icon(Icons.star, color: Color(0xFFFFB300), size: 16),
-                                            SizedBox(width: 4),
-                                            Text('4.6', style: TextStyle(fontWeight: FontWeight.w700)),
-                                            SizedBox(width: 4),
-                                            Text('(2.4k reviews)', style: TextStyle(fontSize: 12, color: AppColors.textMuted)),
-                                          ],
-                                        ),
-                                        const SizedBox(height: 8),
-                                        Text(data.name, style: const TextStyle(fontSize: 14, fontWeight: FontWeight.w700)),
-                                        const SizedBox(height: 4),
-                                        Row(
-                                          children: [
-                                            const Icon(Icons.location_on_outlined, size: 15, color: AppColors.textMuted),
-                                            const SizedBox(width: 2),
-                                            Text(data.location, style: const TextStyle(color: AppColors.textMuted)),
-                                          ],
-                                        ),
-                                      ],
+                                ),
+                              ),
+                            ),
+                            Positioned(
+                              left: 20,
+                              right: 20,
+                              bottom: -24,
+                              child: Container(
+                                padding: const EdgeInsets.all(12),
+                                decoration: BoxDecoration(
+                                  color: Colors.white,
+                                  borderRadius: BorderRadius.circular(12),
+                                  boxShadow: const [
+                                    BoxShadow(
+                                      color: AppColors.shadow,
+                                      blurRadius: 18,
+                                      offset: Offset(0, 8),
                                     ),
-                                  ),
-                                ],
+                                  ],
+                                ),
+                                child: Row(
+                                  children: [
+                                    Container(
+                                      width: 64,
+                                      height: 64,
+                                      decoration: BoxDecoration(
+                                        color: const Color(0xFFF3F3F3),
+                                        borderRadius: BorderRadius.circular(10),
+                                      ),
+                                      alignment: Alignment.center,
+                                      child: Text(
+                                        data.shortCode,
+                                        style: TextStyle(
+                                          color: data.color,
+                                          fontWeight: FontWeight.w900,
+                                          fontSize: 18,
+                                        ),
+                                      ),
+                                    ),
+                                    const SizedBox(width: 12),
+                                    Expanded(
+                                      child: Column(
+                                        crossAxisAlignment:
+                                            CrossAxisAlignment.start,
+                                        children: [
+                                          const Row(
+                                            children: [
+                                              Icon(
+                                                Icons.star,
+                                                color: Color(0xFFFFB300),
+                                                size: 16,
+                                              ),
+                                              SizedBox(width: 4),
+                                              Text(
+                                                '4.6',
+                                                style: TextStyle(
+                                                  fontWeight: FontWeight.w700,
+                                                ),
+                                              ),
+                                              SizedBox(width: 4),
+                                              Text(
+                                                '(2.4k reviews)',
+                                                style: TextStyle(
+                                                  fontSize: 12,
+                                                  color: AppColors.textMuted,
+                                                ),
+                                              ),
+                                            ],
+                                          ),
+                                          const SizedBox(height: 8),
+                                          Text(
+                                            data.name,
+                                            style: const TextStyle(
+                                              fontSize: 14,
+                                              fontWeight: FontWeight.w700,
+                                            ),
+                                          ),
+                                          const SizedBox(height: 4),
+                                          Row(
+                                            children: [
+                                              const Icon(
+                                                Icons.location_on_outlined,
+                                                size: 15,
+                                                color: AppColors.textMuted,
+                                              ),
+                                              const SizedBox(width: 2),
+                                              Text(
+                                                data.location,
+                                                style: const TextStyle(
+                                                  color: AppColors.textMuted,
+                                                ),
+                                              ),
+                                            ],
+                                          ),
+                                        ],
+                                      ),
+                                    ),
+                                  ],
+                                ),
                               ),
                             ),
-                          ),
-                        ],
-                      ),
-                      const SizedBox(height: 30),
+                          ],
+                        ),
+                        const SizedBox(height: 40),
                       const Padding(
                         padding: EdgeInsets.symmetric(horizontal: 20),
                         child: Text('About', style: TextStyle(fontSize: 18, fontWeight: FontWeight.w700)),
@@ -124,20 +179,22 @@ class UniversityDetailScreen extends StatelessWidget {
                           subtitle: '12th pass / Bachelor’s Degree',
                         ),
                       ),
-                      const SizedBox(height: 130),
-                    ],
+                        const SizedBox(height: 130),
+                      ],
+                    ),
                   ),
                 ),
-              ),
-              Padding(
-                padding: const EdgeInsets.fromLTRB(20, 12, 20, 12),
-                child: AppPrimaryButton(
-                  label: 'View Courses',
-                  onPressed: () => Navigator.of(context).push(
-                    MaterialPageRoute(builder: (_) => CourseListScreen(university: data)),
+                Padding(
+                  padding: const EdgeInsets.fromLTRB(20, 12, 20, 12),
+                  child: AppPrimaryButton(
+                    label: 'View Courses',
+                    onPressed: () => Navigator.of(context).push(
+                      MaterialPageRoute(
+                        builder: (_) => CourseListScreen(university: data),
+                      ),
+                    ),
                   ),
                 ),
-              ),
               ],
             ),
           ),

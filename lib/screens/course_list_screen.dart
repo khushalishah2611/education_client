@@ -6,6 +6,7 @@ import '../widgets/app_drawer.dart';
 import '../widgets/common_widgets.dart';
 import '../widgets/flow_widgets.dart';
 import 'course_detail_screen.dart';
+import 'home_screen.dart';
 
 class CourseListScreen extends StatefulWidget {
   const CourseListScreen({super.key, required this.university});
@@ -18,6 +19,38 @@ class CourseListScreen extends StatefulWidget {
 
 class _CourseListScreenState extends State<CourseListScreen> {
   final _scaffoldKey = GlobalKey<ScaffoldState>();
+  bool _isLoading = true;
+
+  @override
+  void initState() {
+    super.initState();
+    Future<void>.delayed(const Duration(milliseconds: 1200), () {
+      if (!mounted) return;
+      setState(() => _isLoading = false);
+    });
+  }
+
+  void _onBottomTabTap(int index) {
+    if (index == 1) return;
+    Navigator.of(context).pushReplacement(_animatedRoute(const HomeScreen()));
+  }
+
+  Route _animatedRoute(Widget page) {
+    return PageRouteBuilder(
+      pageBuilder: (_, animation, __) => FadeTransition(
+        opacity: animation,
+        child: page,
+      ),
+      transitionsBuilder: (_, animation, __, child) {
+        final offset = Tween(
+          begin: const Offset(-0.08, 0),
+          end: Offset.zero,
+        ).animate(CurvedAnimation(parent: animation, curve: Curves.easeOutCubic));
+        return SlideTransition(position: offset, child: child);
+      },
+      transitionDuration: const Duration(milliseconds: 320),
+    );
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -77,28 +110,30 @@ class _CourseListScreenState extends State<CourseListScreen> {
                   ),
                   const SizedBox(height: 16),
                   Expanded(
-                    child: GridView.builder(
-                      itemCount: courseCatalog.length,
-                      gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
-                        crossAxisCount: 2,
-                        mainAxisSpacing: 14,
-                        crossAxisSpacing: 14,
-                        childAspectRatio: .58,
-                      ),
-                      itemBuilder: (context, index) {
-                        final course = courseCatalog[index];
-                        return _CourseCard(
-                          course: course,
-                          onTap: () => Navigator.of(context).push(
-                            MaterialPageRoute(
-                              builder: (_) => CourseDetailScreen(university: widget.university, course: course),
+                    child: _isLoading
+                        ? const _CourseListShimmer()
+                        : GridView.builder(
+                            itemCount: courseCatalog.length,
+                            gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
+                              crossAxisCount: 2,
+                              mainAxisSpacing: 14,
+                              crossAxisSpacing: 14,
+                              childAspectRatio: .58,
                             ),
+                            itemBuilder: (context, index) {
+                              final course = courseCatalog[index];
+                              return _CourseCard(
+                                course: course,
+                                onTap: () => Navigator.of(context).push(
+                                  MaterialPageRoute(
+                                    builder: (_) => CourseDetailScreen(university: widget.university, course: course),
+                                  ),
+                                ),
+                              );
+                            },
                           ),
-                        );
-                      },
-                    ),
                   ),
-                  const BottomTabBarCard(activeIndex: 1),
+                  BottomTabBarCard(activeIndex: 1, onTap: _onBottomTabTap),
                 ],
               ),
             ),
@@ -106,6 +141,72 @@ class _CourseListScreenState extends State<CourseListScreen> {
           ),
         ),
       ),
+    );
+  }
+}
+
+class _CourseListShimmer extends StatefulWidget {
+  const _CourseListShimmer();
+
+  @override
+  State<_CourseListShimmer> createState() => _CourseListShimmerState();
+}
+
+class _CourseListShimmerState extends State<_CourseListShimmer>
+    with SingleTickerProviderStateMixin {
+  late final AnimationController _controller;
+
+  @override
+  void initState() {
+    super.initState();
+    _controller = AnimationController(
+      vsync: this,
+      duration: const Duration(milliseconds: 1100),
+    )..repeat();
+  }
+
+  @override
+  void dispose() {
+    _controller.dispose();
+    super.dispose();
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return AnimatedBuilder(
+      animation: _controller,
+      builder: (context, _) {
+        return ShaderMask(
+          shaderCallback: (rect) {
+            final value = _controller.value;
+            return LinearGradient(
+              begin: Alignment(-1.2 + (value * 2), 0),
+              end: Alignment(-0.2 + (value * 2), 0),
+              colors: const [
+                Color(0xFFECECEC),
+                Color(0xFFF7F7F7),
+                Color(0xFFECECEC),
+              ],
+            ).createShader(rect);
+          },
+          blendMode: BlendMode.srcATop,
+          child: GridView.builder(
+            itemCount: 6,
+            gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
+              crossAxisCount: 2,
+              mainAxisSpacing: 14,
+              crossAxisSpacing: 14,
+              childAspectRatio: .58,
+            ),
+            itemBuilder: (_, __) => Container(
+              decoration: BoxDecoration(
+                color: const Color(0xFFECECEC),
+                borderRadius: BorderRadius.circular(10),
+              ),
+            ),
+          ),
+        );
+      },
     );
   }
 }

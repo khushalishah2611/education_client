@@ -20,6 +20,34 @@ class _HomeScreenState extends State<HomeScreen> {
   final _scaffoldKey = GlobalKey<ScaffoldState>();
   int _activeTab = 0;
 
+  void _onBottomTabTap(int index) {
+    if (_activeTab == index) return;
+    setState(() => _activeTab = index);
+
+    if (index == 1) {
+      Navigator.of(context).push(_animatedRoute(
+        CourseListScreen(university: universityCatalog.first),
+      ));
+    }
+  }
+
+  Route _animatedRoute(Widget page) {
+    return PageRouteBuilder(
+      pageBuilder: (_, animation, __) => FadeTransition(
+        opacity: animation,
+        child: page,
+      ),
+      transitionsBuilder: (_, animation, __, child) {
+        final offset = Tween(
+          begin: const Offset(0.08, 0),
+          end: Offset.zero,
+        ).animate(CurvedAnimation(parent: animation, curve: Curves.easeOutCubic));
+        return SlideTransition(position: offset, child: child);
+      },
+      transitionDuration: const Duration(milliseconds: 320),
+    );
+  }
+
   @override
   Widget build(BuildContext context) {
     return Directionality(
@@ -164,24 +192,7 @@ class _HomeScreenState extends State<HomeScreen> {
 
                   BottomTabBarCard(
                     activeIndex: _activeTab,
-                    onTap: (index) {
-                      setState(() => _activeTab = index);
-
-                      if (index == 0) {
-                        Navigator.of(
-                          context,
-                        ).push(MaterialPageRoute(builder: (_) => HomeScreen()));
-                      }
-                      if (index == 1) {
-                        Navigator.of(context).push(
-                          MaterialPageRoute(
-                            builder: (_) => CourseListScreen(
-                              university: universityCatalog.first,
-                            ),
-                          ),
-                        );
-                      }
-                    },
+                    onTap: _onBottomTabTap,
                   ),
                 ],
               ),
