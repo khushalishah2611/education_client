@@ -7,7 +7,7 @@ import '../widgets/common_widgets.dart';
 import '../widgets/flow_widgets.dart';
 import 'upload_documents_screen.dart';
 
-class CourseDetailScreen extends StatelessWidget {
+class CourseDetailScreen extends StatefulWidget {
   const CourseDetailScreen({
     super.key,
     required this.university,
@@ -18,7 +18,34 @@ class CourseDetailScreen extends StatelessWidget {
   final CourseData course;
 
   @override
+  State<CourseDetailScreen> createState() => _CourseDetailScreenState();
+}
+
+class _CourseDetailScreenState extends State<CourseDetailScreen> {
+  final List<_IntakeOption> _availableIntakes = const [
+    _IntakeOption(
+      month: 'September',
+      year: '2026',
+      deadlineDate: '30 June 2026',
+    ),
+    _IntakeOption(
+      month: 'October',
+      year: '2026',
+      deadlineDate: '15 July 2026',
+    ),
+    _IntakeOption(
+      month: 'March',
+      year: '2027',
+      deadlineDate: '15 December 2026',
+    ),
+  ];
+
+  int _selectedIntakeIndex = 0;
+
+  @override
   Widget build(BuildContext context) {
+    final selectedIntake = _availableIntakes[_selectedIntakeIndex];
+
     return Scaffold(
       body: AppBackground(
         child: SafeArea(
@@ -41,7 +68,7 @@ class CourseDetailScreen extends StatelessWidget {
                             height: 250,
                             width: double.infinity,
                             child: Image.network(
-                              course.image,
+                              widget.course.image,
                               fit: BoxFit.cover,
                               errorBuilder: (_, __, ___) =>
                                   Container(color: const Color(0xFFE2E2E2)),
@@ -81,9 +108,9 @@ class CourseDetailScreen extends StatelessWidget {
                                         BorderRadius.circular(10),
                                       ),
                                       child: Text(
-                                        university.shortCode,
+                                        widget.university.shortCode,
                                         style: TextStyle(
-                                          color: university.color,
+                                          color: widget.university.color,
                                           fontWeight: FontWeight.w900,
                                         ),
                                       ),
@@ -97,7 +124,7 @@ class CourseDetailScreen extends StatelessWidget {
                                         CrossAxisAlignment.start,
                                         children: [
                                           Text(
-                                            university.name,
+                                            widget.university.name,
                                             style: const TextStyle(
                                               fontSize: 14,
                                               fontWeight: FontWeight.w700,
@@ -105,7 +132,7 @@ class CourseDetailScreen extends StatelessWidget {
                                           ),
                                           const SizedBox(height: 2),
                                           Text(
-                                            course.title,
+                                            widget.course.title,
                                             style: const TextStyle(
                                               color: AppColors.textMuted,
                                             ),
@@ -127,7 +154,7 @@ class CourseDetailScreen extends StatelessWidget {
                                     const SizedBox(width: 4),
                                     Expanded(
                                       child: Text(
-                                        university.location,
+                                        widget.university.location,
                                         style: const TextStyle(
                                           color: AppColors.textMuted,
                                         ),
@@ -153,7 +180,7 @@ class CourseDetailScreen extends StatelessWidget {
                                         size: 18,
                                         color: AppColors.textMuted),
                                     const SizedBox(width: 4),
-                                    Text(course.duration),
+                                    Text(widget.course.duration),
                                     const Spacer(),
                                     const Text(
                                       '₹4,50,000 / Year',
@@ -170,7 +197,7 @@ class CourseDetailScreen extends StatelessWidget {
                         ),
 
                         /// HEADER
-                        TopRoundedHeader(title: course.title),
+                        TopRoundedHeader(title: widget.course.title),
                       ],
                     ),
 
@@ -234,7 +261,7 @@ class CourseDetailScreen extends StatelessWidget {
                           borderRadius: BorderRadius.circular(12),
                         ),
                         child: Column(
-                          children: const [
+                          children: [
                             Row(
                               children: [
                                 Icon(Icons.calendar_month_outlined,
@@ -247,15 +274,19 @@ class CourseDetailScreen extends StatelessWidget {
                               ],
                             ),
                             SizedBox(height: 16),
-                            Row(
+                            Wrap(
+                              spacing: 10,
+                              runSpacing: 10,
                               children: [
-                                Expanded(
-                                    child: _IntakeChip(
-                                        month: 'September', year: '2026')),
-                                SizedBox(width: 10),
-                                Expanded(
-                                    child: _IntakeChip(
-                                        month: 'October', year: '2026')),
+                                for (var i = 0; i < _availableIntakes.length; i++)
+                                  _IntakeChip(
+                                    month: _availableIntakes[i].month,
+                                    year: _availableIntakes[i].year,
+                                    isSelected: i == _selectedIntakeIndex,
+                                    onTap: () {
+                                      setState(() => _selectedIntakeIndex = i);
+                                    },
+                                  ),
                               ],
                             ),
                           ],
@@ -263,6 +294,74 @@ class CourseDetailScreen extends StatelessWidget {
                       ),
                     ),
 
+                    const SizedBox(height: 12),
+
+                    Padding(
+                      padding: const EdgeInsets.symmetric(horizontal: 20),
+                      child: Container(
+                        width: double.infinity,
+                        padding: const EdgeInsets.all(14),
+                        decoration: BoxDecoration(
+                          color: Colors.white,
+                          borderRadius: BorderRadius.circular(12),
+                          border: Border.all(color: const Color(0xFFFFC4C4)),
+                        ),
+                        child: Row(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
+                            Container(
+                              width: 36,
+                              height: 36,
+                              decoration: BoxDecoration(
+                                color: const Color(0xFFFFF4F4),
+                                borderRadius: BorderRadius.circular(8),
+                              ),
+                              child: const Icon(
+                                Icons.fact_check_outlined,
+                                color: Color(0xFFEB5757),
+                              ),
+                            ),
+                            const SizedBox(width: 10),
+                            Expanded(
+                              child: Column(
+                                crossAxisAlignment: CrossAxisAlignment.start,
+                                children: [
+                                  const Text(
+                                    'Application Deadline',
+                                    style: TextStyle(
+                                      fontSize: 18,
+                                      fontWeight: FontWeight.w700,
+                                    ),
+                                  ),
+                                  const SizedBox(height: 8),
+                                  RichText(
+                                    text: TextSpan(
+                                      style: const TextStyle(
+                                        fontSize: 14,
+                                        color: AppColors.textMuted,
+                                      ),
+                                      children: [
+                                        TextSpan(
+                                          text: selectedIntake.deadlineDate,
+                                          style: const TextStyle(
+                                            color: Color(0xFFEB5757),
+                                            fontWeight: FontWeight.w700,
+                                          ),
+                                        ),
+                                        TextSpan(
+                                          text:
+                                              ' (For ${selectedIntake.month} ${selectedIntake.year} Intake)',
+                                        ),
+                                      ],
+                                    ),
+                                  ),
+                                ],
+                              ),
+                            ),
+                          ],
+                        ),
+                      ),
+                    ),
 
                   ],
                 ),
@@ -277,8 +376,8 @@ class CourseDetailScreen extends StatelessWidget {
                     context,
                     MaterialPageRoute(
                       builder: (_) => UploadDocumentsScreen(
-                        university: university,
-                        course: course,
+                        university: widget.university,
+                        course: widget.course,
                       ),
                     ),
                   ),
@@ -369,29 +468,56 @@ class _DocTile extends StatelessWidget {
 }
 
 class _IntakeChip extends StatelessWidget {
-  const _IntakeChip({required this.month, required this.year});
+  const _IntakeChip({
+    required this.month,
+    required this.year,
+    required this.isSelected,
+    required this.onTap,
+  });
 
   final String month;
   final String year;
+  final bool isSelected;
+  final VoidCallback onTap;
 
   @override
   Widget build(BuildContext context) {
-    return Container(
-      padding: const EdgeInsets.symmetric(vertical: 10),
-      decoration: BoxDecoration(
-        borderRadius: BorderRadius.circular(8),
-        border: Border.all(color: AppColors.accent),
-      ),
-      child: Column(
-        children: [
-          Text(month, style: const TextStyle(color: AppColors.textMuted)),
-          const SizedBox(height: 4),
-          Text(
-            year,
-            style: const TextStyle(fontSize: 18, fontWeight: FontWeight.w700),
+    return InkWell(
+      onTap: onTap,
+      borderRadius: BorderRadius.circular(8),
+      child: Container(
+        width: 100,
+        padding: const EdgeInsets.symmetric(vertical: 10),
+        decoration: BoxDecoration(
+          color: isSelected ? const Color(0xFFFFF7ED) : Colors.white,
+          borderRadius: BorderRadius.circular(8),
+          border: Border.all(
+            color: isSelected ? AppColors.accent : const Color(0xFFE7E2DA),
           ),
-        ],
+        ),
+        child: Column(
+          children: [
+            Text(month, style: const TextStyle(color: AppColors.textMuted)),
+            const SizedBox(height: 4),
+            Text(
+              year,
+              style: const TextStyle(fontSize: 18, fontWeight: FontWeight.w700),
+            ),
+          ],
+        ),
       ),
     );
   }
+}
+
+class _IntakeOption {
+  const _IntakeOption({
+    required this.month,
+    required this.year,
+    required this.deadlineDate,
+  });
+
+  final String month;
+  final String year;
+  final String deadlineDate;
 }
