@@ -283,7 +283,7 @@ class _UniversityCard extends StatelessWidget {
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-              /// IMAGE
+                /// IMAGE
                 Container(
                   height: 84,
                   width: double.infinity,
@@ -331,18 +331,18 @@ class _UniversityCard extends StatelessWidget {
                       ),
                       const Icon(Icons.star, size: 14),
                       const Text("4.6"),
-                    ),
+                    ],
+                  ),
+                ),
+                const SizedBox(height: 8),
+                SizedBox(
+                  width: double.infinity,
+                  child: AppPrimaryButton(
+                    label: context.l10n.text('viewDetails'),
+                    onPressed: onTap,
                   ),
                 ),
               ],
-            ),
-          ),
-          const SizedBox(height: 8),
-          SizedBox(
-            width: double.infinity,
-            child: AppPrimaryButton(
-              label: context.l10n.text('viewDetails'),
-              onPressed: onTap,
             ),
           ),
         ],

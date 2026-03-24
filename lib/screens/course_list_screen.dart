@@ -1,3 +1,4 @@
+import 'package:education/core/app_localizations.dart';
 import 'package:flutter/material.dart';
 
 import '../core/app_theme.dart';
@@ -54,36 +55,21 @@ class _CourseListScreenState extends State<CourseListScreen> {
                     ],
                   ),
                   const SizedBox(height: 16),
-                  const Text('College/University or City Name', style: TextStyle(fontSize: 15, fontWeight: FontWeight.w500)),
-                  const SizedBox(height: 10),
-                  const TextField(decoration: InputDecoration(hintText: 'University of')),
-                  const SizedBox(height: 12),
-                  Container(
-                    width: double.infinity,
-                    padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 14),
-                    decoration: BoxDecoration(
-                      borderRadius: BorderRadius.circular(14),
-                      border: Border.all(color: const Color(0xFFF4D2B5)),
-                      color: const Color(0xFFFFFCF8),
-                    ),
-                    child: const Row(
-                      mainAxisAlignment: MainAxisAlignment.center,
-                      children: [
-                        Icon(Icons.tune_rounded, color: AppColors.accent),
-                        SizedBox(width: 8),
-                        Text('More Filters', style: TextStyle(color: AppColors.accent, fontSize: 16, fontWeight: FontWeight.w500)),
-                      ],
-                    ),
+                  AppTextField(
+                    label: context.l10n.text('cityOrCollege'),
+                    hint: context.l10n.text('searchHint'),
+                    height: 45,
                   ),
+
                   const SizedBox(height: 16),
                   Expanded(
                     child: GridView.builder(
                       itemCount: courseCatalog.length,
                       gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
                         crossAxisCount: 2,
-                        mainAxisSpacing: 14,
-                        crossAxisSpacing: 14,
-                        childAspectRatio: .58,
+                        mainAxisSpacing: 8,
+                        crossAxisSpacing: 8,
+                        childAspectRatio: 0.7,
                       ),
                       itemBuilder: (context, index) {
                         final course = courseCatalog[index];
