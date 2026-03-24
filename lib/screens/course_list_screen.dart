@@ -10,9 +10,14 @@ import 'course_detail_screen.dart';
 import 'home_screen.dart';
 
 class CourseListScreen extends StatefulWidget {
-  const CourseListScreen({super.key, required this.university});
+  const CourseListScreen({
+    super.key,
+    required this.university,
+    this.initialTab = 1,
+  });
 
   final UniversityData university;
+  final int initialTab;
 
   @override
   State<CourseListScreen> createState() => _CourseListScreenState();
@@ -20,12 +25,13 @@ class CourseListScreen extends StatefulWidget {
 
 class _CourseListScreenState extends State<CourseListScreen> {
   final _scaffoldKey = GlobalKey<ScaffoldState>();
-  int _activeTab = 1;
+  late int _activeTab;
   bool _isLoading = true;
 
   @override
   void initState() {
     super.initState();
+    _activeTab = widget.initialTab;
     _loadCourses();
   }
 

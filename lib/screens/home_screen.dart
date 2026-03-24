@@ -19,6 +19,20 @@ class HomeScreen extends StatefulWidget {
 class _HomeScreenState extends State<HomeScreen> {
   final _scaffoldKey = GlobalKey<ScaffoldState>();
   int _activeTab = 0;
+  bool _isLoadingUniversities = true;
+
+  @override
+  void initState() {
+    super.initState();
+    _loadUniversities();
+  }
+
+  Future<void> _loadUniversities() async {
+    setState(() => _isLoadingUniversities = true);
+    await Future<void>.delayed(const Duration(milliseconds: 900));
+    if (!mounted) return;
+    setState(() => _isLoadingUniversities = false);
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -133,7 +147,9 @@ class _HomeScreenState extends State<HomeScreen> {
                             const SizedBox(height: 12),
 
                             GridView.builder(
-                              itemCount: universityCatalog.length,
+                              itemCount: _isLoadingUniversities
+                                  ? 4
+                                  : universityCatalog.length,
                               shrinkWrap: true,
                               physics: const NeverScrollableScrollPhysics(),
                               gridDelegate:
@@ -144,6 +160,9 @@ class _HomeScreenState extends State<HomeScreen> {
                                     childAspectRatio: 0.8,
                                   ),
                               itemBuilder: (context, index) {
+                                if (_isLoadingUniversities) {
+                                  return const _UniversityCardShimmer();
+                                }
                                 final item = universityCatalog[index];
                                 return _UniversityCard(
                                   data: item,
@@ -167,11 +186,12 @@ class _HomeScreenState extends State<HomeScreen> {
                     onTap: (index) {
                       setState(() => _activeTab = index);
 
-                      if (index == 1) {
+                      if (index == 1 || index == 2) {
                         Navigator.of(context).push(
                           MaterialPageRoute(
                             builder: (_) => CourseListScreen(
                               university: universityCatalog.first,
+                              initialTab: index,
                             ),
                           ),
                         );
@@ -346,6 +366,113 @@ class _UniversityCard extends StatelessWidget {
             ),
           ),
         ],
+      ),
+    );
+  }
+}
+
+class _UniversityCardShimmer extends StatelessWidget {
+  const _UniversityCardShimmer();
+
+  @override
+  Widget build(BuildContext context) {
+    return Container(
+      padding: const EdgeInsets.all(8),
+      decoration: BoxDecoration(
+        color: Colors.white,
+        borderRadius: BorderRadius.circular(12),
+        border: Border.all(color: const Color(0xFFE8E3DB)),
+      ),
+      child: const Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          _ShimmerBlock(height: 84, borderRadius: 8),
+          SizedBox(height: 10),
+          _ShimmerBlock(height: 14, borderRadius: 4),
+          SizedBox(height: 6),
+          _ShimmerBlock(height: 12, width: 90, borderRadius: 4),
+          Spacer(),
+          _ShimmerBlock(height: 32, borderRadius: 8),
+        ],
+      ),
+    );
+  }
+}
+
+class _Shimmer extends StatefulWidget {
+  const _Shimmer({required this.child});
+
+  final Widget child;
+
+  @override
+  State<_Shimmer> createState() => _ShimmerState();
+}
+
+class _ShimmerState extends State<_Shimmer> with SingleTickerProviderStateMixin {
+  late final AnimationController _controller;
+
+  @override
+  void initState() {
+    super.initState();
+    _controller = AnimationController(
+      vsync: this,
+      duration: const Duration(milliseconds: 1300),
+    )..repeat();
+  }
+
+  @override
+  void dispose() {
+    _controller.dispose();
+    super.dispose();
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return AnimatedBuilder(
+      animation: _controller,
+      child: widget.child,
+      builder: (context, child) {
+        return ShaderMask(
+          shaderCallback: (bounds) {
+            final width = bounds.width == 0 ? 1 : bounds.width;
+            final offset = (_controller.value * 2 * width) - width;
+            return LinearGradient(
+              begin: Alignment.centerLeft,
+              end: Alignment.centerRight,
+              colors: const [Color(0xFFE6E6E6), Color(0xFFF4F4F4), Color(0xFFE6E6E6)],
+              stops: const [0.1, 0.45, 0.9],
+              transform: GradientTranslation(offset, 0),
+            ).createShader(bounds);
+          },
+          blendMode: BlendMode.srcATop,
+          child: child,
+        );
+      },
+    );
+  }
+}
+
+class _ShimmerBlock extends StatelessWidget {
+  const _ShimmerBlock({
+    required this.height,
+    this.width,
+    this.borderRadius = 6,
+  });
+
+  final double height;
+  final double? width;
+  final double borderRadius;
+
+  @override
+  Widget build(BuildContext context) {
+    return _Shimmer(
+      child: Container(
+        width: width,
+        height: height,
+        decoration: BoxDecoration(
+          color: const Color(0xFFEAEAEA),
+          borderRadius: BorderRadius.circular(borderRadius),
+        ),
       ),
     );
   }
