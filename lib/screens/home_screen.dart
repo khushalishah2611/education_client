@@ -30,98 +30,154 @@ class _HomeScreenState extends State<HomeScreen> {
         body: AppBackground(
           child: AppPageEntrance(
             child: SafeArea(
-              child: Padding(
-              padding: const EdgeInsets.fromLTRB(20, 8, 20, 0),
               child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  Row(
-                    children: [
-                      _CircleIconButton(
-                        icon: Icons.menu_rounded,
-                        onTap: () => _scaffoldKey.currentState?.openDrawer(),
-                      ),
-                      const Spacer(),
-                      const AppLogo(compact: true, center: true),
-                      const Spacer(),
-                      Stack(
-                        clipBehavior: Clip.none,
-                        children: [
-                          const Icon(Icons.notifications_none_rounded, size: 26),
-                          Positioned(
-                            right: 2,
-                            top: 2,
-                            child: Container(
-                              width: 8,
-                              height: 8,
-                              decoration: BoxDecoration(color: Colors.red, borderRadius: BorderRadius.circular(10)),
-                            ),
-                          ),
-                        ],
-                      ),
-                    ],
-                  ),
-                  const SizedBox(height: 16),
-                  Text(
-                    context.l10n.text('cityOrCollege'),
-                    style: const TextStyle(fontSize: 15, fontWeight: FontWeight.w500),
-                  ),
-                  const SizedBox(height: 10),
-                  TextField(decoration: InputDecoration(hintText: context.l10n.text('searchHint'))),
-                  const SizedBox(height: 12),
-                  Container(
-                    width: double.infinity,
-                    padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 14),
-                    decoration: BoxDecoration(
-                      borderRadius: BorderRadius.circular(14),
-                      border: Border.all(color: const Color(0xFFF4D2B5)),
-                      color: const Color(0xFFFFFCF8),
-                    ),
+                  Padding(
+                    padding: const EdgeInsets.all(16.0),
                     child: Row(
-                      mainAxisAlignment: MainAxisAlignment.center,
                       children: [
-                        const Icon(Icons.tune_rounded, color: AppColors.accent),
-                        const SizedBox(width: 8),
-                        Text(
-                          context.l10n.text('moreFilters'),
-                          style: const TextStyle(color: AppColors.accent, fontSize: 16, fontWeight: FontWeight.w500),
+                        _CircleIconButton(
+                          icon: Icons.menu_rounded,
+                          onTap: () => _scaffoldKey.currentState?.openDrawer(),
+                        ),
+                        const Spacer(),
+                        const AppLogo(compact: true, center: true),
+                        const Spacer(),
+                        Stack(
+                          clipBehavior: Clip.none,
+                          children: [
+                            const Icon(
+                              Icons.notifications_none_rounded,
+                              size: 26,
+                            ),
+                            Positioned(
+                              right: 2,
+                              top: 2,
+                              child: Container(
+                                width: 8,
+                                height: 8,
+                                decoration: BoxDecoration(
+                                  color: Colors.red,
+                                  borderRadius: BorderRadius.circular(10),
+                                ),
+                              ),
+                            ),
+                          ],
                         ),
                       ],
                     ),
                   ),
-                  const SizedBox(height: 16),
-                  _DiscoverBanner(),
-                  const SizedBox(height: 16),
-                  SectionTitle(context.l10n.text('popularUniversities')),
-                  const SizedBox(height: 12),
+
                   Expanded(
-                    child: GridView.builder(
-                      itemCount: universityCatalog.length,
-                      gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
-                        crossAxisCount: 2,
-                        mainAxisSpacing: 14,
-                        crossAxisSpacing: 14,
-                        childAspectRatio: .72,
+                    child: SingleChildScrollView(
+                      child: Padding(
+                        padding: const EdgeInsets.only(
+                          left: 16.0,
+                          right: 16.0,
+                          bottom: 16.0,
+                        ),
+                        child: Column(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
+                            AppTextField(
+                              label: context.l10n.text('cityOrCollege'),
+                              hint: context.l10n.text('searchHint'),
+                              height: 45,
+                            ),
+
+                            const SizedBox(height: 12),
+
+                            Container(
+                              width: double.infinity,
+                              padding: const EdgeInsets.symmetric(
+                                horizontal: 16,
+                                vertical: 10,
+                              ),
+                              decoration: BoxDecoration(
+                                borderRadius: BorderRadius.circular(14),
+                                border: Border.all(
+                                  color: const Color(0xFFF4D2B5),
+                                ),
+                                color: const Color(0xFFFFFCF8),
+                              ),
+                              child: Row(
+                                mainAxisAlignment: MainAxisAlignment.center,
+                                children: [
+                                  const Icon(
+                                    Icons.tune_rounded,
+                                    color: AppColors.accent,
+                                  ),
+                                  const SizedBox(width: 8),
+                                  Text(
+                                    context.l10n.text('moreFilters'),
+                                    style: const TextStyle(
+                                      color: AppColors.accent,
+                                      fontSize: 16,
+                                      fontWeight: FontWeight.w500,
+                                    ),
+                                  ),
+                                ],
+                              ),
+                            ),
+
+                            const SizedBox(height: 16),
+
+                            _DiscoverBanner(),
+
+                            const SizedBox(height: 16),
+
+                            SectionTitle(
+                              context.l10n.text('popularUniversities'),
+                            ),
+
+                            const SizedBox(height: 12),
+
+                            GridView.builder(
+                              itemCount: universityCatalog.length,
+                              shrinkWrap: true,
+                              physics: const NeverScrollableScrollPhysics(),
+                              gridDelegate:
+                                  const SliverGridDelegateWithFixedCrossAxisCount(
+                                    crossAxisCount: 2,
+                                    mainAxisSpacing: 8,
+                                    crossAxisSpacing: 8,
+                                    childAspectRatio: 0.8,
+                                  ),
+                              itemBuilder: (context, index) {
+                                final item = universityCatalog[index];
+                                return _UniversityCard(
+                                  data: item,
+                                  onTap: () => Navigator.of(context).push(
+                                    MaterialPageRoute(
+                                      builder: (_) =>
+                                          UniversityDetailScreen(data: item),
+                                    ),
+                                  ),
+                                );
+                              },
+                            ),
+                          ],
+                        ),
                       ),
-                      itemBuilder: (context, index) {
-                        final item = universityCatalog[index];
-                        return _UniversityCard(
-                          data: item,
-                          onTap: () => Navigator.of(context).push(
-                            MaterialPageRoute(builder: (_) => UniversityDetailScreen(data: item)),
-                          ),
-                        );
-                      },
                     ),
                   ),
+
                   BottomTabBarCard(
                     activeIndex: _activeTab,
                     onTap: (index) {
                       setState(() => _activeTab = index);
+
+                      if (index == 0) {
+                        Navigator.of(
+                          context,
+                        ).push(MaterialPageRoute(builder: (_) => HomeScreen()));
+                      }
                       if (index == 1) {
                         Navigator.of(context).push(
                           MaterialPageRoute(
-                            builder: (_) => CourseListScreen(university: universityCatalog.first),
+                            builder: (_) => CourseListScreen(
+                              university: universityCatalog.first,
+                            ),
                           ),
                         );
                       }
@@ -130,7 +186,6 @@ class _HomeScreenState extends State<HomeScreen> {
                 ],
               ),
             ),
-          ),
           ),
         ),
       ),
@@ -152,7 +207,10 @@ class _CircleIconButton extends StatelessWidget {
       child: Container(
         width: 40,
         height: 40,
-        decoration: const BoxDecoration(color: Colors.white, shape: BoxShape.circle),
+        decoration: const BoxDecoration(
+          color: Colors.white,
+          shape: BoxShape.circle,
+        ),
         child: Icon(icon, color: AppColors.text, size: 26),
       ),
     );
@@ -160,8 +218,6 @@ class _CircleIconButton extends StatelessWidget {
 }
 
 class _DiscoverBanner extends StatelessWidget {
-  _DiscoverBanner();
-
   @override
   Widget build(BuildContext context) {
     return Container(
@@ -170,25 +226,37 @@ class _DiscoverBanner extends StatelessWidget {
       padding: const EdgeInsets.fromLTRB(14, 14, 10, 8),
       decoration: BoxDecoration(
         borderRadius: BorderRadius.circular(14),
-        gradient: const LinearGradient(colors: [Color(0xFFFFB867), Color(0xFFF6A650)]),
+        gradient: const LinearGradient(
+          colors: [Color(0xFFFFB867), Color(0xFFF6A650)],
+        ),
       ),
       child: Stack(
         children: [
           const Positioned(
             right: 0,
             bottom: 0,
-            child: SizedBox(width: 124, height: 86, child: HeroIllustration(showPattern: false, height: 86)),
+            child: SizedBox(
+              width: 124,
+              height: 86,
+              child: HeroIllustration(showPattern: false, height: 86),
+            ),
           ),
-          const Positioned(right: 82, top: 6, child: Icon(Icons.cloud, color: Colors.white, size: 28)),
           Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
               Text(
                 context.l10n.text('findPerfectUniversity'),
-                style: const TextStyle(color: Colors.white, fontSize: 16, fontWeight: FontWeight.w700, height: 1.15),
+                style: const TextStyle(
+                  color: Colors.white,
+                  fontSize: 16,
+                  fontWeight: FontWeight.w700,
+                ),
               ),
               const SizedBox(height: 8),
-              Text(context.l10n.text('universityCount'), style: const TextStyle(color: Colors.white, fontSize: 13)),
+              Text(
+                context.l10n.text('universityCount'),
+                style: const TextStyle(color: Colors.white),
+              ),
             ],
           ),
         ],
@@ -214,48 +282,64 @@ class _UniversityCard extends StatelessWidget {
       ),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
+        mainAxisAlignment: MainAxisAlignment.spaceBetween,
         children: [
-          Container(
-            height: 84,
-            width: double.infinity,
-            decoration: BoxDecoration(
-              color: const Color(0xFFF5F5F5),
-              borderRadius: BorderRadius.circular(8),
-            ),
-            child: Center(
-              child: Text(
-                data.shortCode,
-                style: TextStyle(color: data.color, fontSize: 24, fontWeight: FontWeight.w900),
-              ),
-            ),
-          ),
-          const SizedBox(height: 10),
-          Text(data.name, maxLines: 2, overflow: TextOverflow.ellipsis, style: const TextStyle(fontSize: 14, fontWeight: FontWeight.w700, height: 1.15)),
-          const SizedBox(height: 6),
-          Row(
+          Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              const Icon(Icons.location_on_outlined, size: 14, color: AppColors.textMuted),
-              const SizedBox(width: 2),
-              Expanded(child: Text(data.location, style: const TextStyle(fontSize: 11, color: AppColors.textMuted))),
-              const Icon(Icons.star, color: Color(0xFFFFB300), size: 14),
-              const SizedBox(width: 2),
-              const Text('4.6', style: TextStyle(fontSize: 11, color: AppColors.textMuted)),
+              /// IMAGE
+              Container(
+                height: 84,
+                width: double.infinity,
+                decoration: BoxDecoration(
+                  color: const Color(0xFFF5F5F5),
+                  borderRadius: BorderRadius.circular(8),
+                ),
+                child: Center(
+                  child: Text(
+                    data.shortCode,
+                    style: TextStyle(
+                      color: data.color,
+                      fontSize: 24,
+                      fontWeight: FontWeight.w900,
+                    ),
+                  ),
+                ),
+              ),
+
+              const SizedBox(height: 10),
+
+              /// NAME
+              Text(
+                data.name,
+                maxLines: 2,
+                overflow: TextOverflow.ellipsis,
+                style: const TextStyle(fontWeight: FontWeight.w700),
+              ),
+
+              const SizedBox(height: 6),
+
+              /// LOCATION + RATING
+              Row(
+                children: [
+                  const Icon(Icons.location_on_outlined, size: 14),
+                  Expanded(
+                    child: Text(
+                      data.location,
+                      style: const TextStyle(fontSize: 11),
+                    ),
+                  ),
+                  const Icon(Icons.star, size: 14),
+                  const Text("4.6"),
+                ],
+              ),
             ],
           ),
-          const Spacer(),
-          SizedBox(
-            width: double.infinity,
-            child: FilledButton(
-              onPressed: onTap,
-              style: FilledButton.styleFrom(
-                backgroundColor: AppColors.primary,
-                foregroundColor: AppColors.text,
-                elevation: 0,
-                minimumSize: const Size.fromHeight(36),
-                shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8)),
-              ),
-              child: Text(context.l10n.text('viewDetails'), style: const TextStyle(fontWeight: FontWeight.w700)),
-            ),
+
+          /// BUTTON
+          AppPrimaryButton(
+            label: context.l10n.text('viewDetails'),
+            onPressed: onTap,
           ),
         ],
       ),
