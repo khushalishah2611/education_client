@@ -47,5 +47,8 @@
   "emergencyContact": "Emergency Contact",
   "changeLanguage": "Change Language",
   "logout": "Logout",
-  "versionLabel": "Version 1.0.0"
+  "versionLabel": "Version 1.0.0",
+  "Search Courses" : "Search Courses",
+  "Save": "Save",
+  "viewCourses": "View Courses"
 }

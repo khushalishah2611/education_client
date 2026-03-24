@@ -13,186 +13,212 @@ class UniversityDetailScreen extends StatelessWidget {
   final UniversityData data;
 
   @override
+
   Widget build(BuildContext context) {
+    final List<InfoItem> _infoList = [
+      InfoItem(
+        icon: Icons.verified_outlined,
+        iconBg: const Color(0xFFFFF2CC),
+        title: 'Ranking Info',
+        value: 'Ranking',
+        subtitle: '#3 worldwide (2026)',
+      ),
+      InfoItem(
+        icon: Icons.calendar_month_outlined,
+        iconBg: const Color(0xFFFFF1DF),
+        title: 'Upcoming Intake',
+        value: 'September 2026',
+        subtitle: '12th pass / Bachelor’s Degree',
+      ),
+    ];
     return Directionality(
       textDirection: Directionality.of(context),
       child: Scaffold(
         body: AppBackground(
-          child: AppPageEntrance(
+          child: SafeArea(
             child: Column(
               children: [
 
+                /// 🔹 TOP HEADER (FIXED)
+                Stack(
+                  clipBehavior: Clip.none,
+                  children: [
+                    ClipRRect(
+                      borderRadius: const BorderRadius.vertical(
+                        bottom: Radius.circular(20),
+                      ),
+                      child: SizedBox(
+                        height: 250,
+                        width: double.infinity,
+                        child: Image.network(
+                          data.heroImage,
+                          fit: BoxFit.cover,
+                          errorBuilder: (_, __, ___) => Container(
+                            color: const Color(0xFFE2E2E2),
+                          ),
+                        ),
+                      ),
+                    ),
+
+                    Positioned(
+                      left: 20,
+                      right: 20,
+                      bottom: -24,
+                      child: Container(
+                        padding: const EdgeInsets.all(12),
+                        decoration: BoxDecoration(
+                          color: Colors.white,
+                          borderRadius: BorderRadius.circular(12),
+                          boxShadow: const [
+                            BoxShadow(
+                              color: AppColors.shadow,
+                              blurRadius: 18,
+                              offset: Offset(0, 8),
+                            ),
+                          ],
+                        ),
+                        child: Row(
+                          children: [
+                            Container(
+                              width: 64,
+                              height: 64,
+                              decoration: BoxDecoration(
+                                color: const Color(0xFFF3F3F3),
+                                borderRadius: BorderRadius.circular(10),
+                              ),
+                              alignment: Alignment.center,
+                              child: Text(
+                                data.shortCode,
+                                style: TextStyle(
+                                  color: data.color,
+                                  fontWeight: FontWeight.w900,
+                                  fontSize: 18,
+                                ),
+                              ),
+                            ),
+                            const SizedBox(width: 12),
+                            Expanded(
+                              child: Column(
+                                crossAxisAlignment:
+                                CrossAxisAlignment.start,
+                                children: [
+                                  const Row(
+                                    children: [
+                                      Icon(Icons.star,
+                                          color: Color(0xFFFFB300), size: 16),
+                                      SizedBox(width: 4),
+                                      Text('4.6',
+                                          style: TextStyle(
+                                              fontWeight: FontWeight.w700)),
+                                      SizedBox(width: 4),
+                                      Text('(2.4k reviews)',
+                                          style: TextStyle(
+                                              fontSize: 12,
+                                              color: AppColors.textMuted)),
+                                    ],
+                                  ),
+                                  const SizedBox(height: 8),
+                                  Text(
+                                    data.name,
+                                    style: const TextStyle(
+                                      fontSize: 14,
+                                      fontWeight: FontWeight.w700,
+                                    ),
+                                  ),
+                                  const SizedBox(height: 4),
+                                  Row(
+                                    children: [
+                                      const Icon(
+                                        Icons.location_on_outlined,
+                                        size: 15,
+                                        color: AppColors.textMuted,
+                                      ),
+                                      const SizedBox(width: 2),
+                                      Text(
+                                        data.location,
+                                        style: const TextStyle(
+                                          color: AppColors.textMuted,
+                                        ),
+                                      ),
+                                    ],
+                                  ),
+                                ],
+                              ),
+                            ),
+                          ],
+                        ),
+                      ),
+                    ),
+
+                    TopRoundedHeader(title: data.name),
+                  ],
+                ),
+
+                const SizedBox(height: 40),
+
+                /// 🔥 SCROLLABLE CONTENT
                 Expanded(
                   child: SingleChildScrollView(
+                    padding: const EdgeInsets.only(bottom: 10),
                     child: Column(
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
-                        Stack(
-                          clipBehavior: Clip.none,
-                          children: [
-                            ClipRRect(
-                              borderRadius: const BorderRadius.vertical(
-                                bottom: Radius.circular(20),
-                              ),
-                              child: SizedBox(
-                                height: 300,
-                                width: double.infinity,
-                                child: Image.network(
-                                  data.heroImage,
-                                  fit: BoxFit.cover,
-                                  errorBuilder: (_, __, ___) => Container(
-                                    color: const Color(0xFFE2E2E2),
-                                  ),
+
+                        const Padding(
+                          padding: EdgeInsets.symmetric(horizontal: 20),
+                          child: Text(
+                            'About',
+                            style: TextStyle(
+                                fontSize: 18, fontWeight: FontWeight.w700),
+                          ),
+                        ),
+
+                        Padding(
+                          padding: const EdgeInsets.fromLTRB(20, 10, 20, 0),
+                          child: ReadMoreText(
+                            text: 'Lorem ipsum dolor sit amet, consectetur adipiscing elit. '
+                                'Arcu, arcu dictumst habitant vel ut et pellentesque. '
+                                'Ut in egestas blandit netus in scelerisque. '
+                                'Eget lectus ultrices pellentesque id...',
+                          ),
+                        ),
+                        const SizedBox(height: 16),
+
+
+                        Padding(
+                          padding: const EdgeInsets.symmetric(horizontal: 20),
+                          child: Column(
+                            children: List.generate(_infoList.length, (index) {
+                              final item = _infoList[index];
+
+                              return Padding(
+                                padding: EdgeInsets.only(bottom: index == _infoList.length - 1 ? 0 : 12),
+                                child: _InfoTile(
+                                  icon: item.icon,
+                                  iconBg: item.iconBg,
+                                  title: item.title,
+                                  value: item.value,
+                                  subtitle: item.subtitle,
                                 ),
-                              ),
-                            ),
-                            Positioned(
-                              left: 20,
-                              right: 20,
-                              bottom: -24,
-                              child: Container(
-                                padding: const EdgeInsets.all(12),
-                                decoration: BoxDecoration(
-                                  color: Colors.white,
-                                  borderRadius: BorderRadius.circular(12),
-                                  boxShadow: const [
-                                    BoxShadow(
-                                      color: AppColors.shadow,
-                                      blurRadius: 18,
-                                      offset: Offset(0, 8),
-                                    ),
-                                  ],
-                                ),
-                                child: Row(
-                                  children: [
-                                    Container(
-                                      width: 64,
-                                      height: 64,
-                                      decoration: BoxDecoration(
-                                        color: const Color(0xFFF3F3F3),
-                                        borderRadius: BorderRadius.circular(10),
-                                      ),
-                                      alignment: Alignment.center,
-                                      child: Text(
-                                        data.shortCode,
-                                        style: TextStyle(
-                                          color: data.color,
-                                          fontWeight: FontWeight.w900,
-                                          fontSize: 18,
-                                        ),
-                                      ),
-                                    ),
-                                    const SizedBox(width: 12),
-                                    Expanded(
-                                      child: Column(
-                                        crossAxisAlignment:
-                                            CrossAxisAlignment.start,
-                                        children: [
-                                          const Row(
-                                            children: [
-                                              Icon(
-                                                Icons.star,
-                                                color: Color(0xFFFFB300),
-                                                size: 16,
-                                              ),
-                                              SizedBox(width: 4),
-                                              Text(
-                                                '4.6',
-                                                style: TextStyle(
-                                                  fontWeight: FontWeight.w700,
-                                                ),
-                                              ),
-                                              SizedBox(width: 4),
-                                              Text(
-                                                '(2.4k reviews)',
-                                                style: TextStyle(
-                                                  fontSize: 12,
-                                                  color: AppColors.textMuted,
-                                                ),
-                                              ),
-                                            ],
-                                          ),
-                                          const SizedBox(height: 8),
-                                          Text(
-                                            data.name,
-                                            style: const TextStyle(
-                                              fontSize: 14,
-                                              fontWeight: FontWeight.w700,
-                                            ),
-                                          ),
-                                          const SizedBox(height: 4),
-                                          Row(
-                                            children: [
-                                              const Icon(
-                                                Icons.location_on_outlined,
-                                                size: 15,
-                                                color: AppColors.textMuted,
-                                              ),
-                                              const SizedBox(width: 2),
-                                              Text(
-                                                data.location,
-                                                style: const TextStyle(
-                                                  color: AppColors.textMuted,
-                                                ),
-                                              ),
-                                            ],
-                                          ),
-                                        ],
-                                      ),
-                                    ),
-                                  ],
-                                ),
-                              ),
-                            ),
-                            TopRoundedHeader(title: data.name),
-                          ],
+                              );
+                            }),
+                          ),
                         ),
-                        const SizedBox(height: 40),
-                      const Padding(
-                        padding: EdgeInsets.symmetric(horizontal: 20),
-                        child: Text('About', style: TextStyle(fontSize: 18, fontWeight: FontWeight.w700)),
-                      ),
-                      const Padding(
-                        padding: EdgeInsets.fromLTRB(20, 10, 20, 0),
-                        child: Text(
-                          'Lorem ipsum dolor sit amet, consectetur adipiscing elit. Arcu, arcu dictumst habitant vel ut et pellentesque. Ut in egestas blandit netus in scelerisque. Eget lectus ultrices pellentesque id...Read More',
-                          style: TextStyle(fontSize: 15, color: AppColors.textMuted, height: 1.35),
-                        ),
-                      ),
-                      const SizedBox(height: 16),
-                      const Padding(
-                        padding: EdgeInsets.symmetric(horizontal: 20),
-                        child: _InfoTile(
-                          icon: Icons.verified_outlined,
-                          iconBg: Color(0xFFFFF2CC),
-                          title: 'Ranking Info',
-                          value: 'Ranking',
-                          subtitle: '#3 worldwide (2026)',
-                        ),
-                      ),
-                      const SizedBox(height: 12),
-                      const Padding(
-                        padding: EdgeInsets.symmetric(horizontal: 20),
-                        child: _InfoTile(
-                          icon: Icons.calendar_month_outlined,
-                          iconBg: Color(0xFFFFF1DF),
-                          title: 'Upcoming Intake',
-                          value: 'September 2026',
-                          subtitle: '12th pass / Bachelor’s Degree',
-                        ),
-                      ),
-                        const SizedBox(height: 130),
+                        const SizedBox(height: 100), // 👈 space for button
                       ],
                     ),
                   ),
                 ),
+
+                /// 🔹 BOTTOM BUTTON (FIXED)
                 Padding(
-                  padding: const EdgeInsets.fromLTRB(20, 12, 20, 12),
+                  padding: const EdgeInsets.fromLTRB(20, 10, 20, 16),
                   child: AppPrimaryButton(
                     label: context.l10n.text('viewCourses'),
                     onPressed: () => Navigator.of(context).push(
                       MaterialPageRoute(
-                        builder: (_) => CourseListScreen(university: data),
+                        builder: (_) =>
+                            CourseListScreen(university: data),
                       ),
                     ),
                   ),
@@ -205,7 +231,96 @@ class UniversityDetailScreen extends StatelessWidget {
     );
   }
 }
+class InfoItem {
+  final IconData icon;
+  final Color iconBg;
+  final String title;
+  final String value;
+  final String subtitle;
 
+  InfoItem({
+    required this.icon,
+    required this.iconBg,
+    required this.title,
+    required this.value,
+    required this.subtitle,
+  });
+}
+class ReadMoreText extends StatefulWidget {
+  const ReadMoreText({
+    super.key,
+    required this.text,
+    this.trimLines = 3,
+  });
+
+  final String text;
+  final int trimLines;
+
+  @override
+  State<ReadMoreText> createState() => _ReadMoreTextState();
+}
+
+class _ReadMoreTextState extends State<ReadMoreText> {
+  bool isExpanded = false;
+
+  @override
+  Widget build(BuildContext context) {
+    return LayoutBuilder(
+      builder: (context, size) {
+        final textSpan = TextSpan(
+          text: widget.text,
+          style: const TextStyle(
+            fontSize: 15,
+            color: AppColors.textMuted,
+            height: 1.35,
+          ),
+        );
+
+        final tp = TextPainter(
+          text: textSpan,
+          maxLines: widget.trimLines,
+          textDirection: TextDirection.ltr,
+        )..layout(maxWidth: size.maxWidth);
+
+        final isOverflowing = tp.didExceedMaxLines;
+
+        return Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Text(
+              widget.text,
+              maxLines: isExpanded ? null : widget.trimLines,
+              overflow:
+              isExpanded ? TextOverflow.visible : TextOverflow.ellipsis,
+              style: const TextStyle(
+                fontSize: 15,
+                color: AppColors.textMuted,
+                height: 1.35,
+              ),
+            ),
+
+            if (isOverflowing)
+              GestureDetector(
+                onTap: () {
+                  setState(() => isExpanded = !isExpanded);
+                },
+                child: Padding(
+                  padding: const EdgeInsets.only(top: 4),
+                  child: Text(
+                    isExpanded ? 'Read Less' : 'Read More',
+                    style: const TextStyle(
+                      color: AppColors.primaryDark,
+                      fontWeight: FontWeight.w600,
+                    ),
+                  ),
+                ),
+              ),
+          ],
+        );
+      },
+    );
+  }
+}
 class _InfoTile extends StatelessWidget {
   const _InfoTile({
     required this.icon,

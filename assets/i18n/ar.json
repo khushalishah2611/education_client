@@ -47,5 +47,8 @@
   "emergencyContact": "جهة اتصال الطوارئ",
   "changeLanguage": "تغيير اللغة",
   "logout": "تسجيل الخروج",
-  "versionLabel": "الإصدار 1.0.0"
+  "versionLabel": "الإصدار 1.0.0",
+  "Search Courses" :"البحث عن الدورات",
+  "Save": "يحفظ",
+  "viewCourses": "عرض الدورات"
 }

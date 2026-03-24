@@ -9,14 +9,9 @@ import '../widgets/flow_widgets.dart';
 import 'course_detail_screen.dart';
 
 class CourseListScreen extends StatefulWidget {
-  const CourseListScreen({
-    super.key,
-    required this.university,
-
-  });
+  const CourseListScreen({super.key, required this.university});
 
   final UniversityData university;
-
 
   @override
   State<CourseListScreen> createState() => _CourseListScreenState();
@@ -93,9 +88,28 @@ class _CourseListScreenState extends State<CourseListScreen> {
                         ),
                         const SizedBox(height: 16),
                         AppTextField(
-                          label: context.l10n.text('cityOrCollege'),
-                          hint: context.l10n.text('searchHint'),
+                          label: context.l10n.text('Search Courses'),
+                          hint: context.l10n.text('Search Courses'),
                           height: 45,
+                          suffixicon: Container(
+                            margin: const EdgeInsets.all(6),
+                            decoration: BoxDecoration(
+                              color: Color(
+                                0xFFffc7a2,
+                              ).withOpacity(0.5), // background color
+                              borderRadius: BorderRadius.circular(10),
+                            ),
+                            child: IconButton(
+                              icon: const Icon(
+                                Icons.tune_rounded,
+                                color: Colors.black, // icon color
+                                size: 20,
+                              ),
+                              onPressed: () {
+                                // open filter bottom sheet
+                              },
+                            ),
+                          ),
                         ),
                       ],
                     ),
@@ -233,8 +247,8 @@ class _CourseCard extends StatelessWidget {
                   borderRadius: BorderRadius.circular(8),
                 ),
               ),
-              child: const Text(
-                'View Details',
+              child: Text(
+                context.l10n.text('viewDetails'),
                 style: TextStyle(fontWeight: FontWeight.w700),
               ),
             ),

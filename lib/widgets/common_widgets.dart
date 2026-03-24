@@ -211,6 +211,7 @@ class AppTextField extends StatelessWidget {
     required this.label,
     required this.hint,
     this.icon,
+    this.suffixicon,
     this.controller,
     this.keyboardType,
     this.height = 45,
@@ -219,6 +220,7 @@ class AppTextField extends StatelessWidget {
   final String label;
   final String hint;
   final IconData? icon;
+  final Widget? suffixicon;
   final TextEditingController? controller;
   final TextInputType? keyboardType;
   final double height;
@@ -228,7 +230,14 @@ class AppTextField extends StatelessWidget {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        Text(label, style: const TextStyle(fontSize: 15, fontWeight: FontWeight.w500, color: AppColors.text)),
+        Text(
+          label,
+          style: const TextStyle(
+            fontSize: 15,
+            fontWeight: FontWeight.w500,
+            color: AppColors.text,
+          ),
+        ),
         const SizedBox(height: 10),
         SizedBox(
           height: height,
@@ -238,8 +247,16 @@ class AppTextField extends StatelessWidget {
             textAlignVertical: TextAlignVertical.center,
             decoration: InputDecoration(
               hintText: hint,
-              contentPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 0),
-              prefixIcon: icon == null ? null : Icon(icon, color: AppColors.textMuted, size: 20),
+              contentPadding: const EdgeInsets.symmetric(
+                horizontal: 16,
+                vertical: 0,
+              ),
+              prefixIcon: icon == null
+                  ? null
+                  : Icon(icon, color: AppColors.textMuted, size: 20),
+
+              /// ✅ DIRECT WIDGET USE
+              suffixIcon: suffixicon,
             ),
           ),
         ),
