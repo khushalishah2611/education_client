@@ -3,6 +3,60 @@ import 'package:flutter/material.dart';
 import '../core/app_localizations.dart';
 import '../core/app_theme.dart';
 
+class AppPageEntrance extends StatefulWidget {
+  const AppPageEntrance({super.key, required this.child, this.delay = Duration.zero});
+
+  final Widget child;
+  final Duration delay;
+
+  @override
+  State<AppPageEntrance> createState() => _AppPageEntranceState();
+}
+
+class _AppPageEntranceState extends State<AppPageEntrance> with SingleTickerProviderStateMixin {
+  late final AnimationController _controller;
+  late final Animation<double> _fadeAnimation;
+  late final Animation<Offset> _slideAnimation;
+
+  @override
+  void initState() {
+    super.initState();
+    _controller = AnimationController(
+      duration: const Duration(milliseconds: 520),
+      vsync: this,
+    );
+    _fadeAnimation = CurvedAnimation(parent: _controller, curve: Curves.easeOutCubic);
+    _slideAnimation = Tween<Offset>(
+      begin: const Offset(0, .035),
+      end: Offset.zero,
+    ).animate(CurvedAnimation(parent: _controller, curve: Curves.easeOutCubic));
+    if (widget.delay == Duration.zero) {
+      _controller.forward();
+    } else {
+      Future<void>.delayed(widget.delay, () {
+        if (mounted) _controller.forward();
+      });
+    }
+  }
+
+  @override
+  void dispose() {
+    _controller.dispose();
+    super.dispose();
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return FadeTransition(
+      opacity: _fadeAnimation,
+      child: SlideTransition(
+        position: _slideAnimation,
+        child: widget.child,
+      ),
+    );
+  }
+}
+
 class AppBackground extends StatelessWidget {
   const AppBackground({super.key, required this.child});
 
@@ -256,7 +310,7 @@ class AppScaffoldBody extends StatelessWidget {
       child: Scaffold(
         body: AppBackground(
           child: SafeArea(
-            child: child,
+            child: AppPageEntrance(child: child),
           ),
         ),
       ),
@@ -303,4 +357,3 @@ class SectionTitle extends StatelessWidget {
     );
   }
 }
-

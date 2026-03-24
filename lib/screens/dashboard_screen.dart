@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 
 import '../data/universities.dart';
+import '../widgets/common_widgets.dart';
 import '../widgets/round_icon_button.dart';
 import '../widgets/university_card.dart';
 
@@ -10,10 +11,11 @@ class DashboardScreen extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      body: SafeArea(
-        child: SingleChildScrollView(
-          padding: const EdgeInsets.fromLTRB(20, 14, 20, 24),
-          child: Column(
+      body: AppPageEntrance(
+        child: SafeArea(
+          child: SingleChildScrollView(
+            padding: const EdgeInsets.fromLTRB(20, 14, 20, 24),
+            child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
               Row(
@@ -222,6 +224,7 @@ class DashboardScreen extends StatelessWidget {
                 },
               ),
             ],
+            ),
           ),
         ),
       ),

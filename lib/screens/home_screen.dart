@@ -28,114 +28,109 @@ class _HomeScreenState extends State<HomeScreen> {
         key: _scaffoldKey,
         drawer: const CommonSideMenu(),
         body: AppBackground(
-          child: SafeArea(
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                Expanded(
-                  child: Padding(
-                    padding: const EdgeInsets.all(16.0),
-                    child: Column(
-                      crossAxisAlignment: CrossAxisAlignment.start,
+          child: AppPageEntrance(
+            child: SafeArea(
+              child: Padding(
+              padding: const EdgeInsets.fromLTRB(20, 8, 20, 0),
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Row(
+                    children: [
+                      _CircleIconButton(
+                        icon: Icons.menu_rounded,
+                        onTap: () => _scaffoldKey.currentState?.openDrawer(),
+                      ),
+                      const Spacer(),
+                      const AppLogo(compact: true, center: true),
+                      const Spacer(),
+                      Stack(
+                        clipBehavior: Clip.none,
+                        children: [
+                          const Icon(Icons.notifications_none_rounded, size: 26),
+                          Positioned(
+                            right: 2,
+                            top: 2,
+                            child: Container(
+                              width: 8,
+                              height: 8,
+                              decoration: BoxDecoration(color: Colors.red, borderRadius: BorderRadius.circular(10)),
+                            ),
+                          ),
+                        ],
+                      ),
+                    ],
+                  ),
+                  const SizedBox(height: 16),
+                  Text(
+                    context.l10n.text('cityOrCollege'),
+                    style: const TextStyle(fontSize: 15, fontWeight: FontWeight.w500),
+                  ),
+                  const SizedBox(height: 10),
+                  TextField(decoration: InputDecoration(hintText: context.l10n.text('searchHint'))),
+                  const SizedBox(height: 12),
+                  Container(
+                    width: double.infinity,
+                    padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 14),
+                    decoration: BoxDecoration(
+                      borderRadius: BorderRadius.circular(14),
+                      border: Border.all(color: const Color(0xFFF4D2B5)),
+                      color: const Color(0xFFFFFCF8),
+                    ),
+                    child: Row(
+                      mainAxisAlignment: MainAxisAlignment.center,
                       children: [
-                        Row(
-                          children: [
-                            _CircleIconButton(
-                              icon: Icons.menu_rounded,
-                              onTap: () => _scaffoldKey.currentState?.openDrawer(),
-                            ),
-                            const Spacer(),
-                            const AppLogo(compact: true, center: true),
-                            const Spacer(),
-                            Stack(
-                              clipBehavior: Clip.none,
-                              children: [
-                                const Icon(Icons.notifications_none_rounded, size: 26),
-                                Positioned(
-                                  right: 2,
-                                  top: 2,
-                                  child: Container(
-                                    width: 8,
-                                    height: 8,
-                                    decoration: BoxDecoration(color: Colors.red, borderRadius: BorderRadius.circular(10)),
-                                  ),
-                                ),
-                              ],
-                            ),
-                          ],
-                        ),
-                        const SizedBox(height: 16),
+                        const Icon(Icons.tune_rounded, color: AppColors.accent),
+                        const SizedBox(width: 8),
                         Text(
-                          context.l10n.text('cityOrCollege'),
-                          style: const TextStyle(fontSize: 15, fontWeight: FontWeight.w500),
-                        ),
-                        const SizedBox(height: 10),
-                        TextField(decoration: InputDecoration(hintText: context.l10n.text('searchHint'))),
-                        const SizedBox(height: 12),
-                        Container(
-                          width: double.infinity,
-                          padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 14),
-                          decoration: BoxDecoration(
-                            borderRadius: BorderRadius.circular(14),
-                            border: Border.all(color: const Color(0xFFF4D2B5)),
-                            color: const Color(0xFFFFFCF8),
-                          ),
-                          child: Row(
-                            mainAxisAlignment: MainAxisAlignment.center,
-                            children: [
-                              const Icon(Icons.tune_rounded, color: AppColors.accent),
-                              const SizedBox(width: 8),
-                              Text(
-                                context.l10n.text('moreFilters'),
-                                style: const TextStyle(color: AppColors.accent, fontSize: 16, fontWeight: FontWeight.w500),
-                              ),
-                            ],
-                          ),
-                        ),
-                        const SizedBox(height: 16),
-                        _DiscoverBanner(),
-                        const SizedBox(height: 16),
-                        SectionTitle(context.l10n.text('popularUniversities')),
-                        const SizedBox(height: 12),
-                        Expanded(
-                          child: GridView.builder(
-                            itemCount: universityCatalog.length,
-                            gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
-                              crossAxisCount: 2,
-                              mainAxisSpacing: 14,
-                              crossAxisSpacing: 14,
-                              childAspectRatio: .72,
-                            ),
-                            itemBuilder: (context, index) {
-                              final item = universityCatalog[index];
-                              return _UniversityCard(
-                                data: item,
-                                onTap: () => Navigator.of(context).push(
-                                  MaterialPageRoute(builder: (_) => UniversityDetailScreen(data: item)),
-                                ),
-                              );
-                            },
-                          ),
+                          context.l10n.text('moreFilters'),
+                          style: const TextStyle(color: AppColors.accent, fontSize: 16, fontWeight: FontWeight.w500),
                         ),
                       ],
                     ),
                   ),
-                ),
-                BottomTabBarCard(
-                  activeIndex: _activeTab,
-                  onTap: (index) {
-                    setState(() => _activeTab = index);
-                    if (index == 1) {
-                      Navigator.of(context).push(
-                        MaterialPageRoute(
-                          builder: (_) => CourseListScreen(university: universityCatalog.first),
-                        ),
-                      );
-                    }
-                  },
-                ),
-              ],
+                  const SizedBox(height: 16),
+                  _DiscoverBanner(),
+                  const SizedBox(height: 16),
+                  SectionTitle(context.l10n.text('popularUniversities')),
+                  const SizedBox(height: 12),
+                  Expanded(
+                    child: GridView.builder(
+                      itemCount: universityCatalog.length,
+                      gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
+                        crossAxisCount: 2,
+                        mainAxisSpacing: 14,
+                        crossAxisSpacing: 14,
+                        childAspectRatio: .72,
+                      ),
+                      itemBuilder: (context, index) {
+                        final item = universityCatalog[index];
+                        return _UniversityCard(
+                          data: item,
+                          onTap: () => Navigator.of(context).push(
+                            MaterialPageRoute(builder: (_) => UniversityDetailScreen(data: item)),
+                          ),
+                        );
+                      },
+                    ),
+                  ),
+                  BottomTabBarCard(
+                    activeIndex: _activeTab,
+                    onTap: (index) {
+                      setState(() => _activeTab = index);
+                      if (index == 1) {
+                        Navigator.of(context).push(
+                          MaterialPageRoute(
+                            builder: (_) => CourseListScreen(university: universityCatalog.first),
+                          ),
+                        );
+                      }
+                    },
+                  ),
+                ],
+              ),
             ),
+          ),
           ),
         ),
       ),

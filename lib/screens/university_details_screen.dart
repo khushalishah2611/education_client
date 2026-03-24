@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 
 import '../models/university.dart';
+import '../widgets/common_widgets.dart';
 import '../widgets/info_tile.dart';
 import '../widgets/round_icon_button.dart';
 
@@ -12,8 +13,9 @@ class UniversityDetailsScreen extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      body: SingleChildScrollView(
-        child: Column(
+      body: AppPageEntrance(
+        child: SingleChildScrollView(
+          child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
             Stack(
@@ -231,6 +233,7 @@ class UniversityDetailsScreen extends StatelessWidget {
               ),
             ),
           ],
+          ),
         ),
       ),
       bottomSheet: SafeArea(

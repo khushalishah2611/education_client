@@ -16,8 +16,9 @@ class CourseDetailScreen extends StatelessWidget {
   Widget build(BuildContext context) {
     return Scaffold(
       body: AppBackground(
-        child: Column(
-          children: [
+        child: AppPageEntrance(
+          child: Column(
+            children: [
             TopRoundedHeader(title: course.title),
             Expanded(
               child: SingleChildScrollView(
@@ -204,7 +205,8 @@ class CourseDetailScreen extends StatelessWidget {
                 ),
               ),
             ),
-          ],
+            ],
+          ),
         ),
       ),
     );
