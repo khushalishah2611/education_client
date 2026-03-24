@@ -16,8 +16,9 @@ class PaymentConfirmationScreen extends StatelessWidget {
   Widget build(BuildContext context) {
     return Scaffold(
       body: AppBackground(
-        child: Column(
-          children: [
+        child: AppPageEntrance(
+          child: Column(
+            children: [
             const FlowStepHeader(currentStep: 3, title: 'Payment Confirmation'),
             Expanded(
               child: ListView(
@@ -68,7 +69,8 @@ class PaymentConfirmationScreen extends StatelessWidget {
                 ],
               ),
             ),
-          ],
+            ],
+          ),
         ),
       ),
     );

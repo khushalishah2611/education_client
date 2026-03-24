@@ -15,8 +15,9 @@ class TrackApplicationScreen extends StatelessWidget {
   Widget build(BuildContext context) {
     return Scaffold(
       body: AppBackground(
-        child: Column(
-          children: [
+        child: AppPageEntrance(
+          child: Column(
+            children: [
             const TopRoundedHeader(title: 'Track Application'),
             Expanded(
               child: ListView(
@@ -63,7 +64,8 @@ class TrackApplicationScreen extends StatelessWidget {
                 ],
               ),
             ),
-          ],
+            ],
+          ),
         ),
       ),
     );

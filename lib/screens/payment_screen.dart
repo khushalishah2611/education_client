@@ -23,9 +23,10 @@ class _PaymentScreenState extends State<PaymentScreen> {
   Widget build(BuildContext context) {
     return Scaffold(
       body: AppBackground(
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
+        child: AppPageEntrance(
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
             const FlowStepHeader(currentStep: 2, title: 'Payment'),
             Expanded(
               child: ListView(
@@ -74,7 +75,8 @@ class _PaymentScreenState extends State<PaymentScreen> {
                 ],
               ),
             ),
-          ],
+            ],
+          ),
         ),
       ),
     );

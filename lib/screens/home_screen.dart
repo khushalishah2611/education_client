@@ -28,8 +28,9 @@ class _HomeScreenState extends State<HomeScreen> {
         key: _scaffoldKey,
         drawer: const CommonSideMenu(),
         body: AppBackground(
-          child: SafeArea(
-            child: Padding(
+          child: AppPageEntrance(
+            child: SafeArea(
+              child: Padding(
               padding: const EdgeInsets.fromLTRB(20, 8, 20, 0),
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
@@ -129,6 +130,7 @@ class _HomeScreenState extends State<HomeScreen> {
                 ],
               ),
             ),
+          ),
           ),
         ),
       ),

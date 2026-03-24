@@ -17,8 +17,9 @@ class UniversityDetailScreen extends StatelessWidget {
       textDirection: Directionality.of(context),
       child: Scaffold(
         body: AppBackground(
-          child: Column(
-            children: [
+          child: AppPageEntrance(
+            child: Column(
+              children: [
               TopRoundedHeader(title: data.name),
               Expanded(
                 child: SingleChildScrollView(
@@ -137,7 +138,8 @@ class UniversityDetailScreen extends StatelessWidget {
                   ),
                 ),
               ),
-            ],
+              ],
+            ),
           ),
         ),
       ),

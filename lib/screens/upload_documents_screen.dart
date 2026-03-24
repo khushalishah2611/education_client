@@ -24,9 +24,10 @@ class UploadDocumentsScreen extends StatelessWidget {
 
     return Scaffold(
       body: AppBackground(
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
+        child: AppPageEntrance(
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
             const FlowStepHeader(currentStep: 0, title: 'Upload Documents'),
             Expanded(
               child: ListView(
@@ -50,7 +51,8 @@ class UploadDocumentsScreen extends StatelessWidget {
                 ],
               ),
             ),
-          ],
+            ],
+          ),
         ),
       ),
     );
