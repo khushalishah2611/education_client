@@ -7,6 +7,7 @@ import '../widgets/app_drawer.dart';
 import '../widgets/common_widgets.dart';
 import '../widgets/flow_widgets.dart';
 import 'course_detail_screen.dart';
+import 'home_screen.dart';
 
 class CourseListScreen extends StatefulWidget {
   const CourseListScreen({super.key, required this.university});
@@ -19,6 +20,21 @@ class CourseListScreen extends StatefulWidget {
 
 class _CourseListScreenState extends State<CourseListScreen> {
   final _scaffoldKey = GlobalKey<ScaffoldState>();
+  int _activeTab = 1;
+  bool _isLoading = true;
+
+  @override
+  void initState() {
+    super.initState();
+    _loadCourses();
+  }
+
+  Future<void> _loadCourses() async {
+    setState(() => _isLoading = true);
+    await Future<void>.delayed(const Duration(milliseconds: 900));
+    if (!mounted) return;
+    setState(() => _isLoading = false);
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -88,14 +104,17 @@ class _CourseListScreenState extends State<CourseListScreen> {
                         bottom: 16.0,
                       ),
                       child: GridView.builder(
-                        itemCount: courseCatalog.length,
+                        itemCount: _isLoading ? 6 : courseCatalog.length,
                         gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
                           crossAxisCount: 2,
                           mainAxisSpacing: 8,
                           crossAxisSpacing: 8,
-                          childAspectRatio: 0.75,
+                          childAspectRatio: 0.68,
                         ),
                         itemBuilder: (context, index) {
+                          if (_isLoading) {
+                            return const _CourseCardShimmer();
+                          }
                           final course = courseCatalog[index];
                           return _CourseCard(
                             course: course,
@@ -109,7 +128,24 @@ class _CourseListScreenState extends State<CourseListScreen> {
                       ),
                     ),
                   ),
-                  const BottomTabBarCard(),
+                  BottomTabBarCard(
+                    activeIndex: _activeTab,
+                    onTap: (index) async {
+                      setState(() => _activeTab = index);
+
+                      if (index == 0) {
+                        Navigator.of(context).pushAndRemoveUntil(
+                          MaterialPageRoute(builder: (_) => const HomeScreen()),
+                          (route) => false,
+                        );
+                        return;
+                      }
+
+                      if (index == 1 || index == 2) {
+                        await _loadCourses();
+                      }
+                    },
+                  ),
                 ],
               ),
             ),
@@ -231,6 +267,143 @@ class _RoundIconButton extends StatelessWidget {
           shape: BoxShape.circle,
         ),
         child: Icon(icon, size: 26),
+      ),
+    );
+  }
+}
+
+class _CourseCardShimmer extends StatelessWidget {
+  const _CourseCardShimmer();
+
+  @override
+  Widget build(BuildContext context) {
+    return Container(
+      padding: const EdgeInsets.all(6),
+      decoration: BoxDecoration(
+        color: Colors.white,
+        borderRadius: BorderRadius.circular(10),
+        border: Border.all(color: const Color(0xFFE9E2D7)),
+      ),
+      child: const Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          _ShimmerBlock(height: 112, borderRadius: 8),
+          SizedBox(height: 8),
+          _ShimmerBlock(height: 14, width: 120, borderRadius: 4),
+          SizedBox(height: 6),
+          _ShimmerBlock(height: 14, width: 90, borderRadius: 4),
+          SizedBox(height: 8),
+          Row(
+            children: [
+              _ShimmerCircle(size: 13),
+              SizedBox(width: 5),
+              Expanded(child: _ShimmerBlock(height: 10, borderRadius: 4)),
+              SizedBox(width: 8),
+              _ShimmerBlock(height: 10, width: 42, borderRadius: 4),
+            ],
+          ),
+          Spacer(),
+          _ShimmerBlock(height: 36, borderRadius: 8),
+        ],
+      ),
+    );
+  }
+}
+
+class _Shimmer extends StatefulWidget {
+  const _Shimmer({required this.child});
+
+  final Widget child;
+
+  @override
+  State<_Shimmer> createState() => _ShimmerState();
+}
+
+class _ShimmerState extends State<_Shimmer> with SingleTickerProviderStateMixin {
+  late final AnimationController _controller;
+
+  @override
+  void initState() {
+    super.initState();
+    _controller = AnimationController(
+      vsync: this,
+      duration: const Duration(milliseconds: 1300),
+    )..repeat();
+  }
+
+  @override
+  void dispose() {
+    _controller.dispose();
+    super.dispose();
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return AnimatedBuilder(
+      animation: _controller,
+      child: widget.child,
+      builder: (context, child) {
+        return ShaderMask(
+          shaderCallback: (bounds) {
+            final width = bounds.width == 0 ? 1 : bounds.width;
+            final offset = (_controller.value * 2 * width) - width;
+            return LinearGradient(
+              begin: Alignment.centerLeft,
+              end: Alignment.centerRight,
+              colors: const [Color(0xFFE6E6E6), Color(0xFFF4F4F4), Color(0xFFE6E6E6)],
+              stops: const [0.1, 0.45, 0.9],
+              transform: GradientTranslation(offset, 0),
+            ).createShader(bounds);
+          },
+          blendMode: BlendMode.srcATop,
+          child: child,
+        );
+      },
+    );
+  }
+}
+
+class _ShimmerBlock extends StatelessWidget {
+  const _ShimmerBlock({
+    required this.height,
+    this.width,
+    this.borderRadius = 6,
+  });
+
+  final double height;
+  final double? width;
+  final double borderRadius;
+
+  @override
+  Widget build(BuildContext context) {
+    return _Shimmer(
+      child: Container(
+        width: width,
+        height: height,
+        decoration: BoxDecoration(
+          color: const Color(0xFFEAEAEA),
+          borderRadius: BorderRadius.circular(borderRadius),
+        ),
+      ),
+    );
+  }
+}
+
+class _ShimmerCircle extends StatelessWidget {
+  const _ShimmerCircle({required this.size});
+
+  final double size;
+
+  @override
+  Widget build(BuildContext context) {
+    return _Shimmer(
+      child: Container(
+        width: size,
+        height: size,
+        decoration: const BoxDecoration(
+          color: Color(0xFFEAEAEA),
+          shape: BoxShape.circle,
+        ),
       ),
     );
   }
