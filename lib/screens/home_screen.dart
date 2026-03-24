@@ -4,7 +4,6 @@ import '../core/app_localizations.dart';
 import '../core/app_theme.dart';
 import '../models/app_models.dart';
 import '../widgets/app_drawer.dart';
-import '../widgets/app_shimmer.dart';
 import '../widgets/common_widgets.dart';
 import '../widgets/flow_widgets.dart';
 import 'course_list_screen.dart';
@@ -20,44 +19,6 @@ class HomeScreen extends StatefulWidget {
 class _HomeScreenState extends State<HomeScreen> {
   final _scaffoldKey = GlobalKey<ScaffoldState>();
   int _activeTab = 0;
-  bool _isLoading = true;
-
-  @override
-  void initState() {
-    super.initState();
-    Future<void>.delayed(const Duration(milliseconds: 1200), () {
-      if (!mounted) return;
-      setState(() => _isLoading = false);
-    });
-  }
-
-  void _onBottomTabTap(int index) {
-    if (_activeTab == index) return;
-    setState(() => _activeTab = index);
-
-    if (index == 1) {
-      Navigator.of(context).push(_animatedRoute(
-        CourseListScreen(university: universityCatalog.first),
-      ));
-    }
-  }
-
-  Route _animatedRoute(Widget page) {
-    return PageRouteBuilder(
-      pageBuilder: (_, animation, __) => FadeTransition(
-        opacity: animation,
-        child: page,
-      ),
-      transitionsBuilder: (_, animation, __, child) {
-        final offset = Tween(
-          begin: const Offset(0.08, 0),
-          end: Offset.zero,
-        ).animate(CurvedAnimation(parent: animation, curve: Curves.easeOutCubic));
-        return SlideTransition(position: offset, child: child);
-      },
-      transitionDuration: const Duration(milliseconds: 320),
-    );
-  }
 
   @override
   Widget build(BuildContext context) {
@@ -172,7 +133,7 @@ class _HomeScreenState extends State<HomeScreen> {
                             const SizedBox(height: 12),
 
                             GridView.builder(
-                              itemCount: _isLoading ? 6 : universityCatalog.length,
+                              itemCount: universityCatalog.length,
                               shrinkWrap: true,
                               physics: const NeverScrollableScrollPhysics(),
                               gridDelegate:
@@ -183,9 +144,6 @@ class _HomeScreenState extends State<HomeScreen> {
                                     childAspectRatio: 0.8,
                                   ),
                               itemBuilder: (context, index) {
-                                if (_isLoading) {
-                                  return const UniversityCardSkeleton();
-                                }
                                 final item = universityCatalog[index];
                                 return _UniversityCard(
                                   data: item,
@@ -206,7 +164,19 @@ class _HomeScreenState extends State<HomeScreen> {
 
                   BottomTabBarCard(
                     activeIndex: _activeTab,
-                    onTap: _onBottomTabTap,
+                    onTap: (index) {
+                      setState(() => _activeTab = index);
+
+                      if (index == 1) {
+                        Navigator.of(context).push(
+                          MaterialPageRoute(
+                            builder: (_) => CourseListScreen(
+                              university: universityCatalog.first,
+                            ),
+                          ),
+                        );
+                      }
+                    },
                   ),
                 ],
               ),
@@ -309,77 +279,71 @@ class _UniversityCard extends StatelessWidget {
         crossAxisAlignment: CrossAxisAlignment.start,
         mainAxisAlignment: MainAxisAlignment.spaceBetween,
         children: [
-          Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
+          Expanded(
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
               /// IMAGE
-              ClipRRect(
-                borderRadius: BorderRadius.circular(10),
-                child: SizedBox(
-                  height: 96,
+                Container(
+                  height: 84,
                   width: double.infinity,
-                  child: Image.network(
-                    data.heroImage,
-                    fit: BoxFit.cover,
-                    loadingBuilder: (context, child, loadingProgress) {
-                      if (loadingProgress == null) return child;
-                      return AppShimmerBox(
-                        borderRadius: BorderRadius.circular(10),
-                        baseColor: const Color(0xFFE9E6E0),
-                        highlightColor: Colors.white,
-                      );
-                    },
-                    errorBuilder: (context, error, stackTrace) {
-                      return Container(
-                        color: const Color(0xFFF5F5F5),
-                        alignment: Alignment.center,
-                        child: Text(
-                          data.shortCode,
-                          style: TextStyle(
-                            color: data.color,
-                            fontSize: 24,
-                            fontWeight: FontWeight.w900,
-                          ),
-                        ),
-                      );
-                    },
+                  decoration: BoxDecoration(
+                    color: const Color(0xFFF5F5F5),
+                    borderRadius: BorderRadius.circular(8),
                   ),
-                ),
-              ),
-
-              const SizedBox(height: 10),
-
-              /// NAME
-              Text(
-                data.name,
-                maxLines: 2,
-                overflow: TextOverflow.ellipsis,
-                style: const TextStyle(fontWeight: FontWeight.w700),
-              ),
-
-              const SizedBox(height: 6),
-
-              /// LOCATION + RATING
-              Row(
-                children: [
-                  const Icon(Icons.location_on_outlined, size: 14),
-                  Expanded(
+                  child: Center(
                     child: Text(
-                      data.location,
-                      style: const TextStyle(fontSize: 11),
+                      data.shortCode,
+                      style: TextStyle(
+                        color: data.color,
+                        fontSize: 24,
+                        fontWeight: FontWeight.w900,
+                      ),
                     ),
                   ),
-                  const Icon(Icons.star, size: 14),
-                  const Text("4.6"),
-                ],
-              ),
-            ],
-          ),
+                ),
 
-          /// BUTTON
-          AppPrimaryButton(
-            label: context.l10n.text('viewDetails'),
-            onPressed: onTap,
+                const SizedBox(height: 10),
+
+                /// NAME
+                Text(
+                  data.name,
+                  maxLines: 2,
+                  overflow: TextOverflow.ellipsis,
+                  style: const TextStyle(fontWeight: FontWeight.w700),
+                ),
+
+                const SizedBox(height: 6),
+
+                /// LOCATION + RATING
+                Expanded(
+                  child: Row(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      const Icon(Icons.location_on_outlined, size: 14),
+                      Expanded(
+                        child: Text(
+                          data.location,
+                          maxLines: 2,
+                          overflow: TextOverflow.ellipsis,
+                          style: const TextStyle(fontSize: 11),
+                        ),
+                      ),
+                      const Icon(Icons.star, size: 14),
+                      const Text("4.6"),
+                    ),
+                  ),
+                ),
+              ],
+            ),
+          ),
+          const SizedBox(height: 8),
+          SizedBox(
+            width: double.infinity,
+            child: AppPrimaryButton(
+              label: context.l10n.text('viewDetails'),
+              onPressed: onTap,
+            ),
           ),
         ],
       ),
