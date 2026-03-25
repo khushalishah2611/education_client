@@ -10,7 +10,7 @@ class TermsConditionsScreen extends StatelessWidget {
   Widget build(BuildContext context) {
     return SideMenuScaffold(
       title: context.l10n.text('termsAndConditions'),
-      child: const ListView(
+      child:  ListView(
         children: [
           SectionCard(
             title: 'Use of the App',
