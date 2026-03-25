@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 
+import '../core/app_localizations.dart';
 import '../core/app_theme.dart';
 import '../models/app_models.dart';
 import '../widgets/common_widgets.dart';
@@ -19,7 +20,7 @@ class PaymentConfirmationScreen extends StatelessWidget {
         child: AppPageEntrance(
           child: Column(
             children: [
-            const FlowStepHeader(currentStep: 3, title: 'Payment Confirmation'),
+            FlowStepHeader(currentStep: 3, title: context.l10n.text('paymentConfirmation')),
             Expanded(
               child: ListView(
                 padding: const EdgeInsets.fromLTRB(20, 18, 20, 20),
@@ -32,13 +33,13 @@ class PaymentConfirmationScreen extends StatelessWidget {
                     child: Icon(Icons.check_rounded, size: 54, color: Colors.white),
                   ),
                   const SizedBox(height: 16),
-                  const Text('Application Submitted', textAlign: TextAlign.center, style: TextStyle(fontSize: 20, fontWeight: FontWeight.w700, color: Color(0xFF0E9F58))),
+                  Text(context.l10n.text('applicationSubmitted'), textAlign: TextAlign.center, style: const TextStyle(fontSize: 20, fontWeight: FontWeight.w700, color: Color(0xFF0E9F58))),
                   const SizedBox(height: 10),
                   Container(
                     margin: const EdgeInsets.symmetric(horizontal: 70),
                     padding: const EdgeInsets.symmetric(vertical: 10),
                     decoration: BoxDecoration(color: const Color(0xFFE9F4E6), borderRadius: BorderRadius.circular(8)),
-                    child: const Text('Application ID : #12345', textAlign: TextAlign.center),
+                    child: Text(context.l10n.text('applicationIdValue'), textAlign: TextAlign.center),
                   ),
                   const SizedBox(height: 18),
                   ClipRRect(
@@ -53,19 +54,19 @@ class PaymentConfirmationScreen extends StatelessWidget {
                   ),
                   const SizedBox(height: 12),
                   Text(
-                    'Your payment of ₹1,500.00 for the Fall 2026 ${course.title} program has been processed. Your application is now in the review queue.',
+                    '${context.l10n.text('paymentProcessedPrefix')} ${course.title} ${context.l10n.text('paymentProcessedSuffix')}',
                     textAlign: TextAlign.center,
                     style: const TextStyle(fontSize: 15, color: AppColors.textMuted, height: 1.45),
                   ),
                   const SizedBox(height: 96),
                   AppPrimaryButton(
-                    label: 'Track Application',
+                    label: context.l10n.text('trackApplication'),
                     onPressed: () => Navigator.of(context).push(
                       MaterialPageRoute(builder: (_) => TrackApplicationScreen(university: university, course: course)),
                     ),
                   ),
                   const SizedBox(height: 12),
-                  AppOutlinedButton(label: 'Download Receipt', onPressed: () {}),
+                  AppOutlinedButton(label: context.l10n.text('downloadReceipt'), onPressed: () {}),
                 ],
               ),
             ),

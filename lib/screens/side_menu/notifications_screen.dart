@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 
+import '../../core/app_localizations.dart';
 import '../../core/app_theme.dart';
 import 'side_menu_common.dart';
 
@@ -8,24 +9,24 @@ class NotificationsScreen extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    const todayItems = [
-      NotificationItemData('Documents approved successfully'),
-      NotificationItemData('Reminder: Application deadline is approaching'),
+    final todayItems = [
+      NotificationItemData(context.l10n.text('documentsApprovedSuccessfully')),
+      NotificationItemData(context.l10n.text('applicationDeadlineReminder')),
     ];
 
-    const yesterdayItems = [
-      NotificationItemData('Documents approved successfully'),
-      NotificationItemData('Reminder: Application deadline is approaching'),
-      NotificationItemData('Reminder: Application deadline is approaching'),
+    final yesterdayItems = [
+      NotificationItemData(context.l10n.text('documentsApprovedSuccessfully')),
+      NotificationItemData(context.l10n.text('applicationDeadlineReminder')),
+      NotificationItemData(context.l10n.text('applicationDeadlineReminder')),
     ];
 
     return SideMenuScaffold(
-      title: 'Notifications',
+      title: context.l10n.text('notifications'),
       child: ListView(
-        children: const [
-          NotificationSection(title: 'Today', items: todayItems),
-          SizedBox(height: 10),
-          NotificationSection(title: 'Yesterday', items: yesterdayItems),
+        children: [
+          NotificationSection(title: context.l10n.text('today'), items: todayItems),
+          const SizedBox(height: 10),
+          NotificationSection(title: context.l10n.text('yesterday'), items: yesterdayItems),
         ],
       ),
     );
@@ -105,16 +106,16 @@ class NotificationCard extends StatelessWidget {
         children: [
           Text(title, style: const TextStyle(fontSize: 14, fontWeight: FontWeight.w700)),
           const SizedBox(height: 4),
-          const Text(
-            'Short description explaining the notification details\nin a compact way...',
-            style: TextStyle(fontSize: 12, color: AppColors.textMuted),
+          Text(
+            context.l10n.text('notificationDescription'),
+            style: const TextStyle(fontSize: 12, color: AppColors.textMuted),
           ),
           const SizedBox(height: 10),
-          const Row(
+          Row(
             children: [
-              Text('10:00 PM', style: TextStyle(fontSize: 12, color: AppColors.textMuted)),
-              Spacer(),
-              Text('03 Mar 2026', style: TextStyle(fontSize: 12, color: AppColors.textMuted)),
+              Text(context.l10n.text('notificationTime'), style: const TextStyle(fontSize: 12, color: AppColors.textMuted)),
+              const Spacer(),
+              Text(context.l10n.text('notificationDate'), style: const TextStyle(fontSize: 12, color: AppColors.textMuted)),
             ],
           ),
         ],

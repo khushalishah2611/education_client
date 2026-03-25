@@ -1,6 +1,7 @@
 import 'package:file_picker/file_picker.dart';
 import 'package:flutter/material.dart';
 
+import '../core/app_localizations.dart';
 import '../core/app_theme.dart';
 import '../models/app_models.dart';
 import '../widgets/common_widgets.dart';
@@ -22,16 +23,14 @@ class UploadDocumentsScreen extends StatefulWidget {
 }
 
 class _UploadDocumentsScreenState extends State<UploadDocumentsScreen> {
-  final List<({String title, String subtitle})> _docs = const [
-    (title: 'Passport', subtitle: 'Valid for at least 6 months'),
-    (title: 'Statement of Purpose (SOP)', subtitle: 'Words about your goals'),
-    (title: 'LOR', subtitle: 'From 2 different academic reference'),
-    (title: 'Resume / CV', subtitle: 'Latest professional experience'),
-  ];
+  late final Map<String, PlatformFile?> _selectedFiles = {};
 
-  late final Map<String, PlatformFile?> _selectedFiles = {
-    for (final doc in _docs) doc.title: null,
-  };
+  List<({String title, String subtitle})> _docs(BuildContext context) => [
+    (title: context.l10n.text('docPassport'), subtitle: context.l10n.text('docPassportSubtitle')),
+    (title: context.l10n.text('docSop'), subtitle: context.l10n.text('docSopSubtitle')),
+    (title: context.l10n.text('docLor'), subtitle: context.l10n.text('docLorSubtitle')),
+    (title: context.l10n.text('docResume'), subtitle: context.l10n.text('docResumeSubtitle')),
+  ];
 
   Future<void> _pickDocument(String docTitle) async {
     final result = await FilePicker.platform.pickFiles(
@@ -54,7 +53,7 @@ class _UploadDocumentsScreenState extends State<UploadDocumentsScreen> {
   void _onContinue() {
     if (!_allDocumentsSelected) {
       ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text('Please upload all required documents.')),
+        SnackBar(content: Text(context.l10n.text('uploadAllRequiredDocs'))),
       );
       return;
     }
@@ -71,30 +70,36 @@ class _UploadDocumentsScreenState extends State<UploadDocumentsScreen> {
 
   @override
   Widget build(BuildContext context) {
+    final docs = _docs(context);
+    if (_selectedFiles.isEmpty) {
+      for (final doc in docs) {
+        _selectedFiles[doc.title] = null;
+      }
+    }
     return Scaffold(
       body: AppBackground(
         child: AppPageEntrance(
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              const FlowStepHeader(currentStep: 0, title: 'Upload Documents'),
+              FlowStepHeader(currentStep: 0, title: context.l10n.text('uploadDocuments')),
               Expanded(
                 child: ListView(
                   padding: const EdgeInsets.fromLTRB(20, 20, 20, 20),
                   children: [
-                    const Text(
-                      'Required Documents',
-                      style: TextStyle(fontSize: 18, fontWeight: FontWeight.w700),
+                    Text(
+                      context.l10n.text('requiredDocuments'),
+                      style: const TextStyle(fontSize: 18, fontWeight: FontWeight.w700),
                     ),
                     const SizedBox(height: 14),
                     _UploadDropZone(
-                      title: _docs.first.title,
-                      subtitle: _docs.first.subtitle,
-                      selectedFileName: _selectedFiles[_docs.first.title]?.name,
-                      onTap: () => _pickDocument(_docs.first.title),
+                      title: docs.first.title,
+                      subtitle: docs.first.subtitle,
+                      selectedFileName: _selectedFiles[docs.first.title]?.name,
+                      onTap: () => _pickDocument(docs.first.title),
                     ),
                     const SizedBox(height: 10),
-                    ..._docs.skip(1).map(
+                    ...docs.skip(1).map(
                       (doc) => Padding(
                         padding: const EdgeInsets.only(bottom: 10),
                         child: _UploadListTile(
@@ -107,7 +112,7 @@ class _UploadDocumentsScreenState extends State<UploadDocumentsScreen> {
                     ),
                     const SizedBox(height: 18),
                     AppPrimaryButton(
-                      label: 'Save & Continue',
+                      label: context.l10n.text('saveContinue'),
                       onPressed: _onContinue,
                     ),
                   ],
@@ -179,9 +184,9 @@ class _UploadDropZone extends StatelessWidget {
               color: Color(0xFFB8B8B8),
             ),
             const SizedBox(height: 10),
-            const Text.rich(
+            Text.rich(
               TextSpan(
-                text: 'Tap to Browse ',
+                text: context.l10n.text('tapToBrowse'),
                 style: TextStyle(
                   fontSize: 16,
                   fontWeight: FontWeight.w600,
@@ -189,7 +194,7 @@ class _UploadDropZone extends StatelessWidget {
                 ),
                 children: [
                   TextSpan(
-                    text: 'PDF / JPG / PNG',
+                    text: context.l10n.text('uploadFormats'),
                     style: TextStyle(color: AppColors.accent),
                   ),
                 ],
@@ -198,8 +203,8 @@ class _UploadDropZone extends StatelessWidget {
             const SizedBox(height: 6),
             Text(
               selectedFileName == null
-                  ? 'Supported: PDF, JPG, PNG'
-                  : 'Selected: $selectedFileName',
+                  ? '${context.l10n.text('supportedPrefix')}${context.l10n.text('uploadFormats')}'
+                  : '${context.l10n.text('selectedPrefix')}$selectedFileName',
               style: TextStyle(
                 color: selectedFileName == null
                     ? AppColors.textMuted

@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 
+import '../core/app_localizations.dart';
 import '../core/app_theme.dart';
 import '../models/app_models.dart';
 import '../widgets/common_widgets.dart';
@@ -27,47 +28,47 @@ class _PaymentScreenState extends State<PaymentScreen> {
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-            const FlowStepHeader(currentStep: 2, title: 'Payment'),
+            FlowStepHeader(currentStep: 2, title: context.l10n.text('payment')),
             Expanded(
               child: ListView(
                 padding: const EdgeInsets.fromLTRB(20, 20, 20, 20),
                 children: [
-                  const Text('Application Fee Summary', style: TextStyle(fontSize: 18, fontWeight: FontWeight.w700)),
+                  Text(context.l10n.text('applicationFeeSummary'), style: const TextStyle(fontSize: 18, fontWeight: FontWeight.w700)),
                   const SizedBox(height: 12),
                   Container(
                     padding: const EdgeInsets.all(12),
                     decoration: BoxDecoration(color: Colors.white, borderRadius: BorderRadius.circular(10), border: Border.all(color: const Color(0xFFE8E2D9))),
-                    child: const Column(
+                    child: Column(
                       children: [
                         Row(
                           children: [
-                            Text('Application Fee', style: TextStyle(color: AppColors.textMuted)),
-                            Spacer(),
-                            Text('₹1,500.00', style: TextStyle(fontWeight: FontWeight.w700)),
+                            Text(context.l10n.text('applicationFee'), style: const TextStyle(color: AppColors.textMuted)),
+                            const Spacer(),
+                            Text(context.l10n.text('feeAmount'), style: const TextStyle(fontWeight: FontWeight.w700)),
                           ],
                         ),
-                        Divider(height: 24),
+                        const Divider(height: 24),
                         Row(
                           children: [
-                            Text('Total Amount', style: TextStyle(fontWeight: FontWeight.w700)),
-                            Spacer(),
-                            Text('₹1,500.00', style: TextStyle(fontSize: 18, fontWeight: FontWeight.w700, color: AppColors.accent)),
+                            Text(context.l10n.text('totalAmount'), style: const TextStyle(fontWeight: FontWeight.w700)),
+                            const Spacer(),
+                            Text(context.l10n.text('feeAmount'), style: const TextStyle(fontSize: 18, fontWeight: FontWeight.w700, color: AppColors.accent)),
                           ],
                         ),
                       ],
                     ),
                   ),
                   const SizedBox(height: 18),
-                  const Text('Payment Method', style: TextStyle(fontSize: 18, fontWeight: FontWeight.w700)),
+                  Text(context.l10n.text('paymentMethod'), style: const TextStyle(fontSize: 18, fontWeight: FontWeight.w700)),
                   const SizedBox(height: 12),
-                  _PaymentMethodTile(label: 'Credit Card', iconText: 'VISA', selected: selected == 0, onTap: () => setState(() => selected = 0)),
+                  _PaymentMethodTile(label: context.l10n.text('creditCard'), iconText: 'VISA', selected: selected == 0, onTap: () => setState(() => selected = 0)),
                   const SizedBox(height: 10),
-                  _PaymentMethodTile(label: 'UPI Pay', iconText: 'UPI', selected: selected == 1, onTap: () => setState(() => selected = 1)),
+                  _PaymentMethodTile(label: context.l10n.text('upiPay'), iconText: 'UPI', selected: selected == 1, onTap: () => setState(() => selected = 1)),
                   const SizedBox(height: 10),
-                  _PaymentMethodTile(label: 'Net Banking', iconText: 'BANK', selected: selected == 2, onTap: () => setState(() => selected = 2)),
+                  _PaymentMethodTile(label: context.l10n.text('netBanking'), iconText: 'BANK', selected: selected == 2, onTap: () => setState(() => selected = 2)),
                   const SizedBox(height: 30),
                   AppPrimaryButton(
-                    label: 'Pay Now',
+                    label: context.l10n.text('payNow'),
                     onPressed: () => Navigator.of(context).push(
                       MaterialPageRoute(builder: (_) => PaymentConfirmationScreen(university: widget.university, course: widget.course)),
                     ),
