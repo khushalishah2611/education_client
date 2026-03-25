@@ -9,7 +9,7 @@ class EmergencyContactScreen extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return const SideMenuScaffold(
-      title: 'جهة اتصال الطوارئ',
+      title: 'Emergency Contact',
       child: EmergencyContactCard(),
     );
   }
@@ -29,13 +29,13 @@ class EmergencyContactCard extends StatelessWidget {
       ),
       child: const Column(
         children: [
-          ContactInfoField(label: 'اسم ولي الأمر', value: 'Abhishek Verma', icon: Icons.person_outline_rounded),
+          ContactInfoField(label: 'Guardian Name', value: 'Abhishek Verma', icon: Icons.person_outline_rounded),
           Divider(height: 1, color: Color(0xFFE4E2E0)),
-          ContactInfoField(label: 'صلة القرابة', value: 'الأخ', icon: Icons.person_outline_rounded),
+          ContactInfoField(label: 'Relationship', value: 'Brother', icon: Icons.person_outline_rounded),
           Divider(height: 1, color: Color(0xFFE4E2E0)),
-          ContactInfoField(label: 'رقم الموبايل', value: '+91 89788 54588', icon: Icons.call_outlined),
+          ContactInfoField(label: 'Mobile Number', value: '+91 89788 54588', icon: Icons.call_outlined),
           Divider(height: 1, color: Color(0xFFE4E2E0)),
-          ContactInfoField(label: 'البريد الإلكتروني', value: 'theabc@gmail.com', icon: Icons.mail_outline_rounded),
+          ContactInfoField(label: 'Email Address', value: 'theabc@gmail.com', icon: Icons.mail_outline_rounded),
         ],
       ),
     );

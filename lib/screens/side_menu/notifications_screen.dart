@@ -9,23 +9,23 @@ class NotificationsScreen extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     const todayItems = [
-      NotificationItemData('تمت الموافقة على المستندات'),
-      NotificationItemData('تذكير بموعد نهائي للتقديم'),
+      NotificationItemData('Documents approved successfully'),
+      NotificationItemData('Reminder: Application deadline is approaching'),
     ];
 
     const yesterdayItems = [
-      NotificationItemData('تمت الموافقة على المستندات'),
-      NotificationItemData('تذكير بموعد نهائي للتقديم'),
-      NotificationItemData('تذكير بموعد نهائي للتقديم'),
+      NotificationItemData('Documents approved successfully'),
+      NotificationItemData('Reminder: Application deadline is approaching'),
+      NotificationItemData('Reminder: Application deadline is approaching'),
     ];
 
     return SideMenuScaffold(
-      title: 'الإشعارات',
+      title: 'Notifications',
       child: ListView(
         children: const [
-          NotificationSection(title: 'اليوم', items: todayItems),
+          NotificationSection(title: 'Today', items: todayItems),
           SizedBox(height: 10),
-          NotificationSection(title: 'الأمس', items: yesterdayItems),
+          NotificationSection(title: 'Yesterday', items: yesterdayItems),
         ],
       ),
     );
@@ -51,7 +51,7 @@ class NotificationSection extends StatelessWidget {
           return Padding(
             padding: const EdgeInsets.only(bottom: 8),
             child: Row(
-              crossAxisAlignment: CrossAxisAlignment.stretch,
+              crossAxisAlignment: CrossAxisAlignment.start,
               children: [
                 SizedBox(
                   width: 16,
@@ -66,7 +66,12 @@ class NotificationSection extends StatelessWidget {
                         ),
                       ),
                       if (!isLast)
-                        Expanded(child: Container(width: 1, color: const Color(0xFFCAC2B8))),
+                        Container(
+                          width: 1,
+                          height: 60,
+                          margin: const EdgeInsets.only(top: 4),
+                          color: const Color(0xFFCAC2B8),
+                        ),
                     ],
                   ),
                 ),
@@ -98,10 +103,10 @@ class NotificationCard extends StatelessWidget {
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          Text(title, style: TextStyle(fontSize: 14, fontWeight: FontWeight.w700)),
+          Text(title, style: const TextStyle(fontSize: 14, fontWeight: FontWeight.w700)),
           const SizedBox(height: 4),
-          Text(
-            'نص توضيحي قصير يشرح تفاصيل الإشعار\nبشكل مختصر...',
+          const Text(
+            'Short description explaining the notification details\nin a compact way...',
             style: TextStyle(fontSize: 12, color: AppColors.textMuted),
           ),
           const SizedBox(height: 10),
@@ -109,7 +114,7 @@ class NotificationCard extends StatelessWidget {
             children: [
               Text('10:00 PM', style: TextStyle(fontSize: 12, color: AppColors.textMuted)),
               Spacer(),
-              Text('03 مارس 2026', style: TextStyle(fontSize: 12, color: AppColors.textMuted)),
+              Text('03 Mar 2026', style: TextStyle(fontSize: 12, color: AppColors.textMuted)),
             ],
           ),
         ],
