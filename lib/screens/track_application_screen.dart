@@ -2,7 +2,6 @@ import 'package:flutter/material.dart';
 
 import '../core/app_theme.dart';
 import '../models/app_models.dart';
-import '../widgets/common_widgets.dart';
 import '../widgets/flow_widgets.dart';
 import 'home_screen.dart';
 
@@ -14,135 +13,121 @@ class TrackApplicationScreen extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final applications = [
+      _ApplicationCardData(universityName: university.name, courseName: course.title, shortCode: _extractCode(university.name), appId: '#12345'),
+      const _ApplicationCardData(universityName: 'Al-Ahliyya Amman University', courseName: 'Bachelor of Computer Science', shortCode: 'AAU', appId: '#12345'),
+      const _ApplicationCardData(universityName: 'Beirut Arab University', courseName: 'Bachelor of Computer Science', shortCode: 'BAU', appId: '#12345'),
+    ];
+
     return Scaffold(
-      body: AppBackground(
-        child: AppPageEntrance(
-          child: Column(
-            children: [
+      backgroundColor: const Color(0xFFF4EFE8),
+      body: SafeArea(
+        child: Column(
+          children: [
             TopRoundedHeader(
-              title: 'Track Application',
+              title: 'Track My Applications',
               onBack: () => Navigator.of(context).pushAndRemoveUntil(
                 MaterialPageRoute(builder: (_) => const HomeScreen()),
                 (route) => false,
               ),
             ),
             Expanded(
-              child: ListView(
-                padding: const EdgeInsets.fromLTRB(20, 18, 20, 20),
-                children: [
-                  Container(
-                    padding: const EdgeInsets.all(12),
-                    decoration: BoxDecoration(color: Colors.white, borderRadius: BorderRadius.circular(10), border: Border.all(color: const Color(0xFFE8E2D9))),
-                    child: Column(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: [
-                        const Text('Application ID : #12345', style: TextStyle(fontSize: 11)),
-                        const SizedBox(height: 10),
-                        Text(university.name, style: const TextStyle(fontSize: 18, fontWeight: FontWeight.w700)),
-                        const SizedBox(height: 6),
-                        Row(
-                          children: [
-                            const Icon(Icons.school_outlined, size: 18),
-                            const SizedBox(width: 6),
-                            Text(course.title, style: const TextStyle(fontSize: 16, fontWeight: FontWeight.w600)),
-                          ],
-                        ),
-                        const SizedBox(height: 14),
-                        ClipRRect(
-                          borderRadius: BorderRadius.circular(10),
-                          child: Image.network(
-                            university.heroImage,
-                            height: 150,
-                            width: double.infinity,
-                            fit: BoxFit.cover,
-                            errorBuilder: (_, __, ___) => Container(height: 150, color: const Color(0xFFE2E2E2)),
-                          ),
-                        ),
-                        const SizedBox(height: 14),
-                        const Text('Application Progress', style: TextStyle(fontSize: 18, fontWeight: FontWeight.w700)),
-                        const SizedBox(height: 18),
-                        const _ProgressStep(title: 'Submitted', subtitle: 'Completed on Feb 13', state: _StepState.done, showLine: true),
-                        const _ProgressStep(title: 'Under Review', subtitle: 'Our admission team is reviewing your profile', state: _StepState.done, showLine: true),
-                        const _ProgressStep(title: 'Documents Verified', subtitle: 'Pending review', state: _StepState.active, showLine: true),
-                        const _ProgressStep(title: 'Accepted/Rejected', subtitle: 'Waiting for decision', state: _StepState.pending, showLine: false),
-                      ],
-                    ),
-                  ),
-                ],
+              child: AppPageEntrance(
+                child: ListView.separated(
+                  padding: const EdgeInsets.fromLTRB(14, 16, 14, 20),
+                  itemBuilder: (_, index) => _TrackApplicationCard(data: applications[index]),
+                  separatorBuilder: (_, __) => const SizedBox(height: 8),
+                  itemCount: applications.length,
+                ),
               ),
             ),
+          ],
+        ),
+      ),
+    );
+  }
+
+  String _extractCode(String name) {
+    final words = name.trim().split(RegExp(r'\s+'));
+    if (words.isEmpty) return 'UNI';
+    if (words.length == 1) return words.first.characters.take(3).toString().toUpperCase();
+    return words.take(3).map((word) => word.characters.first.toUpperCase()).join();
+  }
+}
+
+class _TrackApplicationCard extends StatelessWidget {
+  const _TrackApplicationCard({required this.data});
+
+  final _ApplicationCardData data;
+
+  @override
+  Widget build(BuildContext context) {
+    return Container(
+      padding: const EdgeInsets.all(12),
+      decoration: BoxDecoration(
+        color: Colors.white,
+        borderRadius: BorderRadius.circular(8),
+        border: Border.all(color: const Color(0xFFE0DDD8)),
+      ),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Text('Application ID : ${data.appId}', style: const TextStyle(fontSize: 14, fontWeight: FontWeight.w500)),
+          const SizedBox(height: 10),
+          Row(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Container(
+                width: 54,
+                height: 54,
+                alignment: Alignment.center,
+                decoration: BoxDecoration(color: const Color(0xFFF5F5F5), borderRadius: BorderRadius.circular(8)),
+                child: Text(data.shortCode, style: const TextStyle(fontWeight: FontWeight.w800, color: AppColors.textMuted)),
+              ),
+              const SizedBox(width: 10),
+              Expanded(
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Text(data.universityName, style: const TextStyle(fontSize: 25 / 1.5, fontWeight: FontWeight.w700), maxLines: 2, overflow: TextOverflow.ellipsis),
+                    const SizedBox(height: 2),
+                    Text(data.courseName, style: const TextStyle(fontSize: 23 / 1.5, color: AppColors.textMuted), maxLines: 2, overflow: TextOverflow.ellipsis),
+                  ],
+                ),
+              ),
             ],
           ),
-        ),
+          const SizedBox(height: 12),
+          const Divider(height: 1, color: Color(0xFFE0DDD8)),
+          const SizedBox(height: 10),
+          Row(
+            children: [
+              const Text('Application Progress', style: TextStyle(fontSize: 16, fontWeight: FontWeight.w700)),
+              const Spacer(),
+              Container(
+                width: 18,
+                height: 18,
+                decoration: const BoxDecoration(color: Color(0xFFF1F1F1), shape: BoxShape.circle),
+                child: const Icon(Icons.keyboard_arrow_down_rounded, size: 16),
+              ),
+            ],
+          ),
+        ],
       ),
     );
   }
 }
 
-enum _StepState { done, active, pending }
-
-class _ProgressStep extends StatelessWidget {
-  const _ProgressStep({
-    required this.title,
-    required this.subtitle,
-    required this.state,
-    required this.showLine,
+class _ApplicationCardData {
+  const _ApplicationCardData({
+    required this.universityName,
+    required this.courseName,
+    required this.shortCode,
+    required this.appId,
   });
 
-  final String title;
-  final String subtitle;
-  final _StepState state;
-  final bool showLine;
-
-  @override
-  Widget build(BuildContext context) {
-    final color = switch (state) {
-      _StepState.done => const Color(0xFF0E9F58),
-      _StepState.active => AppColors.accent,
-      _StepState.pending => const Color(0xFF777777),
-    };
-
-    return Row(
-      crossAxisAlignment: CrossAxisAlignment.start,
-      children: [
-        SizedBox(
-          width: 24,
-          child: Column(
-            children: [
-              Container(
-                width: 24,
-                height: 24,
-                decoration: BoxDecoration(
-                  color: state == _StepState.active ? Colors.white : color,
-                  shape: BoxShape.circle,
-                  border: Border.all(color: color, width: 3),
-                ),
-                child: state == _StepState.done ? const Icon(Icons.check, size: 16, color: Colors.white) : null,
-              ),
-              if (showLine)
-                Container(
-                  width: 2,
-                  height: 42,
-                  color: state == _StepState.pending ? const Color(0xFFD7D7D7) : const Color(0xFF0E9F58),
-                ),
-            ],
-          ),
-        ),
-        const SizedBox(width: 10),
-        Expanded(
-          child: Padding(
-            padding: const EdgeInsets.only(top: 1),
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                Text(title, style: TextStyle(fontSize: 16, fontWeight: FontWeight.w700, color: state == _StepState.pending ? const Color(0xFF777777) : AppColors.text)),
-                const SizedBox(height: 4),
-                Text(subtitle, style: const TextStyle(color: AppColors.textMuted)),
-              ],
-            ),
-          ),
-        ),
-      ],
-    );
-  }
+  final String universityName;
+  final String courseName;
+  final String shortCode;
+  final String appId;
 }
