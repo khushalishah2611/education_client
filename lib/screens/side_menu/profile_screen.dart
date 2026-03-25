@@ -1,6 +1,9 @@
+import 'package:education/core/app_localizations.dart';
+import 'package:education/screens/home_screen.dart';
 import 'package:flutter/material.dart';
 
 import '../../core/app_theme.dart';
+import '../../widgets/common_widgets.dart' show AppPrimaryButton;
 import 'side_menu_common.dart';
 
 class ProfileScreen extends StatelessWidget {
@@ -263,18 +266,10 @@ class SaveButton extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return SizedBox(
-      height: 58,
-      child: ElevatedButton(
-        onPressed: () {},
-        style: ElevatedButton.styleFrom(
-          backgroundColor: AppColors.primary,
-          foregroundColor: AppColors.text,
-          elevation: 0,
-          shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
-        ),
-        child: const Text('Save', style: TextStyle(fontSize: 16, fontWeight: FontWeight.w800)),
-      ),
-    );
+    return   AppPrimaryButton(
+      label: context.l10n.text('save'),
+      onPressed: () => Navigator.of(context).push(
+        MaterialPageRoute(builder: (_) => const HomeScreen()),
+      ));
   }
 }
