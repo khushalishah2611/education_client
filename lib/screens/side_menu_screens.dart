@@ -29,7 +29,10 @@ class UploadedDocumentsScreen extends StatelessWidget {
             leading: Icons.picture_as_pdf_outlined,
             title: doc.$1,
             subtitle: doc.$2,
-            trailing: const Icon(Icons.chevron_right_rounded, color: AppColors.textMuted),
+            trailing: const Icon(
+              Icons.cancel_outlined,
+              color: AppColors.textMuted,
+            ),
           );
         },
       ),
@@ -67,12 +70,18 @@ class PaymentsScreen extends StatelessWidget {
                 Expanded(
                   child: Text(
                     '${item.$1}   •   ${item.$2}',
-                    style: const TextStyle(fontSize: 12, color: AppColors.textMuted),
+                    style: const TextStyle(
+                      fontSize: 12,
+                      color: AppColors.textMuted,
+                    ),
                   ),
                 ),
                 Text(
                   item.$3,
-                  style: const TextStyle(color: AppColors.accent, fontWeight: FontWeight.w700),
+                  style: const TextStyle(
+                    color: AppColors.accent,
+                    fontWeight: FontWeight.w700,
+                  ),
                 ),
               ],
             ),
@@ -89,10 +98,26 @@ class NotificationsScreen extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     const notifications = [
-      ('Document Approved', 'Your document is approved and ready for the next process.', 'March 13, 2026'),
-      ('Application Deadline Reminder', 'Your last date to submit this form is next week.', 'March 11, 2026'),
-      ('Application Deadline Extended', 'Your application deadline has been extended.', 'March 10, 2026'),
-      ('Document Approved', 'Your document is approved and ready for the next process.', 'March 09, 2026'),
+      (
+        'Document Approved',
+        'Your document is approved and ready for the next process.',
+        'March 13, 2026',
+      ),
+      (
+        'Application Deadline Reminder',
+        'Your last date to submit this form is next week.',
+        'March 11, 2026',
+      ),
+      (
+        'Application Deadline Extended',
+        'Your application deadline has been extended.',
+        'March 10, 2026',
+      ),
+      (
+        'Document Approved',
+        'Your document is approved and ready for the next process.',
+        'March 09, 2026',
+      ),
     ];
 
     return _SideMenuScaffold(
@@ -112,13 +137,31 @@ class NotificationsScreen extends StatelessWidget {
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                Text(item.$1, style: const TextStyle(fontSize: 13, fontWeight: FontWeight.w700)),
+                Text(
+                  item.$1,
+                  style: const TextStyle(
+                    fontSize: 13,
+                    fontWeight: FontWeight.w700,
+                  ),
+                ),
                 const SizedBox(height: 4),
-                Text(item.$2, style: const TextStyle(fontSize: 11, color: AppColors.textMuted)),
+                Text(
+                  item.$2,
+                  style: const TextStyle(
+                    fontSize: 11,
+                    color: AppColors.textMuted,
+                  ),
+                ),
                 const SizedBox(height: 6),
                 Align(
                   alignment: Alignment.centerRight,
-                  child: Text(item.$3, style: const TextStyle(fontSize: 10, color: AppColors.textMuted)),
+                  child: Text(
+                    item.$3,
+                    style: const TextStyle(
+                      fontSize: 10,
+                      color: AppColors.textMuted,
+                    ),
+                  ),
                 ),
               ],
             ),
@@ -163,15 +206,17 @@ class ChangeLanguageScreen extends StatelessWidget {
           _LanguageTile(
             label: 'English',
             selected: context.l10n.textDirection == TextDirection.ltr,
-            onTap: () =>
-                AppLocalizationScope.of(context).changeLanguage(const Locale('en')),
+            onTap: () => AppLocalizationScope.of(
+              context,
+            ).changeLanguage(const Locale('en')),
           ),
           const SizedBox(height: 8),
           _LanguageTile(
             label: 'العربية',
             selected: context.l10n.textDirection == TextDirection.rtl,
-            onTap: () =>
-                AppLocalizationScope.of(context).changeLanguage(const Locale('ar')),
+            onTap: () => AppLocalizationScope.of(
+              context,
+            ).changeLanguage(const Locale('ar')),
           ),
         ],
       ),
@@ -218,48 +263,137 @@ class TermsConditionsScreen extends StatelessWidget {
   }
 }
 
+
 class TrackMyApplicationsScreen extends StatelessWidget {
   const TrackMyApplicationsScreen({super.key});
 
   @override
   Widget build(BuildContext context) {
-    const rows = [
-      ('Application ID #4578', 'Beirut Arab University', 'Application Progress', '65%'),
-      ('Application ID #6144', 'Al-Ahliyya Amman University', 'Application Progress', '72%'),
-      ('Application ID #1818', 'United Arab Emirates University', 'Application Progress', '48%'),
+    final applications = [
+      const _ApplicationCardData(
+        universityName: 'Harvard University',
+        courseName: 'Bachelor of Computer Science',
+        shortCode: 'HAR',
+        appId: '#12345',
+      ),
+      const _ApplicationCardData(
+        universityName: 'Al-Ahliyya Amman University',
+        courseName: 'Bachelor of Computer Science',
+        shortCode: 'AAU',
+        appId: '#12346',
+      ),
+      const _ApplicationCardData(
+        universityName: 'Beirut Arab University',
+        courseName: 'Bachelor of Computer Science',
+        shortCode: 'BAU',
+        appId: '#12347',
+      ),
     ];
 
     return _SideMenuScaffold(
       title: 'Track My Applications',
       child: ListView.separated(
-        itemCount: rows.length,
+        itemCount: applications.length,
         separatorBuilder: (_, __) => const SizedBox(height: 8),
         itemBuilder: (context, index) {
-          final item = rows[index];
+          final item = applications[index];
+
           return Container(
-            padding: const EdgeInsets.all(10),
+            padding: const EdgeInsets.all(12),
             decoration: BoxDecoration(
               color: Colors.white,
-              borderRadius: BorderRadius.circular(10),
-              border: Border.all(color: const Color(0xFFE7E0D8)),
+              borderRadius: BorderRadius.circular(8),
+              border: Border.all(color: const Color(0xFFE0DDD8)),
             ),
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                Text(item.$1, style: const TextStyle(fontWeight: FontWeight.w700, fontSize: 12)),
-                const SizedBox(height: 4),
-                Text(item.$2, style: const TextStyle(fontSize: 12, color: AppColors.textMuted)),
-                const SizedBox(height: 6),
+                Text(
+                  'Application ID : ${item.appId}',
+                  style: const TextStyle(
+                    fontSize: 14,
+                    fontWeight: FontWeight.w500,
+                  ),
+                ),
+                const SizedBox(height: 10),
+
                 Row(
+                  crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
-                    Expanded(child: Text(item.$3, style: const TextStyle(fontSize: 11, color: AppColors.textMuted))),
-                    Text(item.$4, style: const TextStyle(fontWeight: FontWeight.w700)),
+                    Container(
+                      width: 54,
+                      height: 54,
+                      alignment: Alignment.center,
+                      decoration: BoxDecoration(
+                        color: const Color(0xFFF5F5F5),
+                        borderRadius: BorderRadius.circular(8),
+                      ),
+                      child: Text(
+                        item.shortCode,
+                        style: const TextStyle(
+                          fontWeight: FontWeight.w800,
+                          color: AppColors.textMuted,
+                        ),
+                      ),
+                    ),
+                    const SizedBox(width: 10),
+
+                    Expanded(
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          Text(
+                            item.universityName,
+                            style: const TextStyle(
+                              fontSize: 16,
+                              fontWeight: FontWeight.w700,
+                            ),
+                            maxLines: 2,
+                            overflow: TextOverflow.ellipsis,
+                          ),
+                          const SizedBox(height: 2),
+                          Text(
+                            item.courseName,
+                            style: const TextStyle(
+                              fontSize: 14,
+                              color: AppColors.textMuted,
+                            ),
+                            maxLines: 2,
+                            overflow: TextOverflow.ellipsis,
+                          ),
+                        ],
+                      ),
+                    ),
                   ],
                 ),
-                const SizedBox(height: 5),
-                ClipRRect(
-                  borderRadius: BorderRadius.circular(100),
-                  child: const LinearProgressIndicator(value: 0.65, minHeight: 4),
+
+                const SizedBox(height: 12),
+                const Divider(height: 1, color: Color(0xFFE0DDD8)),
+                const SizedBox(height: 10),
+
+                Row(
+                  children: [
+                    const Text(
+                      'Application Progress',
+                      style: TextStyle(
+                        fontSize: 16,
+                        fontWeight: FontWeight.w700,
+                      ),
+                    ),
+                    const Spacer(),
+                    Container(
+                      width: 18,
+                      height: 18,
+                      decoration: const BoxDecoration(
+                        color: Color(0xFFF1F1F1),
+                        shape: BoxShape.circle,
+                      ),
+                      child: const Icon(
+                        Icons.keyboard_arrow_down_rounded,
+                        size: 16,
+                      ),
+                    ),
+                  ],
                 ),
               ],
             ),
@@ -270,6 +404,20 @@ class TrackMyApplicationsScreen extends StatelessWidget {
   }
 }
 
+class _ApplicationCardData {
+  const _ApplicationCardData({
+    required this.universityName,
+    required this.courseName,
+    required this.shortCode,
+    required this.appId,
+  });
+
+  final String universityName;
+  final String courseName;
+  final String shortCode;
+  final String appId;
+}
+
 class _SideMenuScaffold extends StatelessWidget {
   const _SideMenuScaffold({required this.title, required this.child});
 
@@ -278,38 +426,63 @@ class _SideMenuScaffold extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
-      body: AppBackground(
-        child: SafeArea(
-          child: Column(
-            children: [
-              Container(
-                height: 52,
-                padding: const EdgeInsets.symmetric(horizontal: 14),
-                decoration: const BoxDecoration(
-                  color: Colors.white,
-                  borderRadius: BorderRadius.vertical(bottom: Radius.circular(18)),
-                ),
-                child: Row(
-                  children: [
-                    IconButton(
-                      onPressed: () => Navigator.of(context).maybePop(),
-                      icon: const Icon(Icons.arrow_back_ios_new_rounded, size: 18),
+    return Container(
+      height: 80,
+      decoration: const BoxDecoration(
+        color: Colors.white,
+        borderRadius: BorderRadius.vertical(
+          bottom: Radius.circular(22),
+        ),
+      ),
+      child: SafeArea(
+        bottom: false,
+        child: Column(
+          children: [
+            Stack(
+              alignment: Alignment.center,
+              children: [
+                /// BACK BUTTON (LEFT)
+                Align(
+                  alignment: Alignment.centerLeft,
+                  child: Padding(
+                    padding: const EdgeInsets.only(left: 16),
+                    child: InkWell(
+                      onTap:  () => Navigator.of(context).pop(),
+                      borderRadius: BorderRadius.circular(20),
+                      child: Container(
+                        width: 34,
+                        height: 34,
+                        decoration: const BoxDecoration(
+                          color: Color(0xFFF6F6F6),
+                          shape: BoxShape.circle,
+                        ),
+                        child: const Icon(
+                          Icons.arrow_back_ios_new_rounded,
+                          size: 18,
+                        ),
+                      ),
                     ),
-                    Expanded(
-                      child: Text(title, style: const TextStyle(fontSize: 15, fontWeight: FontWeight.w700)),
+                  ),
+                ),
+            
+                /// TITLE (PERFECT CENTER)
+                Padding(
+                  padding: const EdgeInsets.symmetric(horizontal: 50),
+                  child: Text(
+                    title,
+                    textAlign: TextAlign.center,
+                    maxLines: 1,
+                    overflow: TextOverflow.ellipsis,
+                    style: const TextStyle(
+                      fontSize: 18,
+                      fontWeight: FontWeight.w700,
                     ),
-                  ],
+                  ),
                 ),
-              ),
-              Expanded(
-                child: Padding(
-                  padding: const EdgeInsets.fromLTRB(12, 12, 12, 8),
-                  child: child,
-                ),
-              ),
-            ],
-          ),
+              ],
+            ),
+            Expanded(child: child)
+          ],
         ),
       ),
     );
@@ -343,7 +516,10 @@ class _SimpleTile extends StatelessWidget {
           Container(
             width: 28,
             height: 28,
-            decoration: BoxDecoration(color: const Color(0xFFFFEFE2), borderRadius: BorderRadius.circular(8)),
+            decoration: BoxDecoration(
+              color: const Color(0xFFFFEFE2),
+              borderRadius: BorderRadius.circular(8),
+            ),
             child: Icon(leading, size: 16, color: Colors.redAccent),
           ),
           const SizedBox(width: 10),
@@ -351,9 +527,21 @@ class _SimpleTile extends StatelessWidget {
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                Text(title, style: const TextStyle(fontWeight: FontWeight.w600, fontSize: 12)),
+                Text(
+                  title,
+                  style: const TextStyle(
+                    fontWeight: FontWeight.w600,
+                    fontSize: 12,
+                  ),
+                ),
                 const SizedBox(height: 2),
-                Text(subtitle, style: const TextStyle(fontSize: 10, color: AppColors.textMuted)),
+                Text(
+                  subtitle,
+                  style: const TextStyle(
+                    fontSize: 10,
+                    color: AppColors.textMuted,
+                  ),
+                ),
               ],
             ),
           ),
@@ -385,9 +573,21 @@ class _InfoField extends StatelessWidget {
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                Text(label, style: const TextStyle(fontSize: 11, color: AppColors.textMuted)),
+                Text(
+                  label,
+                  style: const TextStyle(
+                    fontSize: 11,
+                    color: AppColors.textMuted,
+                  ),
+                ),
                 const SizedBox(height: 3),
-                Text(value, style: const TextStyle(fontWeight: FontWeight.w600, fontSize: 12)),
+                Text(
+                  value,
+                  style: const TextStyle(
+                    fontWeight: FontWeight.w600,
+                    fontSize: 12,
+                  ),
+                ),
               ],
             ),
           ),
@@ -462,9 +662,18 @@ class _SectionCard extends StatelessWidget {
               child: Row(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  const Text('• ', style: TextStyle(color: AppColors.textMuted)),
+                  const Text(
+                    '• ',
+                    style: TextStyle(color: AppColors.textMuted),
+                  ),
                   Expanded(
-                    child: Text(point, style: const TextStyle(fontSize: 12, color: AppColors.textMuted)),
+                    child: Text(
+                      point,
+                      style: const TextStyle(
+                        fontSize: 12,
+                        color: AppColors.textMuted,
+                      ),
+                    ),
                   ),
                 ],
               ),
@@ -482,7 +691,10 @@ Future<void> showLogoutDialog(BuildContext context) {
     builder: (context) {
       return AlertDialog(
         shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(14)),
-        title: const Text('Are you sure you want to logout?', style: TextStyle(fontSize: 14)),
+        title: const Text(
+          'Are you sure you want to logout?',
+          style: TextStyle(fontSize: 14),
+        ),
         actions: [
           OutlinedButton(
             onPressed: () => Navigator.of(context).pop(),
