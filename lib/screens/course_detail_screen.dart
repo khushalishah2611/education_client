@@ -63,128 +63,312 @@ class _CourseDetailScreenState extends State<CourseDetailScreen> {
 
     return Scaffold(
       body: AppBackground(
-        child: SafeArea(
-          child: Column(
-            children: [
-              /// 🔷 FIXED HEADER (NO SCROLL)
-              Stack(
-                clipBehavior: Clip.none,
-                children: [
-                  ClipRRect(
-                    borderRadius: const BorderRadius.vertical(
-                      bottom: Radius.circular(20),
+        child: Column(
+          children: [
+            /// 🔷 FIXED HEADER (NO SCROLL)
+            Stack(
+              clipBehavior: Clip.none,
+              children: [
+                ClipRRect(
+                  borderRadius: const BorderRadius.vertical(
+                    bottom: Radius.circular(20),
+                  ),
+                  child: SizedBox(
+                    height: 250,
+                    width: double.infinity,
+                    child: Image.network(
+                      widget.course.image,
+                      fit: BoxFit.cover,
+                      errorBuilder: (_, __, ___) =>
+                          Container(color: const Color(0xFFE2E2E2)),
                     ),
-                    child: SizedBox(
-                      height: 250,
-                      width: double.infinity,
-                      child: Image.network(
-                        widget.course.image,
-                        fit: BoxFit.cover,
-                        errorBuilder: (_, __, ___) =>
-                            Container(color: const Color(0xFFE2E2E2)),
+                  ),
+                ),
+
+                /// 🔷 FLOAT CARD
+                Positioned(
+                  left: 20,
+                  right: 20,
+                  bottom: -50,
+                  child: Container(
+                    padding: const EdgeInsets.all(14),
+                    decoration: BoxDecoration(
+                      color: Colors.white,
+                      borderRadius: BorderRadius.circular(14),
+                      boxShadow: const [
+                        BoxShadow(
+                          color: AppColors.shadow,
+                          blurRadius: 16,
+                          offset: Offset(0, 8),
+                        ),
+                      ],
+                    ),
+                    child: Column(
+                      children: [
+                        Row(
+                          children: [
+                            Container(
+                              width: 58,
+                              height: 58,
+                              alignment: Alignment.center,
+                              decoration: BoxDecoration(
+                                color: const Color(0xFFF4F4F4),
+                                borderRadius:
+                                BorderRadius.circular(10),
+                              ),
+                              child: Text(
+                                widget.university.shortCode,
+                                style: TextStyle(
+                                  color: widget.university.color,
+                                  fontWeight: FontWeight.w900,
+                                ),
+                              ),
+                            ),
+                            const SizedBox(width: 12),
+                            Expanded(
+                              child: Column(
+                                crossAxisAlignment:
+                                CrossAxisAlignment.start,
+                                children: [
+                                  Text(
+                                    widget.university.name,
+                                    style: const TextStyle(
+                                      fontSize: 14,
+                                      fontWeight: FontWeight.w700,
+                                    ),
+                                  ),
+                                  Text(
+                                    widget.course.title,
+                                    style: const TextStyle(
+                                      color: AppColors.textMuted,
+                                    ),
+                                  ),
+                                ],
+                              ),
+                            ),
+                          ],
+                        ),
+                        const SizedBox(height: 10),
+
+                        Row(
+                          children: [
+                            const Icon(Icons.location_on_outlined,
+                                size: 15,
+                                color: AppColors.textMuted),
+                            const SizedBox(width: 4),
+                            Expanded(
+                              child: Text(
+                                widget.university.location,
+                                style: const TextStyle(
+                                    color: AppColors.textMuted),
+                              ),
+                            ),
+                            const Icon(Icons.star,
+                                color: Color(0xFFFFB300), size: 16),
+                            const SizedBox(width: 4),
+                            const Text('4.6'),
+                          ],
+                        ),
+
+                        const SizedBox(height: 8),
+
+                        Row(
+                          children: [
+                            const Icon(Icons.access_time,
+                                size: 18,
+                                color: AppColors.textMuted),
+                            const SizedBox(width: 4),
+                            Text(widget.course.duration),
+                            const Spacer(),
+                            const Text(
+                              '₹4,50,000 / Year',
+                              style: TextStyle(
+                                  fontWeight: FontWeight.w700),
+                            ),
+                          ],
+                        ),
+                      ],
+                    ),
+                  ),
+                ),
+
+                TopRoundedHeader(title: widget.course.title),
+              ],
+            ),
+
+            const SizedBox(height: 70),
+
+            /// 🔷 SCROLLABLE CONTENT ONLY
+            Expanded(
+              child: ListView(
+                padding: EdgeInsets.zero,
+                children: [
+                  /// 🔷 ELIGIBILITY
+                  const Padding(
+                    padding: EdgeInsets.symmetric(horizontal: 20),
+                    child: Text('Eligibility',
+                        style: TextStyle(
+                            fontSize: 18, fontWeight: FontWeight.w700)),
+                  ),
+
+                  Padding(
+                    padding: const EdgeInsets.fromLTRB(20, 10, 20, 0),
+                    child: Column(
+                      children: List.generate(
+                        eligibilityList.length,
+                            (index) =>
+                            _BulletLine(eligibilityList[index]),
                       ),
                     ),
                   ),
 
-                  /// 🔷 FLOAT CARD
-                  Positioned(
-                    left: 20,
-                    right: 20,
-                    bottom: -50,
+                  const SizedBox(height: 20),
+
+                  /// 🔷 DOCUMENTS
+                  const Padding(
+                    padding: EdgeInsets.symmetric(horizontal: 20),
+                    child: Text('Required Documents',
+                        style: TextStyle(
+                            fontSize: 18, fontWeight: FontWeight.w700)),
+                  ),
+
+                  Padding(
+                    padding: const EdgeInsets.fromLTRB(20, 12, 20, 0),
+                    child: Column(
+                      children: List.generate(
+                        documentsList.length,
+                            (index) => Padding(
+                          padding: const EdgeInsets.only(bottom: 8),
+                          child: _DocTile(documentsList[index]),
+                        ),
+                      ),
+                    ),
+                  ),
+
+                  const SizedBox(height: 20),
+
+                  /// 🔷 INTAKE
+                  Padding(
+                    padding: const EdgeInsets.symmetric(horizontal: 20),
                     child: Container(
                       padding: const EdgeInsets.all(14),
                       decoration: BoxDecoration(
                         color: Colors.white,
-                        borderRadius: BorderRadius.circular(14),
-                        boxShadow: const [
-                          BoxShadow(
-                            color: AppColors.shadow,
-                            blurRadius: 16,
-                            offset: Offset(0, 8),
+                        borderRadius: BorderRadius.circular(12),
+                      ),
+                      child: Column(
+                        children: [
+                           Row(
+                            children: [
+                              Container(
+                                width: 32,
+                                height: 32,
+                                decoration: BoxDecoration(
+                                  color: const Color(0xFFF4F4F4),
+                                  borderRadius: BorderRadius.circular(8),
+                                ),
+                                child: const Icon(
+                                  Icons.calendar_month_outlined,
+                                  size: 20,
+                                  color: AppColors.accent,
+                                ),
+                              ),
+                              SizedBox(width: 8),
+                              Text('Available Intake',
+                                  style: TextStyle(
+                                      fontSize: 18,
+                                      fontWeight: FontWeight.w700)),
+                            ],
+                          ),
+                          const SizedBox(height: 16),
+
+                          Wrap(
+                            spacing: 10,
+                            runSpacing: 10,
+                            children: [
+                              for (var i = 0;
+                              i < _availableIntakes.length;
+                              i++)
+                                _IntakeChip(
+                                  month: _availableIntakes[i].month,
+                                  year: _availableIntakes[i].year,
+                                  isSelected:
+                                  i == _selectedIntakeIndex,
+                                  onTap: () {
+                                    setState(() =>
+                                    _selectedIntakeIndex = i);
+                                  },
+                                ),
+                            ],
                           ),
                         ],
+                      ),
+                    ),
+                  ),
+
+                  const SizedBox(height: 12),
+
+                  /// 🔷 DEADLINE
+                  Padding(
+                    padding: const EdgeInsets.symmetric(horizontal: 20),
+                    child: Container(
+                      padding: const EdgeInsets.all(14),
+                      decoration: BoxDecoration(
+                        color: Colors.white,
+                        borderRadius: BorderRadius.circular(12),
+                        border: Border.all(
+                            color: const Color(0xFFFFC4C4)),
                       ),
                       child: Column(
                         children: [
                           Row(
                             children: [
                               Container(
-                                width: 58,
-                                height: 58,
-                                alignment: Alignment.center,
+                                width: 32,
+                                height: 32,
                                 decoration: BoxDecoration(
                                   color: const Color(0xFFF4F4F4),
-                                  borderRadius:
-                                  BorderRadius.circular(10),
+                                  borderRadius: BorderRadius.circular(8),
                                 ),
-                                child: Text(
-                                  widget.university.shortCode,
+                                child: const Icon(
+                                  Icons.fact_check_outlined,
+                                  size: 20,
+                                  color: AppColors.accent,
+                                ),
+                              ),
+                              SizedBox(width: 8),
+                              Text('Application Deadline',
                                   style: TextStyle(
-                                    color: widget.university.color,
-                                    fontWeight: FontWeight.w900,
+                                      fontSize: 18,
+                                      fontWeight: FontWeight.w700)),
+                            ],
+                          ),
+                          const SizedBox(height: 16),
+
+                          Row(
+                            children: [
+
+                              const SizedBox(width: 10),
+                              Expanded(
+                                child: RichText(
+                                  text: TextSpan(
+                                    style: const TextStyle(
+                                        color: AppColors.textMuted),
+                                    children: [
+                                      TextSpan(
+                                        text: selectedIntake.deadlineDate,
+                                        style: const TextStyle(
+                                            color: Color(0xFFEB5757),
+                                            fontWeight:
+                                            FontWeight.w700),
+                                      ),
+                                      TextSpan(
+                                        text:
+                                        ' (For ${selectedIntake.month} ${selectedIntake.year} Intake)',
+                                      ),
+                                    ],
                                   ),
                                 ),
-                              ),
-                              const SizedBox(width: 12),
-                              Expanded(
-                                child: Column(
-                                  crossAxisAlignment:
-                                  CrossAxisAlignment.start,
-                                  children: [
-                                    Text(
-                                      widget.university.name,
-                                      style: const TextStyle(
-                                        fontSize: 14,
-                                        fontWeight: FontWeight.w700,
-                                      ),
-                                    ),
-                                    Text(
-                                      widget.course.title,
-                                      style: const TextStyle(
-                                        color: AppColors.textMuted,
-                                      ),
-                                    ),
-                                  ],
-                                ),
-                              ),
-                            ],
-                          ),
-                          const SizedBox(height: 10),
-
-                          Row(
-                            children: [
-                              const Icon(Icons.location_on_outlined,
-                                  size: 15,
-                                  color: AppColors.textMuted),
-                              const SizedBox(width: 4),
-                              Expanded(
-                                child: Text(
-                                  widget.university.location,
-                                  style: const TextStyle(
-                                      color: AppColors.textMuted),
-                                ),
-                              ),
-                              const Icon(Icons.star,
-                                  color: Color(0xFFFFB300), size: 16),
-                              const SizedBox(width: 4),
-                              const Text('4.6'),
-                            ],
-                          ),
-
-                          const SizedBox(height: 8),
-
-                          Row(
-                            children: [
-                              const Icon(Icons.access_time,
-                                  size: 18,
-                                  color: AppColors.textMuted),
-                              const SizedBox(width: 4),
-                              Text(widget.course.duration),
-                              const Spacer(),
-                              const Text(
-                                '₹4,50,000 / Year',
-                                style: TextStyle(
-                                    fontWeight: FontWeight.w700),
                               ),
                             ],
                           ),
@@ -193,214 +377,28 @@ class _CourseDetailScreenState extends State<CourseDetailScreen> {
                     ),
                   ),
 
-                  TopRoundedHeader(title: widget.course.title),
+                  const SizedBox(height: 20),
                 ],
               ),
+            ),
 
-              const SizedBox(height: 70),
-
-              /// 🔷 SCROLLABLE CONTENT ONLY
-              Expanded(
-                child: ListView(
-                  padding: EdgeInsets.zero,
-                  children: [
-                    /// 🔷 ELIGIBILITY
-                    const Padding(
-                      padding: EdgeInsets.symmetric(horizontal: 20),
-                      child: Text('Eligibility',
-                          style: TextStyle(
-                              fontSize: 18, fontWeight: FontWeight.w700)),
-                    ),
-
-                    Padding(
-                      padding: const EdgeInsets.fromLTRB(20, 10, 20, 0),
-                      child: Column(
-                        children: List.generate(
-                          eligibilityList.length,
-                              (index) =>
-                              _BulletLine(eligibilityList[index]),
-                        ),
-                      ),
-                    ),
-
-                    const SizedBox(height: 20),
-
-                    /// 🔷 DOCUMENTS
-                    const Padding(
-                      padding: EdgeInsets.symmetric(horizontal: 20),
-                      child: Text('Required Documents',
-                          style: TextStyle(
-                              fontSize: 18, fontWeight: FontWeight.w700)),
-                    ),
-
-                    Padding(
-                      padding: const EdgeInsets.fromLTRB(20, 12, 20, 0),
-                      child: Column(
-                        children: List.generate(
-                          documentsList.length,
-                              (index) => Padding(
-                            padding: const EdgeInsets.only(bottom: 8),
-                            child: _DocTile(documentsList[index]),
-                          ),
-                        ),
-                      ),
-                    ),
-
-                    const SizedBox(height: 20),
-
-                    /// 🔷 INTAKE
-                    Padding(
-                      padding: const EdgeInsets.symmetric(horizontal: 20),
-                      child: Container(
-                        padding: const EdgeInsets.all(14),
-                        decoration: BoxDecoration(
-                          color: Colors.white,
-                          borderRadius: BorderRadius.circular(12),
-                        ),
-                        child: Column(
-                          children: [
-                             Row(
-                              children: [
-                                Container(
-                                  width: 32,
-                                  height: 32,
-                                  decoration: BoxDecoration(
-                                    color: const Color(0xFFF4F4F4),
-                                    borderRadius: BorderRadius.circular(8),
-                                  ),
-                                  child: const Icon(
-                                    Icons.calendar_month_outlined,
-                                    size: 20,
-                                    color: AppColors.accent,
-                                  ),
-                                ),
-                                SizedBox(width: 8),
-                                Text('Available Intake',
-                                    style: TextStyle(
-                                        fontSize: 18,
-                                        fontWeight: FontWeight.w700)),
-                              ],
-                            ),
-                            const SizedBox(height: 16),
-
-                            Wrap(
-                              spacing: 10,
-                              runSpacing: 10,
-                              children: [
-                                for (var i = 0;
-                                i < _availableIntakes.length;
-                                i++)
-                                  _IntakeChip(
-                                    month: _availableIntakes[i].month,
-                                    year: _availableIntakes[i].year,
-                                    isSelected:
-                                    i == _selectedIntakeIndex,
-                                    onTap: () {
-                                      setState(() =>
-                                      _selectedIntakeIndex = i);
-                                    },
-                                  ),
-                              ],
-                            ),
-                          ],
-                        ),
-                      ),
-                    ),
-
-                    const SizedBox(height: 12),
-
-                    /// 🔷 DEADLINE
-                    Padding(
-                      padding: const EdgeInsets.symmetric(horizontal: 20),
-                      child: Container(
-                        padding: const EdgeInsets.all(14),
-                        decoration: BoxDecoration(
-                          color: Colors.white,
-                          borderRadius: BorderRadius.circular(12),
-                          border: Border.all(
-                              color: const Color(0xFFFFC4C4)),
-                        ),
-                        child: Column(
-                          children: [
-                            Row(
-                              children: [
-                                Container(
-                                  width: 32,
-                                  height: 32,
-                                  decoration: BoxDecoration(
-                                    color: const Color(0xFFF4F4F4),
-                                    borderRadius: BorderRadius.circular(8),
-                                  ),
-                                  child: const Icon(
-                                    Icons.fact_check_outlined,
-                                    size: 20,
-                                    color: AppColors.accent,
-                                  ),
-                                ),
-                                SizedBox(width: 8),
-                                Text('Application Deadline',
-                                    style: TextStyle(
-                                        fontSize: 18,
-                                        fontWeight: FontWeight.w700)),
-                              ],
-                            ),
-                            const SizedBox(height: 16),
-
-                            Row(
-                              children: [
-
-                                const SizedBox(width: 10),
-                                Expanded(
-                                  child: RichText(
-                                    text: TextSpan(
-                                      style: const TextStyle(
-                                          color: AppColors.textMuted),
-                                      children: [
-                                        TextSpan(
-                                          text: selectedIntake.deadlineDate,
-                                          style: const TextStyle(
-                                              color: Color(0xFFEB5757),
-                                              fontWeight:
-                                              FontWeight.w700),
-                                        ),
-                                        TextSpan(
-                                          text:
-                                          ' (For ${selectedIntake.month} ${selectedIntake.year} Intake)',
-                                        ),
-                                      ],
-                                    ),
-                                  ),
-                                ),
-                              ],
-                            ),
-                          ],
-                        ),
-                      ),
-                    ),
-
-                    const SizedBox(height: 20),
-                  ],
-                ),
-              ),
-
-              /// 🔷 BUTTON (FIXED)
-              Padding(
-                padding: const EdgeInsets.all(16),
-                child: AppPrimaryButton(
-                  label: context.l10n.text('Save'),
-                  onPressed: () => Navigator.push(
-                    context,
-                    MaterialPageRoute(
-                      builder: (_) => UploadDocumentsScreen(
-                        university: widget.university,
-                        course: widget.course,
-                      ),
+            /// 🔷 BUTTON (FIXED)
+            Padding(
+              padding: const EdgeInsets.all(16),
+              child: AppPrimaryButton(
+                label: context.l10n.text('Save'),
+                onPressed: () => Navigator.push(
+                  context,
+                  MaterialPageRoute(
+                    builder: (_) => UploadDocumentsScreen(
+                      university: widget.university,
+                      course: widget.course,
                     ),
                   ),
                 ),
               ),
-            ],
-          ),
+            ),
+          ],
         ),
       ),
     );
