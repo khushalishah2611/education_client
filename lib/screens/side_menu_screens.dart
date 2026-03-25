@@ -426,19 +426,19 @@ class _SideMenuScaffold extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return Container(
-      height: 80,
-      decoration: const BoxDecoration(
-        color: Colors.white,
-        borderRadius: BorderRadius.vertical(
-          bottom: Radius.circular(22),
-        ),
-      ),
-      child: SafeArea(
-        bottom: false,
-        child: Column(
-          children: [
-            Stack(
+    return SafeArea(
+      bottom: false,
+      child: Column(
+        children: [
+          Container(
+            height: 80,
+            decoration: const BoxDecoration(
+              color: Colors.white,
+              borderRadius: BorderRadius.vertical(
+                bottom: Radius.circular(22),
+              ),
+            ),
+            child: Stack(
               alignment: Alignment.center,
               children: [
                 /// BACK BUTTON (LEFT)
@@ -447,7 +447,7 @@ class _SideMenuScaffold extends StatelessWidget {
                   child: Padding(
                     padding: const EdgeInsets.only(left: 16),
                     child: InkWell(
-                      onTap:  () => Navigator.of(context).pop(),
+                      onTap: () => Navigator.of(context).pop(),
                       borderRadius: BorderRadius.circular(20),
                       child: Container(
                         width: 34,
@@ -464,7 +464,7 @@ class _SideMenuScaffold extends StatelessWidget {
                     ),
                   ),
                 ),
-            
+
                 /// TITLE (PERFECT CENTER)
                 Padding(
                   padding: const EdgeInsets.symmetric(horizontal: 50),
@@ -481,9 +481,15 @@ class _SideMenuScaffold extends StatelessWidget {
                 ),
               ],
             ),
-            Expanded(child: child)
-          ],
-        ),
+          ),
+          Expanded(
+            child: MediaQuery.removePadding(
+              context: context,
+              removeTop: true,
+              child: child,
+            ),
+          ),
+        ],
       ),
     );
   }
