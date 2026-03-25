@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 
+import '../core/app_localizations.dart';
 import '../core/app_theme.dart';
 import '../models/app_models.dart';
 import '../widgets/common_widgets.dart';
@@ -20,7 +21,7 @@ class TrackApplicationScreen extends StatelessWidget {
           child: Column(
             children: [
             TopRoundedHeader(
-              title: 'Track Application',
+              title: context.l10n.text('trackApplication'),
               onBack: () => Navigator.of(context).pushAndRemoveUntil(
                 MaterialPageRoute(builder: (_) => const HomeScreen()),
                 (route) => false,
@@ -36,7 +37,7 @@ class TrackApplicationScreen extends StatelessWidget {
                     child: Column(
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
-                        const Text('Application ID : #12345', style: TextStyle(fontSize: 11)),
+                        Text(context.l10n.text('applicationIdValue'), style: const TextStyle(fontSize: 11)),
                         const SizedBox(height: 10),
                         Text(university.name, style: const TextStyle(fontSize: 18, fontWeight: FontWeight.w700)),
                         const SizedBox(height: 6),
@@ -59,12 +60,12 @@ class TrackApplicationScreen extends StatelessWidget {
                           ),
                         ),
                         const SizedBox(height: 14),
-                        const Text('Application Progress', style: TextStyle(fontSize: 18, fontWeight: FontWeight.w700)),
+                        Text(context.l10n.text('applicationProgress'), style: const TextStyle(fontSize: 18, fontWeight: FontWeight.w700)),
                         const SizedBox(height: 18),
-                        const _ProgressStep(title: 'Submitted', subtitle: 'Completed on Feb 13', state: _StepState.done, showLine: true),
-                        const _ProgressStep(title: 'Under Review', subtitle: 'Our admission team is reviewing your profile', state: _StepState.done, showLine: true),
-                        const _ProgressStep(title: 'Documents Verified', subtitle: 'Pending review', state: _StepState.active, showLine: true),
-                        const _ProgressStep(title: 'Accepted/Rejected', subtitle: 'Waiting for decision', state: _StepState.pending, showLine: false),
+                        _ProgressStep(title: context.l10n.text('submitted'), subtitle: context.l10n.text('completedOnDate'), state: _StepState.done, showLine: true),
+                        _ProgressStep(title: context.l10n.text('underReview'), subtitle: context.l10n.text('underReviewSubtitle'), state: _StepState.done, showLine: true),
+                        _ProgressStep(title: context.l10n.text('documentsVerified'), subtitle: context.l10n.text('pendingReview'), state: _StepState.active, showLine: true),
+                        _ProgressStep(title: context.l10n.text('acceptedRejected'), subtitle: context.l10n.text('waitingDecision'), state: _StepState.pending, showLine: false),
                       ],
                     ),
                   ),

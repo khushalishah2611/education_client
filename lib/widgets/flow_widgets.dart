@@ -82,7 +82,12 @@ class FlowStepHeader extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    const labels = ['Upload Doc.', 'Verify', 'Payment', 'Status'];
+    final labels = [
+      context.l10n.text('stepUploadDoc'),
+      context.l10n.text('stepVerify'),
+      context.l10n.text('stepPayment'),
+      context.l10n.text('stepStatus'),
+    ];
     return Column(
       children: [
         TopRoundedHeader(title: title),

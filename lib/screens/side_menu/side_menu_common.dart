@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 
+import '../../core/app_localizations.dart';
 import '../../core/app_theme.dart';
 import '../../widgets/common_widgets.dart';
 
@@ -203,9 +204,9 @@ Future<void> showLogoutDialog(BuildContext context) {
                 child: const Icon(Icons.logout_rounded, color: Colors.red, size: 28),
               ),
               const SizedBox(height: 12),
-              const Text(
-                'هل أنت متأكد أنك تريد تسجيل الخروج؟',
-                style: TextStyle(fontSize: 18, fontWeight: FontWeight.w600),
+              Text(
+                context.l10n.text('logoutConfirmMessage'),
+                style: const TextStyle(fontSize: 18, fontWeight: FontWeight.w600),
                 textAlign: TextAlign.center,
               ),
               const SizedBox(height: 14),
@@ -223,9 +224,9 @@ Future<void> showLogoutDialog(BuildContext context) {
                             borderRadius: BorderRadius.circular(10),
                           ),
                         ),
-                        child: const Text(
-                          'إلغاء',
-                          style: TextStyle(
+                        child: Text(
+                          context.l10n.text('cancel'),
+                          style: const TextStyle(
                             color: AppColors.text,
                             fontWeight: FontWeight.w700,
                             fontSize: 15,
@@ -249,9 +250,9 @@ Future<void> showLogoutDialog(BuildContext context) {
                             borderRadius: BorderRadius.circular(10),
                           ),
                         ),
-                        child: const Text(
-                          'تأكيد',
-                          style: TextStyle(fontWeight: FontWeight.w700, fontSize: 15),
+                        child: Text(
+                          context.l10n.text('confirm'),
+                          style: const TextStyle(fontWeight: FontWeight.w700, fontSize: 15),
                         ),
                       ),
                     ),
