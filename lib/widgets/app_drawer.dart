@@ -12,7 +12,7 @@ class CommonSideMenu extends StatelessWidget {
     final items = <({IconData icon, String label, bool danger, Widget? screen})>[
       (icon: Icons.home_outlined, label: context.l10n.text('dashboard'), danger: false, screen: null),
       (icon: Icons.assignment_outlined, label: context.l10n.text('trackApplications'), danger: false, screen: const TrackMyApplicationsScreen()),
-      (icon: Icons.person_outline, label: context.l10n.text('myProfile'), danger: false, screen: null),
+      (icon: Icons.person_outline, label: context.l10n.text('myProfile'), danger: false, screen: const ProfileScreen()),
       (icon: Icons.description_outlined, label: context.l10n.text('manageDocuments'), danger: false, screen: const UploadedDocumentsScreen()),
       (icon: Icons.payments_outlined, label: context.l10n.text('payments'), danger: false, screen: const PaymentsScreen()),
       (icon: Icons.notifications_none_rounded, label: context.l10n.text('notifications'), danger: false, screen: const NotificationsScreen()),
