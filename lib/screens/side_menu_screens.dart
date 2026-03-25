@@ -427,9 +427,8 @@ class _SideMenuScaffold extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Material(
-      color: const Color(0xFFF8F5F2),
-      child: SafeArea(
-        bottom: false,
+    
+      child: AppBackground(
         child: Column(
           children: [
             Container(
@@ -488,7 +487,10 @@ class _SideMenuScaffold extends StatelessWidget {
               child: MediaQuery.removePadding(
                 context: context,
                 removeTop: true,
-                child: child,
+                child: Padding(
+                  padding: const EdgeInsets.all(16.0),
+                  child: child,
+                ),
               ),
             ),
           ],
