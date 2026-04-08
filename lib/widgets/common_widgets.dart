@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 
 import '../core/app_localizations.dart';
 import '../core/app_theme.dart';
+import '../screens/help_screen.dart';
 
 /// Backward-compatible gradient transform that translates by [dx]/[dy].
 ///
@@ -135,6 +136,137 @@ class LanguageButton extends StatelessWidget {
         ),
         icon: const Icon(Icons.language),
         label: Text(context.l10n.text('langLabel')),
+      ),
+    );
+  }
+}
+
+class LanguageDropdownChip extends StatelessWidget {
+  const LanguageDropdownChip({super.key});
+
+  @override
+  Widget build(BuildContext context) {
+    final isArabic = context.l10n.isArabic;
+    return InkWell(
+      onTap: context.toggleLanguage,
+      borderRadius: BorderRadius.circular(10),
+      child: Container(
+        padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 5),
+        decoration: BoxDecoration(
+          color: Colors.white.withOpacity(.92),
+          borderRadius: BorderRadius.circular(10),
+          border: Border.all(color: const Color(0xFFE8C8AE)),
+        ),
+        child: Row(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            const Text('🇵🇸', style: TextStyle(fontSize: 14)),
+            const SizedBox(width: 5),
+            Text(
+              isArabic ? 'English' : 'عربي',
+              style: const TextStyle(
+                fontSize: 15,
+                color: AppColors.text,
+                fontWeight: FontWeight.w500,
+              ),
+            ),
+            const SizedBox(width: 2),
+            const Icon(Icons.keyboard_arrow_down_rounded, size: 17, color: AppColors.text),
+          ],
+        ),
+      ),
+    );
+  }
+}
+
+class HelpPillButton extends StatelessWidget {
+  const HelpPillButton({super.key});
+
+  @override
+  Widget build(BuildContext context) {
+    return InkWell(
+      onTap: () => Navigator.of(context).push(MaterialPageRoute(builder: (_) => const HelpScreen())),
+      borderRadius: BorderRadius.circular(12),
+      child: Container(
+        padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 8),
+        decoration: BoxDecoration(
+          color: const Color(0xFFFFEBD9),
+          borderRadius: BorderRadius.circular(12),
+        ),
+        child: Row(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            const Icon(Icons.help_outline_rounded, size: 18),
+            const SizedBox(width: 6),
+            Text(
+              context.l10n.text('help').toUpperCase(),
+              style: const TextStyle(fontWeight: FontWeight.w500, fontSize: 20),
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+}
+
+class AuthScaffold extends StatelessWidget {
+  const AuthScaffold({super.key, required this.child});
+
+  final Widget child;
+
+  @override
+  Widget build(BuildContext context) {
+    return Directionality(
+      textDirection: context.l10n.textDirection,
+      child: Scaffold(
+        body: Container(
+          decoration: const BoxDecoration(color: Color(0xFFF8EFE6)),
+          child: SafeArea(
+            child: Stack(
+              children: [
+                Positioned.fill(
+                  child: Opacity(
+                    opacity: .34,
+                    child: Image.asset('assets/images/img.png', fit: BoxFit.cover),
+                  ),
+                ),
+                Column(
+                  children: [
+                    const Padding(
+                      padding: EdgeInsets.fromLTRB(12, 8, 12, 0),
+                      child: Row(
+                        children: [
+                          HelpPillButton(),
+                          Spacer(),
+                          LanguageDropdownChip(),
+                        ],
+                      ),
+                    ),
+                    const Spacer(),
+                    Padding(
+                      padding: const EdgeInsets.symmetric(horizontal: 24),
+                      child: Image.asset(
+                        'assets/images/logo.webp',
+                        height: 150,
+                        fit: BoxFit.contain,
+                      ),
+                    ),
+                    const SizedBox(height: 16),
+                    Container(
+                      width: double.infinity,
+                      padding: const EdgeInsets.fromLTRB(16, 20, 16, 20),
+                      decoration: const BoxDecoration(
+                        color: Color(0xFFF2F2F4),
+                        borderRadius: BorderRadius.vertical(top: Radius.circular(26)),
+                      ),
+                      child: child,
+                    ),
+                  ],
+                ),
+              ],
+            ),
+          ),
+        ),
       ),
     );
   }
