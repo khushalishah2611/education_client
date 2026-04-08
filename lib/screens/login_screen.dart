@@ -1,12 +1,20 @@
 import 'package:flutter/material.dart';
-
 import '../core/app_localizations.dart';
 import '../core/app_theme.dart';
 import '../widgets/common_widgets.dart';
 import 'verify_otp_screen.dart';
 
-class LoginScreen extends StatelessWidget {
+class LoginScreen extends StatefulWidget {
   const LoginScreen({super.key});
+
+  @override
+  State<LoginScreen> createState() => _LoginScreenState();
+}
+
+class _LoginScreenState extends State<LoginScreen> {
+  final TextEditingController _mobileController = TextEditingController();
+
+  bool _isChecked = false; // ✅ Checkbox state
 
   @override
   Widget build(BuildContext context) {
@@ -15,10 +23,23 @@ class LoginScreen extends StatelessWidget {
         crossAxisAlignment: CrossAxisAlignment.start,
         mainAxisSize: MainAxisSize.min,
         children: [
-          Text(context.l10n.text('loginWithOtp'), style: Theme.of(context).textTheme.headlineMedium),
+          /// Title
+          Text(
+            context.l10n.text('loginWithOtp'),
+            style: Theme.of(context).textTheme.headlineMedium,
+          ),
+
           const SizedBox(height: 20),
-          Text(context.l10n.text('mobileNumber'), style: Theme.of(context).textTheme.titleMedium),
+
+          /// Mobile Label
+          Text(
+            context.l10n.text('mobileNumber'),
+            style: Theme.of(context).textTheme.titleMedium,
+          ),
+
           const SizedBox(height: 10),
+
+          /// Mobile Input Field
           Container(
             height: 50,
             decoration: BoxDecoration(
@@ -28,39 +49,86 @@ class LoginScreen extends StatelessWidget {
             ),
             child: Row(
               children: [
-                const SizedBox(width: 10),
-                const Text('🇵🇸 +1'),
-                const SizedBox(width: 10),
-                Container(width: 1, height: 30, color: AppColors.border),
                 const SizedBox(width: 12),
-                Text(
-                  '70235 68911',
-                  style: Theme.of(context).textTheme.bodyLarge?.copyWith(color: AppColors.textMuted),
+
+                /// Country Code
+                const Text('🇮🇳 +91', style: TextStyle(fontSize: 16)),
+
+                const SizedBox(width: 10),
+
+                /// Divider
+                Container(width: 1, height: 30, color: AppColors.border),
+
+                /// Input
+                Expanded(
+                  child: TextField(
+                    controller: _mobileController,
+                    keyboardType: TextInputType.phone,
+                    decoration: const InputDecoration(
+                      contentPadding: EdgeInsets.all(5),
+                      hintText: 'Enter mobile number',
+                      border: InputBorder.none,
+                      focusedBorder: InputBorder.none,
+                      enabledBorder: InputBorder.none,
+                    ),
+                  ),
                 ),
+                const SizedBox(width: 12),
               ],
             ),
           ),
+
           const SizedBox(height: 26),
+
+          /// Send OTP Button
           AppPrimaryButton(
             label: context.l10n.text('sendOtp'),
-            onPressed: () => Navigator.of(context).push(
-              MaterialPageRoute(builder: (_) => const VerifyOtpScreen()),
-            ),
+            onPressed: () {
+              /// Mobile validation
+              if (_mobileController.text.length < 10) {
+                ScaffoldMessenger.of(context).showSnackBar(
+                  const SnackBar(content: Text("Enter valid mobile number")),
+                );
+                return;
+              }
+
+              /// Checkbox validation
+              if (!_isChecked) {
+                ScaffoldMessenger.of(context).showSnackBar(
+                  const SnackBar(
+                    content: Text("Please accept Terms & Privacy"),
+                  ),
+                );
+                return;
+              }
+
+              /// Navigate
+              Navigator.of(context).push(
+                MaterialPageRoute(builder: (_) => const VerifyOtpScreen()),
+              );
+            },
           ),
+
           const SizedBox(height: 14),
-          Row(
-            children: [
-              const Icon(Icons.check_box_outline_blank_rounded, size: 16, color: AppColors.textMuted),
-              const SizedBox(width: 8),
-              Expanded(
-                child: Text(
-                  context.l10n.text('termsPrivacy'),
-                  style: const TextStyle(color: Colors.blue, fontSize: 14),
-                ),
-              ),
-            ],
+
+          /// Terms & Privacy Checkbox
+          CheckboxListTile(
+            value: _isChecked,
+            onChanged: (value) {
+              setState(() {
+                _isChecked = value!;
+              });
+            },
+            title: Text(
+              context.l10n.text('termsPrivacy'),
+              style: const TextStyle(color: Colors.blue, fontSize: 14),
+            ),
+            controlAffinity:
+                ListTileControlAffinity.leading, // checkbox left side
+            contentPadding: EdgeInsets.zero,
+            activeColor: AppColors.primary,
           ),
-        ),
+        ],
       ),
     );
   }

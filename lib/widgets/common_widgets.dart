@@ -21,7 +21,11 @@ class GradientTranslation extends GradientTransform {
 }
 
 class AppPageEntrance extends StatefulWidget {
-  const AppPageEntrance({super.key, required this.child, this.delay = Duration.zero});
+  const AppPageEntrance({
+    super.key,
+    required this.child,
+    this.delay = Duration.zero,
+  });
 
   final Widget child;
   final Duration delay;
@@ -30,7 +34,8 @@ class AppPageEntrance extends StatefulWidget {
   State<AppPageEntrance> createState() => _AppPageEntranceState();
 }
 
-class _AppPageEntranceState extends State<AppPageEntrance> with SingleTickerProviderStateMixin {
+class _AppPageEntranceState extends State<AppPageEntrance>
+    with SingleTickerProviderStateMixin {
   late final AnimationController _controller;
   late final Animation<double> _fadeAnimation;
   late final Animation<Offset> _slideAnimation;
@@ -42,7 +47,10 @@ class _AppPageEntranceState extends State<AppPageEntrance> with SingleTickerProv
       duration: const Duration(milliseconds: 520),
       vsync: this,
     );
-    _fadeAnimation = CurvedAnimation(parent: _controller, curve: Curves.easeOutCubic);
+    _fadeAnimation = CurvedAnimation(
+      parent: _controller,
+      curve: Curves.easeOutCubic,
+    );
     _slideAnimation = Tween<Offset>(
       begin: const Offset(0, .035),
       end: Offset.zero,
@@ -66,10 +74,7 @@ class _AppPageEntranceState extends State<AppPageEntrance> with SingleTickerProv
   Widget build(BuildContext context) {
     return FadeTransition(
       opacity: _fadeAnimation,
-      child: SlideTransition(
-        position: _slideAnimation,
-        child: widget.child,
-      ),
+      child: SlideTransition(position: _slideAnimation, child: widget.child),
     );
   }
 }
@@ -111,7 +116,9 @@ class AppLogo extends StatelessWidget {
 
     final content = Column(
       mainAxisSize: MainAxisSize.min,
-      crossAxisAlignment: center ? CrossAxisAlignment.center : CrossAxisAlignment.start,
+      crossAxisAlignment: center
+          ? CrossAxisAlignment.center
+          : CrossAxisAlignment.start,
       children: [logo],
     );
 
@@ -132,7 +139,9 @@ class LanguageButton extends StatelessWidget {
           foregroundColor: AppColors.logo,
           backgroundColor: Colors.white.withOpacity(.92),
           padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 10),
-          shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
+          shape: RoundedRectangleBorder(
+            borderRadius: BorderRadius.circular(16),
+          ),
         ),
         icon: const Icon(Icons.language),
         label: Text(context.l10n.text('langLabel')),
@@ -160,10 +169,10 @@ class LanguageDropdownChip extends StatelessWidget {
         child: Row(
           mainAxisSize: MainAxisSize.min,
           children: [
-            const Text('🇵🇸', style: TextStyle(fontSize: 14)),
+            Text(!isArabic ? "🇮🇳" : '🇵🇸', style: TextStyle(fontSize: 14)),
             const SizedBox(width: 5),
             Text(
-              isArabic ? 'English' : 'عربي',
+              !isArabic ? 'English' : 'عربي',
               style: const TextStyle(
                 fontSize: 15,
                 color: AppColors.text,
@@ -171,7 +180,11 @@ class LanguageDropdownChip extends StatelessWidget {
               ),
             ),
             const SizedBox(width: 2),
-            const Icon(Icons.keyboard_arrow_down_rounded, size: 17, color: AppColors.text),
+            const Icon(
+              Icons.keyboard_arrow_down_rounded,
+              size: 17,
+              color: AppColors.text,
+            ),
           ],
         ),
       ),
@@ -185,7 +198,9 @@ class HelpPillButton extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return InkWell(
-      onTap: () => Navigator.of(context).push(MaterialPageRoute(builder: (_) => const HelpScreen())),
+      onTap: () => Navigator.of(
+        context,
+      ).push(MaterialPageRoute(builder: (_) => const HelpScreen())),
       borderRadius: BorderRadius.circular(12),
       child: Container(
         padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 8),
@@ -200,7 +215,7 @@ class HelpPillButton extends StatelessWidget {
             const SizedBox(width: 6),
             Text(
               context.l10n.text('help').toUpperCase(),
-              style: const TextStyle(fontWeight: FontWeight.w500, fontSize: 20),
+              style: const TextStyle(fontWeight: FontWeight.w500, fontSize: 16),
             ),
           ],
         ),
@@ -220,44 +235,56 @@ class AuthScaffold extends StatelessWidget {
       textDirection: context.l10n.textDirection,
       child: Scaffold(
         body: Container(
-          decoration: const BoxDecoration(color: Color(0xFFF8EFE6)),
+          color: const Color(0xFFF8EFE6),
           child: SafeArea(
             child: Stack(
               children: [
-                Positioned.fill(
-                  child: Opacity(
-                    opacity: .34,
-                    child: Image.asset('assets/images/img.png', fit: BoxFit.cover),
-                  ),
+                /// 🔥 BACKGROUND IMAGE (FIXED)
+                Image.asset(
+                  'assets/images/img.png',
+                  width: double.infinity,
+                  fit: BoxFit.cover,
                 ),
+
+                /// 🔥 MAIN CONTENT
                 Column(
                   children: [
-                    const Padding(
-                      padding: EdgeInsets.fromLTRB(12, 8, 12, 0),
+                    /// 🔝 TOP BAR
+                    Padding(
+                      padding: const EdgeInsets.symmetric(
+                        horizontal: 16,
+                        vertical: 12,
+                      ),
                       child: Row(
-                        children: [
+                        mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                        children: const [
                           HelpPillButton(),
-                          Spacer(),
                           LanguageDropdownChip(),
                         ],
                       ),
                     ),
-                    const Spacer(),
-                    Padding(
-                      padding: const EdgeInsets.symmetric(horizontal: 24),
-                      child: Image.asset(
-                        'assets/images/logo.webp',
-                        height: 150,
-                        fit: BoxFit.contain,
+
+                    const SizedBox(height: 20),
+
+                    /// ✅ CENTER LOGO (PERFECT POSITION)
+                    Expanded(
+                      child: Center(
+                        child: Image.asset(
+                          'assets/images/logo.webp',
+
+                        ),
                       ),
                     ),
-                    const SizedBox(height: 16),
+
+                    /// ⬇️ BOTTOM CARD (LOGIN AREA)
                     Container(
                       width: double.infinity,
-                      padding: const EdgeInsets.fromLTRB(16, 20, 16, 20),
+                      padding: const EdgeInsets.fromLTRB(16, 52, 16, 52),
                       decoration: const BoxDecoration(
-                        color: Color(0xFFF2F2F4),
-                        borderRadius: BorderRadius.vertical(top: Radius.circular(26)),
+                        color: Colors.white,
+                        borderRadius: BorderRadius.vertical(
+                          top: Radius.circular(30),
+                        ),
                       ),
                       child: child,
                     ),
@@ -296,14 +323,19 @@ class AppPrimaryButton extends StatelessWidget {
           foregroundColor: AppColors.text,
           disabledBackgroundColor: AppColors.primary.withOpacity(.7),
           elevation: 0,
-          shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+          shape: RoundedRectangleBorder(
+            borderRadius: BorderRadius.circular(12),
+          ),
           textStyle: const TextStyle(fontSize: 16, fontWeight: FontWeight.w700),
         ),
         child: isLoading
             ? const SizedBox(
                 width: 22,
                 height: 22,
-                child: CircularProgressIndicator(strokeWidth: 2.5, color: AppColors.text),
+                child: CircularProgressIndicator(
+                  strokeWidth: 2.5,
+                  color: AppColors.text,
+                ),
               )
             : Text(label),
       ),
@@ -312,7 +344,11 @@ class AppPrimaryButton extends StatelessWidget {
 }
 
 class AppOutlinedButton extends StatelessWidget {
-  const AppOutlinedButton({super.key, required this.label, required this.onPressed});
+  const AppOutlinedButton({
+    super.key,
+    required this.label,
+    required this.onPressed,
+  });
 
   final String label;
   final VoidCallback onPressed;
@@ -328,7 +364,9 @@ class AppOutlinedButton extends StatelessWidget {
           foregroundColor: AppColors.text,
           side: const BorderSide(color: Color(0xFFF1C7A2)),
           backgroundColor: const Color(0xFFFFFCF8),
-          shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+          shape: RoundedRectangleBorder(
+            borderRadius: BorderRadius.circular(12),
+          ),
           textStyle: const TextStyle(fontSize: 16, fontWeight: FontWeight.w700),
         ),
         child: Text(label),
@@ -447,10 +485,9 @@ class AppDropdownField extends StatelessWidget {
             ),
             child: Text(
               value,
-              style: Theme.of(context)
-                  .textTheme
-                  .bodyLarge
-                  ?.copyWith(color: AppColors.textMuted),
+              style: Theme.of(
+                context,
+              ).textTheme.bodyLarge?.copyWith(color: AppColors.textMuted),
             ),
           ),
         ),
@@ -476,15 +513,20 @@ class AppTextLink extends StatelessWidget {
     return Wrap(
       alignment: WrapAlignment.center,
       children: [
-        Text(prefix, style: Theme.of(context).textTheme.bodyMedium?.copyWith(color: AppColors.textMuted)),
+        Text(
+          prefix,
+          style: Theme.of(
+            context,
+          ).textTheme.bodyMedium?.copyWith(color: AppColors.textMuted),
+        ),
         GestureDetector(
           onTap: onTap,
           child: Text(
             link,
             style: Theme.of(context).textTheme.bodyMedium?.copyWith(
-                  color: AppColors.text,
-                  fontWeight: FontWeight.w600,
-                ),
+              color: AppColors.text,
+              fontWeight: FontWeight.w600,
+            ),
           ),
         ),
       ],
@@ -493,7 +535,12 @@ class AppTextLink extends StatelessWidget {
 }
 
 class AppScaffoldBody extends StatelessWidget {
-  const AppScaffoldBody({super.key, required this.child, this.horizontalPadding = 10, this.topPadding = 12});
+  const AppScaffoldBody({
+    super.key,
+    required this.child,
+    this.horizontalPadding = 10,
+    this.topPadding = 12,
+  });
 
   final Widget child;
   final double horizontalPadding;
@@ -505,9 +552,7 @@ class AppScaffoldBody extends StatelessWidget {
       textDirection: context.l10n.textDirection,
       child: Scaffold(
         body: AppBackground(
-          child: SafeArea(
-            child: AppPageEntrance(child: child),
-          ),
+          child: SafeArea(child: AppPageEntrance(child: child)),
         ),
       ),
     );
@@ -515,7 +560,11 @@ class AppScaffoldBody extends StatelessWidget {
 }
 
 class HeroIllustration extends StatelessWidget {
-  const HeroIllustration({super.key, this.height = 320, this.showPattern = true});
+  const HeroIllustration({
+    super.key,
+    this.height = 320,
+    this.showPattern = true,
+  });
 
   final double height;
   final bool showPattern;
@@ -527,14 +576,9 @@ class HeroIllustration extends StatelessWidget {
       width: double.infinity,
       child: Stack(
         alignment: Alignment.center,
-        children:  [
-          Image.asset(
-              'assets/images/welcome.png'
-          ),
-        ],
+        children: [Image.asset('assets/images/welcome.png')],
       ),
     );
-
 
     return content;
   }
@@ -549,7 +593,11 @@ class SectionTitle extends StatelessWidget {
   Widget build(BuildContext context) {
     return Text(
       text,
-      style: const TextStyle(fontSize: 18, fontWeight: FontWeight.w700, color: AppColors.text),
+      style: const TextStyle(
+        fontSize: 18,
+        fontWeight: FontWeight.w700,
+        color: AppColors.text,
+      ),
     );
   }
 }
