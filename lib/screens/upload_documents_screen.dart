@@ -52,9 +52,7 @@ class _UploadDocumentsScreenState extends State<UploadDocumentsScreen> {
 
   void _onContinue() {
     if (!_allDocumentsSelected) {
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text(context.l10n.text('uploadAllRequiredDocs'))),
-      );
+      showAppSnackBar(context, context.l10n.text('uploadAllRequiredDocs'));
       return;
     }
 

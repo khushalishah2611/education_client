@@ -80,15 +80,10 @@ class _VerifyOtpScreenState extends State<VerifyOtpScreen> {
     _otpControllers.any((c) => c.text.trim().isEmpty);
 
     if (hasEmptyField) {
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(
-          content: Text(
-            context.l10n.isArabic
-                ? 'يرجى إدخال OTP كامل'
-                : 'Please enter complete OTP',
-          ),
-          backgroundColor: Colors.red,
-        ),
+      showAppSnackBar(
+        context,
+        context.l10n.isArabic ? 'يرجى إدخال OTP كامل' : 'Please enter complete OTP',
+        backgroundColor: Colors.red,
       );
       return;
     }
