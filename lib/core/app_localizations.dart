@@ -82,7 +82,7 @@ const Map<String, Map<String, dynamic>> _fallbackValues = {
     'email': 'Email',
     'sendOtp': 'Send OTP',
     'verifyOtp': 'Verify OTP',
-    'otpHelp': 'Enter the 6-digit OTP sent to your email:',
+    'otpHelp': 'Enter the 6-digit OTP sent to your mobile no:',
     'resendOtp': 'Resend OTP in : 30 second',
     'verifyAndLogin': 'Verify & Login',
     'createYourAccount': 'Create Your Account',

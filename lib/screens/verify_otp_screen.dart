@@ -1,5 +1,4 @@
 import 'dart:async';
-
 import 'package:flutter/material.dart';
 
 import '../core/app_localizations.dart';
@@ -16,7 +15,7 @@ class VerifyOtpScreen extends StatefulWidget {
 
 class _VerifyOtpScreenState extends State<VerifyOtpScreen> {
   static const int _initialSeconds = 60;
-  static const _verifyCardShade = Color(0xFFF3F3F3);
+  static const _verifyCardShade = Colors.white;
 
   late final List<TextEditingController> _otpControllers;
   late final List<FocusNode> _focusNodes;
@@ -67,10 +66,42 @@ class _VerifyOtpScreenState extends State<VerifyOtpScreen> {
   }
 
   String _resendText(BuildContext context) {
-    if (_secondsRemaining == 0) return context.l10n.isArabic ? 'إعادة إرسال OTP' : 'Resend OTP';
+    if (_secondsRemaining == 0) {
+      return context.l10n.isArabic ? 'إعادة إرسال OTP' : 'Resend OTP';
+    }
     return context.l10n.isArabic
         ? 'إعادة إرسال OTP خلال : $_secondsRemaining ثانية'
         : 'Resend OTP in : $_secondsRemaining second';
+  }
+
+  /// ✅ OTP VALIDATION FUNCTION
+  void _verifyOtp(BuildContext context) {
+    final hasEmptyField =
+    _otpControllers.any((c) => c.text.trim().isEmpty);
+
+    if (hasEmptyField) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: Text(
+            context.l10n.isArabic
+                ? 'يرجى إدخال OTP كامل'
+                : 'Please enter complete OTP',
+          ),
+          backgroundColor: Colors.red,
+        ),
+      );
+      return;
+    }
+
+    final otp = _otpControllers.map((e) => e.text).join();
+
+    /// 👉 optional debug
+    print("OTP Entered: $otp");
+
+    Navigator.of(context).pushAndRemoveUntil(
+      MaterialPageRoute(builder: (_) => const HomeScreen()),
+          (route) => false,
+    );
   }
 
   @override
@@ -86,6 +117,7 @@ class _VerifyOtpScreenState extends State<VerifyOtpScreen> {
             style: Theme.of(context).textTheme.headlineMedium,
           ),
           const SizedBox(height: 18),
+
           Center(
             child: Text(
               context.l10n.text('otpHelp'),
@@ -93,12 +125,16 @@ class _VerifyOtpScreenState extends State<VerifyOtpScreen> {
               style: Theme.of(context).textTheme.titleMedium,
             ),
           ),
+
           const SizedBox(height: 24),
+
           _OtpRow(
             controllers: _otpControllers,
             focusNodes: _focusNodes,
           ),
+
           const SizedBox(height: 10),
+
           Center(
             child: TextButton(
               onPressed: _secondsRemaining == 0 ? _resendOtp : null,
@@ -106,19 +142,19 @@ class _VerifyOtpScreenState extends State<VerifyOtpScreen> {
                 foregroundColor: AppColors.text,
                 disabledForegroundColor: AppColors.text,
                 textStyle: Theme.of(context).textTheme.titleMedium?.copyWith(
-                      fontWeight: FontWeight.w500,
-                    ),
+                  fontWeight: FontWeight.w500,
+                ),
               ),
               child: Text(_resendText(context)),
             ),
           ),
+
           const SizedBox(height: 28),
+
+          /// ✅ UPDATED BUTTON WITH VALIDATION
           AppPrimaryButton(
             label: context.l10n.text('verifyAndLogin'),
-            onPressed: () => Navigator.of(context).pushAndRemoveUntil(
-              MaterialPageRoute(builder: (_) => const HomeScreen()),
-              (route) => false,
-            ),
+            onPressed: () => _verifyOtp(context),
           ),
         ],
       ),
@@ -144,7 +180,7 @@ class _OtpRow extends StatelessWidget {
         runSpacing: 10,
         children: List.generate(
           6,
-          (index) => SizedBox(
+              (index) => SizedBox(
             width: 44,
             height: 44,
             child: TextField(
@@ -154,8 +190,8 @@ class _OtpRow extends StatelessWidget {
               textAlign: TextAlign.center,
               maxLength: 1,
               style: Theme.of(context).textTheme.titleLarge?.copyWith(
-                    fontWeight: FontWeight.w700,
-                  ),
+                fontWeight: FontWeight.w700,
+              ),
               decoration: InputDecoration(
                 counterText: '',
                 contentPadding: EdgeInsets.zero,
