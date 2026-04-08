@@ -4,6 +4,19 @@ import '../core/app_localizations.dart';
 import '../core/app_theme.dart';
 import '../screens/help_screen.dart';
 
+void showAppSnackBar(
+  BuildContext context,
+  String message, {
+  Color? backgroundColor,
+}) {
+  ScaffoldMessenger.of(context).showSnackBar(
+    SnackBar(
+      content: Text(message),
+      backgroundColor: backgroundColor,
+    ),
+  );
+}
+
 /// Backward-compatible gradient transform that translates by [dx]/[dy].
 ///
 /// Some shimmer implementations reference `GradientTranslation` directly.

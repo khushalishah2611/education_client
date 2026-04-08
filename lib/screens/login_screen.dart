@@ -108,19 +108,13 @@ class _LoginScreenState extends State<LoginScreen> {
             onPressed: () {
               /// Mobile validation
               if (_mobileController.text.length < 10) {
-                ScaffoldMessenger.of(context).showSnackBar(
-                  const SnackBar(content: Text("Enter valid mobile number")),
-                );
+                showAppSnackBar(context, 'Enter valid mobile number');
                 return;
               }
 
               /// Checkbox validation
               if (!_isChecked) {
-                ScaffoldMessenger.of(context).showSnackBar(
-                  const SnackBar(
-                    content: Text("Please accept Terms & Privacy"),
-                  ),
-                );
+                showAppSnackBar(context, 'Please accept Terms & Privacy');
                 return;
               }
 
