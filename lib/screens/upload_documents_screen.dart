@@ -52,7 +52,7 @@ class _UploadDocumentsScreenState extends State<UploadDocumentsScreen> {
 
   void _onContinue() {
     if (!_allDocumentsSelected) {
-      showAppSnackBar(context, context.l10n.text('uploadAllRequiredDocs'));
+      // showAppSnackBar(context, context.l10n.text('uploadAllRequiredDocs'));
       return;
     }
 

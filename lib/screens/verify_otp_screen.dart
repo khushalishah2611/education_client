@@ -76,14 +76,15 @@ class _VerifyOtpScreenState extends State<VerifyOtpScreen> {
 
   /// ✅ OTP VALIDATION FUNCTION
   void _verifyOtp(BuildContext context) {
-    final hasEmptyField =
-    _otpControllers.any((c) => c.text.trim().isEmpty);
+    final hasEmptyField = _otpControllers.any((c) => c.text.trim().isEmpty);
 
     if (hasEmptyField) {
       showAppSnackBar(
         context,
-        context.l10n.isArabic ? 'يرجى إدخال OTP كامل' : 'Please enter complete OTP',
-        backgroundColor: Colors.red,
+        type: AppSnackBarType.error,
+        message: context.l10n.isArabic
+            ? 'يرجى إدخال OTP كامل'
+            : 'Please enter complete OTP',
       );
       return;
     }
@@ -95,7 +96,7 @@ class _VerifyOtpScreenState extends State<VerifyOtpScreen> {
 
     Navigator.of(context).pushAndRemoveUntil(
       MaterialPageRoute(builder: (_) => const HomeScreen()),
-          (route) => false,
+      (route) => false,
     );
   }
 
@@ -123,10 +124,7 @@ class _VerifyOtpScreenState extends State<VerifyOtpScreen> {
 
           const SizedBox(height: 24),
 
-          _OtpRow(
-            controllers: _otpControllers,
-            focusNodes: _focusNodes,
-          ),
+          _OtpRow(controllers: _otpControllers, focusNodes: _focusNodes),
 
           const SizedBox(height: 10),
 
@@ -136,9 +134,9 @@ class _VerifyOtpScreenState extends State<VerifyOtpScreen> {
               style: TextButton.styleFrom(
                 foregroundColor: AppColors.text,
                 disabledForegroundColor: AppColors.text,
-                textStyle: Theme.of(context).textTheme.titleMedium?.copyWith(
-                  fontWeight: FontWeight.w500,
-                ),
+                textStyle: Theme.of(
+                  context,
+                ).textTheme.titleMedium?.copyWith(fontWeight: FontWeight.w500),
               ),
               child: Text(_resendText(context)),
             ),
@@ -158,10 +156,7 @@ class _VerifyOtpScreenState extends State<VerifyOtpScreen> {
 }
 
 class _OtpRow extends StatelessWidget {
-  const _OtpRow({
-    required this.controllers,
-    required this.focusNodes,
-  });
+  const _OtpRow({required this.controllers, required this.focusNodes});
 
   final List<TextEditingController> controllers;
   final List<FocusNode> focusNodes;
@@ -175,7 +170,7 @@ class _OtpRow extends StatelessWidget {
         runSpacing: 10,
         children: List.generate(
           6,
-              (index) => SizedBox(
+          (index) => SizedBox(
             width: 44,
             height: 44,
             child: TextField(
@@ -184,9 +179,9 @@ class _OtpRow extends StatelessWidget {
               keyboardType: TextInputType.number,
               textAlign: TextAlign.center,
               maxLength: 1,
-              style: Theme.of(context).textTheme.titleLarge?.copyWith(
-                fontWeight: FontWeight.w700,
-              ),
+              style: Theme.of(
+                context,
+              ).textTheme.titleLarge?.copyWith(fontWeight: FontWeight.w700),
               decoration: InputDecoration(
                 counterText: '',
                 contentPadding: EdgeInsets.zero,

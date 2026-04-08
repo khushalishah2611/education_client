@@ -57,11 +57,11 @@ class _LoginScreenState extends State<LoginScreen> {
                   child: DropdownButton<String>(
                     value: _selectedDialCode,
                     borderRadius: BorderRadius.circular(12),
-                    icon: const Icon(Icons.keyboard_arrow_down_rounded, size: 18),
-                    style: const TextStyle(
-                      fontSize: 16,
-                      color: AppColors.text,
+                    icon: const Icon(
+                      Icons.keyboard_arrow_down_rounded,
+                      size: 18,
                     ),
+                    style: const TextStyle(fontSize: 16, color: AppColors.text),
                     items: const [
                       DropdownMenuItem(value: '+91', child: Text('🇮🇳 +91')),
                       DropdownMenuItem(value: '+971', child: Text('🇦🇪 +971')),
@@ -108,13 +108,25 @@ class _LoginScreenState extends State<LoginScreen> {
             onPressed: () {
               /// Mobile validation
               if (_mobileController.text.length < 10) {
-                showAppSnackBar(context, 'Enter valid mobile number');
+                showAppSnackBar(
+                  context,
+                  type: AppSnackBarType.error,
+                  message: context.l10n.isArabic
+                      ? 'أدخل رقم هاتف صحيح'
+                      : 'Enter valid mobile number',
+                );
                 return;
               }
 
               /// Checkbox validation
               if (!_isChecked) {
-                showAppSnackBar(context, 'Please accept Terms & Privacy');
+                showAppSnackBar(
+                  context,
+                  type: AppSnackBarType.error,
+                  message: context.l10n.isArabic
+                      ? 'يرجى قبول الشروط وسياسة الخصوصية'
+                      : 'Please accept Terms & Privacy',
+                );
                 return;
               }
 
