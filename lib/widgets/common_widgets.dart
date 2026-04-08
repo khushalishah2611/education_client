@@ -20,6 +20,29 @@ class GradientTranslation extends GradientTransform {
   }
 }
 
+
+
+enum AppSnackBarType { success, error }
+
+void showAppSnackBar(
+  BuildContext context, {
+  required String message,
+  AppSnackBarType type = AppSnackBarType.success,
+}) {
+  final messenger = ScaffoldMessenger.of(context);
+  messenger
+    ..hideCurrentSnackBar()
+    ..showSnackBar(
+      SnackBar(
+        content: Text(message),
+        backgroundColor: type == AppSnackBarType.success
+            ? const Color(0xFF2E7D32)
+            : Colors.red.shade700,
+        behavior: SnackBarBehavior.floating,
+      ),
+    );
+}
+
 class AppPageEntrance extends StatefulWidget {
   const AppPageEntrance({
     super.key,

@@ -111,5 +111,11 @@
   "notificationDate": "03 Mar 2026",
   "logoutConfirmMessage": "Are you sure you want to log out?",
   "cancel": "Cancel",
-  "confirm": "Confirm"
+  "confirm": "Confirm",
+  "noInternetMessage": "No internet connection. Please check your network and try again.",
+  "completeAllFieldsMessage": "Please complete all required fields.",
+  "acceptTermsMessage": "Please accept the Terms & Conditions to continue.",
+  "accountReadyMessage": "Looks good! Account details verified successfully.",
+  "termsAndConditionsTitle": "Terms & Conditions",
+  "termsAndConditionsDescription": "By creating an account, you agree to provide valid and accurate information. Your details will be used only for admission-related communication and application processing. Please review all information before submitting."
 }
