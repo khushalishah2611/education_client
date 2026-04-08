@@ -13,6 +13,7 @@ class LoginScreen extends StatefulWidget {
 
 class _LoginScreenState extends State<LoginScreen> {
   final TextEditingController _mobileController = TextEditingController();
+  String _selectedDialCode = '+91';
 
   bool _isChecked = false; // ✅ Checkbox state
 
@@ -51,8 +52,29 @@ class _LoginScreenState extends State<LoginScreen> {
               children: [
                 const SizedBox(width: 12),
 
-                /// Country Code
-                const Text('🇮🇳 +91', style: TextStyle(fontSize: 16)),
+                /// Country Code Dropdown
+                DropdownButtonHideUnderline(
+                  child: DropdownButton<String>(
+                    value: _selectedDialCode,
+                    borderRadius: BorderRadius.circular(12),
+                    icon: const Icon(Icons.keyboard_arrow_down_rounded, size: 18),
+                    style: const TextStyle(
+                      fontSize: 16,
+                      color: AppColors.text,
+                    ),
+                    items: const [
+                      DropdownMenuItem(value: '+91', child: Text('🇮🇳 +91')),
+                      DropdownMenuItem(value: '+971', child: Text('🇦🇪 +971')),
+                      DropdownMenuItem(value: '+966', child: Text('🇸🇦 +966')),
+                    ],
+                    onChanged: (value) {
+                      if (value == null) return;
+                      setState(() {
+                        _selectedDialCode = value;
+                      });
+                    },
+                  ),
+                ),
 
                 const SizedBox(width: 10),
 

@@ -225,12 +225,22 @@ class HelpPillButton extends StatelessWidget {
 }
 
 class AuthScaffold extends StatelessWidget {
-  const AuthScaffold({super.key, required this.child});
+  const AuthScaffold({
+    super.key,
+    required this.child,
+    this.bottomCardColor = Colors.white,
+  });
 
   final Widget child;
+  final Color bottomCardColor;
 
   @override
   Widget build(BuildContext context) {
+    final size = MediaQuery.sizeOf(context);
+    final horizontalPadding = size.width < 360 ? 14.0 : 16.0;
+    final topPadding = size.height < 760 ? 32.0 : 52.0;
+    final bottomPadding = size.height < 760 ? 32.0 : 52.0;
+
     return Directionality(
       textDirection: context.l10n.textDirection,
       child: Scaffold(
@@ -279,9 +289,14 @@ class AuthScaffold extends StatelessWidget {
                     /// ⬇️ BOTTOM CARD (LOGIN AREA)
                     Container(
                       width: double.infinity,
-                      padding: const EdgeInsets.fromLTRB(16, 52, 16, 52),
-                      decoration: const BoxDecoration(
-                        color: Colors.white,
+                      padding: EdgeInsets.fromLTRB(
+                        horizontalPadding,
+                        topPadding,
+                        horizontalPadding,
+                        bottomPadding,
+                      ),
+                      decoration: BoxDecoration(
+                        color: bottomCardColor,
                         borderRadius: BorderRadius.vertical(
                           top: Radius.circular(30),
                         ),
