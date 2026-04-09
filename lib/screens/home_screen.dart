@@ -26,7 +26,9 @@ class _HomeScreenState extends State<HomeScreen> {
   int _activeTab = 0;
   bool _isLoadingUniversities = true;
   bool _isLoadingBanners = true;
-  final PageController _bannerPageController = PageController(viewportFraction: 1);
+  final PageController _bannerPageController = PageController(
+    viewportFraction: 1,
+  );
   List<BannerItem> _banners = const [];
   List<UniversityData> _universities = const [];
   List<String> _programOptions = const [];
@@ -69,8 +71,13 @@ class _HomeScreenState extends State<HomeScreen> {
 
       if (!mounted) return;
       setState(() {
-        _universities = universities.map(_toUniversityData).toList(growable: false);
-        _programOptions = programs.map((item) => item.name).toSet().toList(growable: false);
+        _universities = universities
+            .map(_toUniversityData)
+            .toList(growable: false);
+        _programOptions = programs
+            .map((item) => item.name)
+            .toSet()
+            .toList(growable: false);
         _academicOptions = academics;
         _countryOptions = countries
             .map(
@@ -135,7 +142,9 @@ class _HomeScreenState extends State<HomeScreen> {
     await showDialog<void>(
       context: context,
       builder: (_) => _AdvanceSearchDialog(
-        countryOptions: _countryOptions.map((item) => item.name).toList(growable: false),
+        countryOptions: _countryOptions
+            .map((item) => item.name)
+            .toList(growable: false),
         academicOptions: _academicOptions,
         programOptions: _programOptions,
         currencyOptions: _currencyOptions,
@@ -151,9 +160,10 @@ class _HomeScreenState extends State<HomeScreen> {
   }
 
   UniversityData _toUniversityData(HomeUniversity university) {
-    final location = [university.city, university.country]
-        .where((item) => item.trim().isNotEmpty)
-        .join(', ');
+    final location = [
+      university.city,
+      university.country,
+    ].where((item) => item.trim().isNotEmpty).join(', ');
     return UniversityData(
       name: university.name,
       location: location.isEmpty ? 'N/A' : location,
@@ -166,7 +176,10 @@ class _HomeScreenState extends State<HomeScreen> {
   }
 
   String _shortCode(String name) {
-    final parts = name.split(RegExp(r'\s+')).where((part) => part.isNotEmpty).toList();
+    final parts = name
+        .split(RegExp(r'\s+'))
+        .where((part) => part.isNotEmpty)
+        .toList();
     if (parts.isEmpty) return 'UNI';
     if (parts.length == 1) {
       final end = parts.first.length > 3 ? 3 : parts.first.length;
@@ -188,7 +201,8 @@ class _HomeScreenState extends State<HomeScreen> {
   }
 
   String _resolveCountryFlag(CountryMaster country) {
-    if (country.value.startsWith('http://') || country.value.startsWith('https://')) {
+    if (country.value.startsWith('http://') ||
+        country.value.startsWith('https://')) {
       return country.value;
     }
     final code = country.value.trim().toLowerCase();
@@ -264,11 +278,15 @@ class _HomeScreenState extends State<HomeScreen> {
                               child: Container(
                                 height: 44,
                                 width: double.infinity,
-                                padding: const EdgeInsets.symmetric(horizontal: 14),
+                                padding: const EdgeInsets.symmetric(
+                                  horizontal: 14,
+                                ),
                                 decoration: BoxDecoration(
                                   color: Colors.white,
                                   borderRadius: BorderRadius.circular(6),
-                                  border: Border.all(color: const Color(0xFFE4B88B)),
+                                  border: Border.all(
+                                    color: const Color(0xFFE4B88B),
+                                  ),
                                 ),
                                 child: Row(
                                   children: [
@@ -296,10 +314,14 @@ class _HomeScreenState extends State<HomeScreen> {
                               child: Container(
                                 width: double.infinity,
                                 height: 44,
-                                padding: const EdgeInsets.symmetric(horizontal: 16),
+                                padding: const EdgeInsets.symmetric(
+                                  horizontal: 16,
+                                ),
                                 decoration: BoxDecoration(
                                   borderRadius: BorderRadius.circular(6),
-                                  border: Border.all(color: const Color(0xFFE4B88B)),
+                                  border: Border.all(
+                                    color: const Color(0xFFE4B88B),
+                                  ),
                                   color: Colors.white,
                                 ),
                                 child: const Row(
@@ -390,8 +412,6 @@ class _HomeScreenState extends State<HomeScreen> {
                     activeIndex: _activeTab,
                     onTap: (index) {
                       setState(() => _activeTab = index);
-
-
                     },
                   ),
                 ],
@@ -446,15 +466,13 @@ class _DiscoverBanner extends StatelessWidget {
     if (isLoading) {
       return const _BannerShimmer();
     }
-    if (banners.isEmpty) {
-      return const _BannerFallback();
+    if (!banners.isEmpty) {
+      return const _BannerShimmer();
     }
     return Container(
       height: 120,
       width: double.infinity,
-      decoration: BoxDecoration(
-        borderRadius: BorderRadius.circular(14),
-      ),
+      decoration: BoxDecoration(borderRadius: BorderRadius.circular(14)),
       child: ClipRRect(
         borderRadius: BorderRadius.circular(14),
         child: PageView.builder(
@@ -469,10 +487,10 @@ class _DiscoverBanner extends StatelessWidget {
                 Image.network(
                   banner.imageUrl,
                   fit: BoxFit.cover,
-                  errorBuilder: (_, __, ___) => const _BannerFallback(),
+                  errorBuilder: (_, __, ___) => const _BannerShimmer(),
                   loadingBuilder: (_, child, progress) {
                     if (progress == null) return child;
-                    return const _BannerFallback();
+                    return const _BannerShimmer();
                   },
                 ),
                 if (banner.title.isNotEmpty)
@@ -487,9 +505,7 @@ class _DiscoverBanner extends StatelessWidget {
                       style: const TextStyle(
                         color: Colors.white,
                         fontWeight: FontWeight.w700,
-                        shadows: [
-                          Shadow(color: Colors.black54, blurRadius: 4),
-                        ],
+                        shadows: [Shadow(color: Colors.black54, blurRadius: 4)],
                       ),
                     ),
                   ),
@@ -502,120 +518,87 @@ class _DiscoverBanner extends StatelessWidget {
   }
 }
 
-class _BannerFallback extends StatelessWidget {
-  const _BannerFallback();
-
-  @override
-  Widget build(BuildContext context) {
-    return Container(
-      height: 120,
-      width: double.infinity,
-      padding: const EdgeInsets.fromLTRB(14, 14, 10, 8),
-      decoration: BoxDecoration(
-        borderRadius: BorderRadius.circular(14),
-        gradient: const LinearGradient(
-          colors: [Color(0xFF1B8D44), Color(0xFF0A7B37)],
-        ),
-      ),
-      child: Stack(
-        children: [
-          const Positioned(
-            right: 0,
-            bottom: 0,
-            child: SizedBox(
-              width: 124,
-              height: 86,
-              child: HeroIllustration(showPattern: false, height: 86),
-            ),
-          ),
-          Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              Text(
-                'Ads will be displayed over here',
-                style: const TextStyle(
-                  color: Colors.white,
-                  fontSize: 14,
-                  fontWeight: FontWeight.w600,
-                ),
-              ),
-              const SizedBox(height: 8),
-              const Text(
-                'You can place your advertisements and\npromotions here.',
-                style: TextStyle(color: Colors.white, fontSize: 12),
-              ),
-              const SizedBox(height: 8),
-              Container(
-                padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
-                decoration: BoxDecoration(
-                  color: const Color(0xFFC7F4D0),
-                  borderRadius: BorderRadius.circular(8),
-                ),
-                child: const Text(
-                  'Explore Now',
-                  style: TextStyle(
-                    color: Color(0xFF00351A),
-                    fontWeight: FontWeight.w700,
-                    fontSize: 12,
-                  ),
-                ),
-              ),
-            ],
-          ),
-        ],
-      ),
-    );
-  }
-}
-
 class _BannerShimmer extends StatelessWidget {
   const _BannerShimmer();
 
   @override
   Widget build(BuildContext context) {
-    return Container(
-      height: 120,
-      width: double.infinity,
-      decoration: BoxDecoration(
-        borderRadius: BorderRadius.circular(14),
-        color: Colors.white,
-      ),
-      child: ClipRRect(
-        borderRadius: BorderRadius.circular(14),
-        child: const Stack(
-          fit: StackFit.expand,
+    return AppShimmerBox(
+      borderRadius: BorderRadius.circular(14),
+      baseColor: const Color(0xFFE6E6E6),
+      highlightColor: const Color(0xFFF4F4F4),
+      child: Container(
+        height: 120,
+        width: double.infinity,
+        padding: const EdgeInsets.fromLTRB(14, 14, 10, 8),
+        decoration: BoxDecoration(
+          borderRadius: BorderRadius.circular(14),
+          color: Colors.white, // shimmer visible better on solid color
+        ),
+        child: Stack(
           children: [
-            AppShimmerBox(
-              borderRadius: BorderRadius.zero,
-              baseColor: Color(0xFFE6E6E6),
-              highlightColor: Color(0xFFF4F4F4),
-            ),
+            /// Right Illustration Placeholder
             Positioned(
-              left: 12,
-              right: 110,
-              top: 16,
-              child: AppShimmerBox(
-                height: 14,
-                borderRadius: BorderRadius.all(Radius.circular(6)),
+              right: 0,
+              bottom: 0,
+              child: Container(
+                width: 124,
+                height: 86,
+                decoration: BoxDecoration(
+                  color: Colors.grey.shade300,
+                  borderRadius: BorderRadius.circular(8),
+                ),
               ),
             ),
-            Positioned(
-              left: 12,
-              right: 150,
-              top: 40,
-              child: AppShimmerBox(
-                height: 12,
-                borderRadius: BorderRadius.all(Radius.circular(6)),
-              ),
-            ),
-            Positioned(
-              left: 12,
-              bottom: 14,
-              child: AppShimmerBox(
-                height: 32,
-                width: 92,
-                borderRadius: BorderRadius.all(Radius.circular(8)),
-              ),
+
+            /// Left Content Placeholder
+            Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                /// Title
+                Container(
+                  height: 14,
+                  width: 180,
+                  decoration: BoxDecoration(
+                    color: Colors.grey.shade300,
+                    borderRadius: BorderRadius.circular(4),
+                  ),
+                ),
+                const SizedBox(height: 10),
+
+                /// Subtitle line 1
+                Container(
+                  height: 12,
+                  width: 220,
+                  decoration: BoxDecoration(
+                    color: Colors.grey.shade300,
+                    borderRadius: BorderRadius.circular(4),
+                  ),
+                ),
+                const SizedBox(height: 6),
+
+                /// Subtitle line 2
+                Container(
+                  height: 12,
+                  width: 160,
+                  decoration: BoxDecoration(
+                    color: Colors.grey.shade300,
+                    borderRadius: BorderRadius.circular(4),
+                  ),
+                ),
+
+                const SizedBox(height: 10),
+
+                /// Button placeholder
+                Container(
+                  height: 28,
+                  width: 100,
+                  decoration: BoxDecoration(
+                    color: Colors.grey.shade300,
+                    borderRadius: BorderRadius.circular(8),
+                  ),
+                ),
+              ],
             ),
           ],
         ),
@@ -660,7 +643,8 @@ class _CountrySelectionDialog extends StatefulWidget {
   final String? selected;
 
   @override
-  State<_CountrySelectionDialog> createState() => _CountrySelectionDialogState();
+  State<_CountrySelectionDialog> createState() =>
+      _CountrySelectionDialogState();
 }
 
 class _CountrySelectionDialogState extends State<_CountrySelectionDialog> {
@@ -703,17 +687,23 @@ class _CountrySelectionDialogState extends State<_CountrySelectionDialog> {
           child: Column(
             mainAxisSize: MainAxisSize.min,
             children: [
-              TextField(
-                controller: _searchController,
-                onChanged: _onSearchChanged,
-                decoration: const InputDecoration(
-                  hintText: 'Selection Country',
-                  isDense: true,
-                  suffixIcon: Icon(Icons.keyboard_arrow_down_rounded),
-                  border: InputBorder.none,
+              SizedBox(
+                height: 45,
+                child: TextField(
+                  controller: _searchController,
+                  onChanged: _onSearchChanged,
+                  decoration: const InputDecoration(
+                    hintText: 'Selection Country',
+                    isDense: true,
+                    contentPadding: EdgeInsets.symmetric(
+                      vertical: 5,
+                      horizontal: 5,
+                    ),
+                    suffixIcon: Icon(Icons.keyboard_arrow_down_rounded),
+                    border: InputBorder.none,
+                  ),
                 ),
               ),
-              const Divider(height: 1),
               ConstrainedBox(
                 constraints: const BoxConstraints(maxHeight: 320),
                 child: ListView.separated(
@@ -789,7 +779,10 @@ class _AdvanceSearchDialog extends StatelessWidget {
         children: [
           Text(
             title,
-            style: const TextStyle(fontSize: 24 * 0.75, fontWeight: FontWeight.w600),
+            style: const TextStyle(
+              fontSize: 24 * 0.75,
+              fontWeight: FontWeight.w600,
+            ),
           ),
           const SizedBox(height: 8),
           Container(
@@ -803,7 +796,10 @@ class _AdvanceSearchDialog extends StatelessWidget {
               child: DropdownButton<String>(
                 isExpanded: true,
                 value: hasValue ? value : null,
-                icon: const Icon(Icons.keyboard_arrow_down_rounded, color: Color(0xFF757575)),
+                icon: const Icon(
+                  Icons.keyboard_arrow_down_rounded,
+                  color: Color(0xFF757575),
+                ),
                 hint: Text(
                   options.isEmpty ? 'No options found' : 'Select $title',
                   style: const TextStyle(color: Color(0xFF8A8A8A)),
@@ -814,7 +810,11 @@ class _AdvanceSearchDialog extends StatelessWidget {
                         value: option,
                         child: Row(
                           children: [
-                            Icon(icon, color: const Color(0xFF8A8A8A), size: 18),
+                            Icon(
+                              icon,
+                              color: const Color(0xFF8A8A8A),
+                              size: 18,
+                            ),
                             const SizedBox(width: 8),
                             Expanded(child: Text(option)),
                           ],
@@ -879,11 +879,16 @@ class _AdvanceSearchDialog extends StatelessWidget {
                   elevation: 0,
                   backgroundColor: const Color(0xFF95DAB4),
                   foregroundColor: const Color(0xFF0F2015),
-                  shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
+                  shape: RoundedRectangleBorder(
+                    borderRadius: BorderRadius.circular(10),
+                  ),
                 ),
                 child: const Text(
                   'Continue',
-                  style: TextStyle(fontSize: 24 * 0.8, fontWeight: FontWeight.w700),
+                  style: TextStyle(
+                    fontSize: 24 * 0.8,
+                    fontWeight: FontWeight.w700,
+                  ),
                 ),
               ),
             ),
@@ -1068,7 +1073,8 @@ class _Shimmer extends StatefulWidget {
   State<_Shimmer> createState() => _ShimmerState();
 }
 
-class _ShimmerState extends State<_Shimmer> with SingleTickerProviderStateMixin {
+class _ShimmerState extends State<_Shimmer>
+    with SingleTickerProviderStateMixin {
   late final AnimationController _controller;
 
   @override
@@ -1099,7 +1105,11 @@ class _ShimmerState extends State<_Shimmer> with SingleTickerProviderStateMixin 
             return LinearGradient(
               begin: Alignment.centerLeft,
               end: Alignment.centerRight,
-              colors: const [Color(0xFFE6E6E6), Color(0xFFF4F4F4), Color(0xFFE6E6E6)],
+              colors: const [
+                Color(0xFFE6E6E6),
+                Color(0xFFF4F4F4),
+                Color(0xFFE6E6E6),
+              ],
               stops: const [0.1, 0.45, 0.9],
               transform: GradientTranslation(offset, 0),
             ).createShader(bounds);
