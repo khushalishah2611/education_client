@@ -6,6 +6,7 @@ class StudentLoginResponse {
     required this.otpRequired,
     required this.otpStatus,
     required this.whatsappOtpLink,
+    required this.existingUser,
   });
 
   final String id;
@@ -14,6 +15,7 @@ class StudentLoginResponse {
   final bool otpRequired;
   final String otpStatus;
   final String whatsappOtpLink;
+  final bool existingUser;
 
   factory StudentLoginResponse.fromJson(Map<String, dynamic> json) {
     return StudentLoginResponse(
@@ -23,6 +25,7 @@ class StudentLoginResponse {
       otpRequired: json['otpRequired'] as bool? ?? false,
       otpStatus: json['otpStatus'] as String? ?? '',
       whatsappOtpLink: json['whatsappOtpLink'] as String? ?? '',
+      existingUser: json['existingUser'] as bool? ?? false,
     );
   }
 }

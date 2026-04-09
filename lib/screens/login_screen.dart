@@ -95,7 +95,9 @@ class _LoginScreenState extends State<LoginScreen> {
       showAppSnackBar(
         context,
         type: AppSnackBarType.error,
-        message: context.l10n.isArabic ? 'اختر الدولة أولًا' : 'Select country first',
+        message: context.l10n.isArabic
+            ? 'اختر الدولة أولًا'
+            : 'Select country first',
       );
       return;
     }
@@ -111,11 +113,7 @@ class _LoginScreenState extends State<LoginScreen> {
         await openExternalLink(response.whatsappOtpLink);
       }
       if (!mounted) return;
-      final bool isExistingUser =
-          response.otpStatus.toLowerCase().contains('existing') ||
-          response.message.toLowerCase().contains('already') ||
-          response.message.toLowerCase().contains('exist');
-      if (!isExistingUser && response.message.trim().isNotEmpty) {
+      if (!response.existingUser) {
         showAppSnackBar(
           context,
           type: AppSnackBarType.success,
@@ -195,8 +193,9 @@ class _LoginScreenState extends State<LoginScreen> {
                     IconButton(
                       onPressed: () => Navigator.of(context).pop(),
                       icon: const Icon(Icons.close),
-                      tooltip: MaterialLocalizations.of(context)
-                          .closeButtonTooltip,
+                      tooltip: MaterialLocalizations.of(
+                        context,
+                      ).closeButtonTooltip,
                     ),
                   ],
                 ),
