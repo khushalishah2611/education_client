@@ -3,6 +3,8 @@ import 'package:flutter/material.dart';
 import '../core/app_localizations.dart';
 import '../core/app_theme.dart';
 import '../models/app_models.dart';
+import '../models/banner_item.dart';
+import '../services/home_api_service.dart';
 import '../widgets/app_drawer.dart';
 import '../widgets/common_widgets.dart';
 import '../widgets/flow_widgets.dart';
@@ -18,13 +20,34 @@ class HomeScreen extends StatefulWidget {
 
 class _HomeScreenState extends State<HomeScreen> {
   final _scaffoldKey = GlobalKey<ScaffoldState>();
+  final HomeApiService _homeApiService = const HomeApiService();
   int _activeTab = 0;
   bool _isLoadingUniversities = true;
+  bool _isLoadingBanners = true;
+  final PageController _bannerPageController = PageController(viewportFraction: 1);
+  List<BannerItem> _banners = const [];
+  int _activeBannerIndex = 0;
+  final List<_CountryOption> _countryOptions = const [
+    _CountryOption(name: 'Oman', flagEmoji: '🇴🇲'),
+    _CountryOption(name: 'Jordan', flagEmoji: '🇯🇴'),
+    _CountryOption(name: 'UAE', flagEmoji: '🇦🇪'),
+    _CountryOption(name: 'Saudi Arabia', flagEmoji: '🇸🇦'),
+    _CountryOption(name: 'Qatar', flagEmoji: '🇶🇦'),
+    _CountryOption(name: 'India', flagEmoji: '🇮🇳'),
+  ];
+  _CountryOption? _selectedCountry;
 
   @override
   void initState() {
     super.initState();
+    _loadBanners();
     _loadUniversities();
+  }
+
+  @override
+  void dispose() {
+    _bannerPageController.dispose();
+    super.dispose();
   }
 
   Future<void> _loadUniversities() async {
@@ -32,6 +55,44 @@ class _HomeScreenState extends State<HomeScreen> {
     await Future<void>.delayed(const Duration(milliseconds: 900));
     if (!mounted) return;
     setState(() => _isLoadingUniversities = false);
+  }
+
+  Future<void> _loadBanners() async {
+    setState(() => _isLoadingBanners = true);
+    try {
+      final banners = await _homeApiService.fetchBanners(page: 1, limit: 10);
+      if (!mounted) return;
+      setState(() {
+        _banners = banners;
+        _activeBannerIndex = 0;
+      });
+    } catch (_) {
+      if (!mounted) return;
+      setState(() => _banners = const []);
+    } finally {
+      if (mounted) {
+        setState(() => _isLoadingBanners = false);
+      }
+    }
+  }
+
+  Future<void> _openCountryDialog() async {
+    final selected = await showDialog<_CountryOption>(
+      context: context,
+      builder: (_) => _CountrySelectionDialog(
+        countries: _countryOptions,
+        selected: _selectedCountry,
+      ),
+    );
+    if (selected == null || !mounted) return;
+    setState(() => _selectedCountry = selected);
+  }
+
+  Future<void> _openAdvanceSearchDialog() async {
+    await showDialog<void>(
+      context: context,
+      builder: (_) => const _AdvanceSearchDialog(),
+    );
   }
 
   @override
@@ -93,50 +154,90 @@ class _HomeScreenState extends State<HomeScreen> {
                         child: Column(
                           crossAxisAlignment: CrossAxisAlignment.start,
                           children: [
-                            AppTextField(
-                              label: context.l10n.text('cityOrCollege'),
-                              hint: context.l10n.text('searchHint'),
-                              height: 45,
-                            ),
-
-                            const SizedBox(height: 12),
-
-                            Container(
-                              width: double.infinity,
-                              padding: const EdgeInsets.symmetric(
-                                horizontal: 16,
-                                vertical: 10,
-                              ),
-                              decoration: BoxDecoration(
-                                borderRadius: BorderRadius.circular(14),
-                                border: Border.all(
-                                  color: const Color(0xFFF4D2B5),
+                            InkWell(
+                              onTap: _openCountryDialog,
+                              borderRadius: BorderRadius.circular(8),
+                              child: Container(
+                                height: 44,
+                                width: double.infinity,
+                                padding: const EdgeInsets.symmetric(horizontal: 14),
+                                decoration: BoxDecoration(
+                                  color: Colors.white,
+                                  borderRadius: BorderRadius.circular(6),
+                                  border: Border.all(color: const Color(0xFFE4B88B)),
                                 ),
-                                color: const Color(0xFFFFFCF8),
-                              ),
-                              child: Row(
-                                mainAxisAlignment: MainAxisAlignment.center,
-                                children: [
-                                  const Icon(
-                                    Icons.tune_rounded,
-                                    color: AppColors.accent,
-                                  ),
-                                  const SizedBox(width: 8),
-                                  Text(
-                                    context.l10n.text('moreFilters'),
-                                    style: const TextStyle(
-                                      color: AppColors.accent,
-                                      fontSize: 16,
-                                      fontWeight: FontWeight.w500,
+                                child: Row(
+                                  children: [
+                                    Expanded(
+                                      child: Text(
+                                        _selectedCountry?.name ?? 'Select  Country',
+                                        style: const TextStyle(
+                                          color: Color(0xFF8E8E8E),
+                                          fontSize: 14,
+                                        ),
+                                      ),
                                     ),
-                                  ),
-                                ],
+                                    const Icon(
+                                      Icons.keyboard_arrow_down_rounded,
+                                      color: Color(0xFF666666),
+                                    ),
+                                  ],
+                                ),
+                              ),
+                            ),
+                            const SizedBox(height: 12),
+                            InkWell(
+                              onTap: _openAdvanceSearchDialog,
+                              borderRadius: BorderRadius.circular(6),
+                              child: Container(
+                                width: double.infinity,
+                                height: 44,
+                                padding: const EdgeInsets.symmetric(horizontal: 16),
+                                decoration: BoxDecoration(
+                                  borderRadius: BorderRadius.circular(6),
+                                  border: Border.all(color: const Color(0xFFE4B88B)),
+                                  color: Colors.white,
+                                ),
+                                child: const Row(
+                                  mainAxisAlignment: MainAxisAlignment.center,
+                                  children: [
+                                    Icon(
+                                      Icons.tune_rounded,
+                                      color: AppColors.accent,
+                                      size: 20,
+                                    ),
+                                    SizedBox(width: 8),
+                                    Text(
+                                      'Advance Search',
+                                      style: TextStyle(
+                                        color: AppColors.accent,
+                                        fontSize: 16,
+                                        fontWeight: FontWeight.w500,
+                                      ),
+                                    ),
+                                  ],
+                                ),
                               ),
                             ),
 
                             const SizedBox(height: 16),
 
-                            _DiscoverBanner(),
+                            _DiscoverBanner(
+                              banners: _banners,
+                              isLoading: _isLoadingBanners,
+                              pageController: _bannerPageController,
+                              onPageChanged: (index) {
+                                if (!mounted) return;
+                                setState(() => _activeBannerIndex = index);
+                              },
+                            ),
+                            const SizedBox(height: 8),
+                            Center(
+                              child: _BannerIndicator(
+                                count: _banners.isEmpty ? 1 : _banners.length,
+                                activeIndex: _activeBannerIndex,
+                              ),
+                            ),
 
                             const SizedBox(height: 16),
 
@@ -224,6 +325,82 @@ class _CircleIconButton extends StatelessWidget {
 }
 
 class _DiscoverBanner extends StatelessWidget {
+  const _DiscoverBanner({
+    required this.banners,
+    required this.isLoading,
+    required this.pageController,
+    required this.onPageChanged,
+  });
+
+  final List<BannerItem> banners;
+  final bool isLoading;
+  final PageController pageController;
+  final ValueChanged<int> onPageChanged;
+
+  @override
+  Widget build(BuildContext context) {
+    if (isLoading) {
+      return const _BannerFallback();
+    }
+    if (banners.isEmpty) {
+      return const _BannerFallback();
+    }
+    return Container(
+      height: 120,
+      width: double.infinity,
+      decoration: BoxDecoration(
+        borderRadius: BorderRadius.circular(14),
+      ),
+      child: ClipRRect(
+        borderRadius: BorderRadius.circular(14),
+        child: PageView.builder(
+          controller: pageController,
+          itemCount: banners.length,
+          onPageChanged: onPageChanged,
+          itemBuilder: (_, index) {
+            final banner = banners[index];
+            return Stack(
+              fit: StackFit.expand,
+              children: [
+                Image.network(
+                  banner.imageUrl,
+                  fit: BoxFit.cover,
+                  errorBuilder: (_, __, ___) => const _BannerFallback(),
+                  loadingBuilder: (_, child, progress) {
+                    if (progress == null) return child;
+                    return const _BannerFallback();
+                  },
+                ),
+                if (banner.title.isNotEmpty)
+                  Positioned(
+                    left: 10,
+                    right: 10,
+                    bottom: 10,
+                    child: Text(
+                      banner.title,
+                      maxLines: 1,
+                      overflow: TextOverflow.ellipsis,
+                      style: const TextStyle(
+                        color: Colors.white,
+                        fontWeight: FontWeight.w700,
+                        shadows: [
+                          Shadow(color: Colors.black54, blurRadius: 4),
+                        ],
+                      ),
+                    ),
+                  ),
+              ],
+            );
+          },
+        ),
+      ),
+    );
+  }
+}
+
+class _BannerFallback extends StatelessWidget {
+  const _BannerFallback();
+
   @override
   Widget build(BuildContext context) {
     return Container(
@@ -233,7 +410,7 @@ class _DiscoverBanner extends StatelessWidget {
       decoration: BoxDecoration(
         borderRadius: BorderRadius.circular(14),
         gradient: const LinearGradient(
-          colors: [Color(0xFFFFB867), Color(0xFFF6A650)],
+          colors: [Color(0xFF1B8D44), Color(0xFF0A7B37)],
         ),
       ),
       child: Stack(
@@ -251,17 +428,33 @@ class _DiscoverBanner extends StatelessWidget {
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
               Text(
-                context.l10n.text('findPerfectUniversity'),
+                'Ads will be displayed over here',
                 style: const TextStyle(
                   color: Colors.white,
-                  fontSize: 16,
-                  fontWeight: FontWeight.w700,
+                  fontSize: 14,
+                  fontWeight: FontWeight.w600,
                 ),
               ),
               const SizedBox(height: 8),
-              Text(
-                context.l10n.text('universityCount'),
-                style: const TextStyle(color: Colors.white),
+              const Text(
+                'You can place your advertisements and\npromotions here.',
+                style: TextStyle(color: Colors.white, fontSize: 12),
+              ),
+              const SizedBox(height: 8),
+              Container(
+                padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
+                decoration: BoxDecoration(
+                  color: const Color(0xFFC7F4D0),
+                  borderRadius: BorderRadius.circular(8),
+                ),
+                child: const Text(
+                  'Explore Now',
+                  style: TextStyle(
+                    color: Color(0xFF00351A),
+                    fontWeight: FontWeight.w700,
+                    fontSize: 12,
+                  ),
+                ),
               ),
             ],
           ),
@@ -269,6 +462,212 @@ class _DiscoverBanner extends StatelessWidget {
       ),
     );
   }
+}
+
+class _BannerIndicator extends StatelessWidget {
+  const _BannerIndicator({required this.count, required this.activeIndex});
+
+  final int count;
+  final int activeIndex;
+
+  @override
+  Widget build(BuildContext context) {
+    return Row(
+      mainAxisSize: MainAxisSize.min,
+      children: List.generate(count, (index) {
+        final isActive = index == activeIndex;
+        return Container(
+          margin: const EdgeInsets.symmetric(horizontal: 3),
+          width: isActive ? 16 : 8,
+          height: 8,
+          decoration: BoxDecoration(
+            color: isActive ? const Color(0xFF248B4B) : const Color(0xFFD4D4D4),
+            borderRadius: BorderRadius.circular(10),
+          ),
+        );
+      }),
+    );
+  }
+}
+
+class _CountrySelectionDialog extends StatefulWidget {
+  const _CountrySelectionDialog({
+    required this.countries,
+    required this.selected,
+  });
+
+  final List<_CountryOption> countries;
+  final _CountryOption? selected;
+
+  @override
+  State<_CountrySelectionDialog> createState() => _CountrySelectionDialogState();
+}
+
+class _CountrySelectionDialogState extends State<_CountrySelectionDialog> {
+  final TextEditingController _searchController = TextEditingController();
+  late List<_CountryOption> _filteredCountries;
+
+  @override
+  void initState() {
+    super.initState();
+    _filteredCountries = widget.countries;
+  }
+
+  @override
+  void dispose() {
+    _searchController.dispose();
+    super.dispose();
+  }
+
+  void _onSearchChanged(String query) {
+    final normalized = query.trim().toLowerCase();
+    setState(() {
+      if (normalized.isEmpty) {
+        _filteredCountries = widget.countries;
+        return;
+      }
+      _filteredCountries = widget.countries
+          .where((country) => country.name.toLowerCase().contains(normalized))
+          .toList(growable: false);
+    });
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return Dialog(
+      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8)),
+      child: SizedBox(
+        width: 320,
+        child: Padding(
+          padding: const EdgeInsets.fromLTRB(12, 10, 12, 8),
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              TextField(
+                controller: _searchController,
+                onChanged: _onSearchChanged,
+                decoration: const InputDecoration(
+                  hintText: 'Selection Country',
+                  isDense: true,
+                  suffixIcon: Icon(Icons.keyboard_arrow_down_rounded),
+                  border: InputBorder.none,
+                ),
+              ),
+              const Divider(height: 1),
+              ConstrainedBox(
+                constraints: const BoxConstraints(maxHeight: 320),
+                child: ListView.separated(
+                  shrinkWrap: true,
+                  itemCount: _filteredCountries.length,
+                  separatorBuilder: (_, __) => const Divider(height: 1),
+                  itemBuilder: (_, index) {
+                    final country = _filteredCountries[index];
+                    return ListTile(
+                      dense: true,
+                      contentPadding: EdgeInsets.zero,
+                      leading: Text(country.flagEmoji, style: const TextStyle(fontSize: 18)),
+                      title: Text(
+                        country.name,
+                        style: TextStyle(
+                          fontWeight: widget.selected?.name == country.name
+                              ? FontWeight.w700
+                              : FontWeight.w500,
+                        ),
+                      ),
+                      onTap: () => Navigator.of(context).pop(country),
+                    );
+                  },
+                ),
+              ),
+            ],
+          ),
+        ),
+      ),
+    );
+  }
+}
+
+class _AdvanceSearchDialog extends StatelessWidget {
+  const _AdvanceSearchDialog();
+
+  @override
+  Widget build(BuildContext context) {
+    Widget inputTile({required String title, required String hint}) {
+      return Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Text(
+            title,
+            style: const TextStyle(fontSize: 24 * 0.75, fontWeight: FontWeight.w600),
+          ),
+          const SizedBox(height: 8),
+          Container(
+            height: 48,
+            padding: const EdgeInsets.symmetric(horizontal: 12),
+            decoration: BoxDecoration(
+              border: Border.all(color: const Color(0xFFD7D7D7)),
+              borderRadius: BorderRadius.circular(10),
+            ),
+            child: Row(
+              children: [
+                const Icon(Icons.apartment_outlined, color: Color(0xFF8A8A8A), size: 18),
+                const SizedBox(width: 8),
+                Expanded(
+                  child: Text(
+                    hint,
+                    style: const TextStyle(color: Color(0xFF8A8A8A)),
+                  ),
+                ),
+                const Icon(Icons.keyboard_arrow_down_rounded, color: Color(0xFF757575)),
+              ],
+            ),
+          ),
+          const SizedBox(height: 12),
+        ],
+      );
+    }
+
+    return Dialog(
+      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(6)),
+      child: Padding(
+        padding: const EdgeInsets.fromLTRB(12, 14, 12, 12),
+        child: Column(
+          mainAxisSize: MainAxisSize.min,
+          crossAxisAlignment: CrossAxisAlignment.stretch,
+          children: [
+            inputTile(title: 'Country', hint: 'Arab'),
+            inputTile(title: 'Latest Academic', hint: 'Latest Academic'),
+            inputTile(title: 'Input Result', hint: 'Input Result'),
+            inputTile(title: 'Course or Program', hint: 'Bachelor of Computer Science'),
+            const SizedBox(height: 4),
+            SizedBox(
+              height: 50,
+              child: ElevatedButton(
+                onPressed: () => Navigator.of(context).pop(),
+                style: ElevatedButton.styleFrom(
+                  elevation: 0,
+                  backgroundColor: const Color(0xFF95DAB4),
+                  foregroundColor: const Color(0xFF0F2015),
+                  shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
+                ),
+                child: const Text(
+                  'Continue',
+                  style: TextStyle(fontSize: 24 * 0.8, fontWeight: FontWeight.w700),
+                ),
+              ),
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+}
+
+class _CountryOption {
+  const _CountryOption({required this.name, required this.flagEmoji});
+
+  final String name;
+  final String flagEmoji;
 }
 
 class _UniversityCard extends StatelessWidget {

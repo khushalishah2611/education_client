@@ -111,11 +111,17 @@ class _LoginScreenState extends State<LoginScreen> {
         await openExternalLink(response.whatsappOtpLink);
       }
       if (!mounted) return;
-      showAppSnackBar(
-        context,
-        type: AppSnackBarType.success,
-        message: response.message,
-      );
+      final bool isExistingUser =
+          response.otpStatus.toLowerCase().contains('existing') ||
+          response.message.toLowerCase().contains('already') ||
+          response.message.toLowerCase().contains('exist');
+      if (!isExistingUser && response.message.trim().isNotEmpty) {
+        showAppSnackBar(
+          context,
+          type: AppSnackBarType.success,
+          message: response.message,
+        );
+      }
 
       Navigator.of(context).push(
         MaterialPageRoute(
