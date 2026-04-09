@@ -11,8 +11,16 @@ class AuthApiService {
   const AuthApiService();
 
   Future<List<CountryMaster>> fetchCountries() async {
+    const path = '/api/admin/masters/country';
     final response = await http.get(
-      ApiConfig.uri('/api/admin/masters/country'),
+      ApiConfig.uri(path),
+    );
+    _logApiCall(
+      method: 'GET',
+      url: ApiConfig.uri(path).toString(),
+      statusCode: response.statusCode,
+      requestBody: null,
+      responseBody: response.body,
     );
 
     if (response.statusCode < 200 || response.statusCode > 299) {
@@ -32,8 +40,16 @@ class AuthApiService {
   }
 
   Future<List<AgreementTemplate>> fetchAgreementTemplates() async {
+    const path = '/api/student/agreements/templates';
     final response = await http.get(
-      ApiConfig.uri('/api/student/agreements/templates'),
+      ApiConfig.uri(path),
+    );
+    _logApiCall(
+      method: 'GET',
+      url: ApiConfig.uri(path).toString(),
+      statusCode: response.statusCode,
+      requestBody: null,
+      responseBody: response.body,
     );
 
     if (response.statusCode < 200 || response.statusCode > 299) {
@@ -57,22 +73,30 @@ class AuthApiService {
     required String country,
     required String phone,
   }) async {
+    const path = '/api/admin/students';
     final requestBody = <String, dynamic>{
       'country': country,
       'phone': phone,
       'isActive': true,
     };
     final response = await http.post(
-      ApiConfig.uri('/api/admin/students'),
+      ApiConfig.uri(path),
       headers: const {'Content-Type': 'application/json'},
       body: jsonEncode(requestBody),
     );
 
     final decoded = _decodeObject(response.body);
+    _logApiCall(
+      method: 'POST',
+      url: ApiConfig.uri(path).toString(),
+      statusCode: response.statusCode,
+      requestBody: requestBody,
+      responseBody: decoded,
+    );
     if (response.statusCode < 200 || response.statusCode > 299) {
       throw ApiResponseException.fromResponse(
         response: response,
-        requestUrl: ApiConfig.uri('/api/admin/students').toString(),
+        requestUrl: ApiConfig.uri(path).toString(),
         requestBody: requestBody,
         responseBody: decoded,
       );
@@ -86,6 +110,13 @@ class AuthApiService {
     final path = '/api/admin/students/$studentId/resend-otp';
     final response = await http.post(ApiConfig.uri(path));
     final decoded = _decodeObject(response.body);
+    _logApiCall(
+      method: 'POST',
+      url: ApiConfig.uri(path).toString(),
+      statusCode: response.statusCode,
+      requestBody: const <String, dynamic>{},
+      responseBody: decoded,
+    );
 
     if (response.statusCode < 200 || response.statusCode > 299) {
       throw ApiResponseException.fromResponse(
@@ -111,6 +142,13 @@ class AuthApiService {
       body: jsonEncode(requestBody),
     );
     final decoded = _decodeObject(response.body);
+    _logApiCall(
+      method: 'POST',
+      url: ApiConfig.uri(path).toString(),
+      statusCode: response.statusCode,
+      requestBody: requestBody,
+      responseBody: decoded,
+    );
 
     if (response.statusCode < 200 || response.statusCode > 299) {
       throw ApiResponseException.fromResponse(
@@ -123,6 +161,22 @@ class AuthApiService {
 
     return decoded['message'] as String? ?? 'OTP verified successfully.';
   }
+}
+
+void _logApiCall({
+  required String method,
+  required String url,
+  required int statusCode,
+  required Object? requestBody,
+  required Object? responseBody,
+}) {
+  final log = StringBuffer()
+    ..writeln('API $method $url')
+    ..writeln('Status: $statusCode')
+    ..writeln('Request: ${requestBody ?? '<empty>'}')
+    ..writeln('Response: $responseBody');
+  // ignore: avoid_print
+  print(log.toString());
 }
 
 Map<String, dynamic> _decodeObject(String body) {
