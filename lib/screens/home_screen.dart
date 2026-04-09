@@ -5,8 +5,10 @@ import '../core/api_config.dart';
 import '../core/app_theme.dart';
 import '../models/app_models.dart';
 import '../models/banner_item.dart';
+import '../models/country_master.dart';
 import '../services/home_api_service.dart';
 import '../widgets/app_drawer.dart';
+import '../widgets/app_shimmer.dart';
 import '../widgets/common_widgets.dart';
 import '../widgets/flow_widgets.dart';
 import 'university_detail_screen.dart';
@@ -58,19 +60,29 @@ class _HomeScreenState extends State<HomeScreen> {
         _homeApiService.fetchUniversities(),
         _homeApiService.fetchPrograms(),
         _homeApiService.fetchAcademicMasters(),
-        _homeApiService.fetchCountry(),
+        _homeApiService.fetchCountries(),
       ]);
       final universities = responses[0] as List<HomeUniversity>;
       final programs = responses[1] as List<HomeProgram>;
       final academics = responses[2] as List<String>;
-      final currencies = responses[3] as List<String>;
+      final countries = responses[3] as List<CountryMaster>;
 
       if (!mounted) return;
       setState(() {
         _universities = universities.map(_toUniversityData).toList(growable: false);
         _programOptions = programs.map((item) => item.name).toSet().toList(growable: false);
         _academicOptions = academics;
-        _currencyOptions = currencies;
+        _countryOptions = countries
+            .map(
+              (item) => _CountryOption(
+                name: item.nameEn.isNotEmpty ? item.nameEn : item.value,
+                flagEmoji: item.flagEmoji,
+                flagImageUrl: _resolveCountryFlag(item),
+              ),
+            )
+            .where((item) => item.name.trim().isNotEmpty)
+            .toList(growable: false);
+        _currencyOptions = const [];
       });
     } catch (_) {
       if (!mounted) return;
@@ -175,12 +187,24 @@ class _HomeScreenState extends State<HomeScreen> {
     return colors[hash % colors.length];
   }
 
+  String _resolveCountryFlag(CountryMaster country) {
+    if (country.value.startsWith('http://') || country.value.startsWith('https://')) {
+      return country.value;
+    }
+    final code = country.value.trim().toLowerCase();
+    if (code.length == 2) {
+      return 'https://flagcdn.com/w40/$code.png';
+    }
+    return '';
+  }
+
   @override
   Widget build(BuildContext context) {
     return Directionality(
       textDirection: context.l10n.textDirection,
       child: Scaffold(
         key: _scaffoldKey,
+        drawerScrimColor: Colors.black.withOpacity(0.16),
         drawer: const CommonSideMenu(),
         body: AppBackground(
           child: AppPageEntrance(
@@ -420,7 +444,7 @@ class _DiscoverBanner extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     if (isLoading) {
-      return const _BannerFallback();
+      return const _BannerShimmer();
     }
     if (banners.isEmpty) {
       return const _BannerFallback();
@@ -544,6 +568,62 @@ class _BannerFallback extends StatelessWidget {
   }
 }
 
+class _BannerShimmer extends StatelessWidget {
+  const _BannerShimmer();
+
+  @override
+  Widget build(BuildContext context) {
+    return Container(
+      height: 120,
+      width: double.infinity,
+      decoration: BoxDecoration(
+        borderRadius: BorderRadius.circular(14),
+        color: Colors.white,
+      ),
+      child: ClipRRect(
+        borderRadius: BorderRadius.circular(14),
+        child: const Stack(
+          fit: StackFit.expand,
+          children: [
+            AppShimmerBox(
+              borderRadius: BorderRadius.zero,
+              baseColor: Color(0xFFE6E6E6),
+              highlightColor: Color(0xFFF4F4F4),
+            ),
+            Positioned(
+              left: 12,
+              right: 110,
+              top: 16,
+              child: AppShimmerBox(
+                height: 14,
+                borderRadius: BorderRadius.all(Radius.circular(6)),
+              ),
+            ),
+            Positioned(
+              left: 12,
+              right: 150,
+              top: 40,
+              child: AppShimmerBox(
+                height: 12,
+                borderRadius: BorderRadius.all(Radius.circular(6)),
+              ),
+            ),
+            Positioned(
+              left: 12,
+              bottom: 14,
+              child: AppShimmerBox(
+                height: 32,
+                width: 92,
+                borderRadius: BorderRadius.all(Radius.circular(8)),
+              ),
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+}
+
 class _BannerIndicator extends StatelessWidget {
   const _BannerIndicator({required this.count, required this.activeIndex});
 
@@ -645,7 +725,7 @@ class _CountrySelectionDialogState extends State<_CountrySelectionDialog> {
                     return ListTile(
                       dense: true,
                       contentPadding: EdgeInsets.zero,
-                      leading: Text(country.flagEmoji, style: const TextStyle(fontSize: 18)),
+                      leading: _CountryFlag(country: country),
                       title: Text(
                         country.name,
                         style: TextStyle(
@@ -774,7 +854,9 @@ class _AdvanceSearchDialog extends StatelessWidget {
               icon: Icons.school_outlined,
             ),
             AppTextField(
-              label: 'Input Result (${currencyOptions.isNotEmpty ? currencyOptions.first : ''})',
+              label: currencyOptions.isNotEmpty
+                  ? 'Input Result (${currencyOptions.first})'
+                  : 'Input Result',
               hint: 'Input Result',
               controller: resultController,
               keyboardType: TextInputType.number,
@@ -813,10 +895,42 @@ class _AdvanceSearchDialog extends StatelessWidget {
 }
 
 class _CountryOption {
-  const _CountryOption({required this.name, required this.flagEmoji});
+  const _CountryOption({
+    required this.name,
+    required this.flagEmoji,
+    required this.flagImageUrl,
+  });
 
   final String name;
   final String flagEmoji;
+  final String flagImageUrl;
+}
+
+class _CountryFlag extends StatelessWidget {
+  const _CountryFlag({required this.country});
+
+  final _CountryOption country;
+
+  @override
+  Widget build(BuildContext context) {
+    final hasImage =
+        country.flagImageUrl.startsWith('http://') ||
+        country.flagImageUrl.startsWith('https://');
+    if (!hasImage) {
+      return Text(country.flagEmoji, style: const TextStyle(fontSize: 18));
+    }
+    return ClipRRect(
+      borderRadius: BorderRadius.circular(2),
+      child: Image.network(
+        country.flagImageUrl,
+        width: 22,
+        height: 16,
+        fit: BoxFit.cover,
+        errorBuilder: (_, __, ___) =>
+            Text(country.flagEmoji, style: const TextStyle(fontSize: 18)),
+      ),
+    );
+  }
 }
 
 class _UniversityCard extends StatelessWidget {

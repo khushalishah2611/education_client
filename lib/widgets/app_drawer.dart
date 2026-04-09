@@ -23,9 +23,11 @@ class CommonSideMenu extends StatelessWidget {
     ];
 
     return Drawer(
+      width: MediaQuery.of(context).size.width * 0.88,
       shape: const RoundedRectangleBorder(
         borderRadius: BorderRadius.only(topRight: Radius.circular(28), bottomRight: Radius.circular(28)),
       ),
+      backgroundColor: Colors.white.withOpacity(0.96),
       child: SafeArea(
         child: Column(
           children: [

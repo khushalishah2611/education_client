@@ -6,6 +6,7 @@ import '../core/api_config.dart';
 import '../core/api_logger.dart';
 import '../core/api_status.dart';
 import '../models/banner_item.dart';
+import '../models/country_master.dart';
 
 class HomeApiService {
   const HomeApiService();
@@ -97,8 +98,27 @@ class HomeApiService {
     return _fetchMasterValues('/api/admin/masters/academic');
   }
 
-  Future<List<String>> fetchCountry() async {
-    return _fetchMasterValues('/api/admin/masters/country');
+  Future<List<CountryMaster>> fetchCountries() async {
+    const path = '/api/admin/masters/country';
+    final response = await http.get(ApiConfig.uri(path));
+    final decoded = _decode(response.body);
+    logApiCall(
+      method: 'GET',
+      url: ApiConfig.uri(path).toString(),
+      statusCode: response.statusCode,
+      requestBody: null,
+      responseBody: decoded,
+    );
+
+    if (!ApiStatus.isSuccess(response.statusCode)) {
+      throw Exception('Failed to load countries.');
+    }
+
+    return _asList(decoded['data'] ?? decoded)
+        .whereType<Map<String, dynamic>>()
+        .map(CountryMaster.fromJson)
+        .where((item) => item.nameEn.isNotEmpty && item.isActive)
+        .toList(growable: false);
   }
 
   Future<List<String>> _fetchMasterValues(String path) async {

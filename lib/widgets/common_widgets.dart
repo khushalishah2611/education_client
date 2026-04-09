@@ -109,13 +109,14 @@ class AppBackground extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return DecoratedBox(
+    return Container(
       decoration: const BoxDecoration(
-        gradient: LinearGradient(
-          begin: Alignment.topCenter,
-          end: Alignment.bottomCenter,
-          colors: [Color(0xFFFDE3CF), Color(0xFFFFFBF7), Color(0xFFFCE1CB)],
-          stops: [0, .42, 1],
+        color: Color(0xFFFFFBF7),
+        image: DecorationImage(
+          image: AssetImage('assets/images/img.png'),
+          fit: BoxFit.cover,
+          alignment: Alignment.topCenter,
+          opacity: 0.15,
         ),
       ),
       child: child,
