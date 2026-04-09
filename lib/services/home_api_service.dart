@@ -48,7 +48,7 @@ class HomeApiService {
   }
 
   Future<List<HomeUniversity>> fetchUniversities() async {
-    const path = '/api/admin/universitie';
+    const path = '/api/admin/universities';
     final response = await http.get(ApiConfig.uri(path));
     final decoded = _decode(response.body);
     logApiCall(
@@ -97,8 +97,8 @@ class HomeApiService {
     return _fetchMasterValues('/api/admin/masters/academic');
   }
 
-  Future<List<String>> fetchCurrencies() async {
-    return _fetchMasterValues('/api/admin/masters/currency');
+  Future<List<String>> fetchCountry() async {
+    return _fetchMasterValues('/api/admin/masters/country');
   }
 
   Future<List<String>> _fetchMasterValues(String path) async {

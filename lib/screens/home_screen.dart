@@ -58,17 +58,12 @@ class _HomeScreenState extends State<HomeScreen> {
         _homeApiService.fetchUniversities(),
         _homeApiService.fetchPrograms(),
         _homeApiService.fetchAcademicMasters(),
-        _homeApiService.fetchCurrencies(),
+        _homeApiService.fetchCountry(),
       ]);
       final universities = responses[0] as List<HomeUniversity>;
       final programs = responses[1] as List<HomeProgram>;
       final academics = responses[2] as List<String>;
       final currencies = responses[3] as List<String>;
-      final countryNames = universities
-          .map((item) => item.country)
-          .where((name) => name.trim().isNotEmpty)
-          .toSet()
-          .toList(growable: false);
 
       if (!mounted) return;
       setState(() {
@@ -76,9 +71,6 @@ class _HomeScreenState extends State<HomeScreen> {
         _programOptions = programs.map((item) => item.name).toSet().toList(growable: false);
         _academicOptions = academics;
         _currencyOptions = currencies;
-        _countryOptions = countryNames
-            .map((name) => _CountryOption(name: name, flagEmoji: '🌍'))
-            .toList(growable: false);
       });
     } catch (_) {
       if (!mounted) return;
