@@ -202,15 +202,6 @@ class _VerifyOtpScreenState extends State<VerifyOtpScreen> {
     await launchUrl(whatsappUri, mode: LaunchMode.externalApplication);
   }
 
-  Future<void> _logout() async {
-    final prefs = await SharedPreferences.getInstance();
-    await prefs.setBool('isLoggedIn', false);
-    if (!mounted) return;
-    Navigator.of(context).pushAndRemoveUntil(
-      MaterialPageRoute(builder: (_) => const LoginScreen()),
-      (route) => false,
-    );
-  }
 
   @override
   Widget build(BuildContext context) {
