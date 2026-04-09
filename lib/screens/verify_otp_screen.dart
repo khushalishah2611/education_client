@@ -2,10 +2,10 @@ import 'dart:async';
 
 import 'package:flutter/material.dart';
 import 'package:shared_preferences/shared_preferences.dart';
-import 'package:url_launcher/url_launcher.dart';
 
 import '../core/app_localizations.dart';
 import '../core/app_theme.dart';
+import '../core/url_launcher_helper.dart';
 import '../services/auth_api_service.dart';
 import '../widgets/common_widgets.dart';
 import 'home_screen.dart';
@@ -93,7 +93,7 @@ class _VerifyOtpScreenState extends State<VerifyOtpScreen> {
         type: AppSnackBarType.success,
         message: response.message,
       );
-      await _openWhatsappLink(_currentWhatsappOtpLink);
+      await openExternalLink(_currentWhatsappOtpLink);
     } on ApiResponseException catch (error) {
       debugPrint(error.toString());
       if (!mounted) return;
@@ -195,13 +195,6 @@ class _VerifyOtpScreenState extends State<VerifyOtpScreen> {
       }
     }
   }
-
-  Future<void> _openWhatsappLink(String link) async {
-    final whatsappUri = Uri.tryParse(link);
-    if (whatsappUri == null) return;
-    await launchUrl(whatsappUri, mode: LaunchMode.externalApplication);
-  }
-
 
   @override
   Widget build(BuildContext context) {
