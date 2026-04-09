@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 
 import '../core/app_localizations.dart';
+import '../core/api_config.dart';
 import '../core/app_theme.dart';
 import '../models/app_models.dart';
 import '../models/banner_item.dart';
@@ -8,7 +9,6 @@ import '../services/home_api_service.dart';
 import '../widgets/app_drawer.dart';
 import '../widgets/common_widgets.dart';
 import '../widgets/flow_widgets.dart';
-import 'course_list_screen.dart';
 import 'university_detail_screen.dart';
 
 class HomeScreen extends StatefulWidget {
@@ -26,16 +26,16 @@ class _HomeScreenState extends State<HomeScreen> {
   bool _isLoadingBanners = true;
   final PageController _bannerPageController = PageController(viewportFraction: 1);
   List<BannerItem> _banners = const [];
+  List<UniversityData> _universities = const [];
+  List<String> _programOptions = const [];
+  List<String> _academicOptions = const [];
+  List<String> _currencyOptions = const [];
   int _activeBannerIndex = 0;
-  final List<_CountryOption> _countryOptions = const [
-    _CountryOption(name: 'Oman', flagEmoji: '🇴🇲'),
-    _CountryOption(name: 'Jordan', flagEmoji: '🇯🇴'),
-    _CountryOption(name: 'UAE', flagEmoji: '🇦🇪'),
-    _CountryOption(name: 'Saudi Arabia', flagEmoji: '🇸🇦'),
-    _CountryOption(name: 'Qatar', flagEmoji: '🇶🇦'),
-    _CountryOption(name: 'India', flagEmoji: '🇮🇳'),
-  ];
-  _CountryOption? _selectedCountry;
+  List<_CountryOption> _countryOptions = const [];
+  String? _selectedCountry;
+  String? _selectedAcademic;
+  String? _selectedProgram;
+  final TextEditingController _resultController = TextEditingController();
 
   @override
   void initState() {
@@ -46,15 +46,54 @@ class _HomeScreenState extends State<HomeScreen> {
 
   @override
   void dispose() {
+    _resultController.dispose();
     _bannerPageController.dispose();
     super.dispose();
   }
 
   Future<void> _loadUniversities() async {
     setState(() => _isLoadingUniversities = true);
-    await Future<void>.delayed(const Duration(milliseconds: 900));
-    if (!mounted) return;
-    setState(() => _isLoadingUniversities = false);
+    try {
+      final responses = await Future.wait<dynamic>([
+        _homeApiService.fetchUniversities(),
+        _homeApiService.fetchPrograms(),
+        _homeApiService.fetchAcademicMasters(),
+        _homeApiService.fetchCurrencies(),
+      ]);
+      final universities = responses[0] as List<HomeUniversity>;
+      final programs = responses[1] as List<HomeProgram>;
+      final academics = responses[2] as List<String>;
+      final currencies = responses[3] as List<String>;
+      final countryNames = universities
+          .map((item) => item.country)
+          .where((name) => name.trim().isNotEmpty)
+          .toSet()
+          .toList(growable: false);
+
+      if (!mounted) return;
+      setState(() {
+        _universities = universities.map(_toUniversityData).toList(growable: false);
+        _programOptions = programs.map((item) => item.name).toSet().toList(growable: false);
+        _academicOptions = academics;
+        _currencyOptions = currencies;
+        _countryOptions = countryNames
+            .map((name) => _CountryOption(name: name, flagEmoji: '🌍'))
+            .toList(growable: false);
+      });
+    } catch (_) {
+      if (!mounted) return;
+      setState(() {
+        _universities = const [];
+        _programOptions = const [];
+        _academicOptions = const [];
+        _currencyOptions = const [];
+        _countryOptions = const [];
+      });
+    } finally {
+      if (mounted) {
+        setState(() => _isLoadingUniversities = false);
+      }
+    }
   }
 
   Future<void> _loadBanners() async {
@@ -85,14 +124,63 @@ class _HomeScreenState extends State<HomeScreen> {
       ),
     );
     if (selected == null || !mounted) return;
-    setState(() => _selectedCountry = selected);
+    setState(() => _selectedCountry = selected.name);
   }
 
   Future<void> _openAdvanceSearchDialog() async {
     await showDialog<void>(
       context: context,
-      builder: (_) => const _AdvanceSearchDialog(),
+      builder: (_) => _AdvanceSearchDialog(
+        countryOptions: _countryOptions.map((item) => item.name).toList(growable: false),
+        academicOptions: _academicOptions,
+        programOptions: _programOptions,
+        currencyOptions: _currencyOptions,
+        selectedCountry: _selectedCountry,
+        selectedAcademic: _selectedAcademic,
+        selectedProgram: _selectedProgram,
+        resultController: _resultController,
+        onCountryChanged: (value) => setState(() => _selectedCountry = value),
+        onAcademicChanged: (value) => setState(() => _selectedAcademic = value),
+        onProgramChanged: (value) => setState(() => _selectedProgram = value),
+      ),
     );
+  }
+
+  UniversityData _toUniversityData(HomeUniversity university) {
+    final location = [university.city, university.country]
+        .where((item) => item.trim().isNotEmpty)
+        .join(', ');
+    return UniversityData(
+      name: university.name,
+      location: location.isEmpty ? 'N/A' : location,
+      shortCode: _shortCode(university.name),
+      color: _colorFromSeed(university.id),
+      heroImage: university.logoUrl.isNotEmpty
+          ? university.logoUrl
+          : '${ApiConfig.baseUrl}/uploads/default-university-image.png',
+    );
+  }
+
+  String _shortCode(String name) {
+    final parts = name.split(RegExp(r'\s+')).where((part) => part.isNotEmpty).toList();
+    if (parts.isEmpty) return 'UNI';
+    if (parts.length == 1) {
+      final end = parts.first.length > 3 ? 3 : parts.first.length;
+      return parts.first.substring(0, end).toUpperCase();
+    }
+    return parts.take(3).map((part) => part[0].toUpperCase()).join();
+  }
+
+  Color _colorFromSeed(String seed) {
+    final hash = seed.hashCode.abs();
+    final colors = <Color>[
+      const Color(0xFF2E5FA7),
+      const Color(0xFFBD1F2D),
+      const Color(0xFF1A8A52),
+      const Color(0xFF8351C9),
+      const Color(0xFF00838F),
+    ];
+    return colors[hash % colors.length];
   }
 
   @override
@@ -170,7 +258,7 @@ class _HomeScreenState extends State<HomeScreen> {
                                   children: [
                                     Expanded(
                                       child: Text(
-                                        _selectedCountry?.name ?? 'Select  Country',
+                                        _selectedCountry ?? 'Select Country',
                                         style: const TextStyle(
                                           color: Color(0xFF8E8E8E),
                                           fontSize: 14,
@@ -250,7 +338,7 @@ class _HomeScreenState extends State<HomeScreen> {
                             GridView.builder(
                               itemCount: _isLoadingUniversities
                                   ? 4
-                                  : universityCatalog.length,
+                                  : _universities.length,
                               shrinkWrap: true,
                               physics: const NeverScrollableScrollPhysics(),
                               gridDelegate:
@@ -264,7 +352,7 @@ class _HomeScreenState extends State<HomeScreen> {
                                 if (_isLoadingUniversities) {
                                   return const _UniversityCardShimmer();
                                 }
-                                final item = universityCatalog[index];
+                                final item = _universities[index];
                                 return _UniversityCard(
                                   data: item,
                                   onTap: () => Navigator.of(context).push(
@@ -497,7 +585,7 @@ class _CountrySelectionDialog extends StatefulWidget {
   });
 
   final List<_CountryOption> countries;
-  final _CountryOption? selected;
+  final String? selected;
 
   @override
   State<_CountrySelectionDialog> createState() => _CountrySelectionDialogState();
@@ -569,7 +657,7 @@ class _CountrySelectionDialogState extends State<_CountrySelectionDialog> {
                       title: Text(
                         country.name,
                         style: TextStyle(
-                          fontWeight: widget.selected?.name == country.name
+                          fontWeight: widget.selected == country.name
                               ? FontWeight.w700
                               : FontWeight.w500,
                         ),
@@ -588,11 +676,42 @@ class _CountrySelectionDialogState extends State<_CountrySelectionDialog> {
 }
 
 class _AdvanceSearchDialog extends StatelessWidget {
-  const _AdvanceSearchDialog();
+  const _AdvanceSearchDialog({
+    required this.countryOptions,
+    required this.academicOptions,
+    required this.programOptions,
+    required this.currencyOptions,
+    required this.selectedCountry,
+    required this.selectedAcademic,
+    required this.selectedProgram,
+    required this.resultController,
+    required this.onCountryChanged,
+    required this.onAcademicChanged,
+    required this.onProgramChanged,
+  });
+
+  final List<String> countryOptions;
+  final List<String> academicOptions;
+  final List<String> programOptions;
+  final List<String> currencyOptions;
+  final String? selectedCountry;
+  final String? selectedAcademic;
+  final String? selectedProgram;
+  final TextEditingController resultController;
+  final ValueChanged<String?> onCountryChanged;
+  final ValueChanged<String?> onAcademicChanged;
+  final ValueChanged<String?> onProgramChanged;
 
   @override
   Widget build(BuildContext context) {
-    Widget inputTile({required String title, required String hint}) {
+    Widget dropdownTile({
+      required String title,
+      required List<String> options,
+      required String? value,
+      required ValueChanged<String?> onChanged,
+      IconData icon = Icons.apartment_outlined,
+    }) {
+      final hasValue = value != null && options.contains(value);
       return Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
@@ -608,18 +727,31 @@ class _AdvanceSearchDialog extends StatelessWidget {
               border: Border.all(color: const Color(0xFFD7D7D7)),
               borderRadius: BorderRadius.circular(10),
             ),
-            child: Row(
-              children: [
-                const Icon(Icons.apartment_outlined, color: Color(0xFF8A8A8A), size: 18),
-                const SizedBox(width: 8),
-                Expanded(
-                  child: Text(
-                    hint,
-                    style: const TextStyle(color: Color(0xFF8A8A8A)),
-                  ),
+            child: DropdownButtonHideUnderline(
+              child: DropdownButton<String>(
+                isExpanded: true,
+                value: hasValue ? value : null,
+                icon: const Icon(Icons.keyboard_arrow_down_rounded, color: Color(0xFF757575)),
+                hint: Text(
+                  options.isEmpty ? 'No options found' : 'Select $title',
+                  style: const TextStyle(color: Color(0xFF8A8A8A)),
                 ),
-                const Icon(Icons.keyboard_arrow_down_rounded, color: Color(0xFF757575)),
-              ],
+                items: options
+                    .map(
+                      (option) => DropdownMenuItem<String>(
+                        value: option,
+                        child: Row(
+                          children: [
+                            Icon(icon, color: const Color(0xFF8A8A8A), size: 18),
+                            const SizedBox(width: 8),
+                            Expanded(child: Text(option)),
+                          ],
+                        ),
+                      ),
+                    )
+                    .toList(growable: false),
+                onChanged: options.isEmpty ? null : onChanged,
+              ),
             ),
           ),
           const SizedBox(height: 12),
@@ -635,10 +767,35 @@ class _AdvanceSearchDialog extends StatelessWidget {
           mainAxisSize: MainAxisSize.min,
           crossAxisAlignment: CrossAxisAlignment.stretch,
           children: [
-            inputTile(title: 'Country', hint: 'Arab'),
-            inputTile(title: 'Latest Academic', hint: 'Latest Academic'),
-            inputTile(title: 'Input Result', hint: 'Input Result'),
-            inputTile(title: 'Course or Program', hint: 'Bachelor of Computer Science'),
+            dropdownTile(
+              title: 'Country',
+              options: countryOptions,
+              value: selectedCountry,
+              onChanged: onCountryChanged,
+              icon: Icons.flag_outlined,
+            ),
+            dropdownTile(
+              title: 'Latest Academic',
+              options: academicOptions,
+              value: selectedAcademic,
+              onChanged: onAcademicChanged,
+              icon: Icons.school_outlined,
+            ),
+            AppTextField(
+              label: 'Input Result (${currencyOptions.isNotEmpty ? currencyOptions.first : ''})',
+              hint: 'Input Result',
+              controller: resultController,
+              keyboardType: TextInputType.number,
+              height: 48,
+            ),
+            const SizedBox(height: 12),
+            dropdownTile(
+              title: 'Course or Program',
+              options: programOptions,
+              value: selectedProgram,
+              onChanged: onProgramChanged,
+              icon: Icons.menu_book_outlined,
+            ),
             const SizedBox(height: 4),
             SizedBox(
               height: 50,
@@ -701,13 +858,20 @@ class _UniversityCard extends StatelessWidget {
                     color: const Color(0xFFF5F5F5),
                     borderRadius: BorderRadius.circular(8),
                   ),
-                  child: Center(
-                    child: Text(
-                      data.shortCode,
-                      style: TextStyle(
-                        color: data.color,
-                        fontSize: 24,
-                        fontWeight: FontWeight.w900,
+                  child: ClipRRect(
+                    borderRadius: BorderRadius.circular(8),
+                    child: Image.network(
+                      data.heroImage,
+                      fit: BoxFit.cover,
+                      errorBuilder: (_, __, ___) => Center(
+                        child: Text(
+                          data.shortCode,
+                          style: TextStyle(
+                            color: data.color,
+                            fontSize: 24,
+                            fontWeight: FontWeight.w900,
+                          ),
+                        ),
                       ),
                     ),
                   ),
