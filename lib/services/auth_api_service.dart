@@ -56,7 +56,6 @@ class AuthApiService {
   Future<StudentLoginResponse> createStudentForOtp({
     required String country,
     required String phone,
-    required String gender,
   }) async {
     final response = await http.post(
       ApiConfig.uri('/api/admin/students'),
@@ -64,7 +63,6 @@ class AuthApiService {
       body: jsonEncode({
         'country': country,
         'phone': phone,
-        'gender': gender,
         'isActive': true,
       }),
     );

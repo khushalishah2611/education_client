@@ -105,7 +105,6 @@ class _LoginScreenState extends State<LoginScreen> {
           .createStudentForOtp(
             country: _selectedCountry!.nameEn,
             phone: _mobileController.text.trim(),
-            gender: 'MALE',
           );
 
       if (!mounted) return;
