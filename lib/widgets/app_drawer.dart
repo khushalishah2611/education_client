@@ -29,37 +29,37 @@ class CommonSideMenu extends StatelessWidget {
       child: SafeArea(
         child: Column(
           children: [
-            Padding(
-              padding: const EdgeInsets.fromLTRB(20, 16, 20, 18),
-              child: Row(
-                children: [
-                  Container(
-                    width: 48,
-                    height: 48,
-                    decoration: BoxDecoration(
-                      shape: BoxShape.circle,
-                      border: Border.all(color: AppColors.accent, width: 1.5),
-                      image: const DecorationImage(
-                        image: NetworkImage('https://images.unsplash.com/photo-1500648767791-00dcc994a43e?auto=format&fit=crop&w=200&q=80'),
-                        fit: BoxFit.cover,
-                      ),
-                    ),
-                  ),
-                  const SizedBox(width: 12),
-                  const Expanded(
-                    child: Column(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: [
-                        Text('Ishan Sharma', style: TextStyle(fontSize: 20, fontWeight: FontWeight.w700)),
-                        SizedBox(height: 2),
-                        Text('Ishan01@gmail.com', style: TextStyle(color: AppColors.textMuted)),
-                      ],
-                    ),
-                  ),
-                ],
-              ),
-            ),
-            const Divider(height: 1),
+            // Padding(
+            //   padding: const EdgeInsets.fromLTRB(20, 16, 20, 18),
+            //   child: Row(
+            //     children: [
+            //       Container(
+            //         width: 48,
+            //         height: 48,
+            //         decoration: BoxDecoration(
+            //           shape: BoxShape.circle,
+            //           border: Border.all(color: AppColors.accent, width: 1.5),
+            //           image: const DecorationImage(
+            //             image: NetworkImage('https://images.unsplash.com/photo-1500648767791-00dcc994a43e?auto=format&fit=crop&w=200&q=80'),
+            //             fit: BoxFit.cover,
+            //           ),
+            //         ),
+            //       ),
+            //       const SizedBox(width: 12),
+            //       const Expanded(
+            //         child: Column(
+            //           crossAxisAlignment: CrossAxisAlignment.start,
+            //           children: [
+            //             Text('Ishan Sharma', style: TextStyle(fontSize: 20, fontWeight: FontWeight.w700)),
+            //             SizedBox(height: 2),
+            //             Text('Ishan01@gmail.com', style: TextStyle(color: AppColors.textMuted)),
+            //           ],
+            //         ),
+            //       ),
+            //     ],
+            //   ),
+            // ),
+            // const Divider(height: 1),
             Expanded(
               child: ListView.separated(
                 padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 16),
