@@ -252,10 +252,12 @@ class AuthScaffold extends StatelessWidget {
     super.key,
     required this.child,
     this.bottomCardColor = Colors.white,
+    this.isLoading = false,
   });
 
   final Widget child;
   final Color bottomCardColor;
+  final bool isLoading;
 
   @override
   Widget build(BuildContext context) {
@@ -267,11 +269,13 @@ class AuthScaffold extends StatelessWidget {
     return Directionality(
       textDirection: context.l10n.textDirection,
       child: Scaffold(
-        body: Container(
-          color: const Color(0xFFF8EFE6),
-          child: SafeArea(
-            child: Stack(
-              children: [
+        body: Stack(
+          children: [
+            Container(
+              color: const Color(0xFFF8EFE6),
+              child: SafeArea(
+                child: Stack(
+                  children: [
                 /// 🔥 BACKGROUND IMAGE (FIXED)
                 Image.asset(
                   'assets/images/img.png',
@@ -280,8 +284,8 @@ class AuthScaffold extends StatelessWidget {
                 ),
 
                 /// 🔥 MAIN CONTENT
-                Column(
-                  children: [
+                    Column(
+                      children: [
                     /// 🔝 TOP BAR
                     Padding(
                       padding: const EdgeInsets.symmetric(
@@ -300,37 +304,45 @@ class AuthScaffold extends StatelessWidget {
                     const SizedBox(height: 20),
 
                     /// ✅ CENTER LOGO (PERFECT POSITION)
-                    Expanded(
-                      child: Center(
-                        child: Image.asset(
-                          'assets/images/logo.webp',
-
+                        Expanded(
+                          child: Center(
+                            child: Image.asset('assets/images/logo.webp'),
+                          ),
                         ),
-                      ),
-                    ),
 
                     /// ⬇️ BOTTOM CARD (LOGIN AREA)
-                    Container(
-                      width: double.infinity,
-                      padding: EdgeInsets.fromLTRB(
-                        horizontalPadding,
-                        topPadding,
-                        horizontalPadding,
-                        bottomPadding,
-                      ),
-                      decoration: BoxDecoration(
-                        color: bottomCardColor,
-                        borderRadius: BorderRadius.vertical(
-                          top: Radius.circular(30),
+                        Container(
+                          width: double.infinity,
+                          padding: EdgeInsets.fromLTRB(
+                            horizontalPadding,
+                            topPadding,
+                            horizontalPadding,
+                            bottomPadding,
+                          ),
+                          decoration: BoxDecoration(
+                            color: bottomCardColor,
+                            borderRadius: const BorderRadius.vertical(
+                              top: Radius.circular(30),
+                            ),
+                          ),
+                          child: child,
                         ),
-                      ),
-                      child: child,
+                      ],
                     ),
                   ],
                 ),
-              ],
+              ),
             ),
-          ),
+            if (isLoading)
+              const Positioned.fill(
+                child: ColoredBox(
+                  color: Color.fromRGBO(0, 0, 0, 0.25),
+                  child: Center(
+                    child: CircularProgressIndicator(color: AppColors.primary),
+                  ),
+                ),
+              ),
+          ],
         ),
       ),
     );

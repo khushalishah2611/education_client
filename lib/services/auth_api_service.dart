@@ -57,21 +57,121 @@ class AuthApiService {
     required String country,
     required String phone,
   }) async {
+    final requestBody = <String, dynamic>{
+      'country': country,
+      'phone': phone,
+      'isActive': true,
+    };
     final response = await http.post(
       ApiConfig.uri('/api/admin/students'),
       headers: const {'Content-Type': 'application/json'},
-      body: jsonEncode({
-        'country': country,
-        'phone': phone,
-        'isActive': true,
-      }),
+      body: jsonEncode(requestBody),
     );
 
+    final decoded = _decodeObject(response.body);
     if (response.statusCode < 200 || response.statusCode > 299) {
-      throw Exception('Failed to create student login.');
+      throw ApiResponseException.fromResponse(
+        response: response,
+        requestUrl: ApiConfig.uri('/api/admin/students').toString(),
+        requestBody: requestBody,
+        responseBody: decoded,
+      );
+    }
+    return StudentLoginResponse.fromJson(decoded);
+  }
+
+  Future<StudentLoginResponse> resendStudentOtp({
+    required String studentId,
+  }) async {
+    final path = '/api/admin/students/$studentId/resend-otp';
+    final response = await http.post(ApiConfig.uri(path));
+    final decoded = _decodeObject(response.body);
+
+    if (response.statusCode < 200 || response.statusCode > 299) {
+      throw ApiResponseException.fromResponse(
+        response: response,
+        requestUrl: ApiConfig.uri(path).toString(),
+        requestBody: const <String, dynamic>{},
+        responseBody: decoded,
+      );
     }
 
-    final decoded = jsonDecode(response.body) as Map<String, dynamic>;
     return StudentLoginResponse.fromJson(decoded);
+  }
+
+  Future<String> verifyStudentOtp({
+    required String studentId,
+    required String otp,
+  }) async {
+    final path = '/api/admin/students/$studentId/verify-otp';
+    final requestBody = <String, dynamic>{'otp': otp};
+    final response = await http.post(
+      ApiConfig.uri(path),
+      headers: const {'Content-Type': 'application/json'},
+      body: jsonEncode(requestBody),
+    );
+    final decoded = _decodeObject(response.body);
+
+    if (response.statusCode < 200 || response.statusCode > 299) {
+      throw ApiResponseException.fromResponse(
+        response: response,
+        requestUrl: ApiConfig.uri(path).toString(),
+        requestBody: requestBody,
+        responseBody: decoded,
+      );
+    }
+
+    return decoded['message'] as String? ?? 'OTP verified successfully.';
+  }
+}
+
+Map<String, dynamic> _decodeObject(String body) {
+  try {
+    final decoded = jsonDecode(body);
+    if (decoded is Map<String, dynamic>) {
+      return decoded;
+    }
+  } catch (_) {
+    return <String, dynamic>{};
+  }
+  return <String, dynamic>{};
+}
+
+class ApiResponseException implements Exception {
+  ApiResponseException({
+    required this.statusCode,
+    required this.message,
+    required this.url,
+    required this.requestBody,
+    required this.responseBody,
+  });
+
+  factory ApiResponseException.fromResponse({
+    required http.Response response,
+    required String requestUrl,
+    required Map<String, dynamic> requestBody,
+    required Map<String, dynamic> responseBody,
+  }) {
+    final dynamic apiMessage = responseBody['message'];
+    final fallbackMessage = 'Request failed with status ${response.statusCode}.';
+    return ApiResponseException(
+      statusCode: response.statusCode,
+      message: apiMessage is String ? apiMessage : fallbackMessage,
+      url: requestUrl,
+      requestBody: requestBody,
+      responseBody: responseBody,
+    );
+  }
+
+  final int statusCode;
+  final String message;
+  final String url;
+  final Map<String, dynamic> requestBody;
+  final Map<String, dynamic> responseBody;
+
+  @override
+  String toString() {
+    return 'ApiResponseException(statusCode: $statusCode, message: $message, '
+        'url: $url, requestBody: $requestBody, responseBody: $responseBody)';
   }
 }

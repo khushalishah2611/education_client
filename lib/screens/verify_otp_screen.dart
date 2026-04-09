@@ -1,20 +1,25 @@
 import 'dart:async';
 
 import 'package:flutter/material.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 import 'package:url_launcher/url_launcher.dart';
 
 import '../core/app_localizations.dart';
 import '../core/app_theme.dart';
+import '../services/auth_api_service.dart';
 import '../widgets/common_widgets.dart';
 import 'home_screen.dart';
+import 'login_screen.dart';
 
 class VerifyOtpScreen extends StatefulWidget {
   const VerifyOtpScreen({
     super.key,
+    required this.studentId,
     required this.expectedOtp,
     required this.whatsappOtpLink,
   });
 
+  final String studentId;
   final String expectedOtp;
   final String whatsappOtpLink;
 
@@ -28,7 +33,11 @@ class _VerifyOtpScreenState extends State<VerifyOtpScreen> {
 
   late final List<TextEditingController> _otpControllers;
   late final List<FocusNode> _focusNodes;
+  final AuthApiService _authApiService = const AuthApiService();
   int _secondsRemaining = _initialSeconds;
+  bool _isSubmitting = false;
+  String _currentExpectedOtp = '';
+  String _currentWhatsappOtpLink = '';
   Timer? _resendTimer;
 
   @override
@@ -36,6 +45,8 @@ class _VerifyOtpScreenState extends State<VerifyOtpScreen> {
     super.initState();
     _otpControllers = List.generate(6, (_) => TextEditingController());
     _focusNodes = List.generate(6, (_) => FocusNode());
+    _currentExpectedOtp = widget.expectedOtp;
+    _currentWhatsappOtpLink = widget.whatsappOtpLink;
     _startResendTimer();
   }
 
@@ -66,12 +77,53 @@ class _VerifyOtpScreenState extends State<VerifyOtpScreen> {
     });
   }
 
-  void _resendOtp() {
+  Future<void> _resendOtp() async {
+    setState(() => _isSubmitting = true);
+    try {
+      final response = await _authApiService.resendStudentOtp(
+        studentId: widget.studentId,
+      );
+      if (!mounted) return;
+      setState(() {
+        _currentExpectedOtp = response.otp;
+        _currentWhatsappOtpLink = response.whatsappOtpLink;
+      });
+      showAppSnackBar(
+        context,
+        type: AppSnackBarType.success,
+        message: response.message,
+      );
+      await _openWhatsappLink(_currentWhatsappOtpLink);
+    } on ApiResponseException catch (error) {
+      debugPrint(error.toString());
+      if (!mounted) return;
+      showAppSnackBar(
+        context,
+        type: AppSnackBarType.error,
+        message: error.message,
+      );
+      return;
+    } catch (_) {
+      if (!mounted) return;
+      showAppSnackBar(
+        context,
+        type: AppSnackBarType.error,
+        message: context.l10n.isArabic
+            ? 'تعذر إعادة إرسال OTP'
+            : 'Failed to resend OTP',
+      );
+      return;
+    } finally {
+      if (mounted) {
+        setState(() => _isSubmitting = false);
+      }
+    }
+
     for (final controller in _otpControllers) {
       controller.clear();
     }
     _focusNodes.first.requestFocus();
-    setState(_startResendTimer);
+    _startResendTimer();
   }
 
   String _resendText(BuildContext context) {
@@ -99,7 +151,7 @@ class _VerifyOtpScreenState extends State<VerifyOtpScreen> {
 
     final otp = _otpControllers.map((e) => e.text).join();
 
-    if (otp != widget.expectedOtp) {
+    if (otp != _currentExpectedOtp) {
       showAppSnackBar(
         context,
         type: AppSnackBarType.error,
@@ -108,14 +160,59 @@ class _VerifyOtpScreenState extends State<VerifyOtpScreen> {
       return;
     }
 
-    final whatsappUri = Uri.tryParse(widget.whatsappOtpLink);
-    if (whatsappUri != null) {
-      await launchUrl(whatsappUri, mode: LaunchMode.externalApplication);
+    setState(() => _isSubmitting = true);
+    try {
+      await _openWhatsappLink(_currentWhatsappOtpLink);
+      final message = await _authApiService.verifyStudentOtp(
+        studentId: widget.studentId,
+        otp: otp,
+      );
+      final prefs = await SharedPreferences.getInstance();
+      await prefs.setBool('isLoggedIn', true);
+      if (!mounted) return;
+      showAppSnackBar(
+        context,
+        type: AppSnackBarType.success,
+        message: message,
+      );
+      Navigator.of(context).pushAndRemoveUntil(
+        MaterialPageRoute(builder: (_) => const HomeScreen()),
+        (route) => false,
+      );
+    } on ApiResponseException catch (error) {
+      debugPrint(error.toString());
+      if (!mounted) return;
+      showAppSnackBar(
+        context,
+        type: AppSnackBarType.error,
+        message: error.message,
+      );
+    } catch (_) {
+      if (!mounted) return;
+      showAppSnackBar(
+        context,
+        type: AppSnackBarType.error,
+        message: context.l10n.isArabic ? 'حدث خطأ' : 'Something went wrong',
+      );
+    } finally {
+      if (mounted) {
+        setState(() => _isSubmitting = false);
+      }
     }
+  }
 
+  Future<void> _openWhatsappLink(String link) async {
+    final whatsappUri = Uri.tryParse(link);
+    if (whatsappUri == null) return;
+    await launchUrl(whatsappUri, mode: LaunchMode.externalApplication);
+  }
+
+  Future<void> _logout() async {
+    final prefs = await SharedPreferences.getInstance();
+    await prefs.setBool('isLoggedIn', false);
     if (!mounted) return;
     Navigator.of(context).pushAndRemoveUntil(
-      MaterialPageRoute(builder: (_) => const HomeScreen()),
+      MaterialPageRoute(builder: (_) => const LoginScreen()),
       (route) => false,
     );
   }
@@ -123,6 +220,7 @@ class _VerifyOtpScreenState extends State<VerifyOtpScreen> {
   @override
   Widget build(BuildContext context) {
     return AuthScaffold(
+      isLoading: _isSubmitting,
       bottomCardColor: _verifyCardShade,
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
@@ -159,7 +257,17 @@ class _VerifyOtpScreenState extends State<VerifyOtpScreen> {
           const SizedBox(height: 28),
           AppPrimaryButton(
             label: context.l10n.text('verifyAndLogin'),
-            onPressed: () => _verifyOtp(context),
+            onPressed: _isSubmitting ? null : () => _verifyOtp(context),
+          ),
+          const SizedBox(height: 10),
+          Center(
+            child: TextButton(
+              onPressed: _isSubmitting ? null : _logout,
+              child: Text(
+                context.l10n.isArabic ? 'تسجيل الخروج' : 'Logout',
+                style: const TextStyle(color: AppColors.textMuted),
+              ),
+            ),
           ),
         ],
       ),
