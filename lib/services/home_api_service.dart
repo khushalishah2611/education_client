@@ -175,6 +175,9 @@ class HomeUniversity {
     required this.city,
     required this.logoUrl,
     required this.rating,
+    required this.isAccredited,
+    required this.academicRequirements,
+    required this.programNames,
   });
 
   factory HomeUniversity.fromJson(Map<String, dynamic> json) {
@@ -186,6 +189,11 @@ class HomeUniversity {
       city: _readString(json, const ['city']),
       logoUrl: _toAbsoluteUrl(logoPath),
       rating: _readDouble(json['rating']),
+      isAccredited: _readBool(json, const ['isAccredited', 'accredited']),
+      academicRequirements: _parseAcademicRequirements(
+        _readString(json, const ['academicList']),
+      ),
+      programNames: _parseProgramNames(json),
     );
   }
 
@@ -195,6 +203,16 @@ class HomeUniversity {
   final String city;
   final String logoUrl;
   final double rating;
+  final bool isAccredited;
+  final List<AcademicRequirement> academicRequirements;
+  final Set<String> programNames;
+}
+
+class AcademicRequirement {
+  const AcademicRequirement({required this.academic, required this.minResult});
+
+  final String academic;
+  final double minResult;
 }
 
 class HomeProgram {
@@ -238,6 +256,77 @@ String _readString(Map<String, dynamic> json, List<String> keys) {
     }
   }
   return '';
+}
+
+bool _readBool(Map<String, dynamic> json, List<String> keys) {
+  for (final key in keys) {
+    final dynamic value = json[key];
+    if (value is bool) return value;
+    if (value is String) {
+      final normalized = value.trim().toLowerCase();
+      if (normalized == 'true' || normalized == '1') return true;
+      if (normalized == 'false' || normalized == '0') return false;
+    }
+    if (value is num) return value != 0;
+  }
+  return false;
+}
+
+List<AcademicRequirement> _parseAcademicRequirements(String academicList) {
+  if (academicList.trim().isEmpty) return const [];
+  final lines = academicList
+      .replaceAll('\r', '')
+      .split('\n')
+      .map((line) => line.trim())
+      .where((line) => line.isNotEmpty);
+
+  final requirements = <AcademicRequirement>[];
+  for (final line in lines) {
+    final parts = line.split('|').map((part) => part.trim()).toList();
+    if (parts.isEmpty || parts.first.isEmpty) {
+      continue;
+    }
+    final threshold =
+        parts.length > 1 ? double.tryParse(parts[1].replaceAll('%', '')) : null;
+    requirements.add(
+      AcademicRequirement(
+        academic: parts.first,
+        minResult: threshold ?? 0,
+      ),
+    );
+  }
+  return requirements;
+}
+
+Set<String> _parseProgramNames(Map<String, dynamic> json) {
+  final values = <String>{};
+  void addProgram(dynamic raw) {
+    if (raw is String) {
+      final normalized = raw.trim().toLowerCase();
+      if (normalized.isNotEmpty) {
+        values.add(normalized);
+      }
+      return;
+    }
+    if (raw is Map<String, dynamic>) {
+      final name = _readString(raw, const ['name', 'programName', 'courseName']);
+      if (name.isNotEmpty) {
+        values.add(name.toLowerCase());
+      }
+    }
+  }
+
+  addProgram(json['program']);
+  addProgram(json['programName']);
+  addProgram(json['courseName']);
+
+  final programList = json['programs'];
+  if (programList is List<dynamic>) {
+    for (final program in programList) {
+      addProgram(program);
+    }
+  }
+  return values;
 }
 
 double _readDouble(dynamic value) {
