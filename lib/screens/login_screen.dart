@@ -1,6 +1,11 @@
 import 'package:flutter/material.dart';
+
 import '../core/app_localizations.dart';
 import '../core/app_theme.dart';
+import '../models/agreement_template.dart';
+import '../models/country_master.dart';
+import '../models/student_login_response.dart';
+import '../services/auth_api_service.dart';
 import '../widgets/common_widgets.dart';
 import 'verify_otp_screen.dart';
 
@@ -13,34 +18,209 @@ class LoginScreen extends StatefulWidget {
 
 class _LoginScreenState extends State<LoginScreen> {
   final TextEditingController _mobileController = TextEditingController();
-  String _selectedDialCode = '+91';
+  final AuthApiService _authApiService = const AuthApiService();
 
-  bool _isChecked = false; // ✅ Checkbox state
+  List<CountryMaster> _countries = const [];
+  List<AgreementTemplate> _agreementTemplates = const [];
+  CountryMaster? _selectedCountry;
+  bool _isChecked = false;
+  bool _isLoadingMeta = false;
+  bool _isSubmitting = false;
+
+  @override
+  void initState() {
+    super.initState();
+    _loadMetaData();
+  }
+
+  @override
+  void dispose() {
+    _mobileController.dispose();
+    super.dispose();
+  }
+
+  Future<void> _loadMetaData() async {
+    setState(() => _isLoadingMeta = true);
+    try {
+      final countries = await _authApiService.fetchCountries();
+      final agreements = await _authApiService.fetchAgreementTemplates();
+
+      if (!mounted) return;
+      setState(() {
+        _countries = countries;
+        _agreementTemplates = agreements;
+        _selectedCountry = countries.isEmpty ? null : countries.first;
+      });
+    } catch (_) {
+      if (!mounted) return;
+      showAppSnackBar(
+        context,
+        type: AppSnackBarType.error,
+        message: context.l10n.isArabic
+            ? 'تعذر تحميل بيانات تسجيل الدخول'
+            : 'Failed to load login data',
+      );
+    } finally {
+      if (mounted) {
+        setState(() => _isLoadingMeta = false);
+      }
+    }
+  }
+
+  Future<void> _onSendOtpTap() async {
+    if (_mobileController.text.length < 10) {
+      showAppSnackBar(
+        context,
+        type: AppSnackBarType.error,
+        message: context.l10n.isArabic
+            ? 'أدخل رقم هاتف صحيح'
+            : 'Enter valid mobile number',
+      );
+      return;
+    }
+
+    if (!_isChecked) {
+      showAppSnackBar(
+        context,
+        type: AppSnackBarType.error,
+        message: context.l10n.isArabic
+            ? 'يرجى قبول الشروط وسياسة الخصوصية'
+            : 'Please accept Terms & Privacy',
+      );
+      return;
+    }
+
+    if (_selectedCountry == null) {
+      showAppSnackBar(
+        context,
+        type: AppSnackBarType.error,
+        message: context.l10n.isArabic ? 'اختر الدولة أولًا' : 'Select country first',
+      );
+      return;
+    }
+
+    setState(() => _isSubmitting = true);
+    try {
+      final StudentLoginResponse response = await _authApiService
+          .createStudentForOtp(
+            country: _selectedCountry!.nameEn,
+            phone: _mobileController.text.trim(),
+            gender: 'MALE',
+          );
+
+      if (!mounted) return;
+      showAppSnackBar(
+        context,
+        type: AppSnackBarType.success,
+        message: response.message,
+      );
+
+      Navigator.of(context).push(
+        MaterialPageRoute(
+          builder: (_) => VerifyOtpScreen(
+            expectedOtp: response.otp,
+            whatsappOtpLink: response.whatsappOtpLink,
+          ),
+        ),
+      );
+    } catch (_) {
+      if (!mounted) return;
+      showAppSnackBar(
+        context,
+        type: AppSnackBarType.error,
+        message: context.l10n.isArabic
+            ? 'تعذر إرسال OTP، حاول مرة أخرى'
+            : 'Failed to send OTP, try again',
+      );
+    } finally {
+      if (mounted) {
+        setState(() => _isSubmitting = false);
+      }
+    }
+  }
+
+  void _openTermsBottomSheet() {
+    final AgreementTemplate? agreement = _agreementTemplates.isEmpty
+        ? null
+        : _agreementTemplates.first;
+
+    if (agreement == null) {
+      return;
+    }
+
+    showModalBottomSheet<void>(
+      context: context,
+      isScrollControlled: true,
+      shape: const RoundedRectangleBorder(
+        borderRadius: BorderRadius.vertical(top: Radius.circular(20)),
+      ),
+      builder: (context) {
+        return SafeArea(
+          top: false,
+          child: Padding(
+            padding: const EdgeInsets.fromLTRB(18, 14, 18, 26),
+            child: Column(
+              mainAxisSize: MainAxisSize.min,
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Row(
+                  children: [
+                    Expanded(
+                      child: Text(
+                        agreement.title,
+                        style: const TextStyle(
+                          fontSize: 18,
+                          fontWeight: FontWeight.w700,
+                          color: AppColors.text,
+                        ),
+                      ),
+                    ),
+                    IconButton(
+                      onPressed: () => Navigator.of(context).pop(),
+                      icon: const Icon(Icons.close),
+                      tooltip: MaterialLocalizations.of(context)
+                          .closeButtonTooltip,
+                    ),
+                  ],
+                ),
+                const SizedBox(height: 8),
+                Text(
+                  agreement.content,
+                  style: const TextStyle(
+                    height: 1.4,
+                    fontSize: 14,
+                    color: AppColors.textMuted,
+                  ),
+                ),
+              ],
+            ),
+          ),
+        );
+      },
+    );
+  }
 
   @override
   Widget build(BuildContext context) {
+    final AgreementTemplate? agreement = _agreementTemplates.isEmpty
+        ? null
+        : _agreementTemplates.first;
+
     return AuthScaffold(
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         mainAxisSize: MainAxisSize.min,
         children: [
-          /// Title
           Text(
             context.l10n.text('loginWithOtp'),
             style: Theme.of(context).textTheme.headlineMedium,
           ),
-
           const SizedBox(height: 20),
-
-          /// Mobile Label
           Text(
             context.l10n.text('mobileNumber'),
             style: Theme.of(context).textTheme.titleMedium,
           ),
-
           const SizedBox(height: 10),
-
-          /// Mobile Input Field
           Container(
             height: 50,
             decoration: BoxDecoration(
@@ -51,37 +231,30 @@ class _LoginScreenState extends State<LoginScreen> {
             child: Row(
               children: [
                 const SizedBox(width: 12),
-
-                /// Country Code Dropdown
                 DropdownButtonHideUnderline(
-                  child: DropdownButton<String>(
-                    value: _selectedDialCode,
+                  child: DropdownButton<CountryMaster>(
+                    value: _selectedCountry,
                     borderRadius: BorderRadius.circular(12),
-                    icon: const Icon(
-                      Icons.keyboard_arrow_down_rounded,
-                      size: 18,
-                    ),
+                    icon: const Icon(Icons.keyboard_arrow_down_rounded, size: 18),
                     style: const TextStyle(fontSize: 16, color: AppColors.text),
-                    items: const [
-                      DropdownMenuItem(value: '+91', child: Text('🇮🇳 +91')),
-                      DropdownMenuItem(value: '+971', child: Text('🇦🇪 +971')),
-                      DropdownMenuItem(value: '+966', child: Text('🇸🇦 +966')),
-                    ],
-                    onChanged: (value) {
-                      if (value == null) return;
-                      setState(() {
-                        _selectedDialCode = value;
-                      });
-                    },
+                    items: _countries
+                        .map(
+                          (country) => DropdownMenuItem<CountryMaster>(
+                            value: country,
+                            child: Text('${country.flagEmoji} ${country.dialCode}'),
+                          ),
+                        )
+                        .toList(growable: false),
+                    onChanged: _isLoadingMeta
+                        ? null
+                        : (value) {
+                            if (value == null) return;
+                            setState(() => _selectedCountry = value);
+                          },
                   ),
                 ),
-
                 const SizedBox(width: 10),
-
-                /// Divider
                 Container(width: 1, height: 30, color: AppColors.border),
-
-                /// Input
                 Expanded(
                   child: TextField(
                     controller: _mobileController,
@@ -99,60 +272,26 @@ class _LoginScreenState extends State<LoginScreen> {
               ],
             ),
           ),
-
           const SizedBox(height: 26),
-
-          /// Send OTP Button
           AppPrimaryButton(
             label: context.l10n.text('sendOtp'),
-            onPressed: () {
-              /// Mobile validation
-              if (_mobileController.text.length < 10) {
-                showAppSnackBar(
-                  context,
-                  type: AppSnackBarType.error,
-                  message: context.l10n.isArabic
-                      ? 'أدخل رقم هاتف صحيح'
-                      : 'Enter valid mobile number',
-                );
-                return;
-              }
-
-              /// Checkbox validation
-              if (!_isChecked) {
-                showAppSnackBar(
-                  context,
-                  type: AppSnackBarType.error,
-                  message: context.l10n.isArabic
-                      ? 'يرجى قبول الشروط وسياسة الخصوصية'
-                      : 'Please accept Terms & Privacy',
-                );
-                return;
-              }
-
-              /// Navigate
-              Navigator.of(context).push(
-                MaterialPageRoute(builder: (_) => const VerifyOtpScreen()),
-              );
-            },
+            isLoading: _isSubmitting,
+            onPressed: _isLoadingMeta ? null : _onSendOtpTap,
           ),
-
           const SizedBox(height: 14),
-
-          /// Terms & Privacy Checkbox
           CheckboxListTile(
             value: _isChecked,
-            onChanged: (value) {
-              setState(() {
-                _isChecked = value!;
-              });
-            },
-            title: Text(
-              context.l10n.text('termsPrivacy'),
-              style: const TextStyle(color: Colors.blue, fontSize: 14),
+            onChanged: agreement == null
+                ? null
+                : (value) => setState(() => _isChecked = value ?? false),
+            title: GestureDetector(
+              onTap: agreement == null ? null : _openTermsBottomSheet,
+              child: Text(
+                agreement?.title ?? context.l10n.text('termsPrivacy'),
+                style: const TextStyle(color: Colors.blue, fontSize: 14),
+              ),
             ),
-            controlAffinity:
-                ListTileControlAffinity.leading, // checkbox left side
+            controlAffinity: ListTileControlAffinity.leading,
             contentPadding: EdgeInsets.zero,
             activeColor: AppColors.primary,
           ),

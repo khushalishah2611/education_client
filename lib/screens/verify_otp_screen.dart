@@ -1,5 +1,7 @@
 import 'dart:async';
+
 import 'package:flutter/material.dart';
+import 'package:url_launcher/url_launcher.dart';
 
 import '../core/app_localizations.dart';
 import '../core/app_theme.dart';
@@ -7,7 +9,14 @@ import '../widgets/common_widgets.dart';
 import 'home_screen.dart';
 
 class VerifyOtpScreen extends StatefulWidget {
-  const VerifyOtpScreen({super.key});
+  const VerifyOtpScreen({
+    super.key,
+    required this.expectedOtp,
+    required this.whatsappOtpLink,
+  });
+
+  final String expectedOtp;
+  final String whatsappOtpLink;
 
   @override
   State<VerifyOtpScreen> createState() => _VerifyOtpScreenState();
@@ -74,8 +83,7 @@ class _VerifyOtpScreenState extends State<VerifyOtpScreen> {
         : 'Resend OTP in : $_secondsRemaining second';
   }
 
-  /// ✅ OTP VALIDATION FUNCTION
-  void _verifyOtp(BuildContext context) {
+  Future<void> _verifyOtp(BuildContext context) async {
     final hasEmptyField = _otpControllers.any((c) => c.text.trim().isEmpty);
 
     if (hasEmptyField) {
@@ -91,9 +99,21 @@ class _VerifyOtpScreenState extends State<VerifyOtpScreen> {
 
     final otp = _otpControllers.map((e) => e.text).join();
 
-    /// 👉 optional debug
-    print("OTP Entered: $otp");
+    if (otp != widget.expectedOtp) {
+      showAppSnackBar(
+        context,
+        type: AppSnackBarType.error,
+        message: context.l10n.isArabic ? 'OTP غير صحيح' : 'Invalid OTP',
+      );
+      return;
+    }
 
+    final whatsappUri = Uri.tryParse(widget.whatsappOtpLink);
+    if (whatsappUri != null) {
+      await launchUrl(whatsappUri, mode: LaunchMode.externalApplication);
+    }
+
+    if (!mounted) return;
     Navigator.of(context).pushAndRemoveUntil(
       MaterialPageRoute(builder: (_) => const HomeScreen()),
       (route) => false,
@@ -113,7 +133,6 @@ class _VerifyOtpScreenState extends State<VerifyOtpScreen> {
             style: Theme.of(context).textTheme.headlineMedium,
           ),
           const SizedBox(height: 18),
-
           Center(
             child: Text(
               context.l10n.text('otpHelp'),
@@ -121,13 +140,9 @@ class _VerifyOtpScreenState extends State<VerifyOtpScreen> {
               style: Theme.of(context).textTheme.titleMedium,
             ),
           ),
-
           const SizedBox(height: 24),
-
           _OtpRow(controllers: _otpControllers, focusNodes: _focusNodes),
-
           const SizedBox(height: 10),
-
           Center(
             child: TextButton(
               onPressed: _secondsRemaining == 0 ? _resendOtp : null,
@@ -141,10 +156,7 @@ class _VerifyOtpScreenState extends State<VerifyOtpScreen> {
               child: Text(_resendText(context)),
             ),
           ),
-
           const SizedBox(height: 28),
-
-          /// ✅ UPDATED BUTTON WITH VALIDATION
           AppPrimaryButton(
             label: context.l10n.text('verifyAndLogin'),
             onPressed: () => _verifyOtp(context),
