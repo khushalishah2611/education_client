@@ -1,5 +1,4 @@
 import 'package:flutter/material.dart';
-import 'package:url_launcher/url_launcher.dart';
 
 import '../core/app_localizations.dart';
 import '../core/app_theme.dart';
@@ -114,7 +113,6 @@ class _LoginScreenState extends State<LoginScreen> {
         type: AppSnackBarType.success,
         message: response.message,
       );
-      await _openWhatsappLink(response.whatsappOtpLink);
 
       Navigator.of(context).push(
         MaterialPageRoute(
@@ -128,6 +126,29 @@ class _LoginScreenState extends State<LoginScreen> {
     } on ApiResponseException catch (error) {
       debugPrint(error.toString());
       if (!mounted) return;
+      if (error.statusCode == 409) {
+        final conflictResponse = _buildConflictLoginResponse(
+          error.responseBody,
+          fallbackMessage: error.message,
+        );
+        if (conflictResponse != null && conflictResponse.id.isNotEmpty) {
+          showAppSnackBar(
+            context,
+            type: AppSnackBarType.success,
+            message: conflictResponse.message,
+          );
+          Navigator.of(context).push(
+            MaterialPageRoute(
+              builder: (_) => VerifyOtpScreen(
+                studentId: conflictResponse.id,
+                expectedOtp: conflictResponse.otp,
+                whatsappOtpLink: conflictResponse.whatsappOtpLink,
+              ),
+            ),
+          );
+          return;
+        }
+      }
       showAppSnackBar(
         context,
         type: AppSnackBarType.error,
@@ -149,17 +170,24 @@ class _LoginScreenState extends State<LoginScreen> {
     }
   }
 
-  Future<void> _openWhatsappLink(String link) async {
-    final uri = Uri.tryParse(link);
-    if (uri == null) return;
+  StudentLoginResponse? _buildConflictLoginResponse(
+    Map<String, dynamic> body, {
+    required String fallbackMessage,
+  }) {
+    if (body.isEmpty) {
+      return null;
+    }
 
-    final openedInApp = await launchUrl(
-      uri,
-      mode: LaunchMode.externalNonBrowserApplication,
-    );
-    if (openedInApp) return;
+    final dynamic data = body['data'];
+    final Map<String, dynamic> payload = data is Map<String, dynamic>
+        ? <String, dynamic>{...data}
+        : <String, dynamic>{...body};
 
-    await launchUrl(uri, mode: LaunchMode.externalApplication);
+    if ((payload['message'] as String?)?.isEmpty ?? true) {
+      payload['message'] = fallbackMessage;
+    }
+
+    return StudentLoginResponse.fromJson(payload);
   }
 
   void _openTermsBottomSheet() {
