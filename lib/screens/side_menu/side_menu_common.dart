@@ -1,7 +1,9 @@
 import 'package:flutter/material.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 
 import '../../core/app_localizations.dart';
 import '../../core/app_theme.dart';
+import '../login_screen.dart';
 import '../../widgets/common_widgets.dart';
 
 class SideMenuScaffold extends StatelessWidget {
@@ -240,9 +242,19 @@ Future<void> showLogoutDialog(BuildContext context) {
                     child: SizedBox(
                       height: 48,
                       child: FilledButton(
-                        onPressed: () {
-                          Navigator.of(context).pop();
-                          Navigator.of(context).popUntil((route) => route.isFirst);
+                        onPressed: () async {
+                          final navigator = Navigator.of(context);
+                          final prefs = await SharedPreferences.getInstance();
+                          await prefs.setBool('isLoggedIn', false);
+                          if (!context.mounted) return;
+
+                          navigator.pop();
+                          navigator.pushAndRemoveUntil(
+                            MaterialPageRoute(
+                              builder: (_) => const LoginScreen(),
+                            ),
+                            (route) => false,
+                          );
                         },
                         style: FilledButton.styleFrom(
                           backgroundColor: const Color(0xFFDF0000),

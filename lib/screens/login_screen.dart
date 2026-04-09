@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:url_launcher/url_launcher.dart';
 
 import '../core/app_localizations.dart';
 import '../core/app_theme.dart';
@@ -113,6 +114,7 @@ class _LoginScreenState extends State<LoginScreen> {
         type: AppSnackBarType.success,
         message: response.message,
       );
+      await _openWhatsappLink(response.whatsappOtpLink);
 
       Navigator.of(context).push(
         MaterialPageRoute(
@@ -145,6 +147,19 @@ class _LoginScreenState extends State<LoginScreen> {
         setState(() => _isSubmitting = false);
       }
     }
+  }
+
+  Future<void> _openWhatsappLink(String link) async {
+    final uri = Uri.tryParse(link);
+    if (uri == null) return;
+
+    final openedInApp = await launchUrl(
+      uri,
+      mode: LaunchMode.externalNonBrowserApplication,
+    );
+    if (openedInApp) return;
+
+    await launchUrl(uri, mode: LaunchMode.externalApplication);
   }
 
   void _openTermsBottomSheet() {

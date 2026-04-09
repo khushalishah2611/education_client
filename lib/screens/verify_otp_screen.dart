@@ -197,9 +197,16 @@ class _VerifyOtpScreenState extends State<VerifyOtpScreen> {
   }
 
   Future<void> _openWhatsappLink(String link) async {
-    final whatsappUri = Uri.tryParse(link);
-    if (whatsappUri == null) return;
-    await launchUrl(whatsappUri, mode: LaunchMode.externalApplication);
+    final uri = Uri.tryParse(link);
+    if (uri == null) return;
+
+    final openedInApp = await launchUrl(
+      uri,
+      mode: LaunchMode.externalNonBrowserApplication,
+    );
+    if (openedInApp) return;
+
+    await launchUrl(uri, mode: LaunchMode.externalApplication);
   }
 
 
