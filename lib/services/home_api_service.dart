@@ -48,13 +48,34 @@ class HomeApiService {
         .toList(growable: false);
   }
 
-  Future<List<HomeUniversity>> fetchUniversities() async {
+  Future<List<HomeUniversity>> fetchUniversities({
+    String? country,
+    String? academic,
+    String? program,
+    String? search,
+  }) async {
     const path = '/api/admin/universities';
-    final response = await http.get(ApiConfig.uri(path));
+    final queryParameters = <String, String>{};
+    void addIfNotEmpty(String key, String? value) {
+      final normalized = value?.trim() ?? '';
+      if (normalized.isNotEmpty) {
+        queryParameters[key] = normalized;
+      }
+    }
+
+    addIfNotEmpty('country', country);
+    addIfNotEmpty('academic', academic);
+    addIfNotEmpty('program', program);
+    addIfNotEmpty('search', search);
+
+    final uri = ApiConfig.uri(path).replace(
+      queryParameters: queryParameters.isEmpty ? null : queryParameters,
+    );
+    final response = await http.get(uri);
     final decoded = _decode(response.body);
     logApiCall(
       method: 'GET',
-      url: ApiConfig.uri(path).toString(),
+      url: uri.toString(),
       statusCode: response.statusCode,
       requestBody: null,
       responseBody: decoded,

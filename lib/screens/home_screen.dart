@@ -30,6 +30,7 @@ class _HomeScreenState extends State<HomeScreen> {
     viewportFraction: 1,
   );
   List<BannerItem> _banners = const [];
+  List<HomeUniversity> _allUniversities = const [];
   List<UniversityData> _universities = const [];
   List<String> _programOptions = const [];
   List<String> _academicOptions = const [];
@@ -59,7 +60,12 @@ class _HomeScreenState extends State<HomeScreen> {
     setState(() => _isLoadingUniversities = true);
     try {
       final responses = await Future.wait<dynamic>([
-        _homeApiService.fetchUniversities(),
+        _homeApiService.fetchUniversities(
+          country: _selectedCountry,
+          academic: _selectedAcademic,
+          program: _selectedProgram,
+          search: _resultController.text,
+        ),
         _homeApiService.fetchPrograms(),
         _homeApiService.fetchAcademicMasters(),
         _homeApiService.fetchCountries(),
@@ -71,7 +77,8 @@ class _HomeScreenState extends State<HomeScreen> {
 
       if (!mounted) return;
       setState(() {
-        _universities = universities
+        _allUniversities = universities;
+        _universities = _filterUniversities(universities)
             .map(_toUniversityData)
             .toList(growable: false);
         _programOptions = programs
@@ -94,6 +101,7 @@ class _HomeScreenState extends State<HomeScreen> {
     } catch (_) {
       if (!mounted) return;
       setState(() {
+        _allUniversities = const [];
         _universities = const [];
         _programOptions = const [];
         _academicOptions = const [];
@@ -105,6 +113,39 @@ class _HomeScreenState extends State<HomeScreen> {
         setState(() => _isLoadingUniversities = false);
       }
     }
+  }
+
+  List<HomeUniversity> _filterUniversities(List<HomeUniversity> source) {
+    return source.where((university) {
+      final countryMatch = _selectedCountry == null ||
+          _selectedCountry!.trim().isEmpty ||
+          university.country.toLowerCase() ==
+              _selectedCountry!.trim().toLowerCase();
+      if (!countryMatch) {
+        return false;
+      }
+
+      final searchValue = _resultController.text.trim().toLowerCase();
+      if (searchValue.isEmpty) {
+        return true;
+      }
+      return university.name.toLowerCase().contains(searchValue) ||
+          university.city.toLowerCase().contains(searchValue) ||
+          university.country.toLowerCase().contains(searchValue);
+    }).toList(growable: false);
+  }
+
+  Future<void> _refreshHomeData() async {
+    await Future.wait<void>([_loadBanners(), _loadUniversities()]);
+  }
+
+  Future<void> _applyFilters() async {
+    setState(() {
+      _universities = _filterUniversities(_allUniversities)
+          .map(_toUniversityData)
+          .toList(growable: false);
+    });
+    await _loadUniversities();
   }
 
   Future<void> _loadBanners() async {
@@ -136,6 +177,7 @@ class _HomeScreenState extends State<HomeScreen> {
     );
     if (selected == null || !mounted) return;
     setState(() => _selectedCountry = selected.name);
+    await _applyFilters();
   }
 
   Future<void> _openAdvanceSearchDialog() async {
@@ -155,6 +197,7 @@ class _HomeScreenState extends State<HomeScreen> {
         onCountryChanged: (value) => setState(() => _selectedCountry = value),
         onAcademicChanged: (value) => setState(() => _selectedAcademic = value),
         onProgramChanged: (value) => setState(() => _selectedProgram = value),
+        onApplyFilters: _applyFilters,
       ),
     );
   }
@@ -262,8 +305,11 @@ class _HomeScreenState extends State<HomeScreen> {
                   ),
 
                   Expanded(
-                    child: SingleChildScrollView(
-                      child: Padding(
+                    child: RefreshIndicator(
+                      onRefresh: _refreshHomeData,
+                      child: SingleChildScrollView(
+                        physics: const AlwaysScrollableScrollPhysics(),
+                        child: Padding(
                         padding: const EdgeInsets.only(
                           left: 16.0,
                           right: 16.0,
@@ -403,6 +449,7 @@ class _HomeScreenState extends State<HomeScreen> {
                               },
                             ),
                           ],
+                        ),
                         ),
                       ),
                     ),
@@ -682,6 +729,7 @@ class _AdvanceSearchDialog extends StatefulWidget {
     required this.onCountryChanged,
     required this.onAcademicChanged,
     required this.onProgramChanged,
+    required this.onApplyFilters,
   });
 
   final List<String> countryOptions;
@@ -695,6 +743,7 @@ class _AdvanceSearchDialog extends StatefulWidget {
   final ValueChanged<String?> onCountryChanged;
   final ValueChanged<String?> onAcademicChanged;
   final ValueChanged<String?> onProgramChanged;
+  final Future<void> Function() onApplyFilters;
 
   @override
   State<_AdvanceSearchDialog> createState() => _AdvanceSearchDialogState();
@@ -827,11 +876,12 @@ class _AdvanceSearchDialogState extends State<_AdvanceSearchDialog> {
             SizedBox(
               height: 50,
               child: ElevatedButton(
-                onPressed: () {
+                onPressed: () async {
                   widget.onCountryChanged(_selectedCountry);
                   widget.onAcademicChanged(_selectedAcademic);
                   widget.onProgramChanged(_selectedProgram);
                   Navigator.of(context).pop();
+                  await widget.onApplyFilters();
                 },
                 style: ElevatedButton.styleFrom(
                   elevation: 0,
