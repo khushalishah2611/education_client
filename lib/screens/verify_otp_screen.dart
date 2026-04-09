@@ -162,7 +162,6 @@ class _VerifyOtpScreenState extends State<VerifyOtpScreen> {
 
     setState(() => _isSubmitting = true);
     try {
-      await _openWhatsappLink(_currentWhatsappOtpLink);
       final message = await _authApiService.verifyStudentOtp(
         studentId: widget.studentId,
         otp: otp,
@@ -170,11 +169,7 @@ class _VerifyOtpScreenState extends State<VerifyOtpScreen> {
       final prefs = await SharedPreferences.getInstance();
       await prefs.setBool('isLoggedIn', true);
       if (!mounted) return;
-      showAppSnackBar(
-        context,
-        type: AppSnackBarType.success,
-        message: message,
-      );
+      showAppSnackBar(context, type: AppSnackBarType.success, message: message);
       Navigator.of(context).pushAndRemoveUntil(
         MaterialPageRoute(builder: (_) => const HomeScreen()),
         (route) => false,
@@ -259,7 +254,6 @@ class _VerifyOtpScreenState extends State<VerifyOtpScreen> {
             label: context.l10n.text('verifyAndLogin'),
             onPressed: _isSubmitting ? null : () => _verifyOtp(context),
           ),
-
         ],
       ),
     );
