@@ -533,9 +533,7 @@ class _BannerShimmer extends StatelessWidget {
       ),
       child: const Column(
         crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          _ShimmerBlock(height: 100, borderRadius: 8),
-        ],
+        children: [_ShimmerBlock(height: 100, borderRadius: 8)],
       ),
     );
   }
@@ -737,42 +735,46 @@ class _AdvanceSearchDialogState extends State<_AdvanceSearchDialog> {
           ),
           const SizedBox(height: 8),
           Container(
-            height: 48,
+            height: 45,
             padding: const EdgeInsets.symmetric(horizontal: 12),
             decoration: BoxDecoration(
               border: Border.all(color: const Color(0xFFD7D7D7)),
               borderRadius: BorderRadius.circular(10),
+              color: Colors.white,
             ),
             child: DropdownButtonHideUnderline(
               child: DropdownButton<String>(
                 isExpanded: true,
                 value: hasValue ? value : null,
+                borderRadius: BorderRadius.circular(12),
+                menuMaxHeight: 250,
                 icon: const Icon(
                   Icons.keyboard_arrow_down_rounded,
                   color: Color(0xFF757575),
                 ),
+
                 hint: Text(
                   options.isEmpty ? 'No options found' : 'Select $title',
                   style: const TextStyle(color: Color(0xFF8A8A8A)),
                 ),
-                items: options
-                    .map(
-                      (option) => DropdownMenuItem<String>(
-                        value: option,
-                        child: Row(
-                          children: [
-                            Icon(
-                              icon,
-                              color: const Color(0xFF8A8A8A),
-                              size: 18,
-                            ),
-                            const SizedBox(width: 8),
-                            Expanded(child: Text(option)),
-                          ],
+
+                items: options.map((option) {
+                  return DropdownMenuItem<String>(
+                    value: option,
+                    child: Row(
+                      children: [
+                        Icon(icon, color: const Color(0xFF8A8A8A), size: 18),
+                        const SizedBox(width: 8),
+
+                        // 👇 FIX
+                        Flexible(
+                          child: Text(option, overflow: TextOverflow.ellipsis),
                         ),
-                      ),
-                    )
-                    .toList(growable: false),
+                      ],
+                    ),
+                  );
+                }).toList(),
+
                 onChanged: options.isEmpty ? null : onChanged,
               ),
             ),
