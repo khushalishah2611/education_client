@@ -3,6 +3,7 @@ import 'dart:convert';
 import 'package:http/http.dart' as http;
 
 import '../core/api_config.dart';
+import '../core/api_logger.dart';
 import '../models/agreement_template.dart';
 import '../models/country_master.dart';
 import '../models/student_login_response.dart';
@@ -15,7 +16,7 @@ class AuthApiService {
     final response = await http.get(
       ApiConfig.uri(path),
     );
-    _logApiCall(
+    logApiCall(
       method: 'GET',
       url: ApiConfig.uri(path).toString(),
       statusCode: response.statusCode,
@@ -44,7 +45,7 @@ class AuthApiService {
     final response = await http.get(
       ApiConfig.uri(path),
     );
-    _logApiCall(
+    logApiCall(
       method: 'GET',
       url: ApiConfig.uri(path).toString(),
       statusCode: response.statusCode,
@@ -86,7 +87,7 @@ class AuthApiService {
     );
 
     final decoded = _decodeObject(response.body);
-    _logApiCall(
+    logApiCall(
       method: 'POST',
       url: ApiConfig.uri(path).toString(),
       statusCode: response.statusCode,
@@ -110,7 +111,7 @@ class AuthApiService {
     final path = '/api/admin/students/$studentId/resend-otp';
     final response = await http.post(ApiConfig.uri(path));
     final decoded = _decodeObject(response.body);
-    _logApiCall(
+    logApiCall(
       method: 'POST',
       url: ApiConfig.uri(path).toString(),
       statusCode: response.statusCode,
@@ -142,7 +143,7 @@ class AuthApiService {
       body: jsonEncode(requestBody),
     );
     final decoded = _decodeObject(response.body);
-    _logApiCall(
+    logApiCall(
       method: 'POST',
       url: ApiConfig.uri(path).toString(),
       statusCode: response.statusCode,
@@ -161,22 +162,6 @@ class AuthApiService {
 
     return decoded['message'] as String? ?? 'OTP verified successfully.';
   }
-}
-
-void _logApiCall({
-  required String method,
-  required String url,
-  required int statusCode,
-  required Object? requestBody,
-  required Object? responseBody,
-}) {
-  final log = StringBuffer()
-    ..writeln('API $method $url')
-    ..writeln('Status: $statusCode')
-    ..writeln('Request: ${requestBody ?? '<empty>'}')
-    ..writeln('Response: $responseBody');
-  // ignore: avoid_print
-  print(log.toString());
 }
 
 Map<String, dynamic> _decodeObject(String body) {
