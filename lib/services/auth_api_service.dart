@@ -19,8 +19,13 @@ class AuthApiService {
       throw Exception('Failed to load countries.');
     }
 
-    final decoded = jsonDecode(response.body) as List<dynamic>;
-    return decoded
+    final dynamic decoded = jsonDecode(response.body);
+    final List<dynamic> items = decoded is List<dynamic>
+        ? decoded
+        : (decoded as Map<String, dynamic>)['data'] as List<dynamic>? ??
+            const <dynamic>[];
+
+    return items
         .map((item) => CountryMaster.fromJson(item as Map<String, dynamic>))
         .where((item) => item.isActive)
         .toList(growable: false);
@@ -28,15 +33,20 @@ class AuthApiService {
 
   Future<List<AgreementTemplate>> fetchAgreementTemplates() async {
     final response = await http.get(
-      ApiConfig.uri('/api/admin/agreements/templates'),
+      ApiConfig.uri('/api/student/agreements/templates'),
     );
 
     if (response.statusCode < 200 || response.statusCode > 299) {
       throw Exception('Failed to load terms and privacy.');
     }
 
-    final decoded = jsonDecode(response.body) as List<dynamic>;
-    return decoded
+    final dynamic decoded = jsonDecode(response.body);
+    final List<dynamic> items = decoded is List<dynamic>
+        ? decoded
+        : (decoded as Map<String, dynamic>)['data'] as List<dynamic>? ??
+            const <dynamic>[];
+
+    return items
         .map((item) =>
             AgreementTemplate.fromJson(item as Map<String, dynamic>))
         .where((item) => item.isActive)

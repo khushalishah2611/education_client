@@ -207,94 +207,112 @@ class _LoginScreenState extends State<LoginScreen> {
         : _agreementTemplates.first;
 
     return AuthScaffold(
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        mainAxisSize: MainAxisSize.min,
+      child: Stack(
         children: [
-          Text(
-            context.l10n.text('loginWithOtp'),
-            style: Theme.of(context).textTheme.headlineMedium,
-          ),
-          const SizedBox(height: 20),
-          Text(
-            context.l10n.text('mobileNumber'),
-            style: Theme.of(context).textTheme.titleMedium,
-          ),
-          const SizedBox(height: 10),
-          Container(
-            height: 50,
-            decoration: BoxDecoration(
-              color: Colors.white,
-              borderRadius: BorderRadius.circular(12),
-              border: Border.all(color: AppColors.border),
-            ),
-            child: Row(
-              children: [
-                const SizedBox(width: 12),
-                DropdownButtonHideUnderline(
-                  child: DropdownButton<CountryMaster>(
-                    value: _selectedCountry,
-                    borderRadius: BorderRadius.circular(12),
-                    icon: const Icon(Icons.keyboard_arrow_down_rounded, size: 18),
-                    style: const TextStyle(fontSize: 16, color: AppColors.text),
-                    items: _countries
-                        .map(
-                          (country) => DropdownMenuItem<CountryMaster>(
-                            value: country,
-                            child: Text('${country.flagEmoji} ${country.dialCode}'),
-                          ),
-                        )
-                        .toList(growable: false),
-                    onChanged: _isLoadingMeta
-                        ? null
-                        : (value) {
-                            if (value == null) return;
-                            setState(() => _selectedCountry = value);
-                          },
-                  ),
+          Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              Text(
+                context.l10n.text('loginWithOtp'),
+                style: Theme.of(context).textTheme.headlineMedium,
+              ),
+              const SizedBox(height: 20),
+              Text(
+                context.l10n.text('mobileNumber'),
+                style: Theme.of(context).textTheme.titleMedium,
+              ),
+              const SizedBox(height: 10),
+              Container(
+                height: 50,
+                decoration: BoxDecoration(
+                  color: Colors.white,
+                  borderRadius: BorderRadius.circular(12),
+                  border: Border.all(color: AppColors.border),
                 ),
-                const SizedBox(width: 10),
-                Container(width: 1, height: 30, color: AppColors.border),
-                Expanded(
-                  child: TextField(
-                    controller: _mobileController,
-                    keyboardType: TextInputType.phone,
-                    decoration: const InputDecoration(
-                      contentPadding: EdgeInsets.all(5),
-                      hintText: 'Enter mobile number',
-                      border: InputBorder.none,
-                      focusedBorder: InputBorder.none,
-                      enabledBorder: InputBorder.none,
+                child: Row(
+                  children: [
+                    const SizedBox(width: 12),
+                    DropdownButtonHideUnderline(
+                      child: DropdownButton<CountryMaster>(
+                        value: _selectedCountry,
+                        borderRadius: BorderRadius.circular(12),
+                        icon: const Icon(
+                          Icons.keyboard_arrow_down_rounded,
+                          size: 18,
+                        ),
+                        style: const TextStyle(fontSize: 16, color: AppColors.text),
+                        items: _countries
+                            .map(
+                              (country) => DropdownMenuItem<CountryMaster>(
+                                value: country,
+                                child: Text(
+                                  '${country.flagEmoji} ${country.dialCode}',
+                                ),
+                              ),
+                            )
+                            .toList(growable: false),
+                        onChanged: _isLoadingMeta
+                            ? null
+                            : (value) {
+                                if (value == null) return;
+                                setState(() => _selectedCountry = value);
+                              },
+                      ),
                     ),
+                    const SizedBox(width: 10),
+                    Container(width: 1, height: 30, color: AppColors.border),
+                    Expanded(
+                      child: TextField(
+                        controller: _mobileController,
+                        keyboardType: TextInputType.phone,
+                        decoration: const InputDecoration(
+                          contentPadding: EdgeInsets.all(5),
+                          hintText: 'Enter mobile number',
+                          border: InputBorder.none,
+                          focusedBorder: InputBorder.none,
+                          enabledBorder: InputBorder.none,
+                        ),
+                      ),
+                    ),
+                    const SizedBox(width: 12),
+                  ],
+                ),
+              ),
+              const SizedBox(height: 26),
+              AppPrimaryButton(
+                label: context.l10n.text('sendOtp'),
+                isLoading: _isSubmitting,
+                onPressed: _isLoadingMeta ? null : _onSendOtpTap,
+              ),
+              const SizedBox(height: 14),
+              CheckboxListTile(
+                value: _isChecked,
+                onChanged: agreement == null
+                    ? null
+                    : (value) => setState(() => _isChecked = value ?? false),
+                title: GestureDetector(
+                  onTap: agreement == null ? null : _openTermsBottomSheet,
+                  child: Text(
+                    agreement?.title ?? context.l10n.text('termsPrivacy'),
+                    style: const TextStyle(color: Colors.blue, fontSize: 14),
                   ),
                 ),
-                const SizedBox(width: 12),
-              ],
-            ),
+                controlAffinity: ListTileControlAffinity.leading,
+                contentPadding: EdgeInsets.zero,
+                activeColor: AppColors.primary,
+              ),
+            ],
           ),
-          const SizedBox(height: 26),
-          AppPrimaryButton(
-            label: context.l10n.text('sendOtp'),
-            isLoading: _isSubmitting,
-            onPressed: _isLoadingMeta ? null : _onSendOtpTap,
-          ),
-          const SizedBox(height: 14),
-          CheckboxListTile(
-            value: _isChecked,
-            onChanged: agreement == null
-                ? null
-                : (value) => setState(() => _isChecked = value ?? false),
-            title: GestureDetector(
-              onTap: agreement == null ? null : _openTermsBottomSheet,
-              child: Text(
-                agreement?.title ?? context.l10n.text('termsPrivacy'),
-                style: const TextStyle(color: Colors.blue, fontSize: 14),
+          if (_isLoadingMeta)
+            Positioned.fill(
+              child: ColoredBox(
+                color: Colors.white.withOpacity(0.6),
+                child: const Center(
+                  child: CircularProgressIndicator(color: AppColors.primary),
+                ),
               ),
             ),
-            controlAffinity: ListTileControlAffinity.leading,
-            contentPadding: EdgeInsets.zero,
-            activeColor: AppColors.primary,
-          ),
         ],
       ),
     );
