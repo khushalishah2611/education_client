@@ -259,16 +259,7 @@ class _VerifyOtpScreenState extends State<VerifyOtpScreen> {
             label: context.l10n.text('verifyAndLogin'),
             onPressed: _isSubmitting ? null : () => _verifyOtp(context),
           ),
-          const SizedBox(height: 10),
-          Center(
-            child: TextButton(
-              onPressed: _isSubmitting ? null : _logout,
-              child: Text(
-                context.l10n.isArabic ? 'تسجيل الخروج' : 'Logout',
-                style: const TextStyle(color: AppColors.textMuted),
-              ),
-            ),
-          ),
+
         ],
       ),
     );
