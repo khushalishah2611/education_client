@@ -523,85 +523,19 @@ class _BannerShimmer extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return AppShimmerBox(
-      borderRadius: BorderRadius.circular(14),
-      baseColor: const Color(0xFFE6E6E6),
-      highlightColor: const Color(0xFFF4F4F4),
-      child: Container(
-        height: 120,
-        width: double.infinity,
-        padding: const EdgeInsets.fromLTRB(14, 14, 10, 8),
-        decoration: BoxDecoration(
-          borderRadius: BorderRadius.circular(14),
-          color: Colors.white, // shimmer visible better on solid color
-        ),
-        child: Stack(
-          children: [
-            /// Right Illustration Placeholder
-            Positioned(
-              right: 0,
-              bottom: 0,
-              child: Container(
-                width: 124,
-                height: 86,
-                decoration: BoxDecoration(
-                  color: Colors.grey.shade300,
-                  borderRadius: BorderRadius.circular(8),
-                ),
-              ),
-            ),
-
-            /// Left Content Placeholder
-            Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                /// Title
-                Container(
-                  height: 14,
-                  width: 180,
-                  decoration: BoxDecoration(
-                    color: Colors.grey.shade300,
-                    borderRadius: BorderRadius.circular(4),
-                  ),
-                ),
-                const SizedBox(height: 10),
-
-                /// Subtitle line 1
-                Container(
-                  height: 12,
-                  width: 220,
-                  decoration: BoxDecoration(
-                    color: Colors.grey.shade300,
-                    borderRadius: BorderRadius.circular(4),
-                  ),
-                ),
-                const SizedBox(height: 6),
-
-                /// Subtitle line 2
-                Container(
-                  height: 12,
-                  width: 160,
-                  decoration: BoxDecoration(
-                    color: Colors.grey.shade300,
-                    borderRadius: BorderRadius.circular(4),
-                  ),
-                ),
-
-                const SizedBox(height: 10),
-
-                /// Button placeholder
-                Container(
-                  height: 28,
-                  width: 100,
-                  decoration: BoxDecoration(
-                    color: Colors.grey.shade300,
-                    borderRadius: BorderRadius.circular(8),
-                  ),
-                ),
-              ],
-            ),
-          ],
-        ),
+    return Container(
+      height: 120,
+      padding: const EdgeInsets.all(8),
+      decoration: BoxDecoration(
+        color: Colors.white,
+        borderRadius: BorderRadius.circular(12),
+        border: Border.all(color: const Color(0xFFE8E3DB)),
+      ),
+      child: const Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          _ShimmerBlock(height: 100, borderRadius: 8),
+        ],
       ),
     );
   }
