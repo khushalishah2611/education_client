@@ -106,7 +106,7 @@ class _LoginScreenState extends State<LoginScreen> {
             country: _selectedCountry!.nameEn,
             phone: _mobileController.text.trim(),
           );
-
+      await openExternalLink(_currentWhatsappOtpLink);
       if (!mounted) return;
       showAppSnackBar(
         context,
@@ -126,29 +126,6 @@ class _LoginScreenState extends State<LoginScreen> {
     } on ApiResponseException catch (error) {
       debugPrint(error.toString());
       if (!mounted) return;
-      if (error.statusCode == 409) {
-        final conflictResponse = _buildConflictLoginResponse(
-          error.responseBody,
-          fallbackMessage: error.message,
-        );
-        if (conflictResponse != null && conflictResponse.id.isNotEmpty) {
-          showAppSnackBar(
-            context,
-            type: AppSnackBarType.success,
-            message: conflictResponse.message,
-          );
-          Navigator.of(context).push(
-            MaterialPageRoute(
-              builder: (_) => VerifyOtpScreen(
-                studentId: conflictResponse.id,
-                expectedOtp: conflictResponse.otp,
-                whatsappOtpLink: conflictResponse.whatsappOtpLink,
-              ),
-            ),
-          );
-          return;
-        }
-      }
       showAppSnackBar(
         context,
         type: AppSnackBarType.error,
@@ -168,26 +145,6 @@ class _LoginScreenState extends State<LoginScreen> {
         setState(() => _isSubmitting = false);
       }
     }
-  }
-
-  StudentLoginResponse? _buildConflictLoginResponse(
-    Map<String, dynamic> body, {
-    required String fallbackMessage,
-  }) {
-    if (body.isEmpty) {
-      return null;
-    }
-
-    final dynamic data = body['data'];
-    final Map<String, dynamic> payload = data is Map<String, dynamic>
-        ? <String, dynamic>{...data}
-        : <String, dynamic>{...body};
-
-    if ((payload['message'] as String?)?.isEmpty ?? true) {
-      payload['message'] = fallbackMessage;
-    }
-
-    return StudentLoginResponse.fromJson(payload);
   }
 
   void _openTermsBottomSheet() {
