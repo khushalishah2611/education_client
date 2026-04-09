@@ -106,7 +106,9 @@ class _LoginScreenState extends State<LoginScreen> {
             country: _selectedCountry!.nameEn,
             phone: _mobileController.text.trim(),
           );
-      await openExternalLink(_currentWhatsappOtpLink);
+      if (response.whatsappOtpLink.trim().isNotEmpty) {
+        await openExternalLink(response.whatsappOtpLink);
+      }
       if (!mounted) return;
       showAppSnackBar(
         context,
