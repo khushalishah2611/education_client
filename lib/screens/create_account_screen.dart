@@ -1,12 +1,43 @@
+import 'dart:convert';
 import 'dart:io';
 
 import 'package:flutter/material.dart';
+import 'package:http/http.dart' as http;
 
 import '../core/app_localizations.dart';
 import '../core/app_theme.dart';
 import '../widgets/common_widgets.dart';
 import 'academic_info_screen.dart';
 import 'login_screen.dart';
+
+
+class CountryOption {
+  const CountryOption({required this.value, required this.label});
+
+  final String value;
+  final String label;
+
+  factory CountryOption.fromJson(Map<String, dynamic> json) {
+    return CountryOption(
+      value: (json['value'] ?? '').toString(),
+      label: (json['label'] ?? json['nameEn'] ?? '').toString(),
+    );
+  }
+}
+
+class AgreementTemplate {
+  const AgreementTemplate({required this.title, required this.content});
+
+  final String title;
+  final String content;
+
+  factory AgreementTemplate.fromJson(Map<String, dynamic> json) {
+    return AgreementTemplate(
+      title: (json['title'] ?? '').toString(),
+      content: (json['content'] ?? '').toString(),
+    );
+  }
+}
 
 class CreateAccountScreen extends StatefulWidget {
   const CreateAccountScreen({super.key});
@@ -21,6 +52,17 @@ class _CreateAccountScreenState extends State<CreateAccountScreen> {
   final _mobileController = TextEditingController();
 
   bool _acceptedTerms = false;
+  bool _isLoadingCountries = false;
+  bool _isLoadingAgreement = false;
+  List<CountryOption> _countries = const [];
+  CountryOption? _selectedCountry;
+  AgreementTemplate? _agreementTemplate;
+
+  @override
+  void initState() {
+    super.initState();
+    _loadInitialData();
+  }
 
   @override
   void dispose() {
@@ -28,6 +70,75 @@ class _CreateAccountScreenState extends State<CreateAccountScreen> {
     _emailController.dispose();
     _mobileController.dispose();
     super.dispose();
+  }
+
+  Future<void> _loadInitialData() async {
+    await Future.wait([_fetchCountries(), _fetchAgreementTemplate()]);
+  }
+
+  Future<void> _fetchCountries() async {
+    setState(() => _isLoadingCountries = true);
+    try {
+      final response = await http.get(
+        Uri.parse('http://arab.vedx.cloud:8000/api/admin/masters/country'),
+      );
+
+      if (response.statusCode != 200) {
+        return;
+      }
+
+      final decoded = jsonDecode(response.body) as Map<String, dynamic>;
+      final data = (decoded['data'] as List<dynamic>? ?? [])
+          .whereType<Map<String, dynamic>>()
+          .map(CountryOption.fromJson)
+          .where((country) => country.label.isNotEmpty)
+          .toList();
+
+      if (!mounted) return;
+      setState(() {
+        _countries = data;
+        if (_countries.isNotEmpty) {
+          _selectedCountry = _countries.first;
+        }
+      });
+    } catch (_) {
+      // Keep UI usable even when endpoint fails.
+    } finally {
+      if (mounted) {
+        setState(() => _isLoadingCountries = false);
+      }
+    }
+  }
+
+  Future<void> _fetchAgreementTemplate() async {
+    setState(() => _isLoadingAgreement = true);
+    try {
+      final response = await http.get(
+        Uri.parse('http://arab.vedx.cloud:8000/api/student/agreements/templates'),
+      );
+
+      if (response.statusCode != 200) {
+        return;
+      }
+
+      final decoded = jsonDecode(response.body) as List<dynamic>;
+      final template = decoded
+          .whereType<Map<String, dynamic>>()
+          .map(AgreementTemplate.fromJson)
+          .firstWhere(
+            (item) => item.title.isNotEmpty && item.content.isNotEmpty,
+            orElse: () => const AgreementTemplate(title: '', content: ''),
+          );
+
+      if (!mounted || template.title.isEmpty) return;
+      setState(() => _agreementTemplate = template);
+    } catch (_) {
+      // Keep localized fallback when endpoint fails.
+    } finally {
+      if (mounted) {
+        setState(() => _isLoadingAgreement = false);
+      }
+    }
   }
 
   Future<bool> _hasInternetConnection() async {
@@ -55,6 +166,15 @@ class _CreateAccountScreenState extends State<CreateAccountScreen> {
     if (_fullNameController.text.trim().isEmpty ||
         _emailController.text.trim().isEmpty ||
         _mobileController.text.trim().isEmpty) {
+      showAppSnackBar(
+        context,
+        message: context.l10n.text('completeAllFieldsMessage'),
+        type: AppSnackBarType.error,
+      );
+      return;
+    }
+
+    if (_selectedCountry == null) {
       showAppSnackBar(
         context,
         message: context.l10n.text('completeAllFieldsMessage'),
@@ -108,7 +228,9 @@ class _CreateAccountScreenState extends State<CreateAccountScreen> {
                   children: [
                     Expanded(
                       child: Text(
-                        context.l10n.text('termsAndConditionsTitle'),
+                        _agreementTemplate?.title.isNotEmpty == true
+                            ? _agreementTemplate!.title
+                            : context.l10n.text('termsAndConditionsTitle'),
                         style: const TextStyle(
                           fontSize: 18,
                           fontWeight: FontWeight.w700,
@@ -125,7 +247,9 @@ class _CreateAccountScreenState extends State<CreateAccountScreen> {
                 ),
                 const SizedBox(height: 8),
                 Text(
-                  context.l10n.text('termsAndConditionsDescription'),
+                  _agreementTemplate?.content.isNotEmpty == true
+                      ? _agreementTemplate!.content
+                      : context.l10n.text('termsAndConditionsDescription'),
                   style: const TextStyle(
                     height: 1.4,
                     fontSize: 14,
@@ -184,10 +308,59 @@ class _CreateAccountScreenState extends State<CreateAccountScreen> {
                       controller: _mobileController,
                     ),
                     const SizedBox(height: 18),
-                    AppDropdownField(
-                      label: context.l10n.text('country'),
-                      value: context.l10n.text('arab'),
-                      icon: Icons.public,
+                    Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        Text(
+                          context.l10n.text('country'),
+                          style: const TextStyle(
+                            fontSize: 15,
+                            fontWeight: FontWeight.w500,
+                            color: AppColors.text,
+                          ),
+                        ),
+                        const SizedBox(height: 10),
+                        DropdownButtonFormField<String>(
+                          value: _selectedCountry?.value,
+                          isExpanded: true,
+                          decoration: InputDecoration(
+                            isDense: true,
+                            contentPadding: const EdgeInsets.symmetric(
+                              horizontal: 12,
+                              vertical: 10,
+                            ),
+                            prefixIcon: const Icon(
+                              Icons.public,
+                              color: AppColors.textMuted,
+                              size: 20,
+                            ),
+                            border: OutlineInputBorder(
+                              borderRadius: BorderRadius.circular(10),
+                            ),
+                          ),
+                          items: _countries
+                              .map(
+                                (country) => DropdownMenuItem<String>(
+                                  value: country.value,
+                                  child: Text(country.label),
+                                ),
+                              )
+                              .toList(),
+                          onChanged: _isLoadingCountries
+                              ? null
+                              : (value) {
+                                  if (value == null) return;
+                                  setState(() {
+                                    _selectedCountry = _countries.firstWhere(
+                                      (country) => country.value == value,
+                                    );
+                                  });
+                                },
+                          hint: _isLoadingCountries
+                              ? const Text('Loading countries...')
+                              : const Text('Select country'),
+                        ),
+                      ],
                     ),
                     const SizedBox(height: 12),
                     Row(
@@ -209,9 +382,13 @@ class _CreateAccountScreenState extends State<CreateAccountScreen> {
                                       ?.copyWith(color: AppColors.textMuted),
                                 ),
                                 GestureDetector(
-                                  onTap: _openTermsBottomSheet,
+                                  onTap: (_isLoadingAgreement || _agreementTemplate == null)
+                                      ? null
+                                      : _openTermsBottomSheet,
                                   child: Text(
-                                    context.l10n.text('termsLink'),
+                                    _agreementTemplate?.title.isNotEmpty == true
+                                        ? _agreementTemplate!.title
+                                        : context.l10n.text('termsLink'),
                                     style: Theme.of(context)
                                         .textTheme
                                         .bodyMedium
