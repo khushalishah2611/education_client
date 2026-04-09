@@ -466,7 +466,7 @@ class _DiscoverBanner extends StatelessWidget {
     if (isLoading) {
       return const _BannerShimmer();
     }
-    if (!banners.isEmpty) {
+    if (banners.isEmpty) {
       return const _BannerShimmer();
     }
     return Container(
@@ -737,7 +737,7 @@ class _CountrySelectionDialogState extends State<_CountrySelectionDialog> {
   }
 }
 
-class _AdvanceSearchDialog extends StatelessWidget {
+class _AdvanceSearchDialog extends StatefulWidget {
   const _AdvanceSearchDialog({
     required this.countryOptions,
     required this.academicOptions,
@@ -763,6 +763,23 @@ class _AdvanceSearchDialog extends StatelessWidget {
   final ValueChanged<String?> onCountryChanged;
   final ValueChanged<String?> onAcademicChanged;
   final ValueChanged<String?> onProgramChanged;
+
+  @override
+  State<_AdvanceSearchDialog> createState() => _AdvanceSearchDialogState();
+}
+
+class _AdvanceSearchDialogState extends State<_AdvanceSearchDialog> {
+  String? _selectedCountry;
+  String? _selectedAcademic;
+  String? _selectedProgram;
+
+  @override
+  void initState() {
+    super.initState();
+    _selectedCountry = widget.selectedCountry;
+    _selectedAcademic = widget.selectedAcademic;
+    _selectedProgram = widget.selectedProgram;
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -841,40 +858,45 @@ class _AdvanceSearchDialog extends StatelessWidget {
           children: [
             dropdownTile(
               title: 'Country',
-              options: countryOptions,
-              value: selectedCountry,
-              onChanged: onCountryChanged,
+              options: widget.countryOptions,
+              value: _selectedCountry,
+              onChanged: (value) => setState(() => _selectedCountry = value),
               icon: Icons.flag_outlined,
             ),
             dropdownTile(
               title: 'Latest Academic',
-              options: academicOptions,
-              value: selectedAcademic,
-              onChanged: onAcademicChanged,
+              options: widget.academicOptions,
+              value: _selectedAcademic,
+              onChanged: (value) => setState(() => _selectedAcademic = value),
               icon: Icons.school_outlined,
             ),
             AppTextField(
-              label: currencyOptions.isNotEmpty
-                  ? 'Input Result (${currencyOptions.first})'
+              label: widget.currencyOptions.isNotEmpty
+                  ? 'Input Result (${widget.currencyOptions.first})'
                   : 'Input Result',
               hint: 'Input Result',
-              controller: resultController,
+              controller: widget.resultController,
               keyboardType: TextInputType.number,
               height: 48,
             ),
             const SizedBox(height: 12),
             dropdownTile(
               title: 'Course or Program',
-              options: programOptions,
-              value: selectedProgram,
-              onChanged: onProgramChanged,
+              options: widget.programOptions,
+              value: _selectedProgram,
+              onChanged: (value) => setState(() => _selectedProgram = value),
               icon: Icons.menu_book_outlined,
             ),
             const SizedBox(height: 4),
             SizedBox(
               height: 50,
               child: ElevatedButton(
-                onPressed: () => Navigator.of(context).pop(),
+                onPressed: () {
+                  widget.onCountryChanged(_selectedCountry);
+                  widget.onAcademicChanged(_selectedAcademic);
+                  widget.onProgramChanged(_selectedProgram);
+                  Navigator.of(context).pop();
+                },
                 style: ElevatedButton.styleFrom(
                   elevation: 0,
                   backgroundColor: const Color(0xFF95DAB4),
