@@ -92,6 +92,7 @@ class _HomeScreenState extends State<HomeScreen> {
                 name: item.nameEn.isNotEmpty ? item.nameEn : item.value,
                 flagEmoji: item.flagEmoji,
                 flagImageUrl: _resolveCountryFlag(item),
+                dialCode: item.dialCode,
               ),
             )
             .where((item) => item.name.trim().isNotEmpty)
@@ -116,6 +117,7 @@ class _HomeScreenState extends State<HomeScreen> {
   }
 
   List<HomeUniversity> _filterUniversities(List<HomeUniversity> source) {
+    final enteredResult = double.tryParse(_resultController.text.trim());
     return source.where((university) {
       final countryMatch = _selectedCountry == null ||
           _selectedCountry!.trim().isEmpty ||
@@ -125,14 +127,52 @@ class _HomeScreenState extends State<HomeScreen> {
         return false;
       }
 
-      final searchValue = _resultController.text.trim().toLowerCase();
-      if (searchValue.isEmpty) {
-        return true;
+      if (_shouldRestrictToAccredited() && !university.isAccredited) {
+        return false;
       }
-      return university.name.toLowerCase().contains(searchValue) ||
-          university.city.toLowerCase().contains(searchValue) ||
-          university.country.toLowerCase().contains(searchValue);
+
+      if (_selectedAcademic != null && _selectedAcademic!.trim().isNotEmpty) {
+        final academicName = _selectedAcademic!.trim().toLowerCase();
+        AcademicRequirement? requirement;
+        for (final item in university.academicRequirements) {
+          if (item.academic.toLowerCase() == academicName) {
+            requirement = item;
+            break;
+          }
+        }
+        if (requirement == null) {
+          return false;
+        }
+        if (enteredResult != null && enteredResult < requirement.minResult) {
+          return false;
+        }
+      }
+
+      if (_selectedProgram != null && _selectedProgram!.trim().isNotEmpty) {
+        final selectedProgram = _selectedProgram!.trim().toLowerCase();
+        if (university.programNames.isNotEmpty &&
+            !university.programNames.contains(selectedProgram)) {
+          return false;
+        }
+      }
+
+      return true;
     }).toList(growable: false);
+  }
+
+  bool _shouldRestrictToAccredited() {
+    final selected = _selectedCountry?.trim().toLowerCase() ?? '';
+    if (selected.isEmpty) return false;
+    if (selected == 'oman') return true;
+    _CountryOption? option;
+    for (final item in _countryOptions) {
+      if (item.name.trim().toLowerCase() == selected) {
+        option = item;
+        break;
+      }
+    }
+    if (option == null) return false;
+    return option.dialCode.trim() == '+968';
   }
 
   Future<void> _refreshHomeData() async {
@@ -419,35 +459,61 @@ class _HomeScreenState extends State<HomeScreen> {
 
                             const SizedBox(height: 12),
 
-                            GridView.builder(
-                              itemCount: _isLoadingUniversities
-                                  ? 4
-                                  : _universities.length,
-                              shrinkWrap: true,
-                              physics: const NeverScrollableScrollPhysics(),
-                              gridDelegate:
-                                  const SliverGridDelegateWithFixedCrossAxisCount(
-                                    crossAxisCount: 2,
-                                    mainAxisSpacing: 8,
-                                    crossAxisSpacing: 8,
-                                    childAspectRatio: 0.8,
+                            if (!_isLoadingUniversities &&
+                                _universities.isEmpty)
+                              Container(
+                                width: double.infinity,
+                                padding: const EdgeInsets.symmetric(
+                                  vertical: 20,
+                                  horizontal: 12,
+                                ),
+                                decoration: BoxDecoration(
+                                  borderRadius: BorderRadius.circular(10),
+                                  border: Border.all(
+                                    color: const Color(0xFFE6E6E6),
                                   ),
-                              itemBuilder: (context, index) {
-                                if (_isLoadingUniversities) {
-                                  return const _UniversityCardShimmer();
-                                }
-                                final item = _universities[index];
-                                return _UniversityCard(
-                                  data: item,
-                                  onTap: () => Navigator.of(context).push(
-                                    MaterialPageRoute(
-                                      builder: (_) =>
-                                          UniversityDetailScreen(data: item),
+                                  color: Colors.white,
+                                ),
+                                child: const Text(
+                                  'No education institute data available.',
+                                  textAlign: TextAlign.center,
+                                  style: TextStyle(
+                                    color: Color(0xFF616161),
+                                    fontWeight: FontWeight.w500,
+                                  ),
+                                ),
+                              )
+                            else
+                              GridView.builder(
+                                itemCount: _isLoadingUniversities
+                                    ? 4
+                                    : _universities.length,
+                                shrinkWrap: true,
+                                physics: const NeverScrollableScrollPhysics(),
+                                gridDelegate:
+                                    const SliverGridDelegateWithFixedCrossAxisCount(
+                                      crossAxisCount: 2,
+                                      mainAxisSpacing: 8,
+                                      crossAxisSpacing: 8,
+                                      childAspectRatio: 0.8,
                                     ),
-                                  ),
-                                );
-                              },
-                            ),
+                                itemBuilder: (context, index) {
+                                  if (_isLoadingUniversities) {
+                                    return const _UniversityCardShimmer();
+                                  }
+                                  final item = _universities[index];
+                                  return _UniversityCard(
+                                    data: item,
+                                    onTap: () => Navigator.of(context).push(
+                                      MaterialPageRoute(
+                                        builder: (_) => UniversityDetailScreen(
+                                          data: item,
+                                        ),
+                                      ),
+                                    ),
+                                  );
+                                },
+                              ),
                           ],
                         ),
                         ),
@@ -912,11 +978,13 @@ class _CountryOption {
     required this.name,
     required this.flagEmoji,
     required this.flagImageUrl,
+    required this.dialCode,
   });
 
   final String name;
   final String flagEmoji;
   final String flagImageUrl;
+  final String dialCode;
 }
 
 class _CountryFlag extends StatelessWidget {
