@@ -4,6 +4,7 @@ import 'package:http/http.dart' as http;
 
 import '../core/api_config.dart';
 import '../core/api_logger.dart';
+import '../core/api_status.dart';
 import '../models/agreement_template.dart';
 import '../models/country_master.dart';
 import '../models/student_login_response.dart';
@@ -24,7 +25,7 @@ class AuthApiService {
       responseBody: response.body,
     );
 
-    if (response.statusCode < 200 || response.statusCode > 299) {
+    if (!ApiStatus.isSuccess(response.statusCode)) {
       throw Exception('Failed to load countries.');
     }
 
@@ -53,7 +54,7 @@ class AuthApiService {
       responseBody: response.body,
     );
 
-    if (response.statusCode < 200 || response.statusCode > 299) {
+    if (!ApiStatus.isSuccess(response.statusCode)) {
       throw Exception('Failed to load terms and privacy.');
     }
 
@@ -94,7 +95,7 @@ class AuthApiService {
       requestBody: requestBody,
       responseBody: decoded,
     );
-    if (response.statusCode < 200 || response.statusCode > 299) {
+    if (!ApiStatus.isSuccess(response.statusCode)) {
       throw ApiResponseException.fromResponse(
         response: response,
         requestUrl: ApiConfig.uri(path).toString(),
@@ -119,7 +120,7 @@ class AuthApiService {
       responseBody: decoded,
     );
 
-    if (response.statusCode < 200 || response.statusCode > 299) {
+    if (!ApiStatus.isSuccess(response.statusCode)) {
       throw ApiResponseException.fromResponse(
         response: response,
         requestUrl: ApiConfig.uri(path).toString(),
@@ -151,7 +152,7 @@ class AuthApiService {
       responseBody: decoded,
     );
 
-    if (response.statusCode < 200 || response.statusCode > 299) {
+    if (!ApiStatus.isSuccess(response.statusCode)) {
       throw ApiResponseException.fromResponse(
         response: response,
         requestUrl: ApiConfig.uri(path).toString(),

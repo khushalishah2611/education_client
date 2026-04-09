@@ -1,5 +1,7 @@
 import 'package:logger/logger.dart';
 
+import 'api_status.dart';
+
 final Logger _logger = Logger();
 
 void logApiCall({
@@ -13,6 +15,7 @@ void logApiCall({
     [
       'API $method $url',
       'Status: $statusCode',
+      'Handled Status: ${ApiStatus.isHandled(statusCode)}',
       'Request: ${requestBody ?? '<empty>'}',
       'Response: $responseBody',
     ].join('\n'),
