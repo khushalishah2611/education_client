@@ -103,7 +103,7 @@ class AuthApiService {
         responseBody: decoded,
       );
     }
-    return StudentLoginResponse.fromJson(decoded);
+    return StudentLoginResponse.fromJson(_extractResponsePayload(decoded));
   }
 
   Future<StudentLoginResponse> resendStudentOtp({
@@ -129,7 +129,7 @@ class AuthApiService {
       );
     }
 
-    return StudentLoginResponse.fromJson(decoded);
+    return StudentLoginResponse.fromJson(_extractResponsePayload(decoded));
   }
 
   Future<String> verifyStudentOtp({
@@ -175,6 +175,19 @@ Map<String, dynamic> _decodeObject(String body) {
     return <String, dynamic>{};
   }
   return <String, dynamic>{};
+}
+
+
+Map<String, dynamic> _extractResponsePayload(Map<String, dynamic> decoded) {
+  final dynamic data = decoded['data'];
+  if (data is Map<String, dynamic>) {
+    return <String, dynamic>{...decoded, ...data};
+  }
+  final dynamic student = decoded['student'];
+  if (student is Map<String, dynamic>) {
+    return <String, dynamic>{...decoded, ...student};
+  }
+  return decoded;
 }
 
 class ApiResponseException implements Exception {
