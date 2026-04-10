@@ -276,7 +276,7 @@ class _OtpRow extends StatelessWidget {
               keyboardType: TextInputType.number,
               autofillHints: const [AutofillHints.oneTimeCode],
               textAlign: TextAlign.center,
-              inputFormatters: const [FilteringTextInputFormatter.digitsOnly],
+              inputFormatters: [FilteringTextInputFormatter.digitsOnly],
               style: Theme.of(
                 context,
               ).textTheme.titleLarge?.copyWith(fontWeight: FontWeight.w700),

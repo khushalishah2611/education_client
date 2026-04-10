@@ -155,9 +155,8 @@ class _LoginScreenState extends State<LoginScreen> {
   }
 
   void _openTermsBottomSheet() {
-    final AgreementTemplate? agreement = _agreementTemplates.isEmpty
-        ? null
-        : _agreementTemplates.first;
+    final AgreementTemplate? agreement =
+    _agreementTemplates.isEmpty ? null : _agreementTemplates.first;
 
     if (agreement == null) {
       return;
@@ -171,51 +170,55 @@ class _LoginScreenState extends State<LoginScreen> {
       ),
       builder: (context) {
         return SafeArea(
-          top: false,
-          child: Padding(
-            padding: const EdgeInsets.fromLTRB(18, 14, 18, 26),
-            child: Column(
-              mainAxisSize: MainAxisSize.min,
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                Row(
-                  children: [
-                    Expanded(
+          child: SizedBox(
+            height: MediaQuery.of(context).size.height * 0.85, // limit height
+            child: Padding(
+              padding: const EdgeInsets.fromLTRB(18, 14, 18, 26),
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Row(
+                    children: [
+                      Expanded(
+                        child: Text(
+                          agreement.title,
+                          style: const TextStyle(
+                            fontSize: 18,
+                            fontWeight: FontWeight.w700,
+                            color: AppColors.text,
+                          ),
+                        ),
+                      ),
+                      IconButton(
+                        onPressed: () => Navigator.of(context).pop(),
+                        icon: const Icon(Icons.close),
+                      ),
+                    ],
+                  ),
+
+                  const SizedBox(height: 8),
+
+                  /// Scrollable content
+                  Expanded(
+                    child: SingleChildScrollView(
                       child: Text(
-                        agreement.title,
+                        agreement.content,
                         style: const TextStyle(
-                          fontSize: 18,
-                          fontWeight: FontWeight.w700,
-                          color: AppColors.text,
+                          height: 1.4,
+                          fontSize: 14,
+                          color: AppColors.textMuted,
                         ),
                       ),
                     ),
-                    IconButton(
-                      onPressed: () => Navigator.of(context).pop(),
-                      icon: const Icon(Icons.close),
-                      tooltip: MaterialLocalizations.of(
-                        context,
-                      ).closeButtonTooltip,
-                    ),
-                  ],
-                ),
-                const SizedBox(height: 8),
-                Text(
-                  agreement.content,
-                  style: const TextStyle(
-                    height: 1.4,
-                    fontSize: 14,
-                    color: AppColors.textMuted,
                   ),
-                ),
-              ],
+                ],
+              ),
             ),
           ),
         );
       },
     );
   }
-
   @override
   Widget build(BuildContext context) {
     final AgreementTemplate? agreement = _agreementTemplates.isEmpty
