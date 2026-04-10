@@ -378,7 +378,7 @@ class _HomeScreenState extends State<HomeScreen> {
               child: Column(
                 children: [
                   SizedBox(
-                    height: MediaQuery.of(context).size.height * 0.42,
+                    height: MediaQuery.of(context).size.height * 0.40,
                     child: Stack(
                       children: [
                         Image.asset(
