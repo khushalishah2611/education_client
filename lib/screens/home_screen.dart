@@ -377,139 +377,137 @@ class _HomeScreenState extends State<HomeScreen> {
             child: SafeArea(
               child: Column(
                 children: [
-                  Padding(
-                    padding: const EdgeInsets.all(16.0),
-                    child: Row(
+                  SizedBox(
+                    height: MediaQuery.of(context).size.height * 0.42,
+                    child: Stack(
                       children: [
-                        _CircleIconButton(
-                          icon: Icons.menu_rounded,
-                          onTap: () => _scaffoldKey.currentState?.openDrawer(),
+                        Image.asset(
+                          'assets/images/img.png',
+                          width: double.infinity,
+                          height: double.infinity,
+                          fit: BoxFit.cover,
                         ),
-                        const Spacer(),
-                        const AppLogo(compact: true, center: true),
-                        const Spacer(),
-                        Stack(
-                          clipBehavior: Clip.none,
-                          children: [
-                            const Icon(
-                              Icons.notifications_none_rounded,
-                              size: 26,
-                            ),
-                            Positioned(
-                              right: 2,
-                              top: 2,
-                              child: Container(
-                                width: 8,
-                                height: 8,
-                                decoration: BoxDecoration(
-                                  color: Colors.red,
-                                  borderRadius: BorderRadius.circular(10),
-                                ),
+
+                        Positioned(
+                          top: MediaQuery.of(context).padding.top ,
+                          left: 16,
+                          right: 16,
+                          child: Row(
+                            children: [
+                              _CircleIconButton(
+                                icon: Icons.menu_rounded,
+                                onTap: () =>
+                                    _scaffoldKey.currentState?.openDrawer(),
                               ),
-                            ),
-                          ],
-                        ),
-                      ],
-                    ),
-                  ),
-                  Padding(
-                    padding: const EdgeInsets.all(16.0),
-                    child: Column(
-                      children: [
-                        InkWell(
-                          onTap: _openCountryDialog,
-                          borderRadius: BorderRadius.circular(8),
-                          child: Container(
-                            height: 44,
-                            width: double.infinity,
-                            padding: const EdgeInsets.symmetric(horizontal: 14),
-                            decoration: BoxDecoration(
-                              color: Colors.white,
-                              borderRadius: BorderRadius.circular(6),
-                              border: Border.all(
-                                color: const Color(0xFFE4B88B),
-                              ),
-                            ),
-                            child: Row(
-                              children: [
-                                Expanded(
-                                  child: Text(
-                                    _selectedCountry ?? 'Select Country',
-                                    style: const TextStyle(
-                                      color: Color(0xFF8E8E8E),
-                                      fontSize: 14,
+                              const Spacer(),
+                              const AppLogo(compact: true, center: true),
+                              const Spacer(),
+                              Stack(
+                                clipBehavior: Clip.none,
+                                children: [
+                                  const Icon(Icons.notifications_none_rounded, size: 26),
+                                  Positioned(
+                                    right: 2,
+                                    top: 2,
+                                    child: Container(
+                                      width: 8,
+                                      height: 8,
+                                      decoration: BoxDecoration(
+                                        color: Colors.red,
+                                        borderRadius: BorderRadius.circular(10),
+                                      ),
                                     ),
                                   ),
-                                ),
-                                const Icon(
-                                  Icons.keyboard_arrow_down_rounded,
-                                  color: Color(0xFF666666),
-                                ),
-                              ],
-                            ),
+                                ],
+                              ),
+                            ],
                           ),
                         ),
-                        const SizedBox(height: 12),
-                        InkWell(
-                          onTap: _openAdvanceSearchDialog,
-                          borderRadius: BorderRadius.circular(6),
-                          child: Container(
-                            width: double.infinity,
-                            height: 44,
-                            padding: const EdgeInsets.symmetric(horizontal: 16),
-                            decoration: BoxDecoration(
-                              borderRadius: BorderRadius.circular(6),
-                              border: Border.all(
-                                color: const Color(0xFFE4B88B),
-                              ),
-                              color: Colors.white,
-                            ),
-                            child: const Row(
-                              mainAxisAlignment: MainAxisAlignment.center,
-                              children: [
-                                Icon(
-                                  Icons.tune_rounded,
-                                  color: AppColors.accent,
-                                  size: 20,
-                                ),
-                                SizedBox(width: 8),
-                                Text(
-                                  'Advance Search',
-                                  style: TextStyle(
-                                    color: AppColors.accent,
-                                    fontSize: 16,
-                                    fontWeight: FontWeight.w500,
+
+                        Positioned(
+                          top: MediaQuery.of(context).size.height * 0.10,
+                          left: 16,
+                          right: 16,
+                          child: Column(
+                            mainAxisSize: MainAxisSize.min,
+                            children: [
+                              /// Country
+                              InkWell(
+                                onTap: _openCountryDialog,
+                                child: Container(
+                                  height: 44,
+                                  padding: const EdgeInsets.symmetric(horizontal: 14),
+                                  decoration: BoxDecoration(
+                                    color: Colors.white,
+                                    borderRadius: BorderRadius.circular(6),
+                                    border: Border.all(color: Color(0xFFE4B88B)),
+                                  ),
+                                  child: Row(
+                                    children: [
+                                      Expanded(
+                                        child: Text(
+                                          _selectedCountry ?? 'Select Country',
+                                          overflow: TextOverflow.ellipsis,
+                                        ),
+                                      ),
+                                      const Icon(Icons.keyboard_arrow_down_rounded),
+                                    ],
                                   ),
                                 ),
-                              ],
-                            ),
+                              ),
+
+                              const SizedBox(height: 12),
+
+                              /// Advance Search
+                              InkWell(
+                                onTap: _openAdvanceSearchDialog,
+                                child: Container(
+                                  height: 44,
+                                  alignment: Alignment.center,
+                                  decoration: BoxDecoration(
+                                    borderRadius: BorderRadius.circular(6),
+                                    border: Border.all(color: Color(0xFFE4B88B)),
+                                    color: Colors.white,
+                                  ),
+                                  child: const Row(
+                                    mainAxisAlignment: MainAxisAlignment.center,
+                                    children: [
+                                      Icon(Icons.tune_rounded, color: AppColors.accent),
+                                      SizedBox(width: 8),
+                                      Text(
+                                        'Advance Search',
+                                        style: TextStyle(color: AppColors.accent),
+                                      ),
+                                    ],
+                                  ),
+                                ),
+                              ),
+
+                              const SizedBox(height: 16),
+
+                              _DiscoverBanner(
+                                banners: _banners,
+                                isLoading: _isLoadingBanners,
+                                pageController: _bannerPageController,
+                                onPageChanged: (index) {
+                                  if (!mounted) return;
+                                  setState(() => _activeBannerIndex = index);
+                                },
+                              ),
+
+                              const SizedBox(height: 8),
+
+                              _BannerIndicator(
+                                count: _banners.isEmpty ? 1 : _banners.length,
+                                activeIndex: _activeBannerIndex,
+                              ),
+                            ],
                           ),
                         ),
-
-                        const SizedBox(height: 16),
-
-                        _DiscoverBanner(
-                          banners: _banners,
-                          isLoading: _isLoadingBanners,
-                          pageController: _bannerPageController,
-                          onPageChanged: (index) {
-                            if (!mounted) return;
-                            setState(() => _activeBannerIndex = index);
-                          },
-                        ),
-                        const SizedBox(height: 8),
-                        Center(
-                          child: _BannerIndicator(
-                            count: _banners.isEmpty ? 1 : _banners.length,
-                            activeIndex: _activeBannerIndex,
-                          ),
-                        ),
-
-                        const SizedBox(height: 16),
                       ],
                     ),
                   ),
-
+                  SizedBox(height: 10,),
                   Expanded(
                     child: RefreshIndicator(
                       onRefresh: _refreshHomeData,
