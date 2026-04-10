@@ -1,6 +1,7 @@
 import 'dart:async';
 
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
 import '../core/app_localizations.dart';
@@ -250,6 +251,13 @@ class _OtpRow extends StatelessWidget {
   final List<TextEditingController> controllers;
   final List<FocusNode> focusNodes;
 
+  void _fillOtpFromText(String text) {
+    final digits = text.replaceAll(RegExp(r'\D'), '');
+    for (var i = 0; i < controllers.length; i++) {
+      controllers[i].text = i < digits.length ? digits[i] : '';
+    }
+  }
+
   @override
   Widget build(BuildContext context) {
     return Center(
@@ -266,8 +274,9 @@ class _OtpRow extends StatelessWidget {
               controller: controllers[index],
               focusNode: focusNodes[index],
               keyboardType: TextInputType.number,
+              autofillHints: const [AutofillHints.oneTimeCode],
               textAlign: TextAlign.center,
-              maxLength: 1,
+              inputFormatters: const [FilteringTextInputFormatter.digitsOnly],
               style: Theme.of(
                 context,
               ).textTheme.titleLarge?.copyWith(fontWeight: FontWeight.w700),
@@ -290,6 +299,17 @@ class _OtpRow extends StatelessWidget {
                 ),
               ),
               onChanged: (value) {
+                if (value.length > 1) {
+                  _fillOtpFromText(value);
+                  final otpLength = value.replaceAll(RegExp(r'\D'), '').length;
+                  if (otpLength >= 6) {
+                    focusNodes[index].unfocus();
+                  } else if (otpLength > 0) {
+                    focusNodes[otpLength].requestFocus();
+                  }
+                  return;
+                }
+
                 if (value.isNotEmpty && index < 5) {
                   focusNodes[index + 1].requestFocus();
                 } else if (value.isEmpty && index > 0) {
