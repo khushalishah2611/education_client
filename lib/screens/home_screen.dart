@@ -949,32 +949,72 @@ class _AdvanceSearchDialogState extends State<_AdvanceSearchDialog> {
               icon: Icons.menu_book_outlined,
             ),
             const SizedBox(height: 4),
-            SizedBox(
-              height: 50,
-              child: ElevatedButton(
-                onPressed: () async {
-                  widget.onCountryChanged(_selectedCountry);
-                  widget.onAcademicChanged(_selectedAcademic);
-                  widget.onProgramChanged(_selectedProgram);
-                  Navigator.of(context).pop();
-                  await widget.onApplyFilters();
-                },
-                style: ElevatedButton.styleFrom(
-                  elevation: 0,
-                  backgroundColor: const Color(0xFF95DAB4),
-                  foregroundColor: const Color(0xFF0F2015),
-                  shape: RoundedRectangleBorder(
-                    borderRadius: BorderRadius.circular(10),
+            Row(
+              children: [
+                Expanded(
+                  child: SizedBox(
+                    height: 50,
+                    child: OutlinedButton(
+                      onPressed: () async {
+                        setState(() {
+                          _selectedAcademic = null;
+                          _selectedProgram = null;
+                        });
+                        widget.resultController.clear();
+                        widget.onCountryChanged(_selectedCountry);
+                        widget.onAcademicChanged(null);
+                        widget.onProgramChanged(null);
+                        Navigator.of(context).pop();
+                        await widget.onApplyFilters();
+                      },
+                      style: OutlinedButton.styleFrom(
+                        foregroundColor: const Color(0xFF444444),
+                        side: const BorderSide(color: Color(0xFFD6D6D6)),
+                        shape: RoundedRectangleBorder(
+                          borderRadius: BorderRadius.circular(10),
+                        ),
+                      ),
+                      child: const Text(
+                        'Reset',
+                        style: TextStyle(
+                          fontSize: 24 * 0.75,
+                          fontWeight: FontWeight.w600,
+                        ),
+                      ),
+                    ),
                   ),
                 ),
-                child: const Text(
-                  'Continue',
-                  style: TextStyle(
-                    fontSize: 24 * 0.8,
-                    fontWeight: FontWeight.w700,
+                const SizedBox(width: 12),
+                Expanded(
+                  child: SizedBox(
+                    height: 50,
+                    child: ElevatedButton(
+                      onPressed: () async {
+                        widget.onCountryChanged(_selectedCountry);
+                        widget.onAcademicChanged(_selectedAcademic);
+                        widget.onProgramChanged(_selectedProgram);
+                        Navigator.of(context).pop();
+                        await widget.onApplyFilters();
+                      },
+                      style: ElevatedButton.styleFrom(
+                        elevation: 0,
+                        backgroundColor: const Color(0xFF95DAB4),
+                        foregroundColor: const Color(0xFF0F2015),
+                        shape: RoundedRectangleBorder(
+                          borderRadius: BorderRadius.circular(10),
+                        ),
+                      ),
+                      child: const Text(
+                        'Continue',
+                        style: TextStyle(
+                          fontSize: 24 * 0.8,
+                          fontWeight: FontWeight.w700,
+                        ),
+                      ),
+                    ),
                   ),
                 ),
-              ),
+              ],
             ),
           ],
         ),
