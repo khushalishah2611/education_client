@@ -18,11 +18,15 @@ class VerifyOtpScreen extends StatefulWidget {
     required this.studentId,
     required this.expectedOtp,
     required this.whatsappOtpLink,
+    required this.loginCountry,
+    required this.loginDialCode,
   });
 
   final String studentId;
   final String expectedOtp;
   final String whatsappOtpLink;
+  final String loginCountry;
+  final String loginDialCode;
 
   @override
   State<VerifyOtpScreen> createState() => _VerifyOtpScreenState();
@@ -169,10 +173,21 @@ class _VerifyOtpScreenState extends State<VerifyOtpScreen> {
       );
       final prefs = await SharedPreferences.getInstance();
       await prefs.setBool('isLoggedIn', true);
+      if (widget.loginCountry.trim().isNotEmpty) {
+        await prefs.setString('loginCountry', widget.loginCountry.trim());
+      }
+      if (widget.loginDialCode.trim().isNotEmpty) {
+        await prefs.setString('loginDialCode', widget.loginDialCode.trim());
+      }
       if (!mounted) return;
       showAppSnackBar(context, type: AppSnackBarType.success, message: message);
       Navigator.of(context).pushAndRemoveUntil(
-        MaterialPageRoute(builder: (_) => const HomeScreen()),
+        MaterialPageRoute(
+          builder: (_) => HomeScreen(
+            initialCountry: widget.loginCountry,
+            initialDialCode: widget.loginDialCode,
+          ),
+        ),
         (route) => false,
       );
     } on ApiResponseException catch (error) {

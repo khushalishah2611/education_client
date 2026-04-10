@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 
 import '../core/app_localizations.dart';
 import '../core/api_config.dart';
@@ -14,7 +15,10 @@ import '../widgets/flow_widgets.dart';
 import 'university_detail_screen.dart';
 
 class HomeScreen extends StatefulWidget {
-  const HomeScreen({super.key});
+  const HomeScreen({super.key, this.initialCountry, this.initialDialCode});
+
+  final String? initialCountry;
+  final String? initialDialCode;
 
   @override
   State<HomeScreen> createState() => _HomeScreenState();
@@ -40,11 +44,19 @@ class _HomeScreenState extends State<HomeScreen> {
   String? _selectedCountry;
   String? _selectedAcademic;
   String? _selectedProgram;
+  String? _loginDialCode;
   final TextEditingController _resultController = TextEditingController();
 
   @override
   void initState() {
     super.initState();
+    _selectedCountry = widget.initialCountry?.trim().isNotEmpty == true
+        ? widget.initialCountry!.trim()
+        : null;
+    _loginDialCode = widget.initialDialCode?.trim().isNotEmpty == true
+        ? widget.initialDialCode!.trim()
+        : null;
+    _loadSessionDefaults();
     _loadBanners();
     _loadUniversities();
   }
@@ -76,7 +88,9 @@ class _HomeScreenState extends State<HomeScreen> {
       final countries = responses[3] as List<CountryMaster>;
 
       if (!mounted) return;
+      final autoSelectedCountry = _resolveAutoCountry(countries);
       setState(() {
+        _selectedCountry = autoSelectedCountry;
         _allUniversities = universities;
         _universities = _filterUniversities(
           universities,
@@ -167,8 +181,9 @@ class _HomeScreenState extends State<HomeScreen> {
 
   bool _shouldRestrictToAccredited() {
     final selected = _selectedCountry?.trim().toLowerCase() ?? '';
-    if (selected.isEmpty) return false;
     if (selected == 'oman') return true;
+    if (_loginDialCode?.trim() == '+968') return true;
+    if (selected.isEmpty) return false;
     _CountryOption? option;
     for (final item in _countryOptions) {
       if (item.name.trim().toLowerCase() == selected) {
@@ -178,6 +193,49 @@ class _HomeScreenState extends State<HomeScreen> {
     }
     if (option == null) return false;
     return option.dialCode.trim() == '+968';
+  }
+
+  Future<void> _loadSessionDefaults() async {
+    try {
+      final prefs = await SharedPreferences.getInstance();
+      final storedCountry = prefs.getString('loginCountry')?.trim() ?? '';
+      final storedDialCode = prefs.getString('loginDialCode')?.trim() ?? '';
+      if (!mounted) return;
+      var shouldReload = false;
+      setState(() {
+        if ((_selectedCountry ?? '').trim().isEmpty && storedCountry.isNotEmpty) {
+          _selectedCountry = storedCountry;
+          shouldReload = true;
+        }
+        if ((_loginDialCode ?? '').trim().isEmpty && storedDialCode.isNotEmpty) {
+          _loginDialCode = storedDialCode;
+          shouldReload = true;
+        }
+      });
+      if (shouldReload) {
+        await _loadUniversities();
+      }
+    } catch (_) {
+      // Ignore shared preferences read failures.
+    }
+  }
+
+  String? _resolveAutoCountry(List<CountryMaster> countries) {
+    final selected = _selectedCountry?.trim() ?? '';
+    if (selected.isNotEmpty) {
+      return selected;
+    }
+    if ((_loginDialCode ?? '').trim() == '+968') {
+      for (final country in countries) {
+        if (country.dialCode.trim() == '+968') {
+          return country.nameEn.trim().isNotEmpty
+              ? country.nameEn.trim()
+              : country.value.trim();
+        }
+      }
+      return 'Oman';
+    }
+    return null;
   }
 
   Future<void> _refreshHomeData() async {
@@ -242,6 +300,12 @@ class _HomeScreenState extends State<HomeScreen> {
         onCountryChanged: (value) => setState(() => _selectedCountry = value),
         onAcademicChanged: (value) => setState(() => _selectedAcademic = value),
         onProgramChanged: (value) => setState(() => _selectedProgram = value),
+        onResetFilters: () => setState(() {
+          _selectedCountry = null;
+          _selectedAcademic = null;
+          _selectedProgram = null;
+          _resultController.clear();
+        }),
         onApplyFilters: _applyFilters,
       ),
     );
@@ -805,6 +869,7 @@ class _AdvanceSearchDialog extends StatefulWidget {
     required this.onCountryChanged,
     required this.onAcademicChanged,
     required this.onProgramChanged,
+    required this.onResetFilters,
     required this.onApplyFilters,
   });
 
@@ -819,6 +884,7 @@ class _AdvanceSearchDialog extends StatefulWidget {
   final ValueChanged<String?> onCountryChanged;
   final ValueChanged<String?> onAcademicChanged;
   final ValueChanged<String?> onProgramChanged;
+  final VoidCallback onResetFilters;
   final Future<void> Function() onApplyFilters;
 
   @override
@@ -949,32 +1015,71 @@ class _AdvanceSearchDialogState extends State<_AdvanceSearchDialog> {
               icon: Icons.menu_book_outlined,
             ),
             const SizedBox(height: 4),
-            SizedBox(
-              height: 50,
-              child: ElevatedButton(
-                onPressed: () async {
-                  widget.onCountryChanged(_selectedCountry);
-                  widget.onAcademicChanged(_selectedAcademic);
-                  widget.onProgramChanged(_selectedProgram);
-                  Navigator.of(context).pop();
-                  await widget.onApplyFilters();
-                },
-                style: ElevatedButton.styleFrom(
-                  elevation: 0,
-                  backgroundColor: const Color(0xFF95DAB4),
-                  foregroundColor: const Color(0xFF0F2015),
-                  shape: RoundedRectangleBorder(
-                    borderRadius: BorderRadius.circular(10),
+            Row(
+              children: [
+                Expanded(
+                  child: SizedBox(
+                    height: 50,
+                    child: OutlinedButton(
+                      onPressed: () async {
+                        setState(() {
+                          _selectedCountry = null;
+                          _selectedAcademic = null;
+                          _selectedProgram = null;
+                        });
+                        widget.resultController.clear();
+                        widget.onResetFilters();
+                        Navigator.of(context).pop();
+                        await widget.onApplyFilters();
+                      },
+                      style: OutlinedButton.styleFrom(
+                        foregroundColor: const Color(0xFF444444),
+                        side: const BorderSide(color: Color(0xFFD6D6D6)),
+                        shape: RoundedRectangleBorder(
+                          borderRadius: BorderRadius.circular(10),
+                        ),
+                      ),
+                      child: const Text(
+                        'Reset',
+                        style: TextStyle(
+                          fontSize: 24 * 0.75,
+                          fontWeight: FontWeight.w600,
+                        ),
+                      ),
+                    ),
                   ),
                 ),
-                child: const Text(
-                  'Continue',
-                  style: TextStyle(
-                    fontSize: 24 * 0.8,
-                    fontWeight: FontWeight.w700,
+                const SizedBox(width: 8),
+                Expanded(
+                  child: SizedBox(
+                    height: 50,
+                    child: ElevatedButton(
+                      onPressed: () async {
+                        widget.onCountryChanged(_selectedCountry);
+                        widget.onAcademicChanged(_selectedAcademic);
+                        widget.onProgramChanged(_selectedProgram);
+                        Navigator.of(context).pop();
+                        await widget.onApplyFilters();
+                      },
+                      style: ElevatedButton.styleFrom(
+                        elevation: 0,
+                        backgroundColor: const Color(0xFF95DAB4),
+                        foregroundColor: const Color(0xFF0F2015),
+                        shape: RoundedRectangleBorder(
+                          borderRadius: BorderRadius.circular(10),
+                        ),
+                      ),
+                      child: const Text(
+                        'Continue',
+                        style: TextStyle(
+                          fontSize: 24 * 0.8,
+                          fontWeight: FontWeight.w700,
+                        ),
+                      ),
+                    ),
                   ),
                 ),
-              ),
+              ],
             ),
           ],
         ),

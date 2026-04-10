@@ -246,6 +246,8 @@ Future<void> showLogoutDialog(BuildContext context) {
                           final navigator = Navigator.of(context);
                           final prefs = await SharedPreferences.getInstance();
                           await prefs.setBool('isLoggedIn', false);
+                          await prefs.remove('loginCountry');
+                          await prefs.remove('loginDialCode');
                           if (!context.mounted) return;
 
                           navigator.pop();

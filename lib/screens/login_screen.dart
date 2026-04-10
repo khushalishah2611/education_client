@@ -127,6 +127,12 @@ class _LoginScreenState extends State<LoginScreen> {
             studentId: response.id,
             expectedOtp: response.otp,
             whatsappOtpLink: response.whatsappOtpLink,
+            loginCountry: response.country.isNotEmpty
+                ? response.country
+                : _selectedCountry!.nameEn,
+            loginDialCode: response.dialCode.isNotEmpty
+                ? response.dialCode
+                : _selectedCountry!.dialCode,
           ),
         ),
       );

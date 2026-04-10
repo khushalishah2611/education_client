@@ -190,9 +190,7 @@ class HomeUniversity {
       logoUrl: _toAbsoluteUrl(logoPath),
       rating: _readDouble(json['rating']),
       isAccredited: _readBool(json, const ['isAccredited', 'accredited']),
-      academicRequirements: _parseAcademicRequirements(
-        _readString(json, const ['academicList']),
-      ),
+      academicRequirements: _parseAcademicRequirements(json['academicList']),
       programNames: _parseProgramNames(json),
     );
   }
@@ -272,27 +270,37 @@ bool _readBool(Map<String, dynamic> json, List<String> keys) {
   return false;
 }
 
-List<AcademicRequirement> _parseAcademicRequirements(String academicList) {
-  if (academicList.trim().isEmpty) return const [];
-  final lines = academicList
+List<AcademicRequirement> _parseAcademicRequirements(dynamic academicList) {
+  final requirements = <AcademicRequirement>[];
+  if (academicList is List<dynamic>) {
+    for (final raw in academicList) {
+      if (raw is! Map<String, dynamic>) continue;
+      final academic = _readString(raw, const ['academicname', 'academic', 'name']);
+      if (academic.isEmpty) continue;
+      final minResult = _readDouble(raw['percentage']);
+      requirements.add(
+        AcademicRequirement(academic: academic, minResult: minResult),
+      );
+    }
+    return requirements;
+  }
+
+  final rawText = academicList is String ? academicList : '';
+  if (rawText.trim().isEmpty) return const [];
+
+  final lines = rawText
       .replaceAll('\r', '')
       .split('\n')
       .map((line) => line.trim())
       .where((line) => line.isNotEmpty);
 
-  final requirements = <AcademicRequirement>[];
   for (final line in lines) {
     final parts = line.split('|').map((part) => part.trim()).toList();
-    if (parts.isEmpty || parts.first.isEmpty) {
-      continue;
-    }
+    if (parts.isEmpty || parts.first.isEmpty) continue;
     final threshold =
         parts.length > 1 ? double.tryParse(parts[1].replaceAll('%', '')) : null;
     requirements.add(
-      AcademicRequirement(
-        academic: parts.first,
-        minResult: threshold ?? 0,
-      ),
+      AcademicRequirement(academic: parts.first, minResult: threshold ?? 0),
     );
   }
   return requirements;
@@ -324,6 +332,24 @@ Set<String> _parseProgramNames(Map<String, dynamic> json) {
   if (programList is List<dynamic>) {
     for (final program in programList) {
       addProgram(program);
+    }
+  }
+  final courses = json['courses'];
+  if (courses is List<dynamic>) {
+    for (final course in courses) {
+      if (course is Map<String, dynamic>) {
+        addProgram(course['program']);
+        addProgram(course['programName']);
+      }
+    }
+  }
+  final programLinks = json['programLinks'];
+  if (programLinks is List<dynamic>) {
+    for (final link in programLinks) {
+      if (link is Map<String, dynamic>) {
+        addProgram(link['program']);
+        addProgram(link['programName']);
+      }
     }
   }
   return values;
