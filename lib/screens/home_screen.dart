@@ -78,9 +78,9 @@ class _HomeScreenState extends State<HomeScreen> {
       if (!mounted) return;
       setState(() {
         _allUniversities = universities;
-        _universities = _filterUniversities(universities)
-            .map(_toUniversityData)
-            .toList(growable: false);
+        _universities = _filterUniversities(
+          universities,
+        ).map(_toUniversityData).toList(growable: false);
         _programOptions = programs
             .map((item) => item.name)
             .toSet()
@@ -118,46 +118,51 @@ class _HomeScreenState extends State<HomeScreen> {
 
   List<HomeUniversity> _filterUniversities(List<HomeUniversity> source) {
     final enteredResult = double.tryParse(_resultController.text.trim());
-    return source.where((university) {
-      final countryMatch = _selectedCountry == null ||
-          _selectedCountry!.trim().isEmpty ||
-          university.country.toLowerCase() ==
-              _selectedCountry!.trim().toLowerCase();
-      if (!countryMatch) {
-        return false;
-      }
-
-      if (_shouldRestrictToAccredited() && !university.isAccredited) {
-        return false;
-      }
-
-      if (_selectedAcademic != null && _selectedAcademic!.trim().isNotEmpty) {
-        final academicName = _selectedAcademic!.trim().toLowerCase();
-        AcademicRequirement? requirement;
-        for (final item in university.academicRequirements) {
-          if (item.academic.toLowerCase() == academicName) {
-            requirement = item;
-            break;
+    return source
+        .where((university) {
+          final countryMatch =
+              _selectedCountry == null ||
+              _selectedCountry!.trim().isEmpty ||
+              university.country.toLowerCase() ==
+                  _selectedCountry!.trim().toLowerCase();
+          if (!countryMatch) {
+            return false;
           }
-        }
-        if (requirement == null) {
-          return false;
-        }
-        if (enteredResult != null && enteredResult < requirement.minResult) {
-          return false;
-        }
-      }
 
-      if (_selectedProgram != null && _selectedProgram!.trim().isNotEmpty) {
-        final selectedProgram = _selectedProgram!.trim().toLowerCase();
-        if (university.programNames.isNotEmpty &&
-            !university.programNames.contains(selectedProgram)) {
-          return false;
-        }
-      }
+          if (_shouldRestrictToAccredited() && !university.isAccredited) {
+            return false;
+          }
 
-      return true;
-    }).toList(growable: false);
+          if (_selectedAcademic != null &&
+              _selectedAcademic!.trim().isNotEmpty) {
+            final academicName = _selectedAcademic!.trim().toLowerCase();
+            AcademicRequirement? requirement;
+            for (final item in university.academicRequirements) {
+              if (item.academic.toLowerCase() == academicName) {
+                requirement = item;
+                break;
+              }
+            }
+            if (requirement == null) {
+              return false;
+            }
+            if (enteredResult != null &&
+                enteredResult < requirement.minResult) {
+              return false;
+            }
+          }
+
+          if (_selectedProgram != null && _selectedProgram!.trim().isNotEmpty) {
+            final selectedProgram = _selectedProgram!.trim().toLowerCase();
+            if (university.programNames.isNotEmpty &&
+                !university.programNames.contains(selectedProgram)) {
+              return false;
+            }
+          }
+
+          return true;
+        })
+        .toList(growable: false);
   }
 
   bool _shouldRestrictToAccredited() {
@@ -181,9 +186,9 @@ class _HomeScreenState extends State<HomeScreen> {
 
   Future<void> _applyFilters() async {
     setState(() {
-      _universities = _filterUniversities(_allUniversities)
-          .map(_toUniversityData)
-          .toList(growable: false);
+      _universities = _filterUniversities(
+        _allUniversities,
+      ).map(_toUniversityData).toList(growable: false);
     });
     await _loadUniversities();
   }
@@ -343,6 +348,103 @@ class _HomeScreenState extends State<HomeScreen> {
                       ],
                     ),
                   ),
+                  Padding(
+                    padding: const EdgeInsets.all(16.0),
+                    child: Column(
+                      children: [
+                        InkWell(
+                          onTap: _openCountryDialog,
+                          borderRadius: BorderRadius.circular(8),
+                          child: Container(
+                            height: 44,
+                            width: double.infinity,
+                            padding: const EdgeInsets.symmetric(horizontal: 14),
+                            decoration: BoxDecoration(
+                              color: Colors.white,
+                              borderRadius: BorderRadius.circular(6),
+                              border: Border.all(
+                                color: const Color(0xFFE4B88B),
+                              ),
+                            ),
+                            child: Row(
+                              children: [
+                                Expanded(
+                                  child: Text(
+                                    _selectedCountry ?? 'Select Country',
+                                    style: const TextStyle(
+                                      color: Color(0xFF8E8E8E),
+                                      fontSize: 14,
+                                    ),
+                                  ),
+                                ),
+                                const Icon(
+                                  Icons.keyboard_arrow_down_rounded,
+                                  color: Color(0xFF666666),
+                                ),
+                              ],
+                            ),
+                          ),
+                        ),
+                        const SizedBox(height: 12),
+                        InkWell(
+                          onTap: _openAdvanceSearchDialog,
+                          borderRadius: BorderRadius.circular(6),
+                          child: Container(
+                            width: double.infinity,
+                            height: 44,
+                            padding: const EdgeInsets.symmetric(horizontal: 16),
+                            decoration: BoxDecoration(
+                              borderRadius: BorderRadius.circular(6),
+                              border: Border.all(
+                                color: const Color(0xFFE4B88B),
+                              ),
+                              color: Colors.white,
+                            ),
+                            child: const Row(
+                              mainAxisAlignment: MainAxisAlignment.center,
+                              children: [
+                                Icon(
+                                  Icons.tune_rounded,
+                                  color: AppColors.accent,
+                                  size: 20,
+                                ),
+                                SizedBox(width: 8),
+                                Text(
+                                  'Advance Search',
+                                  style: TextStyle(
+                                    color: AppColors.accent,
+                                    fontSize: 16,
+                                    fontWeight: FontWeight.w500,
+                                  ),
+                                ),
+                              ],
+                            ),
+                          ),
+                        ),
+
+                        const SizedBox(height: 16),
+
+                        _DiscoverBanner(
+                          banners: _banners,
+                          isLoading: _isLoadingBanners,
+                          pageController: _bannerPageController,
+                          onPageChanged: (index) {
+                            if (!mounted) return;
+                            setState(() => _activeBannerIndex = index);
+                          },
+                        ),
+                        const SizedBox(height: 8),
+                        Center(
+                          child: _BannerIndicator(
+                            count: _banners.isEmpty ? 1 : _banners.length,
+                            activeIndex: _activeBannerIndex,
+                          ),
+                        ),
+
+                        const SizedBox(height: 16),
+                      ],
+                    ),
+                  ),
 
                   Expanded(
                     child: RefreshIndicator(
@@ -350,172 +452,80 @@ class _HomeScreenState extends State<HomeScreen> {
                       child: SingleChildScrollView(
                         physics: const AlwaysScrollableScrollPhysics(),
                         child: Padding(
-                        padding: const EdgeInsets.only(
-                          left: 16.0,
-                          right: 16.0,
-                          bottom: 16.0,
-                        ),
-                        child: Column(
-                          crossAxisAlignment: CrossAxisAlignment.start,
-                          children: [
-                            InkWell(
-                              onTap: _openCountryDialog,
-                              borderRadius: BorderRadius.circular(8),
-                              child: Container(
-                                height: 44,
-                                width: double.infinity,
-                                padding: const EdgeInsets.symmetric(
-                                  horizontal: 14,
-                                ),
-                                decoration: BoxDecoration(
-                                  color: Colors.white,
-                                  borderRadius: BorderRadius.circular(6),
-                                  border: Border.all(
-                                    color: const Color(0xFFE4B88B),
+                          padding: const EdgeInsets.only(
+                            left: 16.0,
+                            right: 16.0,
+                            bottom: 16.0,
+                          ),
+                          child: Column(
+                            crossAxisAlignment: CrossAxisAlignment.start,
+                            children: [
+                              SectionTitle(
+                                context.l10n.text('popularUniversities'),
+                              ),
+
+                              const SizedBox(height: 12),
+
+                              if (!_isLoadingUniversities &&
+                                  _universities.isEmpty)
+                                Container(
+                                  width: double.infinity,
+                                  padding: const EdgeInsets.symmetric(
+                                    vertical: 20,
+                                    horizontal: 12,
                                   ),
-                                ),
-                                child: Row(
-                                  children: [
-                                    Expanded(
-                                      child: Text(
-                                        _selectedCountry ?? 'Select Country',
-                                        style: const TextStyle(
-                                          color: Color(0xFF8E8E8E),
-                                          fontSize: 14,
+                                  decoration: BoxDecoration(
+                                    borderRadius: BorderRadius.circular(10),
+                                    border: Border.all(
+                                      color: const Color(0xFFE6E6E6),
+                                    ),
+                                    color: Colors.white,
+                                  ),
+                                  child: Text(
+                                    context.l10n.text(
+                                      'No education institute data available',
+                                    ),
+                                    textAlign: TextAlign.center,
+                                    style: TextStyle(
+                                      color: Color(0xFF616161),
+                                      fontWeight: FontWeight.w500,
+                                    ),
+                                  ),
+                                )
+                              else
+                                GridView.builder(
+                                  itemCount: _isLoadingUniversities
+                                      ? 4
+                                      : _universities.length,
+                                  shrinkWrap: true,
+                                  physics: const NeverScrollableScrollPhysics(),
+                                  gridDelegate:
+                                      const SliverGridDelegateWithFixedCrossAxisCount(
+                                        crossAxisCount: 2,
+                                        mainAxisSpacing: 8,
+                                        crossAxisSpacing: 8,
+                                        childAspectRatio: 0.8,
+                                      ),
+                                  itemBuilder: (context, index) {
+                                    if (_isLoadingUniversities) {
+                                      return const _UniversityCardShimmer();
+                                    }
+                                    final item = _universities[index];
+                                    return _UniversityCard(
+                                      data: item,
+                                      onTap: () => Navigator.of(context).push(
+                                        MaterialPageRoute(
+                                          builder: (_) =>
+                                              UniversityDetailScreen(
+                                                data: item,
+                                              ),
                                         ),
                                       ),
-                                    ),
-                                    const Icon(
-                                      Icons.keyboard_arrow_down_rounded,
-                                      color: Color(0xFF666666),
-                                    ),
-                                  ],
+                                    );
+                                  },
                                 ),
-                              ),
-                            ),
-                            const SizedBox(height: 12),
-                            InkWell(
-                              onTap: _openAdvanceSearchDialog,
-                              borderRadius: BorderRadius.circular(6),
-                              child: Container(
-                                width: double.infinity,
-                                height: 44,
-                                padding: const EdgeInsets.symmetric(
-                                  horizontal: 16,
-                                ),
-                                decoration: BoxDecoration(
-                                  borderRadius: BorderRadius.circular(6),
-                                  border: Border.all(
-                                    color: const Color(0xFFE4B88B),
-                                  ),
-                                  color: Colors.white,
-                                ),
-                                child: const Row(
-                                  mainAxisAlignment: MainAxisAlignment.center,
-                                  children: [
-                                    Icon(
-                                      Icons.tune_rounded,
-                                      color: AppColors.accent,
-                                      size: 20,
-                                    ),
-                                    SizedBox(width: 8),
-                                    Text(
-                                      'Advance Search',
-                                      style: TextStyle(
-                                        color: AppColors.accent,
-                                        fontSize: 16,
-                                        fontWeight: FontWeight.w500,
-                                      ),
-                                    ),
-                                  ],
-                                ),
-                              ),
-                            ),
-
-                            const SizedBox(height: 16),
-
-                            _DiscoverBanner(
-                              banners: _banners,
-                              isLoading: _isLoadingBanners,
-                              pageController: _bannerPageController,
-                              onPageChanged: (index) {
-                                if (!mounted) return;
-                                setState(() => _activeBannerIndex = index);
-                              },
-                            ),
-                            const SizedBox(height: 8),
-                            Center(
-                              child: _BannerIndicator(
-                                count: _banners.isEmpty ? 1 : _banners.length,
-                                activeIndex: _activeBannerIndex,
-                              ),
-                            ),
-
-                            const SizedBox(height: 16),
-
-                            SectionTitle(
-                              context.l10n.text('popularUniversities'),
-                            ),
-
-                            const SizedBox(height: 12),
-
-                            if (!_isLoadingUniversities &&
-                                _universities.isEmpty)
-                              Container(
-                                width: double.infinity,
-                                padding: const EdgeInsets.symmetric(
-                                  vertical: 20,
-                                  horizontal: 12,
-                                ),
-                                decoration: BoxDecoration(
-                                  borderRadius: BorderRadius.circular(10),
-                                  border: Border.all(
-                                    color: const Color(0xFFE6E6E6),
-                                  ),
-                                  color: Colors.white,
-                                ),
-                                child: const Text(
-                                  'No education institute data available.',
-                                  textAlign: TextAlign.center,
-                                  style: TextStyle(
-                                    color: Color(0xFF616161),
-                                    fontWeight: FontWeight.w500,
-                                  ),
-                                ),
-                              )
-                            else
-                              GridView.builder(
-                                itemCount: _isLoadingUniversities
-                                    ? 4
-                                    : _universities.length,
-                                shrinkWrap: true,
-                                physics: const NeverScrollableScrollPhysics(),
-                                gridDelegate:
-                                    const SliverGridDelegateWithFixedCrossAxisCount(
-                                      crossAxisCount: 2,
-                                      mainAxisSpacing: 8,
-                                      crossAxisSpacing: 8,
-                                      childAspectRatio: 0.8,
-                                    ),
-                                itemBuilder: (context, index) {
-                                  if (_isLoadingUniversities) {
-                                    return const _UniversityCardShimmer();
-                                  }
-                                  final item = _universities[index];
-                                  return _UniversityCard(
-                                    data: item,
-                                    onTap: () => Navigator.of(context).push(
-                                      MaterialPageRoute(
-                                        builder: (_) => UniversityDetailScreen(
-                                          data: item,
-                                        ),
-                                      ),
-                                    ),
-                                  );
-                                },
-                              ),
-                          ],
-                        ),
+                            ],
+                          ),
                         ),
                       ),
                     ),

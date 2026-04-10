@@ -20,8 +20,6 @@ class GradientTranslation extends GradientTransform {
   }
 }
 
-
-
 enum AppSnackBarType { success, error }
 
 void showAppSnackBar(
@@ -222,9 +220,9 @@ class HelpPillButton extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return InkWell(
-      onTap: () => Navigator.of(
-        context,
-      ).push(MaterialPageRoute(builder: (_) => const HelpScreen())),
+      // onTap: () => Navigator.of(
+      //   context,
+      // ).push(MaterialPageRoute(builder: (_) => const HelpScreen())),
       borderRadius: BorderRadius.circular(12),
       child: Container(
         padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 8),
@@ -277,41 +275,41 @@ class AuthScaffold extends StatelessWidget {
               child: SafeArea(
                 child: Stack(
                   children: [
-                /// 🔥 BACKGROUND IMAGE (FIXED)
-                Image.asset(
-                  'assets/images/img.png',
-                  width: double.infinity,
-                  fit: BoxFit.cover,
-                ),
-
-                /// 🔥 MAIN CONTENT
-                    Column(
-                      children: [
-                    /// 🔝 TOP BAR
-                    Padding(
-                      padding: const EdgeInsets.symmetric(
-                        horizontal: 16,
-                        vertical: 12,
-                      ),
-                      child: Row(
-                        mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                        children: const [
-                          HelpPillButton(),
-                          LanguageDropdownChip(),
-                        ],
-                      ),
+                    /// 🔥 BACKGROUND IMAGE (FIXED)
+                    Image.asset(
+                      'assets/images/img.png',
+                      width: double.infinity,
+                      fit: BoxFit.cover,
                     ),
 
-                    const SizedBox(height: 20),
+                    /// 🔥 MAIN CONTENT
+                    Column(
+                      children: [
+                        /// 🔝 TOP BAR
+                        Padding(
+                          padding: const EdgeInsets.symmetric(
+                            horizontal: 16,
+                            vertical: 12,
+                          ),
+                          child: Row(
+                            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                            children: const [
+                              HelpPillButton(),
+                              LanguageDropdownChip(),
+                            ],
+                          ),
+                        ),
 
-                    /// ✅ CENTER LOGO (PERFECT POSITION)
+                        const SizedBox(height: 20),
+
+                        /// ✅ CENTER LOGO (PERFECT POSITION)
                         Expanded(
                           child: Center(
                             child: Image.asset('assets/images/logo.webp'),
                           ),
                         ),
 
-                    /// ⬇️ BOTTOM CARD (LOGIN AREA)
+                        /// ⬇️ BOTTOM CARD (LOGIN AREA)
                         Container(
                           width: double.infinity,
                           padding: EdgeInsets.fromLTRB(
