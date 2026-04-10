@@ -13,7 +13,6 @@ class UniversityDetailScreen extends StatelessWidget {
   final UniversityData data;
 
   @override
-
   Widget build(BuildContext context) {
     final List<InfoItem> _infoList = [
       InfoItem(
@@ -31,6 +30,7 @@ class UniversityDetailScreen extends StatelessWidget {
         subtitle: '12th pass / Bachelor’s Degree',
       ),
     ];
+
     return Directionality(
       textDirection: Directionality.of(context),
       child: Scaffold(
@@ -38,7 +38,7 @@ class UniversityDetailScreen extends StatelessWidget {
           child: Column(
             children: [
 
-              /// 🔹 TOP HEADER (FIXED)
+              /// 🔹 TOP HEADER
               Stack(
                 clipBehavior: Clip.none,
                 children: [
@@ -98,8 +98,7 @@ class UniversityDetailScreen extends StatelessWidget {
                           const SizedBox(width: 12),
                           Expanded(
                             child: Column(
-                              crossAxisAlignment:
-                              CrossAxisAlignment.start,
+                              crossAxisAlignment: CrossAxisAlignment.start,
                               children: [
                                 const Row(
                                   children: [
@@ -155,7 +154,7 @@ class UniversityDetailScreen extends StatelessWidget {
 
               const SizedBox(height: 40),
 
-              /// 🔥 SCROLLABLE CONTENT
+              /// 🔥 SCROLL CONTENT
               Expanded(
                 child: SingleChildScrollView(
                   padding: const EdgeInsets.only(bottom: 10),
@@ -175,14 +174,11 @@ class UniversityDetailScreen extends StatelessWidget {
                       Padding(
                         padding: const EdgeInsets.fromLTRB(20, 10, 20, 0),
                         child: ReadMoreText(
-                          text: 'Lorem ipsum dolor sit amet, consectetur adipiscing elit. '
-                              'Arcu, arcu dictumst habitant vel ut et pellentesque. '
-                              'Ut in egestas blandit netus in scelerisque. '
-                              'Eget lectus ultrices pellentesque id...',
+                          text: 'Lorem ipsum dolor sit amet...',
                         ),
                       ),
-                      const SizedBox(height: 16),
 
+                      const SizedBox(height: 16),
 
                       Padding(
                         padding: const EdgeInsets.symmetric(horizontal: 20),
@@ -191,7 +187,8 @@ class UniversityDetailScreen extends StatelessWidget {
                             final item = _infoList[index];
 
                             return Padding(
-                              padding: EdgeInsets.only(bottom: index == _infoList.length - 1 ? 0 : 12),
+                              padding: EdgeInsets.only(
+                                  bottom: index == _infoList.length - 1 ? 0 : 12),
                               child: _InfoTile(
                                 icon: item.icon,
                                 iconBg: item.iconBg,
@@ -203,21 +200,23 @@ class UniversityDetailScreen extends StatelessWidget {
                           }),
                         ),
                       ),
-                      const SizedBox(height: 100), // 👈 space for button
+
+                      const SizedBox(height: 100),
                     ],
                   ),
                 ),
               ),
 
-              /// 🔹 BOTTOM BUTTON (FIXED)
-              Padding(
-                padding: const EdgeInsets.fromLTRB(20, 10, 20, 16),
-                child: AppPrimaryButton(
-                  label: context.l10n.text('viewCourses'),
-                  onPressed: () => Navigator.of(context).push(
-                    MaterialPageRoute(
-                      builder: (_) =>
-                          CourseListScreen(university: data),
+              SafeArea(
+                child: Padding(
+                  padding: const EdgeInsets.fromLTRB(20, 20, 20, 20),
+                  child: AppPrimaryButton(
+                    label: context.l10n.text('viewCourses'),
+                    onPressed: () => Navigator.of(context).push(
+                      MaterialPageRoute(
+                        builder: (_) =>
+                            CourseListScreen(university: data),
+                      ),
                     ),
                   ),
                 ),
