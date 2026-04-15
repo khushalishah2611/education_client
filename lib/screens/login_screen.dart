@@ -69,13 +69,13 @@ class _LoginScreenState extends State<LoginScreen> {
   }
 
   Future<void> _onSendOtpTap() async {
-    if (_mobileController.text.length < 10) {
+    if (_mobileController.text.isEmpty) {
       showAppSnackBar(
         context,
         type: AppSnackBarType.error,
         message: context.l10n.isArabic
-            ? 'أدخل رقم هاتف صحيح'
-            : 'Enter valid mobile number',
+            ? 'أدخل رقم الجوال'
+            : 'Enter mobile number',
       );
       return;
     }
