@@ -342,8 +342,8 @@ class _CollegeAccordion extends StatelessWidget {
           InkWell(
             onTap: onToggleExpand,
             child: Container(
-              color: const Color(0xFFF4F4F4),
-              padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 16),
+              color: AppColors.white,
+              padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 8),
               child: Row(
                 children: [
                   Expanded(
@@ -433,112 +433,114 @@ class _CollegeAccordion extends StatelessWidget {
                         ],
                       ),
                     ),
-                    ConstrainedBox(
-                      constraints: const BoxConstraints(maxHeight: 320),
-                      child: SingleChildScrollView(
-                        child: Column(
-                          children: courses.map((course) {
-                            final String courseKey = '$collegeName-${course.name}';
-                            final bool isSelected = selectedCourses.contains(
-                              courseKey,
-                            );
+                    SingleChildScrollView(
+                      child: Column(
+                        children: courses.map((course) {
+                          final String courseKey = '$collegeName-${course.name}';
+                          final bool isSelected = selectedCourses.contains(
+                            courseKey,
+                          );
 
-                            return InkWell(
-                              onTap: () => onToggleCourse(courseKey),
-                              child: Container(
-                                decoration: BoxDecoration(
-                                  color: isSelected
-                                      ? AppColors.peachSoft
-                                      : Colors.white,
-                                  border: Border(
-                                    left: BorderSide(
-                                      color: isSelected
-                                          ? AppColors.primaryDark
-                                          : Colors.transparent,
-                                      width: 3,
-                                    ),
-                                    top: const BorderSide(
-                                      color: Color(0xFFE5E5E5),
-                                    ),
+                          return InkWell(
+                            onTap: () => onToggleCourse(courseKey),
+                            child: Container(
+                              decoration: BoxDecoration(
+                                color: isSelected
+                                    ? AppColors.peachSoft
+                                    : Colors.white,
+                                border: Border(
+                                  left: BorderSide(
+                                    color: isSelected
+                                        ? AppColors.primaryDark
+                                        : Colors.transparent,
+                                    width: 3,
+                                  ),
+                                  top: const BorderSide(
+                                    color: Color(0xFFE5E5E5),
                                   ),
                                 ),
-                                padding: const EdgeInsets.symmetric(
-                                  horizontal: 8,
-                                  vertical: 10,
-                                ),
-                                child: Row(
-                                  crossAxisAlignment: CrossAxisAlignment.start,
-                                  children: [
-                                    SizedBox(
-                                      width: _courseWidth,
-                                      child: Text(course.name ?? 'N/A'),
-                                    ),
-                                    SizedBox(
-                                      width: _feeWidth,
-                                      child: Text(
-                                        '${course.feePerCredit ?? '-'} ${course.currency ?? ''}'
-                                            .trim(),
-                                      ),
-                                    ),
-                                    SizedBox(
-                                      width: _admissionWidth,
-                                      child: Text(
-                                        '${course.minAdmissionRate ?? '-'}%',
-                                      ),
-                                    ),
-                                    SizedBox(
-                                      width: _trackWidth,
-                                      child: Text(course.track ?? '-'),
-                                    ),
-                                    SizedBox(
-                                      width: _detailsWidth,
-                                      child: Column(
-                                        crossAxisAlignment:
-                                            CrossAxisAlignment.start,
-                                        children: [
-                                          const Text(
-                                            'Details >',
-                                            style: TextStyle(
-                                              fontWeight: FontWeight.w600,
-                                            ),
-                                          ),
-                                          const SizedBox(height: 6),
-                                          OutlinedButton(
-                                            onPressed: () {},
-                                            style: OutlinedButton.styleFrom(
-                                              backgroundColor: const Color(
-                                                0xFFC8F3DF,
-                                              ),
-                                              foregroundColor:
-                                                  const Color(0xFF126F4A),
-                                              side: const BorderSide(
-                                                color: Color(0xFF93D8BC),
-                                              ),
-                                              minimumSize: const Size(120, 34),
-                                              padding:
-                                                  const EdgeInsets.symmetric(
-                                                horizontal: 8,
-                                                vertical: 6,
-                                              ),
-                                              textStyle: const TextStyle(
-                                                fontSize: 10,
-                                                fontWeight: FontWeight.w700,
-                                              ),
-                                            ),
-                                            child: const Text(
-                                              'Apply & Pay\nApplication Fee',
-                                              textAlign: TextAlign.center,
-                                            ),
-                                          ),
-                                        ],
-                                      ),
-                                    ),
-                                  ],
-                                ),
                               ),
-                            );
-                          }).toList(),
-                        ),
+                              padding: const EdgeInsets.symmetric(
+                                horizontal: 8,
+                                vertical: 10,
+                              ),
+                              child: Row(
+                                crossAxisAlignment: CrossAxisAlignment.start,
+                                children: [
+                                  SizedBox(
+                                    width: _courseWidth,
+                                    child: Text(course.name ?? 'N/A'),
+                                  ),
+                                  SizedBox(
+                                    width: _feeWidth,
+                                    child: Text(
+                                      '${course.feePerCredit ?? '-'} ${course.currency ?? ''}'
+                                          .trim(),
+                                    ),
+                                  ),
+                                  SizedBox(
+                                    width: _admissionWidth,
+                                    child: Text(
+                                      '${course.minAdmissionRate ?? '-'}%',
+                                    ),
+                                  ),
+                                  SizedBox(
+                                    width: _trackWidth,
+                                    child: Text(course.track ?? '-'),
+                                  ),
+                                  SizedBox(
+                                    width: _detailsWidth,
+                                    child: Column(
+                                      crossAxisAlignment:
+                                      CrossAxisAlignment.start,
+                                      children: [
+                                        Row(
+                                          children: [
+                                            const Text(
+                                              'Details ',
+                                              style: TextStyle(
+                                                fontWeight: FontWeight.w600,
+                                              ),
+                                            ),
+                                            Icon(Icons.chevron_right)
+                                          ],
+                                        ),
+                                        const SizedBox(height: 6),
+                                        // OutlinedButton(
+                                        //   onPressed: () {},
+                                        //   style: OutlinedButton.styleFrom(
+                                        //     backgroundColor: const Color(
+                                        //       0xFFC8F3DF,
+                                        //     ),
+                                        //     foregroundColor:
+                                        //     const Color(0xFF126F4A),
+                                        //     side: const BorderSide(
+                                        //       color: Color(0xFF93D8BC),
+                                        //     ),
+                                        //     minimumSize: const Size(120, 34),
+                                        //     padding:
+                                        //     const EdgeInsets.symmetric(
+                                        //       horizontal: 8,
+                                        //       vertical: 6,
+                                        //     ),
+                                        //     textStyle: const TextStyle(
+                                        //       fontSize: 10,
+                                        //       fontWeight: FontWeight.w700,
+                                        //     ),
+                                        //   ),
+                                        //   child: const Text(
+                                        //     'Apply & Pay\nApplication Fee',
+                                        //     textAlign: TextAlign.center,
+                                        //   ),
+                                        // ),
+                                      ],
+                                    ),
+                                  ),
+                                ],
+                              ),
+                            ),
+                          );
+                        }).toList(),
                       ),
                     ),
                   ],
