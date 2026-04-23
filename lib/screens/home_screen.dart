@@ -313,7 +313,7 @@ class _HomeScreenState extends State<HomeScreen> {
         onAcademicChanged: (value) => setState(() => _selectedAcademic = value),
         onTrackChanged: (value) => setState(() => _selectedTrack = value),
         onResetFilters: () => setState(() {
-          _selectedCountry = null;
+          _selectedCountry = _defaultCountryForReset();
           _selectedAcademic = null;
           _selectedTrack = null;
           _resultController.clear();
@@ -321,6 +321,18 @@ class _HomeScreenState extends State<HomeScreen> {
         onApplyFilters: _applyFilters,
       ),
     );
+  }
+
+  String? _defaultCountryForReset() {
+    if ((_loginDialCode ?? '').trim() != '+968') {
+      return null;
+    }
+    for (final option in _countryOptions) {
+      if (option.dialCode.trim() == '+968') {
+        return option.name;
+      }
+    }
+    return 'Oman';
   }
 
   UniversityData _toUniversityData(HomeUniversity university) {
