@@ -898,16 +898,8 @@ class _UniversityCard extends StatelessWidget {
                     child: Image.network(
                       ImageUrlHelper.resolveUploadUrl(data.logoPath),
                       fit: BoxFit.cover,
-                      errorBuilder: (_, __, ___) => Center(
-                        child: Text(
-                          data.name ?? "",
-                          style: TextStyle(
-
-                            fontSize: 24,
-                            fontWeight: FontWeight.w900,
-                          ),
-                        ),
-                      ),
+                      errorBuilder: (_, __, ___) =>
+                          Center(child: Image.asset('assets/images/logo.webp')),
                     ),
                   ),
                 ),
@@ -939,11 +931,10 @@ class _UniversityCard extends StatelessWidget {
                         ),
                       ),
                       const Icon(Icons.star, size: 14),
-                       Text(data.rating.toString()),
+                      Text(data.rating!.toDouble().toString()),
                     ],
                   ),
                 ),
-                const SizedBox(height: 8),
                 SizedBox(
                   width: double.infinity,
                   child: AppPrimaryButton(
