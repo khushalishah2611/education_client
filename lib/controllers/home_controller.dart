@@ -272,8 +272,17 @@ class HomeController extends ChangeNotifier {
   }
 
   String _toAbsoluteUrl(String path) {
-    if (path.startsWith('http')) return path;
-    return '${ApiConfig.baseUrl}/${path.replaceAll(RegExp(r'^/'), '')}';
+    final value = path.trim();
+    if (value.isEmpty) return '';
+
+    if (value.startsWith('http')) {
+      return value.replaceAll('/uploads//uploads/', '/uploads/');
+    }
+
+    final cleaned = value
+        .replaceAll(RegExp(r'^/+'), '')
+        .replaceFirst(RegExp(r'^uploads/+'), '');
+    return '${ApiConfig.baseUrl}/uploads/$cleaned';
   }
 
   @override
