@@ -22,7 +22,8 @@ class _UniversityDetailScreenState extends State<UniversityDetailScreen> {
   AdminUniversity get data => widget.data;
 
   Map<String, List<CourseDetails>> get _collegeCourses {
-    final Map<String, List<CourseDetails>> grouped = <String, List<CourseDetails>>{};
+    final Map<String, List<CourseDetails>> grouped =
+        <String, List<CourseDetails>>{};
     final List<ProgramLinks> links = data.programLinks ?? <ProgramLinks>[];
 
     for (final ProgramLinks link in links) {
@@ -30,8 +31,8 @@ class _UniversityDetailScreenState extends State<UniversityDetailScreen> {
       if (program == null) continue;
       final String collegeName =
           (program.educationInstitute?.trim().isNotEmpty ?? false)
-              ? program.educationInstitute!.trim().toUpperCase()
-              : 'COLLEGE';
+          ? program.educationInstitute!.trim().toUpperCase()
+          : 'COLLEGE';
       final CourseDetails course = CourseDetails(
         name: program.name ?? 'N/A',
         feePerCredit: program.basePrice,
@@ -52,7 +53,9 @@ class _UniversityDetailScreenState extends State<UniversityDetailScreen> {
       builder: (_) {
         return AlertDialog(
           title: Text(context.l10n.text('location')),
-          content: Text(data.address?.trim().isNotEmpty == true ? data.address! : '-'),
+          content: Text(
+            data.address?.trim().isNotEmpty == true ? data.address! : '-',
+          ),
           actions: [
             TextButton(
               onPressed: () => Navigator.of(context).pop(),
@@ -229,29 +232,30 @@ class _UniversityDetailScreenState extends State<UniversityDetailScreen> {
                         padding: const EdgeInsets.fromLTRB(20, 10, 20, 0),
                         child: ReadMoreText(text: data.aboutUs.toString()),
                       ),
-
-                      const SizedBox(height: 16),
-
-                      if (collegeCourses.isNotEmpty) ...[
-                        const Padding(
-                          padding: EdgeInsets.symmetric(horizontal: 20),
-                          child: Text(
-                            'Programs',
-                            style: TextStyle(
-                              fontSize: 18,
-                              fontWeight: FontWeight.w700,
+                      SizedBox(height: 10),
+                      if (_selectedCourses.isNotEmpty)
+                        Padding(
+                          padding: const EdgeInsets.fromLTRB(20, 0, 20, 10),
+                          child: Align(
+                            alignment: Alignment.centerLeft,
+                            child: Text(
+                              'Selected Courses: ${_selectedCourses.length}',
+                              style: const TextStyle(
+                                fontWeight: FontWeight.w600,
+                                color: AppColors.textMuted,
+                              ),
                             ),
                           ),
                         ),
-                        const SizedBox(height: 10),
+                      if (collegeCourses.isNotEmpty) ...[
                         Padding(
                           padding: const EdgeInsets.symmetric(horizontal: 16),
                           child: Column(
                             children: collegeCourses.entries.map((entry) {
                               final String collegeName = entry.key;
                               final List<CourseDetails> courses = entry.value;
-                              final bool isExpanded =
-                                  _expandedColleges.contains(collegeName);
+                              final bool isExpanded = _expandedColleges
+                                  .contains(collegeName);
                               return _CollegeAccordion(
                                 collegeName: collegeName,
                                 courses: courses,
@@ -280,37 +284,7 @@ class _UniversityDetailScreenState extends State<UniversityDetailScreen> {
                           ),
                         ),
                       ],
-
-                      if (_selectedCourses.isNotEmpty)
-                        Padding(
-                          padding: const EdgeInsets.fromLTRB(20, 8, 20, 10),
-                          child: Align(
-                            alignment: Alignment.centerLeft,
-                            child: Text(
-                              'Selected Courses: ${_selectedCourses.length}',
-                              style: const TextStyle(
-                                fontWeight: FontWeight.w600,
-                                color: AppColors.textMuted,
-                              ),
-                            ),
-                          ),
-                        ),
                     ],
-                  ),
-                ),
-              ),
-
-              SafeArea(
-                child: Padding(
-                  padding: const EdgeInsets.fromLTRB(20, 20, 20, 20),
-                  child: AppPrimaryButton(
-                    label: context.l10n.text('viewCourses'),
-                    onPressed: _selectedCourses.isEmpty ? null : () {},
-                    // onPressed: () => Navigator.of(context).push(
-                    //   MaterialPageRoute(
-                    //     builder: (_) => CourseListScreen(university: data),
-                    //   ),
-                    // ),
                   ),
                 ),
               ),
@@ -345,7 +319,7 @@ class _CollegeAccordion extends StatelessWidget {
       margin: const EdgeInsets.only(bottom: 10),
       decoration: BoxDecoration(
         border: Border.all(
-          color: isExpanded ? const Color(0xFF1A87F8) : const Color(0xFFD8D8D8),
+          color: isExpanded ? AppColors.primaryDark : const Color(0xFFD8D8D8),
         ),
       ),
       child: Column(
@@ -382,56 +356,109 @@ class _CollegeAccordion extends StatelessWidget {
               padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 8),
               child: const Row(
                 children: [
-                  Expanded(flex: 4, child: Text('Course', style: TextStyle(fontWeight: FontWeight.w700, fontSize: 12))),
-                  Expanded(flex: 2, child: Text('Credit\nHour Fee', style: TextStyle(fontWeight: FontWeight.w700, fontSize: 12))),
-                  Expanded(flex: 2, child: Text('Min\nAdmis%', style: TextStyle(fontWeight: FontWeight.w700, fontSize: 12))),
-                  Expanded(flex: 2, child: Text('Track', style: TextStyle(fontWeight: FontWeight.w700, fontSize: 12))),
-                  Expanded(flex: 3, child: Text('Details\n/ Apply', style: TextStyle(fontWeight: FontWeight.w700, fontSize: 12))),
+                  Expanded(
+                    flex: 4,
+                    child: Text(
+                      'Course',
+                      style: TextStyle(
+                        fontWeight: FontWeight.w700,
+                        fontSize: 12,
+                      ),
+                    ),
+                  ),
+                  Expanded(
+                    flex: 2,
+                    child: Text(
+                      'Credit\nHour Fee',
+                      style: TextStyle(
+                        fontWeight: FontWeight.w700,
+                        fontSize: 12,
+                      ),
+                    ),
+                  ),
+                  Expanded(
+                    flex: 2,
+                    child: Text(
+                      'Min\nAdmis%',
+                      style: TextStyle(
+                        fontWeight: FontWeight.w700,
+                        fontSize: 12,
+                      ),
+                    ),
+                  ),
+                  Expanded(
+                    flex: 2,
+                    child: Text(
+                      'Track',
+                      style: TextStyle(
+                        fontWeight: FontWeight.w700,
+                        fontSize: 12,
+                      ),
+                    ),
+                  ),
+                  Expanded(
+                    flex: 3,
+                    child: Text(
+                      'Details\n/ Apply',
+                      style: TextStyle(
+                        fontWeight: FontWeight.w700,
+                        fontSize: 12,
+                      ),
+                    ),
+                  ),
                 ],
               ),
             ),
             ...courses.map((course) {
               final String courseKey = '$collegeName-${course.name}';
               final bool isSelected = selectedCourses.contains(courseKey);
-              return Container(
-                color: isSelected ? const Color(0xFFF1FAFF) : Colors.white,
-                padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 10),
-                child: Row(
-                  children: [
-                    Expanded(
-                      flex: 4,
-                      child: Text(course.name ?? 'N/A'),
-                    ),
-                    Expanded(
-                      flex: 2,
-                      child: Text(
-                        '${course.feePerCredit ?? '-'} ${course.currency ?? ''}'.trim(),
+
+              return InkWell(
+                onTap: () => onToggleCourse(courseKey), // tap full row
+                child: Container(
+                  decoration: BoxDecoration(
+                    color: isSelected ? AppColors.peachSoft : Colors.white,
+                    border: Border(
+                      left: BorderSide(
+                        color: isSelected
+                            ? AppColors.primaryDark
+                            : Colors.transparent,
+                        width: 3,
                       ),
                     ),
-                    Expanded(
-                      flex: 2,
-                      child: Text('${course.minAdmissionRate ?? '-'}%'),
-                    ),
-                    Expanded(
-                      flex: 2,
-                      child: Text(course.track ?? '-'),
-                    ),
-                    Expanded(
-                      flex: 3,
-                      child: Row(
-                        children: [
-                          TextButton(
-                            onPressed: () {},
-                            child: const Text('Details'),
-                          ),
-                          Checkbox(
-                            value: isSelected,
-                            onChanged: (_) => onToggleCourse(courseKey),
-                          ),
-                        ],
+                  ),
+                  padding: const EdgeInsets.symmetric(
+                    horizontal: 8,
+                    vertical: 10,
+                  ),
+                  child: Row(
+                    children: [
+                      Expanded(flex: 4, child: Text(course.name ?? 'N/A')),
+                      Expanded(
+                        flex: 2,
+                        child: Text(
+                          '${course.feePerCredit ?? '-'} ${course.currency ?? ''}'
+                              .trim(),
+                        ),
                       ),
-                    ),
-                  ],
+                      Expanded(
+                        flex: 2,
+                        child: Text('${course.minAdmissionRate ?? '-'}%'),
+                      ),
+                      Expanded(flex: 2, child: Text(course.track ?? '-')),
+                      Expanded(
+                        flex: 3,
+                        child: Row(
+                          children: [
+                            TextButton(
+                              onPressed: () {},
+                              child: const Text('Details'),
+                            ),
+                          ],
+                        ),
+                      ),
+                    ],
+                  ),
                 ),
               );
             }),
@@ -527,67 +554,6 @@ class _ReadMoreTextState extends State<ReadMoreText> {
           ],
         );
       },
-    );
-  }
-}
-
-class _InfoTile extends StatelessWidget {
-  const _InfoTile({
-    required this.icon,
-    required this.iconBg,
-    required this.title,
-    required this.value,
-    required this.subtitle,
-  });
-
-  final IconData icon;
-  final Color iconBg;
-  final String title;
-  final String value;
-  final String subtitle;
-
-  @override
-  Widget build(BuildContext context) {
-    return Container(
-      padding: const EdgeInsets.all(12),
-      decoration: BoxDecoration(
-        color: Colors.white,
-        borderRadius: BorderRadius.circular(12),
-        border: Border.all(color: const Color(0xFFE8E3DB)),
-      ),
-      child: Row(
-        children: [
-          Container(
-            width: 38,
-            height: 38,
-            decoration: BoxDecoration(
-              color: iconBg,
-              borderRadius: BorderRadius.circular(8),
-            ),
-            child: Icon(icon, color: const Color(0xFFE09B2D)),
-          ),
-          const SizedBox(width: 12),
-          Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              Text(title, style: const TextStyle(color: AppColors.textMuted)),
-              const SizedBox(height: 4),
-              Text(
-                value,
-                style: const TextStyle(
-                  fontSize: 15,
-                  fontWeight: FontWeight.w700,
-                ),
-              ),
-              const SizedBox(height: 2),
-              Text(
-                subtitle,
-                style: const TextStyle(color: AppColors.textMuted),
-              ),
-            ],
-          ),
-        ],
-      ),
     );
   }
 }
