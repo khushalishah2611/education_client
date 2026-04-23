@@ -45,6 +45,7 @@ class _HomeScreenState extends State<HomeScreen> {
   String? _selectedAcademic;
   String? _selectedTrack;
   String? _loginDialCode;
+  bool _skipAutoCountrySelection = false;
   final TextEditingController _resultController = TextEditingController();
 
   @override
@@ -245,18 +246,6 @@ class _HomeScreenState extends State<HomeScreen> {
     return normalized == 'SCIENTIFICANDLITERARY';
   }
 
-  String? _resolveCountryAfterReset() {
-    if ((_loginDialCode ?? '').trim() != '+968') {
-      return null;
-    }
-    for (final item in _countryOptions) {
-      if (item.dialCode.trim() == '+968') {
-        return item.name;
-      }
-    }
-    return 'Oman';
-  }
-
   Future<void> _loadSessionDefaults() async {
     try {
       final prefs = await SharedPreferences.getInstance();
@@ -285,6 +274,10 @@ class _HomeScreenState extends State<HomeScreen> {
   }
 
   String? _resolveAutoCountry(List<CountryMaster> countries) {
+    if (_skipAutoCountrySelection) {
+      _skipAutoCountrySelection = false;
+      return null;
+    }
     final selected = _selectedCountry?.trim() ?? '';
     if (selected.isNotEmpty) {
       return selected;
@@ -365,7 +358,8 @@ class _HomeScreenState extends State<HomeScreen> {
         onAcademicChanged: (value) => setState(() => _selectedAcademic = value),
         onTrackChanged: (value) => setState(() => _selectedTrack = value),
         onResetFilters: () => setState(() {
-          _selectedCountry = _resolveCountryAfterReset();
+          _skipAutoCountrySelection = true;
+          _selectedCountry = null;
           _selectedAcademic = null;
           _selectedTrack = null;
           _resultController.clear();
