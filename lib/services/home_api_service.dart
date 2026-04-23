@@ -89,7 +89,7 @@ class HomeApiService {
     return _asList(decoded['data'] ?? decoded)
         .whereType<Map<String, dynamic>>()
         .map(AdminUniversity.fromJson)
-        .where((item) => item.name.isNotEmpty)
+        .where((item) => item.name!.isNotEmpty)
         .toList(growable: false);
   }
 

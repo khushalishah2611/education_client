@@ -1,5 +1,6 @@
+import 'package:education/models/admin_university.dart';
+import 'package:education/models/banner_item.dart';
 import 'package:flutter/material.dart';
-
 import '../core/app_localizations.dart';
 import '../core/app_theme.dart';
 import '../controllers/home_controller.dart';
@@ -7,7 +8,6 @@ import '../models/app_models.dart';
 import '../models/country_option.dart';
 import '../services/home_api_service.dart';
 import '../widgets/app_drawer.dart';
-import '../widgets/app_shimmer.dart';
 import '../widgets/common_widgets.dart';
 import '../widgets/flow_widgets.dart';
 import 'university_detail_screen.dart';
@@ -326,7 +326,7 @@ class _HomeScreenState extends State<HomeScreen> {
                                       return const _UniversityCardShimmer();
                                     }
                                     final item =
-                                        _controller.universities[index];
+                                        _controller.allUniversities[index];
                                     return _UniversityCard(
                                       data: item,
                                       onTap: () => Navigator.of(context).push(
@@ -864,7 +864,7 @@ class _CountryFlag extends StatelessWidget {
 class _UniversityCard extends StatelessWidget {
   const _UniversityCard({required this.data, required this.onTap});
 
-  final UniversityData data;
+  final AdminUniversity data;
   final VoidCallback onTap;
 
   @override
@@ -895,13 +895,13 @@ class _UniversityCard extends StatelessWidget {
                   child: ClipRRect(
                     borderRadius: BorderRadius.circular(8),
                     child: Image.network(
-                      data.heroImage,
+                      data.logoPath ?? "",
                       fit: BoxFit.cover,
                       errorBuilder: (_, __, ___) => Center(
                         child: Text(
-                          data.shortCode,
+                          data.name ?? "",
                           style: TextStyle(
-                            color: data.color,
+
                             fontSize: 24,
                             fontWeight: FontWeight.w900,
                           ),
@@ -915,7 +915,7 @@ class _UniversityCard extends StatelessWidget {
 
                 /// NAME
                 Text(
-                  data.name,
+                  data.name ?? "",
                   maxLines: 2,
                   overflow: TextOverflow.ellipsis,
                   style: const TextStyle(fontWeight: FontWeight.w700),
@@ -931,14 +931,14 @@ class _UniversityCard extends StatelessWidget {
                       const Icon(Icons.location_on_outlined, size: 14),
                       Expanded(
                         child: Text(
-                          data.location,
+                          data.country ?? "",
                           maxLines: 2,
                           overflow: TextOverflow.ellipsis,
                           style: const TextStyle(fontSize: 11),
                         ),
                       ),
                       const Icon(Icons.star, size: 14),
-                      const Text("4.6"),
+                       Text(data.rating.toString()),
                     ],
                   ),
                 ),

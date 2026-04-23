@@ -1,4 +1,5 @@
 import 'package:education/core/app_localizations.dart';
+import 'package:education/models/admin_university.dart';
 import 'package:flutter/material.dart';
 
 import '../core/app_theme.dart';
@@ -10,7 +11,7 @@ import 'course_list_screen.dart';
 class UniversityDetailScreen extends StatelessWidget {
   const UniversityDetailScreen({super.key, required this.data});
 
-  final UniversityData data;
+  final AdminUniversity data;
 
   @override
   Widget build(BuildContext context) {
@@ -37,7 +38,6 @@ class UniversityDetailScreen extends StatelessWidget {
         body: AppBackground(
           child: Column(
             children: [
-
               /// 🔹 TOP HEADER
               Stack(
                 clipBehavior: Clip.none,
@@ -50,11 +50,10 @@ class UniversityDetailScreen extends StatelessWidget {
                       height: 250,
                       width: double.infinity,
                       child: Image.network(
-                        data.heroImage,
+                        data.coverImagePath ?? "",
                         fit: BoxFit.cover,
-                        errorBuilder: (_, __, ___) => Container(
-                          color: const Color(0xFFE2E2E2),
-                        ),
+                        errorBuilder: (_, __, ___) =>
+                            Container(color: const Color(0xFFE2E2E2)),
                       ),
                     ),
                   ),
@@ -87,9 +86,8 @@ class UniversityDetailScreen extends StatelessWidget {
                             ),
                             alignment: Alignment.center,
                             child: Text(
-                              data.shortCode,
+                              data.name ?? "",
                               style: TextStyle(
-                                color: data.color,
                                 fontWeight: FontWeight.w900,
                                 fontSize: 18,
                               ),
@@ -100,24 +98,33 @@ class UniversityDetailScreen extends StatelessWidget {
                             child: Column(
                               crossAxisAlignment: CrossAxisAlignment.start,
                               children: [
-                                const Row(
+                                 Row(
                                   children: [
-                                    Icon(Icons.star,
-                                        color: Color(0xFFFFB300), size: 16),
+                                    Icon(
+                                      Icons.star,
+                                      color: Color(0xFFFFB300),
+                                      size: 16,
+                                    ),
                                     SizedBox(width: 4),
-                                    Text('4.6',
-                                        style: TextStyle(
-                                            fontWeight: FontWeight.w700)),
+                                    Text(
+                                     data.rating.toString(),
+                                      style: TextStyle(
+                                        fontWeight: FontWeight.w700,
+                                      ),
+                                    ),
                                     SizedBox(width: 4),
-                                    Text('(2.4k reviews)',
-                                        style: TextStyle(
-                                            fontSize: 12,
-                                            color: AppColors.textMuted)),
+                                    Text(
+                                      '(2.4k reviews)',
+                                      style: TextStyle(
+                                        fontSize: 12,
+                                        color: AppColors.textMuted,
+                                      ),
+                                    ),
                                   ],
                                 ),
                                 const SizedBox(height: 8),
                                 Text(
-                                  data.name,
+                                  data.name ?? "",
                                   style: const TextStyle(
                                     fontSize: 14,
                                     fontWeight: FontWeight.w700,
@@ -133,7 +140,7 @@ class UniversityDetailScreen extends StatelessWidget {
                                     ),
                                     const SizedBox(width: 2),
                                     Text(
-                                      data.location,
+                                      data.address ?? "",
                                       style: const TextStyle(
                                         color: AppColors.textMuted,
                                       ),
@@ -148,7 +155,7 @@ class UniversityDetailScreen extends StatelessWidget {
                     ),
                   ),
 
-                  TopRoundedHeader(title: data.name),
+                  TopRoundedHeader(title: data.name ??""),
                 ],
               ),
 
@@ -161,13 +168,14 @@ class UniversityDetailScreen extends StatelessWidget {
                   child: Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
-
                       const Padding(
                         padding: EdgeInsets.symmetric(horizontal: 20),
                         child: Text(
                           'About',
                           style: TextStyle(
-                              fontSize: 18, fontWeight: FontWeight.w700),
+                            fontSize: 18,
+                            fontWeight: FontWeight.w700,
+                          ),
                         ),
                       ),
 
@@ -188,7 +196,8 @@ class UniversityDetailScreen extends StatelessWidget {
 
                             return Padding(
                               padding: EdgeInsets.only(
-                                  bottom: index == _infoList.length - 1 ? 0 : 12),
+                                bottom: index == _infoList.length - 1 ? 0 : 12,
+                              ),
                               child: _InfoTile(
                                 icon: item.icon,
                                 iconBg: item.iconBg,
@@ -212,12 +221,15 @@ class UniversityDetailScreen extends StatelessWidget {
                   padding: const EdgeInsets.fromLTRB(20, 20, 20, 20),
                   child: AppPrimaryButton(
                     label: context.l10n.text('viewCourses'),
-                    onPressed: () => Navigator.of(context).push(
-                      MaterialPageRoute(
-                        builder: (_) =>
-                            CourseListScreen(university: data),
-                      ),
-                    ),
+                    onPressed: ()
+                    {
+
+                    },
+                    // onPressed: () => Navigator.of(context).push(
+                    //   MaterialPageRoute(
+                    //     builder: (_) => CourseListScreen(university: data),
+                    //   ),
+                    // ),
                   ),
                 ),
               ),
@@ -228,6 +240,7 @@ class UniversityDetailScreen extends StatelessWidget {
     );
   }
 }
+
 class InfoItem {
   final IconData icon;
   final Color iconBg;
@@ -243,12 +256,9 @@ class InfoItem {
     required this.subtitle,
   });
 }
+
 class ReadMoreText extends StatefulWidget {
-  const ReadMoreText({
-    super.key,
-    required this.text,
-    this.trimLines = 3,
-  });
+  const ReadMoreText({super.key, required this.text, this.trimLines = 3});
 
   final String text;
   final int trimLines;
@@ -287,8 +297,9 @@ class _ReadMoreTextState extends State<ReadMoreText> {
             Text(
               widget.text,
               maxLines: isExpanded ? null : widget.trimLines,
-              overflow:
-              isExpanded ? TextOverflow.visible : TextOverflow.ellipsis,
+              overflow: isExpanded
+                  ? TextOverflow.visible
+                  : TextOverflow.ellipsis,
               style: const TextStyle(
                 fontSize: 15,
                 color: AppColors.textMuted,
@@ -318,6 +329,7 @@ class _ReadMoreTextState extends State<ReadMoreText> {
     );
   }
 }
+
 class _InfoTile extends StatelessWidget {
   const _InfoTile({
     required this.icon,
@@ -347,7 +359,10 @@ class _InfoTile extends StatelessWidget {
           Container(
             width: 38,
             height: 38,
-            decoration: BoxDecoration(color: iconBg, borderRadius: BorderRadius.circular(8)),
+            decoration: BoxDecoration(
+              color: iconBg,
+              borderRadius: BorderRadius.circular(8),
+            ),
             child: Icon(icon, color: const Color(0xFFE09B2D)),
           ),
           const SizedBox(width: 12),
@@ -356,9 +371,18 @@ class _InfoTile extends StatelessWidget {
             children: [
               Text(title, style: const TextStyle(color: AppColors.textMuted)),
               const SizedBox(height: 4),
-              Text(value, style: const TextStyle(fontSize: 15, fontWeight: FontWeight.w700)),
+              Text(
+                value,
+                style: const TextStyle(
+                  fontSize: 15,
+                  fontWeight: FontWeight.w700,
+                ),
+              ),
               const SizedBox(height: 2),
-              Text(subtitle, style: const TextStyle(color: AppColors.textMuted)),
+              Text(
+                subtitle,
+                style: const TextStyle(color: AppColors.textMuted),
+              ),
             ],
           ),
         ],

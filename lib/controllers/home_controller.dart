@@ -29,7 +29,7 @@ class HomeController extends ChangeNotifier {
   bool isLoadingBanners = true;
   List<BannerItem> banners = const [];
   List<AdminUniversity> allUniversities = const [];
-  List<UniversityData> universities = const [];
+  List<AdminUniversity> universities = const [];
   List<String> trackOptions = const [];
   List<String> academicOptions = const [];
   List<String> currencyOptions = const [];
@@ -317,7 +317,7 @@ class HomeController extends ChangeNotifier {
     return null;
   }
 
-  UniversityData _toUniversityData(AdminUniversity university) {
+  AdminUniversity _toUniversityData(AdminUniversity university) {
     final country = university.country.isNotEmpty
         ? university.country
         : university.state;
@@ -325,14 +325,10 @@ class HomeController extends ChangeNotifier {
       university.city,
       country,
     ].where((item) => item.trim().isNotEmpty).join(', ');
-    return UniversityData(
+    return AdminUniversity(
       name: university.name,
-      location: location.isEmpty ? 'N/A' : location,
-      shortCode: _shortCode(university.name),
-      color: _colorFromSeed(university.id),
-      heroImage: university.logoPath.isNotEmpty
-          ? _toAbsoluteUrl(university.logoPath)
-          : '${ApiConfig.baseUrl}/uploads/default-university-image.png',
+      country: location.isEmpty ? 'N/A' : location,
+      logoPath: _toAbsoluteUrl(university.logoPath),
     );
   }
 

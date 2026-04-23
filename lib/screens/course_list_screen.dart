@@ -136,17 +136,17 @@ class _CourseListScreenState extends State<CourseListScreen> {
                             return const _CourseCardShimmer();
                           }
                           final course = courseCatalog[index];
-                          return _CourseCard(
-                            course: course,
-                            onTap: () => Navigator.of(context).push(
-                              MaterialPageRoute(
-                                builder: (_) => CourseDetailScreen(
-                                  university: widget.university,
-                                  course: course,
-                                ),
-                              ),
-                            ),
-                          );
+                          // return _CourseCard(
+                          //   course: course,
+                          //   onTap: () => Navigator.of(context).push(
+                          //     MaterialPageRoute(
+                          //       builder: (_) => CourseDetailScreen(
+                          //         university: widget.university,
+                          //         course: course,
+                          //       ),
+                          //     ),
+                          //   ),
+                          // );
                         },
                       ),
                     ),
