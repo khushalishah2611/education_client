@@ -1140,15 +1140,7 @@ class _AdvanceSearchDialogState extends State<_AdvanceSearchDialog> {
                   child: AppOutlinedButton(
                     label: context.l10n.text('Reset'),
                     onPressed: () async {
-                      setState(() {
-                        _selectedCountry = null;
-                        _selectedAcademic = null;
-                        _selectedTrack = null;
-                      });
-                      widget.resultController.clear();
                       widget.onResetFilters();
-                      Navigator.of(context).pop();
-                      await widget.onApplyFilters();
                     },
                   ),
                 ),
