@@ -97,11 +97,7 @@ class _HomeScreenState extends State<HomeScreen> {
         ).map(_toUniversityData).toList(growable: false);
         _trackOptions = tracks
             .map((item) => item.trim())
-            .where(
-              (item) =>
-                  item.isNotEmpty &&
-                  item.toUpperCase() != 'SCIENTIFIC_AND_LITERARY',
-            )
+            .where((item) => item.isNotEmpty && !_isScientificAndLiterary(item))
             .toList(growable: false);
         final allCountryOptions = countries
             .map(
@@ -244,6 +240,23 @@ class _HomeScreenState extends State<HomeScreen> {
     return false;
   }
 
+  bool _isScientificAndLiterary(String value) {
+    final normalized = value.trim().toUpperCase().replaceAll(RegExp(r'[^A-Z]'), '');
+    return normalized == 'SCIENTIFICANDLITERARY';
+  }
+
+  String? _resolveCountryAfterReset() {
+    if ((_loginDialCode ?? '').trim() != '+968') {
+      return null;
+    }
+    for (final item in _countryOptions) {
+      if (item.dialCode.trim() == '+968') {
+        return item.name;
+      }
+    }
+    return 'Oman';
+  }
+
   Future<void> _loadSessionDefaults() async {
     try {
       final prefs = await SharedPreferences.getInstance();
@@ -352,7 +365,7 @@ class _HomeScreenState extends State<HomeScreen> {
         onAcademicChanged: (value) => setState(() => _selectedAcademic = value),
         onTrackChanged: (value) => setState(() => _selectedTrack = value),
         onResetFilters: () => setState(() {
-          _selectedCountry = null;
+          _selectedCountry = _resolveCountryAfterReset();
           _selectedAcademic = null;
           _selectedTrack = null;
           _resultController.clear();
