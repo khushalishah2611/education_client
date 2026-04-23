@@ -6,13 +6,68 @@ import '../core/app_theme.dart';
 import '../widgets/common_widgets.dart';
 import '../widgets/flow_widgets.dart';
 
-class UniversityDetailScreen extends StatelessWidget {
+class UniversityDetailScreen extends StatefulWidget {
   const UniversityDetailScreen({super.key, required this.data});
 
   final AdminUniversity data;
 
   @override
+  State<UniversityDetailScreen> createState() => _UniversityDetailScreenState();
+}
+
+class _UniversityDetailScreenState extends State<UniversityDetailScreen> {
+  final Set<String> _expandedColleges = <String>{};
+  final Set<String> _selectedCourses = <String>{};
+
+  AdminUniversity get data => widget.data;
+
+  Map<String, List<CourseDetails>> get _collegeCourses {
+    final Map<String, List<CourseDetails>> grouped = <String, List<CourseDetails>>{};
+    final List<ProgramLinks> links = data.programLinks ?? <ProgramLinks>[];
+
+    for (final ProgramLinks link in links) {
+      final Program? program = link.program;
+      if (program == null) continue;
+      final String collegeName =
+          (program.educationInstitute?.trim().isNotEmpty ?? false)
+              ? program.educationInstitute!.trim().toUpperCase()
+              : 'COLLEGE';
+      final CourseDetails course = CourseDetails(
+        name: program.name ?? 'N/A',
+        feePerCredit: program.basePrice,
+        currency: program.currency ?? '',
+        minAdmissionRate: program.minAdmissionRate,
+        track: program.track ?? 'N/A',
+        applicationFee: link.applicationFee,
+      );
+      grouped.putIfAbsent(collegeName, () => <CourseDetails>[]).add(course);
+    }
+
+    return grouped;
+  }
+
+  void _showAddressDialog() {
+    showDialog<void>(
+      context: context,
+      builder: (_) {
+        return AlertDialog(
+          title: Text(context.l10n.text('location')),
+          content: Text(data.address?.trim().isNotEmpty == true ? data.address! : '-'),
+          actions: [
+            TextButton(
+              onPressed: () => Navigator.of(context).pop(),
+              child: const Text('OK'),
+            ),
+          ],
+        );
+      },
+    );
+  }
+
+  @override
   Widget build(BuildContext context) {
+    final Map<String, List<CourseDetails>> collegeCourses = _collegeCourses;
+
     return Directionality(
       textDirection: Directionality.of(context),
       child: Scaffold(
@@ -124,12 +179,15 @@ class UniversityDetailScreen extends StatelessWidget {
                                     const SizedBox(width: 4),
 
                                     Expanded(
-                                      child: Text(
-                                        data.address ?? "",
-                                        maxLines: 1,
-                                        overflow: TextOverflow.ellipsis,
-                                        style: const TextStyle(
-                                          color: AppColors.textMuted,
+                                      child: InkWell(
+                                        onTap: _showAddressDialog,
+                                        child: Text(
+                                          data.address ?? "",
+                                          maxLines: 1,
+                                          overflow: TextOverflow.ellipsis,
+                                          style: const TextStyle(
+                                            color: AppColors.textMuted,
+                                          ),
                                         ),
                                       ),
                                     ),
@@ -173,6 +231,70 @@ class UniversityDetailScreen extends StatelessWidget {
                       ),
 
                       const SizedBox(height: 16),
+
+                      if (collegeCourses.isNotEmpty) ...[
+                        const Padding(
+                          padding: EdgeInsets.symmetric(horizontal: 20),
+                          child: Text(
+                            'Programs',
+                            style: TextStyle(
+                              fontSize: 18,
+                              fontWeight: FontWeight.w700,
+                            ),
+                          ),
+                        ),
+                        const SizedBox(height: 10),
+                        Padding(
+                          padding: const EdgeInsets.symmetric(horizontal: 16),
+                          child: Column(
+                            children: collegeCourses.entries.map((entry) {
+                              final String collegeName = entry.key;
+                              final List<CourseDetails> courses = entry.value;
+                              final bool isExpanded =
+                                  _expandedColleges.contains(collegeName);
+                              return _CollegeAccordion(
+                                collegeName: collegeName,
+                                courses: courses,
+                                isExpanded: isExpanded,
+                                selectedCourses: _selectedCourses,
+                                onToggleExpand: () {
+                                  setState(() {
+                                    if (isExpanded) {
+                                      _expandedColleges.remove(collegeName);
+                                    } else {
+                                      _expandedColleges.add(collegeName);
+                                    }
+                                  });
+                                },
+                                onToggleCourse: (courseKey) {
+                                  setState(() {
+                                    if (_selectedCourses.contains(courseKey)) {
+                                      _selectedCourses.remove(courseKey);
+                                    } else {
+                                      _selectedCourses.add(courseKey);
+                                    }
+                                  });
+                                },
+                              );
+                            }).toList(),
+                          ),
+                        ),
+                      ],
+
+                      if (_selectedCourses.isNotEmpty)
+                        Padding(
+                          padding: const EdgeInsets.fromLTRB(20, 8, 20, 10),
+                          child: Align(
+                            alignment: Alignment.centerLeft,
+                            child: Text(
+                              'Selected Courses: ${_selectedCourses.length}',
+                              style: const TextStyle(
+                                fontWeight: FontWeight.w600,
+                                color: AppColors.textMuted,
+                              ),
+                            ),
+                          ),
+                        ),
                     ],
                   ),
                 ),
@@ -183,7 +305,7 @@ class UniversityDetailScreen extends StatelessWidget {
                   padding: const EdgeInsets.fromLTRB(20, 20, 20, 20),
                   child: AppPrimaryButton(
                     label: context.l10n.text('viewCourses'),
-                    onPressed: () {},
+                    onPressed: _selectedCourses.isEmpty ? null : () {},
                     // onPressed: () => Navigator.of(context).push(
                     //   MaterialPageRoute(
                     //     builder: (_) => CourseListScreen(university: data),
@@ -195,6 +317,126 @@ class UniversityDetailScreen extends StatelessWidget {
             ],
           ),
         ),
+      ),
+    );
+  }
+}
+
+class _CollegeAccordion extends StatelessWidget {
+  const _CollegeAccordion({
+    required this.collegeName,
+    required this.courses,
+    required this.isExpanded,
+    required this.selectedCourses,
+    required this.onToggleExpand,
+    required this.onToggleCourse,
+  });
+
+  final String collegeName;
+  final List<CourseDetails> courses;
+  final bool isExpanded;
+  final Set<String> selectedCourses;
+  final VoidCallback onToggleExpand;
+  final ValueChanged<String> onToggleCourse;
+
+  @override
+  Widget build(BuildContext context) {
+    return Container(
+      margin: const EdgeInsets.only(bottom: 10),
+      decoration: BoxDecoration(
+        border: Border.all(
+          color: isExpanded ? const Color(0xFF1A87F8) : const Color(0xFFD8D8D8),
+        ),
+      ),
+      child: Column(
+        children: [
+          InkWell(
+            onTap: onToggleExpand,
+            child: Container(
+              color: const Color(0xFFF4F4F4),
+              padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 16),
+              child: Row(
+                children: [
+                  Expanded(
+                    child: Text(
+                      collegeName,
+                      style: const TextStyle(
+                        fontWeight: FontWeight.w700,
+                        color: Color(0xFF868686),
+                      ),
+                    ),
+                  ),
+                  Icon(
+                    isExpanded
+                        ? Icons.keyboard_arrow_up_rounded
+                        : Icons.keyboard_arrow_down_rounded,
+                    color: const Color(0xFF3A3A3A),
+                  ),
+                ],
+              ),
+            ),
+          ),
+          if (isExpanded) ...[
+            Container(
+              color: const Color(0xFFE5E5E5),
+              padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 8),
+              child: const Row(
+                children: [
+                  Expanded(flex: 4, child: Text('Course', style: TextStyle(fontWeight: FontWeight.w700, fontSize: 12))),
+                  Expanded(flex: 2, child: Text('Credit\nHour Fee', style: TextStyle(fontWeight: FontWeight.w700, fontSize: 12))),
+                  Expanded(flex: 2, child: Text('Min\nAdmis%', style: TextStyle(fontWeight: FontWeight.w700, fontSize: 12))),
+                  Expanded(flex: 2, child: Text('Track', style: TextStyle(fontWeight: FontWeight.w700, fontSize: 12))),
+                  Expanded(flex: 3, child: Text('Details\n/ Apply', style: TextStyle(fontWeight: FontWeight.w700, fontSize: 12))),
+                ],
+              ),
+            ),
+            ...courses.map((course) {
+              final String courseKey = '$collegeName-${course.name}';
+              final bool isSelected = selectedCourses.contains(courseKey);
+              return Container(
+                color: isSelected ? const Color(0xFFF1FAFF) : Colors.white,
+                padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 10),
+                child: Row(
+                  children: [
+                    Expanded(
+                      flex: 4,
+                      child: Text(course.name ?? 'N/A'),
+                    ),
+                    Expanded(
+                      flex: 2,
+                      child: Text(
+                        '${course.feePerCredit ?? '-'} ${course.currency ?? ''}'.trim(),
+                      ),
+                    ),
+                    Expanded(
+                      flex: 2,
+                      child: Text('${course.minAdmissionRate ?? '-'}%'),
+                    ),
+                    Expanded(
+                      flex: 2,
+                      child: Text(course.track ?? '-'),
+                    ),
+                    Expanded(
+                      flex: 3,
+                      child: Row(
+                        children: [
+                          TextButton(
+                            onPressed: () {},
+                            child: const Text('Details'),
+                          ),
+                          Checkbox(
+                            value: isSelected,
+                            onChanged: (_) => onToggleCourse(courseKey),
+                          ),
+                        ],
+                      ),
+                    ),
+                  ],
+                ),
+              );
+            }),
+          ],
+        ],
       ),
     );
   }
