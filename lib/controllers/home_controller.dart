@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
-import '../core/api_config.dart';
+import '../core/image_url_helper.dart';
 import '../models/admin_university.dart';
 import '../models/banner_item.dart';
 import '../models/country_master.dart';
@@ -272,17 +272,7 @@ class HomeController extends ChangeNotifier {
   }
 
   String _toAbsoluteUrl(String path) {
-    final value = path.trim();
-    if (value.isEmpty) return '';
-
-    if (value.startsWith('http')) {
-      return value.replaceAll('/uploads//uploads/', '/uploads/');
-    }
-
-    final cleaned = value
-        .replaceAll(RegExp(r'^/+'), '')
-        .replaceFirst(RegExp(r'^uploads/+'), '');
-    return '${ApiConfig.baseUrl}/uploads/$cleaned';
+    return ImageUrlHelper.resolveUploadUrl(path);
   }
 
   @override

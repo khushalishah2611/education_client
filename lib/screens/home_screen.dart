@@ -3,6 +3,7 @@ import 'package:education/models/banner_item.dart';
 import 'package:flutter/material.dart';
 import '../core/app_localizations.dart';
 import '../core/app_theme.dart';
+import '../core/image_url_helper.dart';
 import '../controllers/home_controller.dart';
 import '../models/app_models.dart';
 import '../models/country_option.dart';
@@ -895,7 +896,7 @@ class _UniversityCard extends StatelessWidget {
                   child: ClipRRect(
                     borderRadius: BorderRadius.circular(8),
                     child: Image.network(
-                      data.logoPath ?? '',
+                      ImageUrlHelper.resolveUploadUrl(data.logoPath),
                       fit: BoxFit.cover,
                       errorBuilder: (_, __, ___) => Center(
                         child: Text(
