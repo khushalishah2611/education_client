@@ -95,9 +95,15 @@ class _HomeScreenState extends State<HomeScreen> {
         _universities = _filterUniversities(
           universities,
         ).map(_toUniversityData).toList(growable: false);
-        _trackOptions = tracks;
-        _academicOptions = academics;
-        _countryOptions = countries
+        _trackOptions = tracks
+            .map((item) => item.trim())
+            .where(
+              (item) =>
+                  item.isNotEmpty &&
+                  item.toUpperCase() != 'SCIENTIFIC_AND_LITERARY',
+            )
+            .toList(growable: false);
+        final allCountryOptions = countries
             .map(
               (item) => _CountryOption(
                 name: item.nameEn.isNotEmpty ? item.nameEn : item.value,
@@ -108,6 +114,24 @@ class _HomeScreenState extends State<HomeScreen> {
             )
             .where((item) => item.name.trim().isNotEmpty)
             .toList(growable: false);
+        _academicOptions = academics;
+        final shouldRestrictToOman = _shouldRestrictToOmanCountryList(
+          allCountryOptions,
+        );
+        _countryOptions = shouldRestrictToOman
+            ? allCountryOptions
+                .where((item) => item.dialCode.trim() == '+968')
+                .toList(growable: false)
+            : allCountryOptions;
+        if (shouldRestrictToOman &&
+            _countryOptions.isNotEmpty &&
+            !_countryOptions.any(
+              (item) =>
+                  item.name.trim().toLowerCase() ==
+                  (_selectedCountry ?? '').trim().toLowerCase(),
+            )) {
+          _selectedCountry = _countryOptions.first.name;
+        }
         _currencyOptions = const [];
       });
     } catch (_) {
@@ -205,6 +229,19 @@ class _HomeScreenState extends State<HomeScreen> {
     }
     if (option == null) return false;
     return option.dialCode.trim() == '+968';
+  }
+
+  bool _shouldRestrictToOmanCountryList(List<_CountryOption> options) {
+    if ((_loginDialCode ?? '').trim() == '+968') return true;
+    final selected = _selectedCountry?.trim().toLowerCase() ?? '';
+    if (selected == 'oman') return true;
+    if (selected.isEmpty) return false;
+    for (final item in options) {
+      if (item.name.trim().toLowerCase() == selected) {
+        return item.dialCode.trim() == '+968';
+      }
+    }
+    return false;
   }
 
   Future<void> _loadSessionDefaults() async {
