@@ -466,8 +466,13 @@ class AppTextField extends StatelessWidget {
             textAlignVertical: TextAlignVertical.center,
             decoration: InputDecoration(
               hintText: hint,
+              labelStyle: const TextStyle(
+                fontSize: 14,
+                fontWeight: FontWeight.w500,
+                color: AppColors.text,
+              ),
               contentPadding: const EdgeInsets.symmetric(
-                horizontal: 16,
+                horizontal: 10,
                 vertical: 0,
               ),
               prefixIcon: icon == null
