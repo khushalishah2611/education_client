@@ -21,13 +21,17 @@ class _UniversityDetailScreenState extends State<UniversityDetailScreen> {
 
   AdminUniversity get data => widget.data;
 
-  bool get _isOmanUniversity {
-    final String country = (data.country ?? '').trim().toLowerCase();
-    final String mobile = (data.mobile ?? '').trim();
-    return country == 'oman' || country == 'om' || mobile.startsWith('+968');
-  }
+  bool get _showCollegeCourseTable {
+    final bool isAccredited = data.accredited == true;
+    final String normalizedCountry = (data.country ?? '').trim().toLowerCase();
+    final String normalizedMobile = (data.mobile ?? '').trim();
+    final bool isOman =
+        normalizedCountry == 'oman' ||
+        normalizedCountry == 'om' ||
+        normalizedMobile.startsWith('+968');
 
-  bool get _shouldShowCourseTable => data.accredited == true && _isOmanUniversity;
+    return isAccredited && isOman;
+  }
 
   Map<String, List<CourseDetails>> get _collegeCourses {
     final Map<String, List<CourseDetails>> grouped =
@@ -255,7 +259,8 @@ class _UniversityDetailScreenState extends State<UniversityDetailScreen> {
                             ),
                           ),
                         ),
-                      if (_shouldShowCourseTable && collegeCourses.isNotEmpty) ...[
+                      if (_showCollegeCourseTable && collegeCourses.isNotEmpty)
+                        ...[
                         Padding(
                           padding: const EdgeInsets.symmetric(horizontal: 16),
                           child: Column(
