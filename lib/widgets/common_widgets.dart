@@ -452,7 +452,7 @@ class AppTextField extends StatelessWidget {
         Text(
           label,
           style: const TextStyle(
-            fontSize: 15,
+            fontSize: 14,
             fontWeight: FontWeight.w500,
             color: AppColors.text,
           ),

@@ -120,8 +120,8 @@ class _HomeScreenState extends State<HomeScreen> {
         );
         _countryOptions = shouldRestrictToOman
             ? allCountryOptions
-                .where((item) => item.dialCode.trim() == '+968')
-                .toList(growable: false)
+                  .where((item) => item.dialCode.trim() == '+968')
+                  .toList(growable: false)
             : allCountryOptions;
         if (shouldRestrictToOman &&
             _countryOptions.isNotEmpty &&
@@ -252,11 +252,13 @@ class _HomeScreenState extends State<HomeScreen> {
       if (!mounted) return;
       var shouldReload = false;
       setState(() {
-        if ((_selectedCountry ?? '').trim().isEmpty && storedCountry.isNotEmpty) {
+        if ((_selectedCountry ?? '').trim().isEmpty &&
+            storedCountry.isNotEmpty) {
           _selectedCountry = storedCountry;
           shouldReload = true;
         }
-        if ((_loginDialCode ?? '').trim().isEmpty && storedDialCode.isNotEmpty) {
+        if ((_loginDialCode ?? '').trim().isEmpty &&
+            storedDialCode.isNotEmpty) {
           _loginDialCode = storedDialCode;
           shouldReload = true;
         }
@@ -438,7 +440,7 @@ class _HomeScreenState extends State<HomeScreen> {
                         ),
 
                         Positioned(
-                          top: MediaQuery.of(context).padding.top ,
+                          top: MediaQuery.of(context).padding.top,
                           left: 16,
                           right: 16,
                           child: Row(
@@ -454,7 +456,10 @@ class _HomeScreenState extends State<HomeScreen> {
                               Stack(
                                 clipBehavior: Clip.none,
                                 children: [
-                                  const Icon(Icons.notifications_none_rounded, size: 26),
+                                  const Icon(
+                                    Icons.notifications_none_rounded,
+                                    size: 26,
+                                  ),
                                   Positioned(
                                     right: 2,
                                     top: 2,
@@ -485,11 +490,15 @@ class _HomeScreenState extends State<HomeScreen> {
                                 onTap: _openCountryDialog,
                                 child: Container(
                                   height: 44,
-                                  padding: const EdgeInsets.symmetric(horizontal: 14),
+                                  padding: const EdgeInsets.symmetric(
+                                    horizontal: 14,
+                                  ),
                                   decoration: BoxDecoration(
                                     color: Colors.white,
                                     borderRadius: BorderRadius.circular(6),
-                                    border: Border.all(color: Color(0xFFE4B88B)),
+                                    border: Border.all(
+                                      color: Color(0xFFE4B88B),
+                                    ),
                                   ),
                                   child: Row(
                                     children: [
@@ -499,7 +508,9 @@ class _HomeScreenState extends State<HomeScreen> {
                                           overflow: TextOverflow.ellipsis,
                                         ),
                                       ),
-                                      const Icon(Icons.keyboard_arrow_down_rounded),
+                                      const Icon(
+                                        Icons.keyboard_arrow_down_rounded,
+                                      ),
                                     ],
                                   ),
                                 ),
@@ -515,17 +526,24 @@ class _HomeScreenState extends State<HomeScreen> {
                                   alignment: Alignment.center,
                                   decoration: BoxDecoration(
                                     borderRadius: BorderRadius.circular(6),
-                                    border: Border.all(color: Color(0xFFE4B88B)),
+                                    border: Border.all(
+                                      color: Color(0xFFE4B88B),
+                                    ),
                                     color: Colors.white,
                                   ),
                                   child: const Row(
                                     mainAxisAlignment: MainAxisAlignment.center,
                                     children: [
-                                      Icon(Icons.tune_rounded, color: AppColors.accent),
+                                      Icon(
+                                        Icons.tune_rounded,
+                                        color: AppColors.accent,
+                                      ),
                                       SizedBox(width: 8),
                                       Text(
                                         'Advance Search',
-                                        style: TextStyle(color: AppColors.accent),
+                                        style: TextStyle(
+                                          color: AppColors.accent,
+                                        ),
                                       ),
                                     ],
                                   ),
@@ -556,7 +574,7 @@ class _HomeScreenState extends State<HomeScreen> {
                       ],
                     ),
                   ),
-                  SizedBox(height: 10,),
+                  SizedBox(height: 10),
                   Expanded(
                     child: RefreshIndicator(
                       onRefresh: _refreshHomeData,
@@ -976,10 +994,7 @@ class _AdvanceSearchDialogState extends State<_AdvanceSearchDialog> {
         children: [
           Text(
             title,
-            style: const TextStyle(
-              fontSize: 24 * 0.75,
-              fontWeight: FontWeight.w600,
-            ),
+            style: const TextStyle(fontSize: 14, fontWeight: FontWeight.w600),
           ),
           const SizedBox(height: 8),
           Container(
@@ -1003,7 +1018,10 @@ class _AdvanceSearchDialogState extends State<_AdvanceSearchDialog> {
 
                 hint: Text(
                   options.isEmpty ? 'No options found' : 'Select $title',
-                  style: const TextStyle(color: Color(0xFF8A8A8A)),
+                  style: const TextStyle(
+                    color: Color(0xFF8A8A8A),
+                    fontSize: 14,
+                  ),
                 ),
 
                 items: options.map((option) {
@@ -1016,7 +1034,11 @@ class _AdvanceSearchDialogState extends State<_AdvanceSearchDialog> {
 
                         // 👇 FIX
                         Flexible(
-                          child: Text(option, overflow: TextOverflow.ellipsis),
+                          child: Text(
+                            option,
+                            overflow: TextOverflow.ellipsis,
+                            style: TextStyle(fontSize: 14),
+                          ),
                         ),
                       ],
                     ),
@@ -1064,6 +1086,15 @@ class _AdvanceSearchDialogState extends State<_AdvanceSearchDialog> {
               }),
               icon: Icons.school_outlined,
             ),
+
+            dropdownTile(
+              title: 'Secondary School Certificate Program',
+              options: widget.trackOptions,
+              value: _selectedTrack,
+              onChanged: (value) => setState(() => _selectedTrack = value),
+              icon: Icons.menu_book_outlined,
+              enabled: !shouldDisableDetails,
+            ),
             Opacity(
               opacity: shouldDisableDetails ? 0.55 : 1,
               child: IgnorePointer(
@@ -1079,78 +1110,37 @@ class _AdvanceSearchDialogState extends State<_AdvanceSearchDialog> {
                 ),
               ),
             ),
-            const SizedBox(height: 12),
-            dropdownTile(
-              title: 'Secondary School Certificate Programme',
-              options: widget.trackOptions,
-              value: _selectedTrack,
-              onChanged: (value) => setState(() => _selectedTrack = value),
-              icon: Icons.menu_book_outlined,
-              enabled: !shouldDisableDetails,
-            ),
-            const SizedBox(height: 4),
+
+            const SizedBox(height: 10),
             Row(
               children: [
                 Expanded(
-                  child: SizedBox(
-                    height: 50,
-                    child: OutlinedButton(
-                      onPressed: () async {
-                        setState(() {
-                          _selectedCountry = null;
-                          _selectedAcademic = null;
-                          _selectedTrack = null;
-                        });
-                        widget.resultController.clear();
-                        widget.onResetFilters();
-                        Navigator.of(context).pop();
-                        await widget.onApplyFilters();
-                      },
-                      style: OutlinedButton.styleFrom(
-                        foregroundColor: const Color(0xFF444444),
-                        side: const BorderSide(color: Color(0xFFD6D6D6)),
-                        shape: RoundedRectangleBorder(
-                          borderRadius: BorderRadius.circular(10),
-                        ),
-                      ),
-                      child: const Text(
-                        'Reset',
-                        style: TextStyle(
-                          fontSize: 24 * 0.75,
-                          fontWeight: FontWeight.w600,
-                        ),
-                      ),
-                    ),
+                  child: AppOutlinedButton(
+                    label: context.l10n.text('Reset'),
+                    onPressed: () async {
+                      setState(() {
+                        _selectedCountry = null;
+                        _selectedAcademic = null;
+                        _selectedTrack = null;
+                      });
+                      widget.resultController.clear();
+                      widget.onResetFilters();
+                      Navigator.of(context).pop();
+                      await widget.onApplyFilters();
+                    },
                   ),
                 ),
                 const SizedBox(width: 8),
                 Expanded(
-                  child: SizedBox(
-                    height: 50,
-                    child: ElevatedButton(
-                      onPressed: () async {
-                        widget.onCountryChanged(_selectedCountry);
-                        widget.onAcademicChanged(_selectedAcademic);
-                        widget.onTrackChanged(_selectedTrack);
-                        Navigator.of(context).pop();
-                        await widget.onApplyFilters();
-                      },
-                      style: ElevatedButton.styleFrom(
-                        elevation: 0,
-                        backgroundColor: const Color(0xFF95DAB4),
-                        foregroundColor: const Color(0xFF0F2015),
-                        shape: RoundedRectangleBorder(
-                          borderRadius: BorderRadius.circular(10),
-                        ),
-                      ),
-                      child: const Text(
-                        'Continue',
-                        style: TextStyle(
-                          fontSize: 24 * 0.8,
-                          fontWeight: FontWeight.w700,
-                        ),
-                      ),
-                    ),
+                  child: AppPrimaryButton(
+                    label: context.l10n.text('Continue'),
+                    onPressed: () async {
+                      widget.onCountryChanged(_selectedCountry);
+                      widget.onAcademicChanged(_selectedAcademic);
+                      widget.onTrackChanged(_selectedTrack);
+                      Navigator.of(context).pop();
+                      await widget.onApplyFilters();
+                    },
                   ),
                 ),
               ],
