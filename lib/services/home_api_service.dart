@@ -5,6 +5,7 @@ import 'package:http/http.dart' as http;
 import '../core/api_config.dart';
 import '../core/api_logger.dart';
 import '../core/api_status.dart';
+import '../models/admin_university.dart';
 import '../models/banner_item.dart';
 import '../models/country_master.dart';
 
@@ -48,7 +49,7 @@ class HomeApiService {
         .toList(growable: false);
   }
 
-  Future<List<HomeUniversity>> fetchUniversities({
+  Future<List<AdminUniversity>> fetchUniversities({
     String? country,
     String? academic,
     String? track,
@@ -87,7 +88,7 @@ class HomeApiService {
 
     return _asList(decoded['data'] ?? decoded)
         .whereType<Map<String, dynamic>>()
-        .map(HomeUniversity.fromJson)
+        .map(AdminUniversity.fromJson)
         .where((item) => item.name.isNotEmpty)
         .toList(growable: false);
   }
@@ -110,7 +111,7 @@ class HomeApiService {
 
     return _asList(decoded['data'] ?? decoded)
         .whereType<Map<String, dynamic>>()
-        .map(HomeProgram.fromJson)
+        .map(_homeProgramFromJson)
         .where((item) => item.name.isNotEmpty)
         .toList(growable: false);
   }
@@ -171,69 +172,6 @@ class HomeApiService {
   }
 }
 
-class HomeUniversity {
-  const HomeUniversity({
-    required this.id,
-    required this.name,
-    required this.country,
-    required this.city,
-    required this.logoUrl,
-    required this.rating,
-    required this.isAccredited,
-    required this.academicRequirements,
-    required this.programNames,
-    required this.trackTypes,
-  });
-
-  factory HomeUniversity.fromJson(Map<String, dynamic> json) {
-    final logoPath = _readString(json, const ['logoPath', 'imagePath', 'logo']);
-    return HomeUniversity(
-      id: _readString(json, const ['id', '_id']),
-      name: _readString(json, const ['name']),
-      country: _readString(json, const ['country', 'state']),
-      city: _readString(json, const ['city']),
-      logoUrl: _toAbsoluteUrl(logoPath),
-      rating: _readDouble(json['rating']),
-      isAccredited: _readBool(json, const ['isAccredited', 'accredited']),
-      academicRequirements: _parseAcademicRequirements(json['academicList']),
-      programNames: _parseProgramNames(json),
-      trackTypes: _parseTrackTypes(json),
-    );
-  }
-
-  final String id;
-  final String name;
-  final String country;
-  final String city;
-  final String logoUrl;
-  final double rating;
-  final bool isAccredited;
-  final List<AcademicRequirement> academicRequirements;
-  final Set<String> programNames;
-  final Set<String> trackTypes;
-}
-
-class AcademicRequirement {
-  const AcademicRequirement({required this.academic, required this.minResult});
-
-  final String academic;
-  final double minResult;
-}
-
-class HomeProgram {
-  const HomeProgram({required this.id, required this.name});
-
-  factory HomeProgram.fromJson(Map<String, dynamic> json) {
-    return HomeProgram(
-      id: _readString(json, const ['id', '_id']),
-      name: _readString(json, const ['name', 'programName']),
-    );
-  }
-
-  final String id;
-  final String name;
-}
-
 Map<String, dynamic> _decode(String body) {
   try {
     final decoded = jsonDecode(body);
@@ -253,6 +191,13 @@ List<dynamic> _asList(dynamic value) {
   return value is List<dynamic> ? value : const <dynamic>[];
 }
 
+HomeProgram _homeProgramFromJson(Map<String, dynamic> json) {
+  return HomeProgram(
+    id: _readString(json, const ['id', '_id']),
+    name: _readString(json, const ['name', 'programName']),
+  );
+}
+
 String _readString(Map<String, dynamic> json, List<String> keys) {
   for (final key in keys) {
     final dynamic value = json[key];
@@ -263,151 +208,6 @@ String _readString(Map<String, dynamic> json, List<String> keys) {
   return '';
 }
 
-bool _readBool(Map<String, dynamic> json, List<String> keys) {
-  for (final key in keys) {
-    final dynamic value = json[key];
-    if (value is bool) return value;
-    if (value is String) {
-      final normalized = value.trim().toLowerCase();
-      if (normalized == 'true' || normalized == '1') return true;
-      if (normalized == 'false' || normalized == '0') return false;
-    }
-    if (value is num) return value != 0;
-  }
-  return false;
-}
-
-List<AcademicRequirement> _parseAcademicRequirements(dynamic academicList) {
-  final requirements = <AcademicRequirement>[];
-  if (academicList is List<dynamic>) {
-    for (final raw in academicList) {
-      if (raw is! Map<String, dynamic>) continue;
-      final academic = _readString(raw, const ['academicname', 'academic', 'name']);
-      if (academic.isEmpty) continue;
-      final minResult = _readDouble(raw['percentage']);
-      requirements.add(
-        AcademicRequirement(academic: academic, minResult: minResult),
-      );
-    }
-    return requirements;
-  }
-
-  final rawText = academicList is String ? academicList : '';
-  if (rawText.trim().isEmpty) return const [];
-
-  final lines = rawText
-      .replaceAll('\r', '')
-      .split('\n')
-      .map((line) => line.trim())
-      .where((line) => line.isNotEmpty);
-
-  for (final line in lines) {
-    final parts = line.split('|').map((part) => part.trim()).toList();
-    if (parts.isEmpty || parts.first.isEmpty) continue;
-    final threshold =
-        parts.length > 1 ? double.tryParse(parts[1].replaceAll('%', '')) : null;
-    requirements.add(
-      AcademicRequirement(academic: parts.first, minResult: threshold ?? 0),
-    );
-  }
-  return requirements;
-}
-
-Set<String> _parseProgramNames(Map<String, dynamic> json) {
-  final values = <String>{};
-  void addProgram(dynamic raw) {
-    if (raw is String) {
-      final normalized = raw.trim().toLowerCase();
-      if (normalized.isNotEmpty) {
-        values.add(normalized);
-      }
-      return;
-    }
-    if (raw is Map<String, dynamic>) {
-      final name = _readString(raw, const ['name', 'programName', 'courseName']);
-      if (name.isNotEmpty) {
-        values.add(name.toLowerCase());
-      }
-    }
-  }
-
-  addProgram(json['program']);
-  addProgram(json['programName']);
-  addProgram(json['courseName']);
-
-  final programList = json['programs'];
-  if (programList is List<dynamic>) {
-    for (final program in programList) {
-      addProgram(program);
-    }
-  }
-  final courses = json['courses'];
-  if (courses is List<dynamic>) {
-    for (final course in courses) {
-      if (course is Map<String, dynamic>) {
-        addProgram(course['program']);
-        addProgram(course['programName']);
-      }
-    }
-  }
-  final programLinks = json['programLinks'];
-  if (programLinks is List<dynamic>) {
-    for (final link in programLinks) {
-      if (link is Map<String, dynamic>) {
-        addProgram(link['program']);
-        addProgram(link['programName']);
-      }
-    }
-  }
-  return values;
-}
-
-Set<String> _parseTrackTypes(Map<String, dynamic> json) {
-  final values = <String>{};
-  void addTrack(dynamic raw) {
-    if (raw is String) {
-      final normalized = raw.trim().toUpperCase();
-      if (normalized.isNotEmpty) {
-        values.add(normalized);
-      }
-      return;
-    }
-    if (raw is Map<String, dynamic>) {
-      addTrack(raw['track']);
-      addTrack(raw['value']);
-      addTrack(raw['name']);
-      addTrack(raw['nameEn']);
-    }
-  }
-
-  addTrack(json['track']);
-  addTrack(json['trackType']);
-
-  final tracks = json['tracks'];
-  if (tracks is List<dynamic>) {
-    for (final item in tracks) {
-      addTrack(item);
-    }
-  }
-
-  final courses = json['courses'];
-  if (courses is List<dynamic>) {
-    for (final course in courses) {
-      if (course is Map<String, dynamic>) {
-        addTrack(course['track']);
-        addTrack(course['trackType']);
-      }
-    }
-  }
-  return values;
-}
-
-double _readDouble(dynamic value) {
-  if (value is num) return value.toDouble();
-  if (value is String) return double.tryParse(value) ?? 0;
-  return 0;
-}
-
 String _toAbsoluteUrl(String pathOrUrl) {
   if (pathOrUrl.isEmpty) return '';
   if (pathOrUrl.startsWith('http://') || pathOrUrl.startsWith('https://')) {
@@ -415,4 +215,11 @@ String _toAbsoluteUrl(String pathOrUrl) {
   }
   final normalized = pathOrUrl.startsWith('/') ? pathOrUrl : '/$pathOrUrl';
   return '${ApiConfig.baseUrl}$normalized';
+}
+
+class HomeProgram {
+  const HomeProgram({required this.id, required this.name});
+
+  final String id;
+  final String name;
 }

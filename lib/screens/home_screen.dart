@@ -1,12 +1,10 @@
 import 'package:flutter/material.dart';
-import 'package:shared_preferences/shared_preferences.dart';
 
 import '../core/app_localizations.dart';
-import '../core/api_config.dart';
 import '../core/app_theme.dart';
+import '../controllers/home_controller.dart';
 import '../models/app_models.dart';
-import '../models/banner_item.dart';
-import '../models/country_master.dart';
+import '../models/country_option.dart';
 import '../services/home_api_service.dart';
 import '../widgets/app_drawer.dart';
 import '../widgets/app_shimmer.dart';
@@ -26,413 +24,79 @@ class HomeScreen extends StatefulWidget {
 
 class _HomeScreenState extends State<HomeScreen> {
   final _scaffoldKey = GlobalKey<ScaffoldState>();
-  final HomeApiService _homeApiService = const HomeApiService();
+  late final HomeController _controller;
   int _activeTab = 0;
-  bool _isLoadingUniversities = true;
-  bool _isLoadingBanners = true;
   final PageController _bannerPageController = PageController(
     viewportFraction: 1,
   );
-  List<BannerItem> _banners = const [];
-  List<HomeUniversity> _allUniversities = const [];
-  List<UniversityData> _universities = const [];
-  List<String> _trackOptions = const [];
-  List<String> _academicOptions = const [];
-  List<String> _currencyOptions = const [];
   int _activeBannerIndex = 0;
-  List<_CountryOption> _countryOptions = const [];
-  String? _selectedCountry;
-  String? _selectedAcademic;
-  String? _selectedTrack;
-  String? _loginDialCode;
-  bool _skipAutoCountrySelection = false;
-  final TextEditingController _resultController = TextEditingController();
 
   @override
   void initState() {
     super.initState();
-    _selectedCountry = widget.initialCountry?.trim().isNotEmpty == true
-        ? widget.initialCountry!.trim()
-        : null;
-    _loginDialCode = widget.initialDialCode?.trim().isNotEmpty == true
-        ? widget.initialDialCode!.trim()
-        : null;
-    _loadSessionDefaults();
-    _loadBanners();
-    _loadUniversities();
+    _controller = HomeController(
+      homeApiService: const HomeApiService(),
+      initialCountry: widget.initialCountry,
+      initialDialCode: widget.initialDialCode,
+    )..addListener(_onControllerChanged);
+    _controller.initialize();
   }
 
   @override
   void dispose() {
-    _resultController.dispose();
+    _controller
+      ..removeListener(_onControllerChanged)
+      ..dispose();
     _bannerPageController.dispose();
     super.dispose();
   }
 
-  Future<void> _loadUniversities() async {
-    setState(() => _isLoadingUniversities = true);
-    try {
-      final responses = await Future.wait<dynamic>([
-        _homeApiService.fetchUniversities(
-          country: _selectedCountry,
-          academic: _selectedAcademic,
-          track: _selectedTrack,
-          search: _resultController.text,
-        ),
-        _homeApiService.fetchTrackMasters(),
-        _homeApiService.fetchAcademicMasters(),
-        _homeApiService.fetchCountries(),
-      ]);
-      final universities = responses[0] as List<HomeUniversity>;
-      final tracks = responses[1] as List<String>;
-      final academics = responses[2] as List<String>;
-      final countries = responses[3] as List<CountryMaster>;
-
-      if (!mounted) return;
-      final autoSelectedCountry = _resolveAutoCountry(countries);
-      setState(() {
-        _selectedCountry = autoSelectedCountry;
-        _allUniversities = universities;
-        _universities = _filterUniversities(
-          universities,
-        ).map(_toUniversityData).toList(growable: false);
-        _trackOptions = tracks
-            .map((item) => item.trim())
-            .where((item) => item.isNotEmpty && !_isScientificAndLiterary(item))
-            .toList(growable: false);
-        final allCountryOptions = countries
-            .map(
-              (item) => _CountryOption(
-                name: item.nameEn.isNotEmpty ? item.nameEn : item.value,
-                flagEmoji: item.flagEmoji,
-                flagImageUrl: _resolveCountryFlag(item),
-                dialCode: item.dialCode,
-              ),
-            )
-            .where((item) => item.name.trim().isNotEmpty)
-            .toList(growable: false);
-        _academicOptions = academics;
-        final shouldRestrictToOman = _shouldRestrictToOmanCountryList(
-          allCountryOptions,
-        );
-        _countryOptions = shouldRestrictToOman
-            ? allCountryOptions
-                  .where((item) => item.dialCode.trim() == '+968')
-                  .toList(growable: false)
-            : allCountryOptions;
-        if (shouldRestrictToOman &&
-            _countryOptions.isNotEmpty &&
-            !_countryOptions.any(
-              (item) =>
-                  item.name.trim().toLowerCase() ==
-                  (_selectedCountry ?? '').trim().toLowerCase(),
-            )) {
-          _selectedCountry = _countryOptions.first.name;
-        }
-        _currencyOptions = const [];
-      });
-    } catch (_) {
-      if (!mounted) return;
-      setState(() {
-        _allUniversities = const [];
-        _universities = const [];
-        _trackOptions = const [];
-        _academicOptions = const [];
-        _currencyOptions = const [];
-        _countryOptions = const [];
-      });
-    } finally {
-      if (mounted) {
-        setState(() => _isLoadingUniversities = false);
-      }
+  void _onControllerChanged() {
+    if (!mounted) return;
+    if (_activeBannerIndex >= _controller.banners.length &&
+        _controller.banners.isNotEmpty) {
+      _activeBannerIndex = 0;
     }
-  }
-
-  List<HomeUniversity> _filterUniversities(List<HomeUniversity> source) {
-    final enteredResult = double.tryParse(_resultController.text.trim());
-    return source
-        .where((university) {
-          final countryMatch =
-              _selectedCountry == null ||
-              _selectedCountry!.trim().isEmpty ||
-              university.country.toLowerCase() ==
-                  _selectedCountry!.trim().toLowerCase();
-          if (!countryMatch) {
-            return false;
-          }
-
-          if (_shouldRestrictToAccredited() && !university.isAccredited) {
-            return false;
-          }
-
-          if (_selectedAcademic != null &&
-              _selectedAcademic!.trim().isNotEmpty) {
-            final academicName = _selectedAcademic!.trim().toLowerCase();
-            AcademicRequirement? requirement;
-            for (final item in university.academicRequirements) {
-              if (item.academic.toLowerCase() == academicName) {
-                requirement = item;
-                break;
-              }
-            }
-            if (requirement == null) {
-              return false;
-            }
-            if (enteredResult != null &&
-                enteredResult > requirement.minResult) {
-              return false;
-            }
-          }
-
-          if (!_matchesTrack(university)) {
-            return false;
-          }
-
-          return true;
-        })
-        .toList(growable: false);
-  }
-
-  bool _matchesTrack(HomeUniversity university) {
-    final selectedTrack = _selectedTrack?.trim().toUpperCase() ?? '';
-    if (selectedTrack.isEmpty) return true;
-    if (selectedTrack == 'SCIENTIFIC') {
-      return true;
-    }
-    if (university.trackTypes.isEmpty) {
-      return true;
-    }
-    if (selectedTrack == 'LITERARY') {
-      return university.trackTypes.contains('LITERARY') ||
-          university.trackTypes.contains('SCIENTIFIC_AND_LITERARY');
-    }
-    if (selectedTrack == 'SCIENTIFIC_AND_LITERARY') {
-      return university.trackTypes.contains('SCIENTIFIC_AND_LITERARY');
-    }
-    return true;
-  }
-
-  bool _shouldRestrictToAccredited() {
-    final selected = _selectedCountry?.trim().toLowerCase() ?? '';
-    if (selected == 'oman') return true;
-    if (_loginDialCode?.trim() == '+968') return true;
-    if (selected.isEmpty) return false;
-    _CountryOption? option;
-    for (final item in _countryOptions) {
-      if (item.name.trim().toLowerCase() == selected) {
-        option = item;
-        break;
-      }
-    }
-    if (option == null) return false;
-    return option.dialCode.trim() == '+968';
-  }
-
-  bool _shouldRestrictToOmanCountryList(List<_CountryOption> options) {
-    if ((_loginDialCode ?? '').trim() == '+968') return true;
-    final selected = _selectedCountry?.trim().toLowerCase() ?? '';
-    if (selected == 'oman') return true;
-    if (selected.isEmpty) return false;
-    for (final item in options) {
-      if (item.name.trim().toLowerCase() == selected) {
-        return item.dialCode.trim() == '+968';
-      }
-    }
-    return false;
-  }
-
-  bool _isScientificAndLiterary(String value) {
-    final normalized = value.trim().toUpperCase().replaceAll(RegExp(r'[^A-Z]'), '');
-    return normalized == 'SCIENTIFICANDLITERARY';
-  }
-
-  Future<void> _loadSessionDefaults() async {
-    try {
-      final prefs = await SharedPreferences.getInstance();
-      final storedCountry = prefs.getString('loginCountry')?.trim() ?? '';
-      final storedDialCode = prefs.getString('loginDialCode')?.trim() ?? '';
-      if (!mounted) return;
-      var shouldReload = false;
-      setState(() {
-        if ((_selectedCountry ?? '').trim().isEmpty &&
-            storedCountry.isNotEmpty) {
-          _selectedCountry = storedCountry;
-          shouldReload = true;
-        }
-        if ((_loginDialCode ?? '').trim().isEmpty &&
-            storedDialCode.isNotEmpty) {
-          _loginDialCode = storedDialCode;
-          shouldReload = true;
-        }
-      });
-      if (shouldReload) {
-        await _loadUniversities();
-      }
-    } catch (_) {
-      // Ignore shared preferences read failures.
-    }
-  }
-
-  String? _resolveAutoCountry(List<CountryMaster> countries) {
-    if (_skipAutoCountrySelection) {
-      _skipAutoCountrySelection = false;
-      return null;
-    }
-    final selected = _selectedCountry?.trim() ?? '';
-    if (selected.isNotEmpty) {
-      return selected;
-    }
-    if ((_loginDialCode ?? '').trim() == '+968') {
-      for (final country in countries) {
-        if (country.dialCode.trim() == '+968') {
-          return country.nameEn.trim().isNotEmpty
-              ? country.nameEn.trim()
-              : country.value.trim();
-        }
-      }
-      return 'Oman';
-    }
-    return null;
-  }
-
-  String _resolveMandatoryOmanCountryName() {
-    for (final country in _countryOptions) {
-      if (country.dialCode.trim() == '+968') {
-        return country.name;
-      }
-    }
-    return 'Oman';
-  }
-
-  Future<void> _refreshHomeData() async {
-    await Future.wait<void>([_loadBanners(), _loadUniversities()]);
-  }
-
-  Future<void> _applyFilters() async {
-    setState(() {
-      _universities = _filterUniversities(
-        _allUniversities,
-      ).map(_toUniversityData).toList(growable: false);
-    });
-    await _loadUniversities();
-  }
-
-  Future<void> _loadBanners() async {
-    setState(() => _isLoadingBanners = true);
-    try {
-      final banners = await _homeApiService.fetchBanners(page: 1, limit: 10);
-      if (!mounted) return;
-      setState(() {
-        _banners = banners;
-        _activeBannerIndex = 0;
-      });
-    } catch (_) {
-      if (!mounted) return;
-      setState(() => _banners = const []);
-    } finally {
-      if (mounted) {
-        setState(() => _isLoadingBanners = false);
-      }
-    }
+    setState(() {});
   }
 
   Future<void> _openCountryDialog() async {
-    final selected = await showDialog<_CountryOption>(
+    final selected = await showDialog<CountryOption>(
       context: context,
       builder: (_) => _CountrySelectionDialog(
-        countries: _countryOptions,
-        selected: _selectedCountry,
+        countries: _controller.countryOptions,
+        selected: _controller.selectedCountry,
       ),
     );
     if (selected == null || !mounted) return;
-    setState(() => _selectedCountry = selected.name);
-    await _applyFilters();
+    _controller.updateCountry(selected.name);
+    await _controller.applyFilters();
   }
 
   Future<void> _openAdvanceSearchDialog() async {
     await showDialog<void>(
       context: context,
       builder: (_) => _AdvanceSearchDialog(
-        countryOptions: _countryOptions
+        countryOptions: _controller.countryOptions
             .map((item) => item.name)
             .toList(growable: false),
-        academicOptions: _academicOptions,
-        trackOptions: _trackOptions,
-        currencyOptions: _currencyOptions,
-        selectedCountry: _selectedCountry,
-        selectedAcademic: _selectedAcademic,
-        selectedTrack: _selectedTrack,
-        resultController: _resultController,
-        onCountryChanged: (value) => setState(() => _selectedCountry = value),
-        onAcademicChanged: (value) => setState(() => _selectedAcademic = value),
-        onTrackChanged: (value) => setState(() => _selectedTrack = value),
-        onResetFilters: () => setState(() {
-          final isOmanLogin = (_loginDialCode ?? '').trim() == '+968';
-          _skipAutoCountrySelection = !isOmanLogin;
-          _selectedCountry = isOmanLogin
-              ? _resolveMandatoryOmanCountryName()
-              : null;
-          _selectedAcademic = null;
-          _selectedTrack = null;
-          _resultController.clear();
-        }),
-        onApplyFilters: _applyFilters,
+        academicOptions: _controller.academicOptions,
+        trackOptions: _controller.trackOptions,
+        currencyOptions: _controller.currencyOptions,
+        selectedCountry: _controller.selectedCountry,
+        selectedAcademic: _controller.selectedAcademic,
+        selectedTrack: _controller.selectedTrack,
+        resultController: _controller.resultController,
+        onCountryChanged: _controller.updateCountry,
+        onAcademicChanged: _controller.updateAcademic,
+        onTrackChanged: _controller.updateTrack,
+        onResetFilters: _controller.resetFilters,
+        onApplyFilters: _controller.applyFilters,
       ),
     );
   }
 
-  UniversityData _toUniversityData(HomeUniversity university) {
-    final location = [
-      university.city,
-      university.country,
-    ].where((item) => item.trim().isNotEmpty).join(', ');
-    return UniversityData(
-      name: university.name,
-      location: location.isEmpty ? 'N/A' : location,
-      shortCode: _shortCode(university.name),
-      color: _colorFromSeed(university.id),
-      heroImage: university.logoUrl.isNotEmpty
-          ? university.logoUrl
-          : '${ApiConfig.baseUrl}/uploads/default-university-image.png',
-    );
-  }
-
-  String _shortCode(String name) {
-    final parts = name
-        .split(RegExp(r'\s+'))
-        .where((part) => part.isNotEmpty)
-        .toList();
-    if (parts.isEmpty) return 'UNI';
-    if (parts.length == 1) {
-      final end = parts.first.length > 3 ? 3 : parts.first.length;
-      return parts.first.substring(0, end).toUpperCase();
-    }
-    return parts.take(3).map((part) => part[0].toUpperCase()).join();
-  }
-
-  Color _colorFromSeed(String seed) {
-    final hash = seed.hashCode.abs();
-    final colors = <Color>[
-      const Color(0xFF2E5FA7),
-      const Color(0xFFBD1F2D),
-      const Color(0xFF1A8A52),
-      const Color(0xFF8351C9),
-      const Color(0xFF00838F),
-    ];
-    return colors[hash % colors.length];
-  }
-
-  String _resolveCountryFlag(CountryMaster country) {
-    if (country.value.startsWith('http://') ||
-        country.value.startsWith('https://')) {
-      return country.value;
-    }
-    final code = country.value.trim().toLowerCase();
-    if (code.length == 2) {
-      return 'https://flagcdn.com/w40/$code.png';
-    }
-    return '';
-  }
+  Future<void> _refreshHomeData() => _controller.refreshHomeData();
 
   @override
   Widget build(BuildContext context) {
@@ -523,7 +187,8 @@ class _HomeScreenState extends State<HomeScreen> {
                                     children: [
                                       Expanded(
                                         child: Text(
-                                          _selectedCountry ?? 'Select Country',
+                                          _controller.selectedCountry ??
+                                              'Select Country',
                                           overflow: TextOverflow.ellipsis,
                                         ),
                                       ),
@@ -572,8 +237,8 @@ class _HomeScreenState extends State<HomeScreen> {
                               const SizedBox(height: 16),
 
                               _DiscoverBanner(
-                                banners: _banners,
-                                isLoading: _isLoadingBanners,
+                                banners: _controller.banners,
+                                isLoading: _controller.isLoadingBanners,
                                 pageController: _bannerPageController,
                                 onPageChanged: (index) {
                                   if (!mounted) return;
@@ -584,7 +249,9 @@ class _HomeScreenState extends State<HomeScreen> {
                               const SizedBox(height: 8),
 
                               _BannerIndicator(
-                                count: _banners.isEmpty ? 1 : _banners.length,
+                                count: _controller.banners.isEmpty
+                                    ? 1
+                                    : _controller.banners.length,
                                 activeIndex: _activeBannerIndex,
                               ),
                             ],
@@ -614,8 +281,8 @@ class _HomeScreenState extends State<HomeScreen> {
 
                               const SizedBox(height: 12),
 
-                              if (!_isLoadingUniversities &&
-                                  _universities.isEmpty)
+                              if (!_controller.isLoadingUniversities &&
+                                  _controller.universities.isEmpty)
                                 Container(
                                   width: double.infinity,
                                   padding: const EdgeInsets.symmetric(
@@ -642,9 +309,9 @@ class _HomeScreenState extends State<HomeScreen> {
                                 )
                               else
                                 GridView.builder(
-                                  itemCount: _isLoadingUniversities
+                                  itemCount: _controller.isLoadingUniversities
                                       ? 4
-                                      : _universities.length,
+                                      : _controller.universities.length,
                                   shrinkWrap: true,
                                   physics: const NeverScrollableScrollPhysics(),
                                   gridDelegate:
@@ -655,10 +322,11 @@ class _HomeScreenState extends State<HomeScreen> {
                                         childAspectRatio: 0.8,
                                       ),
                                   itemBuilder: (context, index) {
-                                    if (_isLoadingUniversities) {
+                                    if (_controller.isLoadingUniversities) {
                                       return const _UniversityCardShimmer();
                                     }
-                                    final item = _universities[index];
+                                    final item =
+                                        _controller.universities[index];
                                     return _UniversityCard(
                                       data: item,
                                       onTap: () => Navigator.of(context).push(
@@ -842,7 +510,7 @@ class _CountrySelectionDialog extends StatefulWidget {
     required this.selected,
   });
 
-  final List<_CountryOption> countries;
+  final List<CountryOption> countries;
   final String? selected;
 
   @override
@@ -852,7 +520,7 @@ class _CountrySelectionDialog extends StatefulWidget {
 
 class _CountrySelectionDialogState extends State<_CountrySelectionDialog> {
   final TextEditingController _searchController = TextEditingController();
-  late List<_CountryOption> _filteredCountries;
+  late List<CountryOption> _filteredCountries;
 
   @override
   void initState() {
@@ -1166,24 +834,10 @@ class _AdvanceSearchDialogState extends State<_AdvanceSearchDialog> {
   }
 }
 
-class _CountryOption {
-  const _CountryOption({
-    required this.name,
-    required this.flagEmoji,
-    required this.flagImageUrl,
-    required this.dialCode,
-  });
-
-  final String name;
-  final String flagEmoji;
-  final String flagImageUrl;
-  final String dialCode;
-}
-
 class _CountryFlag extends StatelessWidget {
   const _CountryFlag({required this.country});
 
-  final _CountryOption country;
+  final CountryOption country;
 
   @override
   Widget build(BuildContext context) {
