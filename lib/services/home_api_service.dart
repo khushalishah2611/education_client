@@ -51,7 +51,7 @@ class HomeApiService {
   Future<List<HomeUniversity>> fetchUniversities({
     String? country,
     String? academic,
-    String? program,
+    String? track,
     String? search,
   }) async {
     const path = '/api/admin/universities';
@@ -65,7 +65,7 @@ class HomeApiService {
 
     addIfNotEmpty('country', country);
     addIfNotEmpty('academic', academic);
-    addIfNotEmpty('program', program);
+    addIfNotEmpty('track', track);
     addIfNotEmpty('search', search);
 
     final uri = ApiConfig.uri(path).replace(
@@ -117,6 +117,10 @@ class HomeApiService {
 
   Future<List<String>> fetchAcademicMasters() async {
     return _fetchMasterValues('/api/admin/masters/academic');
+  }
+
+  Future<List<String>> fetchTrackMasters() async {
+    return _fetchMasterValues('/api/admin/masters/track');
   }
 
   Future<List<CountryMaster>> fetchCountries() async {
@@ -178,6 +182,7 @@ class HomeUniversity {
     required this.isAccredited,
     required this.academicRequirements,
     required this.programNames,
+    required this.trackTypes,
   });
 
   factory HomeUniversity.fromJson(Map<String, dynamic> json) {
@@ -192,6 +197,7 @@ class HomeUniversity {
       isAccredited: _readBool(json, const ['isAccredited', 'accredited']),
       academicRequirements: _parseAcademicRequirements(json['academicList']),
       programNames: _parseProgramNames(json),
+      trackTypes: _parseTrackTypes(json),
     );
   }
 
@@ -204,6 +210,7 @@ class HomeUniversity {
   final bool isAccredited;
   final List<AcademicRequirement> academicRequirements;
   final Set<String> programNames;
+  final Set<String> trackTypes;
 }
 
 class AcademicRequirement {
@@ -349,6 +356,46 @@ Set<String> _parseProgramNames(Map<String, dynamic> json) {
       if (link is Map<String, dynamic>) {
         addProgram(link['program']);
         addProgram(link['programName']);
+      }
+    }
+  }
+  return values;
+}
+
+Set<String> _parseTrackTypes(Map<String, dynamic> json) {
+  final values = <String>{};
+  void addTrack(dynamic raw) {
+    if (raw is String) {
+      final normalized = raw.trim().toUpperCase();
+      if (normalized.isNotEmpty) {
+        values.add(normalized);
+      }
+      return;
+    }
+    if (raw is Map<String, dynamic>) {
+      addTrack(raw['track']);
+      addTrack(raw['value']);
+      addTrack(raw['name']);
+      addTrack(raw['nameEn']);
+    }
+  }
+
+  addTrack(json['track']);
+  addTrack(json['trackType']);
+
+  final tracks = json['tracks'];
+  if (tracks is List<dynamic>) {
+    for (final item in tracks) {
+      addTrack(item);
+    }
+  }
+
+  final courses = json['courses'];
+  if (courses is List<dynamic>) {
+    for (final course in courses) {
+      if (course is Map<String, dynamic>) {
+        addTrack(course['track']);
+        addTrack(course['trackType']);
       }
     }
   }

@@ -36,14 +36,14 @@ class _HomeScreenState extends State<HomeScreen> {
   List<BannerItem> _banners = const [];
   List<HomeUniversity> _allUniversities = const [];
   List<UniversityData> _universities = const [];
-  List<String> _programOptions = const [];
+  List<String> _trackOptions = const [];
   List<String> _academicOptions = const [];
   List<String> _currencyOptions = const [];
   int _activeBannerIndex = 0;
   List<_CountryOption> _countryOptions = const [];
   String? _selectedCountry;
   String? _selectedAcademic;
-  String? _selectedProgram;
+  String? _selectedTrack;
   String? _loginDialCode;
   final TextEditingController _resultController = TextEditingController();
 
@@ -75,15 +75,15 @@ class _HomeScreenState extends State<HomeScreen> {
         _homeApiService.fetchUniversities(
           country: _selectedCountry,
           academic: _selectedAcademic,
-          program: _selectedProgram,
+          track: _selectedTrack,
           search: _resultController.text,
         ),
-        _homeApiService.fetchPrograms(),
+        _homeApiService.fetchTrackMasters(),
         _homeApiService.fetchAcademicMasters(),
         _homeApiService.fetchCountries(),
       ]);
       final universities = responses[0] as List<HomeUniversity>;
-      final programs = responses[1] as List<HomeProgram>;
+      final tracks = responses[1] as List<String>;
       final academics = responses[2] as List<String>;
       final countries = responses[3] as List<CountryMaster>;
 
@@ -95,10 +95,7 @@ class _HomeScreenState extends State<HomeScreen> {
         _universities = _filterUniversities(
           universities,
         ).map(_toUniversityData).toList(growable: false);
-        _programOptions = programs
-            .map((item) => item.name)
-            .toSet()
-            .toList(growable: false);
+        _trackOptions = tracks;
         _academicOptions = academics;
         _countryOptions = countries
             .map(
@@ -118,7 +115,7 @@ class _HomeScreenState extends State<HomeScreen> {
       setState(() {
         _allUniversities = const [];
         _universities = const [];
-        _programOptions = const [];
+        _trackOptions = const [];
         _academicOptions = const [];
         _currencyOptions = const [];
         _countryOptions = const [];
@@ -161,22 +158,37 @@ class _HomeScreenState extends State<HomeScreen> {
               return false;
             }
             if (enteredResult != null &&
-                enteredResult < requirement.minResult) {
+                enteredResult > requirement.minResult) {
               return false;
             }
           }
 
-          if (_selectedProgram != null && _selectedProgram!.trim().isNotEmpty) {
-            final selectedProgram = _selectedProgram!.trim().toLowerCase();
-            if (university.programNames.isNotEmpty &&
-                !university.programNames.contains(selectedProgram)) {
-              return false;
-            }
+          if (!_matchesTrack(university)) {
+            return false;
           }
 
           return true;
         })
         .toList(growable: false);
+  }
+
+  bool _matchesTrack(HomeUniversity university) {
+    final selectedTrack = _selectedTrack?.trim().toUpperCase() ?? '';
+    if (selectedTrack.isEmpty) return true;
+    if (selectedTrack == 'SCIENTIFIC') {
+      return true;
+    }
+    if (university.trackTypes.isEmpty) {
+      return true;
+    }
+    if (selectedTrack == 'LITERARY') {
+      return university.trackTypes.contains('LITERARY') ||
+          university.trackTypes.contains('SCIENTIFIC_AND_LITERARY');
+    }
+    if (selectedTrack == 'SCIENTIFIC_AND_LITERARY') {
+      return university.trackTypes.contains('SCIENTIFIC_AND_LITERARY');
+    }
+    return true;
   }
 
   bool _shouldRestrictToAccredited() {
@@ -291,19 +303,19 @@ class _HomeScreenState extends State<HomeScreen> {
             .map((item) => item.name)
             .toList(growable: false),
         academicOptions: _academicOptions,
-        programOptions: _programOptions,
+        trackOptions: _trackOptions,
         currencyOptions: _currencyOptions,
         selectedCountry: _selectedCountry,
         selectedAcademic: _selectedAcademic,
-        selectedProgram: _selectedProgram,
+        selectedTrack: _selectedTrack,
         resultController: _resultController,
         onCountryChanged: (value) => setState(() => _selectedCountry = value),
         onAcademicChanged: (value) => setState(() => _selectedAcademic = value),
-        onProgramChanged: (value) => setState(() => _selectedProgram = value),
+        onTrackChanged: (value) => setState(() => _selectedTrack = value),
         onResetFilters: () => setState(() {
           _selectedCountry = null;
           _selectedAcademic = null;
-          _selectedProgram = null;
+          _selectedTrack = null;
           _resultController.clear();
         }),
         onApplyFilters: _applyFilters,
@@ -858,30 +870,30 @@ class _AdvanceSearchDialog extends StatefulWidget {
   const _AdvanceSearchDialog({
     required this.countryOptions,
     required this.academicOptions,
-    required this.programOptions,
+    required this.trackOptions,
     required this.currencyOptions,
     required this.selectedCountry,
     required this.selectedAcademic,
-    required this.selectedProgram,
+    required this.selectedTrack,
     required this.resultController,
     required this.onCountryChanged,
     required this.onAcademicChanged,
-    required this.onProgramChanged,
+    required this.onTrackChanged,
     required this.onResetFilters,
     required this.onApplyFilters,
   });
 
   final List<String> countryOptions;
   final List<String> academicOptions;
-  final List<String> programOptions;
+  final List<String> trackOptions;
   final List<String> currencyOptions;
   final String? selectedCountry;
   final String? selectedAcademic;
-  final String? selectedProgram;
+  final String? selectedTrack;
   final TextEditingController resultController;
   final ValueChanged<String?> onCountryChanged;
   final ValueChanged<String?> onAcademicChanged;
-  final ValueChanged<String?> onProgramChanged;
+  final ValueChanged<String?> onTrackChanged;
   final VoidCallback onResetFilters;
   final Future<void> Function() onApplyFilters;
 
@@ -892,14 +904,23 @@ class _AdvanceSearchDialog extends StatefulWidget {
 class _AdvanceSearchDialogState extends State<_AdvanceSearchDialog> {
   String? _selectedCountry;
   String? _selectedAcademic;
-  String? _selectedProgram;
+  String? _selectedTrack;
 
   @override
   void initState() {
     super.initState();
     _selectedCountry = widget.selectedCountry;
     _selectedAcademic = widget.selectedAcademic;
-    _selectedProgram = widget.selectedProgram;
+    _selectedTrack = widget.selectedTrack;
+  }
+
+  bool _isOnlyCountryAndAcademicAllowed(String? academicValue) {
+    final normalized = academicValue?.trim().toLowerCase() ?? '';
+    if (normalized.isEmpty) return false;
+    return normalized.contains('master') ||
+        normalized.contains('phd') ||
+        normalized.contains('doctor') ||
+        normalized.contains('teach');
   }
 
   @override
@@ -910,6 +931,7 @@ class _AdvanceSearchDialogState extends State<_AdvanceSearchDialog> {
       required String? value,
       required ValueChanged<String?> onChanged,
       IconData icon = Icons.apartment_outlined,
+      bool enabled = true,
     }) {
       final hasValue = value != null && options.contains(value);
       return Column(
@@ -964,7 +986,7 @@ class _AdvanceSearchDialogState extends State<_AdvanceSearchDialog> {
                   );
                 }).toList(),
 
-                onChanged: options.isEmpty ? null : onChanged,
+                onChanged: !enabled || options.isEmpty ? null : onChanged,
               ),
             ),
           ),
@@ -972,6 +994,10 @@ class _AdvanceSearchDialogState extends State<_AdvanceSearchDialog> {
         ],
       );
     }
+
+    final shouldDisableDetails = _isOnlyCountryAndAcademicAllowed(
+      _selectedAcademic,
+    );
 
     return Dialog(
       shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(6)),
@@ -989,28 +1015,41 @@ class _AdvanceSearchDialogState extends State<_AdvanceSearchDialog> {
               icon: Icons.flag_outlined,
             ),
             dropdownTile(
-              title: 'Latest Academic',
+              title: 'Academic Qualification',
               options: widget.academicOptions,
               value: _selectedAcademic,
-              onChanged: (value) => setState(() => _selectedAcademic = value),
+              onChanged: (value) => setState(() {
+                _selectedAcademic = value;
+                if (_isOnlyCountryAndAcademicAllowed(value)) {
+                  _selectedTrack = null;
+                  widget.resultController.clear();
+                }
+              }),
               icon: Icons.school_outlined,
             ),
-            AppTextField(
-              label: widget.currencyOptions.isNotEmpty
-                  ? 'Input Result (${widget.currencyOptions.first})'
-                  : 'Input Result',
-              hint: 'Input Result',
-              controller: widget.resultController,
-              keyboardType: TextInputType.number,
-              height: 48,
+            Opacity(
+              opacity: shouldDisableDetails ? 0.55 : 1,
+              child: IgnorePointer(
+                ignoring: shouldDisableDetails,
+                child: AppTextField(
+                  label: widget.currencyOptions.isNotEmpty
+                      ? 'High school graduation rate (${widget.currencyOptions.first})'
+                      : 'High school graduation rate',
+                  hint: 'Enter high school graduation rate',
+                  controller: widget.resultController,
+                  keyboardType: TextInputType.number,
+                  height: 48,
+                ),
+              ),
             ),
             const SizedBox(height: 12),
             dropdownTile(
-              title: 'Course or Program',
-              options: widget.programOptions,
-              value: _selectedProgram,
-              onChanged: (value) => setState(() => _selectedProgram = value),
+              title: 'Secondary School Certificate Programme',
+              options: widget.trackOptions,
+              value: _selectedTrack,
+              onChanged: (value) => setState(() => _selectedTrack = value),
               icon: Icons.menu_book_outlined,
+              enabled: !shouldDisableDetails,
             ),
             const SizedBox(height: 4),
             Row(
@@ -1023,7 +1062,7 @@ class _AdvanceSearchDialogState extends State<_AdvanceSearchDialog> {
                         setState(() {
                           _selectedCountry = null;
                           _selectedAcademic = null;
-                          _selectedProgram = null;
+                          _selectedTrack = null;
                         });
                         widget.resultController.clear();
                         widget.onResetFilters();
@@ -1055,7 +1094,7 @@ class _AdvanceSearchDialogState extends State<_AdvanceSearchDialog> {
                       onPressed: () async {
                         widget.onCountryChanged(_selectedCountry);
                         widget.onAcademicChanged(_selectedAcademic);
-                        widget.onProgramChanged(_selectedProgram);
+                        widget.onTrackChanged(_selectedTrack);
                         Navigator.of(context).pop();
                         await widget.onApplyFilters();
                       },
