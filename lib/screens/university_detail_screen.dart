@@ -1,12 +1,10 @@
 import 'package:education/core/app_localizations.dart';
+import 'package:education/core/image_url_helper.dart';
 import 'package:education/models/admin_university.dart';
 import 'package:flutter/material.dart';
-
 import '../core/app_theme.dart';
-import '../models/app_models.dart';
 import '../widgets/common_widgets.dart';
 import '../widgets/flow_widgets.dart';
-import 'course_list_screen.dart';
 
 class UniversityDetailScreen extends StatelessWidget {
   const UniversityDetailScreen({super.key, required this.data});
@@ -15,23 +13,6 @@ class UniversityDetailScreen extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final List<InfoItem> _infoList = [
-      InfoItem(
-        icon: Icons.verified_outlined,
-        iconBg: const Color(0xFFFFF2CC),
-        title: 'Ranking Info',
-        value: 'Ranking',
-        subtitle: '#3 worldwide (2026)',
-      ),
-      InfoItem(
-        icon: Icons.calendar_month_outlined,
-        iconBg: const Color(0xFFFFF1DF),
-        title: 'Upcoming Intake',
-        value: 'September 2026',
-        subtitle: '12th pass / Bachelor’s Degree',
-      ),
-    ];
-
     return Directionality(
       textDirection: Directionality.of(context),
       child: Scaffold(
@@ -47,13 +28,14 @@ class UniversityDetailScreen extends StatelessWidget {
                       bottom: Radius.circular(20),
                     ),
                     child: SizedBox(
-                      height: 250,
+                      height: 280,
                       width: double.infinity,
                       child: Image.network(
-                        data.coverImagePath ?? "",
-                        fit: BoxFit.cover,
-                        errorBuilder: (_, __, ___) =>
-                            Container(color: const Color(0xFFE2E2E2)),
+                        ImageUrlHelper.resolveUploadUrl(data.coverImagePath),
+                        fit: BoxFit.fill,
+                        errorBuilder: (_, __, ___) => Center(
+                          child: Image.asset('assets/images/logo.webp'),
+                        ),
                       ),
                     ),
                   ),
@@ -61,7 +43,7 @@ class UniversityDetailScreen extends StatelessWidget {
                   Positioned(
                     left: 20,
                     right: 20,
-                    bottom: -24,
+                    bottom: -40,
                     child: Container(
                       padding: const EdgeInsets.all(12),
                       decoration: BoxDecoration(
@@ -85,11 +67,11 @@ class UniversityDetailScreen extends StatelessWidget {
                               borderRadius: BorderRadius.circular(10),
                             ),
                             alignment: Alignment.center,
-                            child: Text(
-                              data.name ?? "",
-                              style: TextStyle(
-                                fontWeight: FontWeight.w900,
-                                fontSize: 18,
+                            child: Image.network(
+                              ImageUrlHelper.resolveUploadUrl(data.logoPath),
+                              fit: BoxFit.cover,
+                              errorBuilder: (_, __, ___) => Center(
+                                child: Image.asset('assets/images/logo.webp'),
                               ),
                             ),
                           ),
@@ -98,7 +80,7 @@ class UniversityDetailScreen extends StatelessWidget {
                             child: Column(
                               crossAxisAlignment: CrossAxisAlignment.start,
                               children: [
-                                 Row(
+                                Row(
                                   children: [
                                     Icon(
                                       Icons.star,
@@ -107,7 +89,7 @@ class UniversityDetailScreen extends StatelessWidget {
                                     ),
                                     SizedBox(width: 4),
                                     Text(
-                                     data.rating!.toDouble().toString(),
+                                      data.rating!.toDouble().toString(),
                                       style: TextStyle(
                                         fontWeight: FontWeight.w700,
                                       ),
@@ -132,17 +114,23 @@ class UniversityDetailScreen extends StatelessWidget {
                                 ),
                                 const SizedBox(height: 4),
                                 Row(
+                                  crossAxisAlignment: CrossAxisAlignment.start,
                                   children: [
                                     const Icon(
                                       Icons.location_on_outlined,
                                       size: 15,
                                       color: AppColors.textMuted,
                                     ),
-                                    const SizedBox(width: 2),
-                                    Text(
-                                      data.address ?? "",
-                                      style: const TextStyle(
-                                        color: AppColors.textMuted,
+                                    const SizedBox(width: 4),
+
+                                    Expanded(
+                                      child: Text(
+                                        data.address ?? "",
+                                        maxLines: 1,
+                                        overflow: TextOverflow.ellipsis,
+                                        style: const TextStyle(
+                                          color: AppColors.textMuted,
+                                        ),
                                       ),
                                     ),
                                   ],
@@ -155,11 +143,11 @@ class UniversityDetailScreen extends StatelessWidget {
                     ),
                   ),
 
-                  TopRoundedHeader(title: data.name ??""),
+                  TopRoundedHeader(title: data.name ?? ""),
                 ],
               ),
 
-              const SizedBox(height: 40),
+              const SizedBox(height: 60),
 
               /// 🔥 SCROLL CONTENT
               Expanded(
@@ -181,36 +169,10 @@ class UniversityDetailScreen extends StatelessWidget {
 
                       Padding(
                         padding: const EdgeInsets.fromLTRB(20, 10, 20, 0),
-                        child: ReadMoreText(
-                          text: 'Lorem ipsum dolor sit amet...',
-                        ),
+                        child: ReadMoreText(text: data.aboutUs.toString()),
                       ),
 
                       const SizedBox(height: 16),
-
-                      Padding(
-                        padding: const EdgeInsets.symmetric(horizontal: 20),
-                        child: Column(
-                          children: List.generate(_infoList.length, (index) {
-                            final item = _infoList[index];
-
-                            return Padding(
-                              padding: EdgeInsets.only(
-                                bottom: index == _infoList.length - 1 ? 0 : 12,
-                              ),
-                              child: _InfoTile(
-                                icon: item.icon,
-                                iconBg: item.iconBg,
-                                title: item.title,
-                                value: item.value,
-                                subtitle: item.subtitle,
-                              ),
-                            );
-                          }),
-                        ),
-                      ),
-
-                      const SizedBox(height: 100),
                     ],
                   ),
                 ),
@@ -221,10 +183,7 @@ class UniversityDetailScreen extends StatelessWidget {
                   padding: const EdgeInsets.fromLTRB(20, 20, 20, 20),
                   child: AppPrimaryButton(
                     label: context.l10n.text('viewCourses'),
-                    onPressed: ()
-                    {
-
-                    },
+                    onPressed: () {},
                     // onPressed: () => Navigator.of(context).push(
                     //   MaterialPageRoute(
                     //     builder: (_) => CourseListScreen(university: data),
