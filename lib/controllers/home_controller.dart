@@ -170,6 +170,7 @@ class HomeController extends ChangeNotifier {
     _selectedTrack = null;
     resultController.clear();
     notifyListeners();
+    loadUniversities();
   }
 
   String resolveMandatoryOmanCountryName() {
@@ -188,20 +189,20 @@ class HomeController extends ChangeNotifier {
           final countryMatch =
               _selectedCountry == null ||
               _selectedCountry!.trim().isEmpty ||
-              university.country.toLowerCase() ==
+              university.country?.toLowerCase() ==
                   _selectedCountry!.trim().toLowerCase();
           if (!countryMatch) {
             return false;
           }
 
-          if (_shouldRestrictToAccredited() && !university.accredited) {
+          if (_shouldRestrictToAccredited() && !(university.accredited ?? false)) {
             return false;
           }
 
           if (_selectedAcademic != null && _selectedAcademic!.trim().isNotEmpty) {
             final academicName = _selectedAcademic!.trim().toLowerCase();
-            AdminAcademicRequirement? requirement;
-            for (final item in university.academicList) {
+            AcademicList? requirement;
+            for (final item in university ?? []) {
               if (item.academicName.toLowerCase() == academicName) {
                 requirement = item;
                 break;
@@ -318,17 +319,17 @@ class HomeController extends ChangeNotifier {
   }
 
   AdminUniversity _toUniversityData(AdminUniversity university) {
-    final country = university.country.isNotEmpty
+    final country = university.country!.isNotEmpty
         ? university.country
         : university.state;
     final location = [
       university.city,
       country,
-    ].where((item) => item.trim().isNotEmpty).join(', ');
+    ].where((item) => item!.trim().isNotEmpty).join(', ');
     return AdminUniversity(
       name: university.name,
       country: location.isEmpty ? 'N/A' : location,
-      logoPath: _toAbsoluteUrl(university.logoPath),
+      logoPath: _toAbsoluteUrl(university.logoPath ?? ""),
     );
   }
 
