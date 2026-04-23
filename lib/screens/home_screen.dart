@@ -919,19 +919,41 @@ class _UniversityCard extends StatelessWidget {
                 /// LOCATION + RATING
                 Expanded(
                   child: Row(
+                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
-                      const Icon(Icons.location_on_outlined, size: 14),
+
+                      /// LEFT SIDE (Location)
                       Expanded(
-                        child: Text(
-                          data.country ?? "",
-                          maxLines: 2,
-                          overflow: TextOverflow.ellipsis,
-                          style: const TextStyle(fontSize: 11),
+                        child: Row(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
+                            const Icon(Icons.location_on_outlined, size: 14),
+                            const SizedBox(width: 4),
+                            Expanded(
+                              child: Text(
+                                data.country ?? "",
+                                maxLines: 2,
+                                overflow: TextOverflow.ellipsis,
+                                style: const TextStyle(fontSize: 11),
+                              ),
+                            ),
+                          ],
                         ),
                       ),
-                      const Icon(Icons.star, size: 14),
-                      Text(data.rating!.toDouble().toString()),
+
+                      /// RIGHT SIDE (Rating)
+                      Row(
+                        mainAxisSize: MainAxisSize.min,
+                        children: [
+                          const Icon(Icons.star, color: Color(0xFFFFB300), size: 16),
+                          const SizedBox(width: 4),
+                          Text(
+                            (data.rating ?? 0).toStringAsFixed(1),
+                            style: const TextStyle(fontWeight: FontWeight.w700),
+                          ),
+                        ],
+                      ),
                     ],
                   ),
                 ),

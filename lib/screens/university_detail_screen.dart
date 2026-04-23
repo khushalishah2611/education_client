@@ -107,14 +107,14 @@ class UniversityDetailScreen extends StatelessWidget {
                                     ),
                                     SizedBox(width: 4),
                                     Text(
-                                     data.rating.toString(),
+                                     data.rating!.toDouble().toString(),
                                       style: TextStyle(
                                         fontWeight: FontWeight.w700,
                                       ),
                                     ),
                                     SizedBox(width: 4),
                                     Text(
-                                      '(2.4k reviews)',
+                                      '(reviews)',
                                       style: TextStyle(
                                         fontSize: 12,
                                         color: AppColors.textMuted,
