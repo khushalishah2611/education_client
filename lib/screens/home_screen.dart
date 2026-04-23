@@ -1100,13 +1100,16 @@ class _AdvanceSearchDialogState extends State<_AdvanceSearchDialog> {
               icon: Icons.school_outlined,
             ),
 
-            dropdownTile(
-              title: 'Secondary School Certificate Program',
-              options: widget.trackOptions,
-              value: _selectedTrack,
-              onChanged: (value) => setState(() => _selectedTrack = value),
-              icon: Icons.menu_book_outlined,
-              enabled: !shouldDisableDetails,
+            Opacity(
+              opacity: shouldDisableDetails ? 0.55 : 1,
+              child: dropdownTile(
+                title: 'Secondary School Certificate Program',
+                options: widget.trackOptions,
+                value: _selectedTrack,
+                onChanged: (value) => setState(() => _selectedTrack = value),
+                icon: Icons.menu_book_outlined,
+                enabled: !shouldDisableDetails,
+              ),
             ),
             Opacity(
               opacity: shouldDisableDetails ? 0.55 : 1,
