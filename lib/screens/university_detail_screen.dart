@@ -21,6 +21,14 @@ class _UniversityDetailScreenState extends State<UniversityDetailScreen> {
 
   AdminUniversity get data => widget.data;
 
+  bool get _isOmanUniversity {
+    final String country = (data.country ?? '').trim().toLowerCase();
+    final String mobile = (data.mobile ?? '').trim();
+    return country == 'oman' || country == 'om' || mobile.startsWith('+968');
+  }
+
+  bool get _shouldShowCourseTable => data.accredited == true && _isOmanUniversity;
+
   Map<String, List<CourseDetails>> get _collegeCourses {
     final Map<String, List<CourseDetails>> grouped =
         <String, List<CourseDetails>>{};
@@ -247,7 +255,7 @@ class _UniversityDetailScreenState extends State<UniversityDetailScreen> {
                             ),
                           ),
                         ),
-                      if (collegeCourses.isNotEmpty) ...[
+                      if (_shouldShowCourseTable && collegeCourses.isNotEmpty) ...[
                         Padding(
                           padding: const EdgeInsets.symmetric(horizontal: 16),
                           child: Column(
@@ -312,6 +320,13 @@ class _CollegeAccordion extends StatelessWidget {
   final Set<String> selectedCourses;
   final VoidCallback onToggleExpand;
   final ValueChanged<String> onToggleCourse;
+  static const double _courseWidth = 240;
+  static const double _feeWidth = 110;
+  static const double _admissionWidth = 100;
+  static const double _trackWidth = 120;
+  static const double _detailsWidth = 190;
+  static const double _tableWidth =
+      _courseWidth + _feeWidth + _admissionWidth + _trackWidth + _detailsWidth;
 
   @override
   Widget build(BuildContext context) {
@@ -351,117 +366,185 @@ class _CollegeAccordion extends StatelessWidget {
             ),
           ),
           if (isExpanded) ...[
-            Container(
-              color: const Color(0xFFE5E5E5),
-              padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 8),
-              child: const Row(
-                children: [
-                  Expanded(
-                    flex: 4,
-                    child: Text(
-                      'Course',
-                      style: TextStyle(
-                        fontWeight: FontWeight.w700,
-                        fontSize: 12,
+            SingleChildScrollView(
+              scrollDirection: Axis.horizontal,
+              child: SizedBox(
+                width: _tableWidth,
+                child: Column(
+                  children: [
+                    Container(
+                      color: const Color(0xFFE5E5E5),
+                      padding: const EdgeInsets.symmetric(
+                        horizontal: 10,
+                        vertical: 8,
+                      ),
+                      child: const Row(
+                        children: [
+                          SizedBox(
+                            width: _courseWidth,
+                            child: Text(
+                              'Course',
+                              style: TextStyle(
+                                fontWeight: FontWeight.w700,
+                                fontSize: 12,
+                              ),
+                            ),
+                          ),
+                          SizedBox(
+                            width: _feeWidth,
+                            child: Text(
+                              'Credit\nHour Fee',
+                              style: TextStyle(
+                                fontWeight: FontWeight.w700,
+                                fontSize: 12,
+                              ),
+                            ),
+                          ),
+                          SizedBox(
+                            width: _admissionWidth,
+                            child: Text(
+                              'Min\nAdmis%',
+                              style: TextStyle(
+                                fontWeight: FontWeight.w700,
+                                fontSize: 12,
+                              ),
+                            ),
+                          ),
+                          SizedBox(
+                            width: _trackWidth,
+                            child: Text(
+                              'Track',
+                              style: TextStyle(
+                                fontWeight: FontWeight.w700,
+                                fontSize: 12,
+                              ),
+                            ),
+                          ),
+                          SizedBox(
+                            width: _detailsWidth,
+                            child: Text(
+                              'Details\n/ Apply',
+                              style: TextStyle(
+                                fontWeight: FontWeight.w700,
+                                fontSize: 12,
+                              ),
+                            ),
+                          ),
+                        ],
                       ),
                     ),
-                  ),
-                  Expanded(
-                    flex: 2,
-                    child: Text(
-                      'Credit\nHour Fee',
-                      style: TextStyle(
-                        fontWeight: FontWeight.w700,
-                        fontSize: 12,
+                    ConstrainedBox(
+                      constraints: const BoxConstraints(maxHeight: 320),
+                      child: SingleChildScrollView(
+                        child: Column(
+                          children: courses.map((course) {
+                            final String courseKey = '$collegeName-${course.name}';
+                            final bool isSelected = selectedCourses.contains(
+                              courseKey,
+                            );
+
+                            return InkWell(
+                              onTap: () => onToggleCourse(courseKey),
+                              child: Container(
+                                decoration: BoxDecoration(
+                                  color: isSelected
+                                      ? AppColors.peachSoft
+                                      : Colors.white,
+                                  border: Border(
+                                    left: BorderSide(
+                                      color: isSelected
+                                          ? AppColors.primaryDark
+                                          : Colors.transparent,
+                                      width: 3,
+                                    ),
+                                    top: const BorderSide(
+                                      color: Color(0xFFE5E5E5),
+                                    ),
+                                  ),
+                                ),
+                                padding: const EdgeInsets.symmetric(
+                                  horizontal: 8,
+                                  vertical: 10,
+                                ),
+                                child: Row(
+                                  crossAxisAlignment: CrossAxisAlignment.start,
+                                  children: [
+                                    SizedBox(
+                                      width: _courseWidth,
+                                      child: Text(course.name ?? 'N/A'),
+                                    ),
+                                    SizedBox(
+                                      width: _feeWidth,
+                                      child: Text(
+                                        '${course.feePerCredit ?? '-'} ${course.currency ?? ''}'
+                                            .trim(),
+                                      ),
+                                    ),
+                                    SizedBox(
+                                      width: _admissionWidth,
+                                      child: Text(
+                                        '${course.minAdmissionRate ?? '-'}%',
+                                      ),
+                                    ),
+                                    SizedBox(
+                                      width: _trackWidth,
+                                      child: Text(course.track ?? '-'),
+                                    ),
+                                    SizedBox(
+                                      width: _detailsWidth,
+                                      child: Column(
+                                        crossAxisAlignment:
+                                            CrossAxisAlignment.start,
+                                        children: [
+                                          const Text(
+                                            'Details >',
+                                            style: TextStyle(
+                                              fontWeight: FontWeight.w600,
+                                            ),
+                                          ),
+                                          const SizedBox(height: 6),
+                                          OutlinedButton(
+                                            onPressed: () {},
+                                            style: OutlinedButton.styleFrom(
+                                              backgroundColor: const Color(
+                                                0xFFC8F3DF,
+                                              ),
+                                              foregroundColor:
+                                                  const Color(0xFF126F4A),
+                                              side: const BorderSide(
+                                                color: Color(0xFF93D8BC),
+                                              ),
+                                              minimumSize: const Size(120, 34),
+                                              padding:
+                                                  const EdgeInsets.symmetric(
+                                                horizontal: 8,
+                                                vertical: 6,
+                                              ),
+                                              textStyle: const TextStyle(
+                                                fontSize: 10,
+                                                fontWeight: FontWeight.w700,
+                                              ),
+                                            ),
+                                            child: const Text(
+                                              'Apply & Pay\nApplication Fee',
+                                              textAlign: TextAlign.center,
+                                            ),
+                                          ),
+                                        ],
+                                      ),
+                                    ),
+                                  ],
+                                ),
+                              ),
+                            );
+                          }).toList(),
+                        ),
                       ),
                     ),
-                  ),
-                  Expanded(
-                    flex: 2,
-                    child: Text(
-                      'Min\nAdmis%',
-                      style: TextStyle(
-                        fontWeight: FontWeight.w700,
-                        fontSize: 12,
-                      ),
-                    ),
-                  ),
-                  Expanded(
-                    flex: 2,
-                    child: Text(
-                      'Track',
-                      style: TextStyle(
-                        fontWeight: FontWeight.w700,
-                        fontSize: 12,
-                      ),
-                    ),
-                  ),
-                  Expanded(
-                    flex: 3,
-                    child: Text(
-                      'Details\n/ Apply',
-                      style: TextStyle(
-                        fontWeight: FontWeight.w700,
-                        fontSize: 12,
-                      ),
-                    ),
-                  ),
-                ],
+                  ],
+                ),
               ),
             ),
-            ...courses.map((course) {
-              final String courseKey = '$collegeName-${course.name}';
-              final bool isSelected = selectedCourses.contains(courseKey);
-
-              return InkWell(
-                onTap: () => onToggleCourse(courseKey), // tap full row
-                child: Container(
-                  decoration: BoxDecoration(
-                    color: isSelected ? AppColors.peachSoft : Colors.white,
-                    border: Border(
-                      left: BorderSide(
-                        color: isSelected
-                            ? AppColors.primaryDark
-                            : Colors.transparent,
-                        width: 3,
-                      ),
-                    ),
-                  ),
-                  padding: const EdgeInsets.symmetric(
-                    horizontal: 8,
-                    vertical: 10,
-                  ),
-                  child: Row(
-                    children: [
-                      Expanded(flex: 4, child: Text(course.name ?? 'N/A')),
-                      Expanded(
-                        flex: 2,
-                        child: Text(
-                          '${course.feePerCredit ?? '-'} ${course.currency ?? ''}'
-                              .trim(),
-                        ),
-                      ),
-                      Expanded(
-                        flex: 2,
-                        child: Text('${course.minAdmissionRate ?? '-'}%'),
-                      ),
-                      Expanded(flex: 2, child: Text(course.track ?? '-')),
-                      Expanded(
-                        flex: 3,
-                        child: Row(
-                          children: [
-                            TextButton(
-                              onPressed: () {},
-                              child: const Text('Details'),
-                            ),
-                          ],
-                        ),
-                      ),
-                    ],
-                  ),
-                ),
-              );
-            }),
           ],
         ],
       ),
