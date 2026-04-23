@@ -1,6 +1,7 @@
 import 'package:education/models/admin_university.dart';
 import 'package:education/models/banner_item.dart';
 import 'package:flutter/material.dart';
+import '../core/api_config.dart';
 import '../core/app_localizations.dart';
 import '../core/app_theme.dart';
 import '../controllers/home_controller.dart';
@@ -867,8 +868,21 @@ class _UniversityCard extends StatelessWidget {
   final AdminUniversity data;
   final VoidCallback onTap;
 
+  String _resolveLogoUrl(String? path) {
+    final value = (path ?? '').trim();
+    if (value.isEmpty) return '';
+    if (value.startsWith('http')) {
+      return value.replaceAll('/uploads//uploads/', '/uploads/');
+    }
+    final cleaned = value
+        .replaceAll(RegExp(r'^/+'), '')
+        .replaceFirst(RegExp(r'^uploads/+'), '');
+    return '${ApiConfig.baseUrl}/uploads/$cleaned';
+  }
+
   @override
   Widget build(BuildContext context) {
+    final logoUrl = _resolveLogoUrl(data.logoPath);
     return Container(
       padding: const EdgeInsets.all(8),
       decoration: BoxDecoration(
@@ -895,7 +909,7 @@ class _UniversityCard extends StatelessWidget {
                   child: ClipRRect(
                     borderRadius: BorderRadius.circular(8),
                     child: Image.network(
-                      "https://arab.vedx.cloud/uploads/${data.logoPath ?? ''}",
+                      logoUrl,
                       fit: BoxFit.cover,
                       errorBuilder: (_, __, ___) => Center(
                         child: Text(
