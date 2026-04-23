@@ -202,8 +202,8 @@ class HomeController extends ChangeNotifier {
           if (_selectedAcademic != null && _selectedAcademic!.trim().isNotEmpty) {
             final academicName = _selectedAcademic!.trim().toLowerCase();
             AcademicList? requirement;
-            for (final item in university ?? []) {
-              if (item.academicName.toLowerCase() == academicName) {
+            for (final item in university.academicList ?? const <AcademicList>[]) {
+              if ((item.academicname ?? '').trim().toLowerCase() == academicName) {
                 requirement = item;
                 break;
               }
@@ -211,7 +211,10 @@ class HomeController extends ChangeNotifier {
             if (requirement == null) {
               return false;
             }
-            if (enteredResult != null && enteredResult > requirement.percentage) {
+            final minAdmissionRate = _minimumAdmissionRate(university);
+            if (enteredResult != null &&
+                minAdmissionRate != null &&
+                enteredResult < minAdmissionRate) {
               return false;
             }
           }
@@ -335,30 +338,28 @@ class HomeController extends ChangeNotifier {
 
   Set<String> _trackTypes(AdminUniversity university) {
     final values = <String>{};
-    void add(String raw) {
+    void add(String? raw) {
+      if (raw == null) return;
       final normalized = raw.trim().toUpperCase();
       if (normalized.isNotEmpty) values.add(normalized);
     }
 
-    add(university.track);
-    for (final link in university.programLinks) {
+    for (final link in university.programLinks ?? const <ProgramLinks>[]) {
       final program = link.program;
       if (program == null) continue;
       add(program.track);
-      for (final detail in program.courseDetails) {
-        add(detail.track);
-      }
-    }
-    for (final course in university.courses) {
-      add(course.track);
-      final program = course.program;
-      if (program == null) continue;
-      add(program.track);
-      for (final detail in program.courseDetails) {
-        add(detail.track);
-      }
     }
     return values;
+  }
+
+  double? _minimumAdmissionRate(AdminUniversity university) {
+    double? minimumRate;
+    for (final link in university.programLinks ?? const <ProgramLinks>[]) {
+      final rate = link.program?.minAdmissionRate?.toDouble();
+      if (rate == null) continue;
+      minimumRate = minimumRate == null ? rate : (rate < minimumRate ? rate : minimumRate);
+    }
+    return minimumRate;
   }
 
   String _shortCode(String name) {
