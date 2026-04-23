@@ -895,7 +895,7 @@ class _UniversityCard extends StatelessWidget {
                   child: ClipRRect(
                     borderRadius: BorderRadius.circular(8),
                     child: Image.network(
-                      data.logoPath ?? "",
+                      "https://arab.vedx.cloud/uploads/${data.logoPath ?? ''}",
                       fit: BoxFit.cover,
                       errorBuilder: (_, __, ___) => Center(
                         child: Text(

@@ -82,7 +82,7 @@ class HomeApiService {
       responseBody: decoded,
     );
 
-    if (!ApiStatus.isSuccess(response.statusCode)) {
+    if (!ApiStatus.isSuccess(response. statusCode)) {
       throw Exception('Failed to load universities.');
     }
 

@@ -3,7 +3,6 @@ import 'package:shared_preferences/shared_preferences.dart';
 
 import '../core/api_config.dart';
 import '../models/admin_university.dart';
-import '../models/app_models.dart';
 import '../models/banner_item.dart';
 import '../models/country_master.dart';
 import '../models/country_option.dart';
@@ -27,18 +26,23 @@ class HomeController extends ChangeNotifier {
 
   bool isLoadingUniversities = true;
   bool isLoadingBanners = true;
-  List<BannerItem> banners = const [];
-  List<AdminUniversity> allUniversities = const [];
-  List<AdminUniversity> universities = const [];
-  List<String> trackOptions = const [];
-  List<String> academicOptions = const [];
-  List<String> currencyOptions = const [];
-  List<CountryOption> countryOptions = const [];
+
+  List<BannerItem> banners = [];
+  List<AdminUniversity> allUniversities = [];
+  List<AdminUniversity> universities = [];
+
+  List<String> trackOptions = [];
+  List<String> academicOptions = [];
+  List<String> currencyOptions = [];
+  List<CountryOption> countryOptions = [];
+
   String? _selectedCountry;
   String? _selectedAcademic;
   String? _selectedTrack;
   String? _loginDialCode;
+
   bool _skipAutoCountrySelection = false;
+
   final TextEditingController resultController = TextEditingController();
 
   String? get selectedCountry => _selectedCountry;
@@ -47,31 +51,33 @@ class HomeController extends ChangeNotifier {
 
   Future<void> initialize() async {
     await _loadSessionDefaults();
-    await Future.wait<void>([loadBanners(), loadUniversities()]);
+    await Future.wait([loadBanners(), loadUniversities()]);
   }
 
   Future<void> refreshHomeData() async {
-    await Future.wait<void>([loadBanners(), loadUniversities()]);
+    await Future.wait([loadBanners(), loadUniversities()]);
   }
 
   Future<void> loadBanners() async {
     isLoadingBanners = true;
     notifyListeners();
+
     try {
       banners = await _homeApiService.fetchBanners(page: 1, limit: 10);
     } catch (_) {
-      banners = const [];
-    } finally {
-      isLoadingBanners = false;
-      notifyListeners();
+      banners = [];
     }
+
+    isLoadingBanners = false;
+    notifyListeners();
   }
 
   Future<void> loadUniversities() async {
     isLoadingUniversities = true;
     notifyListeners();
+
     try {
-      final responses = await Future.wait<dynamic>([
+      final responses = await Future.wait([
         _homeApiService.fetchUniversities(
           country: _selectedCountry,
           academic: _selectedAcademic,
@@ -82,69 +88,55 @@ class HomeController extends ChangeNotifier {
         _homeApiService.fetchAcademicMasters(),
         _homeApiService.fetchCountries(),
       ]);
+
       final universitiesResponse = responses[0] as List<AdminUniversity>;
       final tracks = responses[1] as List<String>;
       final academics = responses[2] as List<String>;
       final countries = responses[3] as List<CountryMaster>;
 
-      _selectedCountry = _resolveAutoCountry(countries);
+      _selectedCountry ??= _resolveAutoCountry(countries);
+
       allUniversities = universitiesResponse;
+
       universities = _filterUniversities(
         universitiesResponse,
-      ).map(_toUniversityData).toList(growable: false);
+      ).map(_toUniversityData).toList();
+
       trackOptions = tracks
-          .map((item) => item.trim())
-          .where((item) => item.isNotEmpty && !_isScientificAndLiterary(item))
-          .toList(growable: false);
-      final allCountryOptions = countries
+          .map((e) => e.trim())
+          .where((e) => e.isNotEmpty && !_isScientificAndLiterary(e))
+          .toList();
+
+      academicOptions = academics;
+
+      countryOptions = countries
           .map(
-            (item) => CountryOption(
-              name: item.nameEn.isNotEmpty ? item.nameEn : item.value,
-              flagEmoji: item.flagEmoji,
-              flagImageUrl: _resolveCountryFlag(item),
-              dialCode: item.dialCode,
+            (c) => CountryOption(
+              name: c.nameEn.isNotEmpty ? c.nameEn : c.value,
+              flagEmoji: c.flagEmoji,
+              flagImageUrl: _resolveCountryFlag(c),
+              dialCode: c.dialCode,
             ),
           )
-          .where((item) => item.name.trim().isNotEmpty)
-          .toList(growable: false);
-      academicOptions = academics;
-      final shouldRestrictToOman = _shouldRestrictToOmanCountryList(
-        allCountryOptions,
-      );
-      countryOptions = shouldRestrictToOman
-          ? allCountryOptions
-              .where((item) => item.dialCode.trim() == '+968')
-              .toList(growable: false)
-          : allCountryOptions;
-      if (shouldRestrictToOman &&
-          countryOptions.isNotEmpty &&
-          !countryOptions.any(
-            (item) =>
-                item.name.trim().toLowerCase() ==
-                (_selectedCountry ?? '').trim().toLowerCase(),
-          )) {
-        _selectedCountry = countryOptions.first.name;
-      }
-      currencyOptions = const [];
+          .where((e) => e.name.trim().isNotEmpty)
+          .toList();
     } catch (_) {
-      allUniversities = const [];
-      universities = const [];
-      trackOptions = const [];
-      academicOptions = const [];
-      currencyOptions = const [];
-      countryOptions = const [];
-    } finally {
-      isLoadingUniversities = false;
-      notifyListeners();
+      allUniversities = [];
+      universities = [];
+      trackOptions = [];
+      academicOptions = [];
+      countryOptions = [];
     }
+
+    isLoadingUniversities = false;
+    notifyListeners();
   }
 
   Future<void> applyFilters() async {
     universities = _filterUniversities(
       allUniversities,
-    ).map(_toUniversityData).toList(growable: false);
+    ).map(_toUniversityData).toList();
     notifyListeners();
-    await loadUniversities();
   }
 
   void updateCountry(String? value) {
@@ -163,9 +155,7 @@ class HomeController extends ChangeNotifier {
   }
 
   void resetFilters() {
-    final isOmanLogin = (_loginDialCode ?? '').trim() == '+968';
-    _skipAutoCountrySelection = !isOmanLogin;
-    _selectedCountry = isOmanLogin ? resolveMandatoryOmanCountryName() : null;
+    _selectedCountry = null;
     _selectedAcademic = null;
     _selectedTrack = null;
     resultController.clear();
@@ -173,239 +163,117 @@ class HomeController extends ChangeNotifier {
     loadUniversities();
   }
 
-  String resolveMandatoryOmanCountryName() {
-    for (final country in countryOptions) {
-      if (country.dialCode.trim() == '+968') {
-        return country.name;
-      }
-    }
-    return 'Oman';
-  }
-
   List<AdminUniversity> _filterUniversities(List<AdminUniversity> source) {
     final enteredResult = double.tryParse(resultController.text.trim());
-    return source
-        .where((university) {
-          final countryMatch =
-              _selectedCountry == null ||
-              _selectedCountry!.trim().isEmpty ||
-              university.country?.toLowerCase() ==
-                  _selectedCountry!.trim().toLowerCase();
-          if (!countryMatch) {
-            return false;
-          }
 
-          if (_shouldRestrictToAccredited() && !(university.accredited ?? false)) {
-            return false;
-          }
-
-          if (_selectedAcademic != null && _selectedAcademic!.trim().isNotEmpty) {
-            final academicName = _selectedAcademic!.trim().toLowerCase();
-            AcademicList? requirement;
-            for (final item in university.academicList ?? const <AcademicList>[]) {
-              if ((item.academicname ?? '').trim().toLowerCase() == academicName) {
-                requirement = item;
-                break;
-              }
-            }
-            if (requirement == null) {
-              return false;
-            }
-            final minAdmissionRate = _minimumAdmissionRate(university);
-            if (enteredResult != null &&
-                minAdmissionRate != null &&
-                enteredResult < minAdmissionRate) {
-              return false;
-            }
-          }
-
-          if (!_matchesTrack(university)) {
-            return false;
-          }
-
-          return true;
-        })
-        .toList(growable: false);
-  }
-
-  bool _matchesTrack(AdminUniversity university) {
-    final selectedTrack = _selectedTrack?.trim().toUpperCase() ?? '';
-    final trackTypes = _trackTypes(university);
-    if (selectedTrack.isEmpty) return true;
-    if (selectedTrack == 'SCIENTIFIC') {
-      return true;
-    }
-    if (trackTypes.isEmpty) {
-      return true;
-    }
-    if (selectedTrack == 'LITERARY') {
-      return trackTypes.contains('LITERARY') ||
-          trackTypes.contains('SCIENTIFIC_AND_LITERARY');
-    }
-    if (selectedTrack == 'SCIENTIFIC_AND_LITERARY') {
-      return trackTypes.contains('SCIENTIFIC_AND_LITERARY');
-    }
-    return true;
-  }
-
-  bool _shouldRestrictToAccredited() {
-    final selected = _selectedCountry?.trim().toLowerCase() ?? '';
-    if (selected == 'oman') return true;
-    if (_loginDialCode?.trim() == '+968') return true;
-    if (selected.isEmpty) return false;
-    CountryOption? option;
-    for (final item in countryOptions) {
-      if (item.name.trim().toLowerCase() == selected) {
-        option = item;
-        break;
+    return source.where((u) {
+      if (_selectedCountry != null &&
+          _selectedCountry!.isNotEmpty &&
+          (u.country ?? '').toLowerCase() != _selectedCountry!.toLowerCase()) {
+        return false;
       }
-    }
-    if (option == null) return false;
-    return option.dialCode.trim() == '+968';
-  }
 
-  bool _shouldRestrictToOmanCountryList(List<CountryOption> options) {
-    if ((_loginDialCode ?? '').trim() == '+968') return true;
-    final selected = _selectedCountry?.trim().toLowerCase() ?? '';
-    if (selected == 'oman') return true;
-    if (selected.isEmpty) return false;
-    for (final item in options) {
-      if (item.name.trim().toLowerCase() == selected) {
-        return item.dialCode.trim() == '+968';
+      if (_selectedAcademic != null && _selectedAcademic!.isNotEmpty) {
+        final match =
+            u.academicList?.any(
+              (a) =>
+                  (a.academicname ?? '').toLowerCase() ==
+                  _selectedAcademic!.toLowerCase(),
+            ) ??
+            false;
+        if (!match) return false;
       }
-    }
-    return false;
+
+      if (!_matchesTrack(u)) return false;
+
+      if (enteredResult != null) {
+        final minRate = _minimumAdmissionRate(u);
+        if (minRate != null && enteredResult < minRate) {
+          return false;
+        }
+      }
+
+      return true;
+    }).toList();
   }
 
-  bool _isScientificAndLiterary(String value) {
-    final normalized =
-        value.trim().toUpperCase().replaceAll(RegExp(r'[^A-Z]'), '');
-    return normalized == 'SCIENTIFICANDLITERARY';
+  bool _matchesTrack(AdminUniversity u) {
+    if (_selectedTrack == null || _selectedTrack!.isEmpty) return true;
+
+    final tracks = _trackTypes(u);
+    return tracks.contains(_selectedTrack!.toUpperCase());
   }
 
   Future<void> _loadSessionDefaults() async {
     try {
       final prefs = await SharedPreferences.getInstance();
-      final storedCountry = prefs.getString('loginCountry')?.trim() ?? '';
-      final storedDialCode = prefs.getString('loginDialCode')?.trim() ?? '';
-      if ((_selectedCountry ?? '').trim().isEmpty && storedCountry.isNotEmpty) {
-        _selectedCountry = storedCountry;
-      }
-      if ((_loginDialCode ?? '').trim().isEmpty && storedDialCode.isNotEmpty) {
-        _loginDialCode = storedDialCode;
-      }
-    } catch (_) {
-      // Ignore shared preferences read failures.
-    }
+      _selectedCountry ??= prefs.getString('loginCountry');
+      _loginDialCode ??= prefs.getString('loginDialCode');
+    } catch (_) {}
   }
 
   String? _resolveAutoCountry(List<CountryMaster> countries) {
-    if (_skipAutoCountrySelection) {
-      _skipAutoCountrySelection = false;
-      return null;
-    }
-    final selected = _selectedCountry?.trim() ?? '';
-    if (selected.isNotEmpty) {
-      return selected;
-    }
     if ((_loginDialCode ?? '').trim() == '+968') {
-      for (final country in countries) {
-        if (country.dialCode.trim() == '+968') {
-          return country.nameEn.trim().isNotEmpty
-              ? country.nameEn.trim()
-              : country.value.trim();
-        }
+      final match = countries.where((c) => c.dialCode.trim() == '+968');
+
+      if (match.isNotEmpty) {
+        final country = match.first;
+        return country.nameEn.trim().isNotEmpty
+            ? country.nameEn.trim()
+            : country.value.trim();
       }
+
+      // fallback if API doesn't return Oman
       return 'Oman';
     }
+
     return null;
   }
 
-  AdminUniversity _toUniversityData(AdminUniversity university) {
-    final country = university.country!.isNotEmpty
-        ? university.country
-        : university.state;
+  AdminUniversity _toUniversityData(AdminUniversity u) {
     final location = [
-      university.city,
-      country,
-    ].where((item) => item!.trim().isNotEmpty).join(', ');
+      u.city,
+      u.country ?? u.state,
+    ].where((e) => e != null && e!.isNotEmpty).join(', ');
+
     return AdminUniversity(
-      name: university.name,
+      name: u.name,
       country: location.isEmpty ? 'N/A' : location,
-      logoPath: _toAbsoluteUrl(university.logoPath ?? ""),
+      logoPath: _toAbsoluteUrl(u.logoPath ?? ''),
     );
   }
 
-  Set<String> _trackTypes(AdminUniversity university) {
-    final values = <String>{};
-    void add(String? raw) {
-      if (raw == null) return;
-      final normalized = raw.trim().toUpperCase();
-      if (normalized.isNotEmpty) values.add(normalized);
-    }
-
-    for (final link in university.programLinks ?? const <ProgramLinks>[]) {
-      final program = link.program;
-      if (program == null) continue;
-      add(program.track);
-    }
-    return values;
+  Set<String> _trackTypes(AdminUniversity u) {
+    return u.programLinks
+            ?.map((e) => e.program?.track?.toUpperCase() ?? '')
+            .where((e) => e.isNotEmpty)
+            .toSet() ??
+        {};
   }
 
-  double? _minimumAdmissionRate(AdminUniversity university) {
-    double? minimumRate;
-    for (final link in university.programLinks ?? const <ProgramLinks>[]) {
-      final rate = link.program?.minAdmissionRate?.toDouble();
-      if (rate == null) continue;
-      minimumRate = minimumRate == null ? rate : (rate < minimumRate ? rate : minimumRate);
-    }
-    return minimumRate;
+  double? _minimumAdmissionRate(AdminUniversity u) {
+    return u.programLinks
+        ?.map((e) => e.program?.minAdmissionRate?.toDouble())
+        .whereType<double>()
+        .fold<double?>(
+          null,
+          (min, val) => min == null || val < min ? val : min,
+        );
   }
 
-  String _shortCode(String name) {
-    final parts = name
-        .split(RegExp(r'\s+'))
-        .where((part) => part.isNotEmpty)
-        .toList();
-    if (parts.isEmpty) return 'UNI';
-    if (parts.length == 1) {
-      final end = parts.first.length > 3 ? 3 : parts.first.length;
-      return parts.first.substring(0, end).toUpperCase();
-    }
-    return parts.take(3).map((part) => part[0].toUpperCase()).join();
+  bool _isScientificAndLiterary(String v) {
+    return v.replaceAll(' ', '').toUpperCase() == 'SCIENTIFICANDLITERARY';
   }
 
-  Color _colorFromSeed(String seed) {
-    final hash = seed.hashCode.abs();
-    final colors = <Color>[
-      const Color(0xFF2E5FA7),
-      const Color(0xFFBD1F2D),
-      const Color(0xFF1A8A52),
-      const Color(0xFF8351C9),
-      const Color(0xFF00838F),
-    ];
-    return colors[hash % colors.length];
+  String _resolveCountryFlag(CountryMaster c) {
+    if (c.value.startsWith('http')) return c.value;
+    final code = c.value.toLowerCase();
+    return code.length == 2 ? 'https://flagcdn.com/w40/$code.png' : '';
   }
 
-  String _resolveCountryFlag(CountryMaster country) {
-    if (country.value.startsWith('http://') ||
-        country.value.startsWith('https://')) {
-      return country.value;
-    }
-    final code = country.value.trim().toLowerCase();
-    if (code.length == 2) {
-      return 'https://flagcdn.com/w40/$code.png';
-    }
-    return '';
-  }
-
-  String _toAbsoluteUrl(String pathOrUrl) {
-    if (pathOrUrl.isEmpty) return '';
-    if (pathOrUrl.startsWith('http://') || pathOrUrl.startsWith('https://')) {
-      return pathOrUrl;
-    }
-    final normalized = pathOrUrl.startsWith('/') ? pathOrUrl : '/$pathOrUrl';
-    return '${ApiConfig.baseUrl}$normalized';
+  String _toAbsoluteUrl(String path) {
+    if (path.startsWith('http')) return path;
+    return '${ApiConfig.baseUrl}/${path.replaceAll(RegExp(r'^/'), '')}';
   }
 
   @override
