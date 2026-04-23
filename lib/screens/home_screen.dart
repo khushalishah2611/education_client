@@ -295,6 +295,15 @@ class _HomeScreenState extends State<HomeScreen> {
     return null;
   }
 
+  String _resolveMandatoryOmanCountryName() {
+    for (final country in _countryOptions) {
+      if (country.dialCode.trim() == '+968') {
+        return country.name;
+      }
+    }
+    return 'Oman';
+  }
+
   Future<void> _refreshHomeData() async {
     await Future.wait<void>([_loadBanners(), _loadUniversities()]);
   }
@@ -358,8 +367,11 @@ class _HomeScreenState extends State<HomeScreen> {
         onAcademicChanged: (value) => setState(() => _selectedAcademic = value),
         onTrackChanged: (value) => setState(() => _selectedTrack = value),
         onResetFilters: () => setState(() {
-          _skipAutoCountrySelection = true;
-          _selectedCountry = null;
+          final isOmanLogin = (_loginDialCode ?? '').trim() == '+968';
+          _skipAutoCountrySelection = !isOmanLogin;
+          _selectedCountry = isOmanLogin
+              ? _resolveMandatoryOmanCountryName()
+              : null;
           _selectedAcademic = null;
           _selectedTrack = null;
           _resultController.clear();
