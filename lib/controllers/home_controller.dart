@@ -158,10 +158,6 @@ class HomeController extends ChangeNotifier {
     final enteredResult = double.tryParse(resultController.text.trim());
 
     return source.where((u) {
-      if (!_isEligibleOmanUniversity(u)) {
-        return false;
-      }
-
       if (_selectedCountry != null &&
           _selectedCountry!.isNotEmpty &&
           (u.country ?? '').toLowerCase() != _selectedCountry!.toLowerCase()) {
@@ -190,18 +186,6 @@ class HomeController extends ChangeNotifier {
 
       return true;
     }).toList();
-  }
-
-  bool _isEligibleOmanUniversity(AdminUniversity u) {
-    final bool isAccredited = u.accredited == true;
-    final String normalizedCountry = (u.country ?? '').trim().toLowerCase();
-    final String normalizedMobile = (u.mobile ?? '').trim();
-    final bool isOman =
-        normalizedCountry == 'oman' ||
-        normalizedCountry == 'om' ||
-        normalizedMobile.startsWith('+968');
-
-    return isAccredited && isOman;
   }
 
   bool _matchesTrack(AdminUniversity u) {

@@ -156,7 +156,9 @@ class HomeApiService {
       throw Exception('Failed to load countries.');
     }
 
-    return _asList(decoded['data'] ?? decoded)
+    return _asList(
+          decoded['data'] ?? decoded['items'] ?? decoded['results'] ?? decoded,
+        )
         .whereType<Map<String, dynamic>>()
         .map(CountryMaster.fromJson)
         .where((item) => item.nameEn.isNotEmpty && item.isActive)
