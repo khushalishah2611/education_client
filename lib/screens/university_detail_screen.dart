@@ -247,76 +247,72 @@ class _UniversityDetailScreenState extends State<UniversityDetailScreen> {
                           ),
                         ),
 
-                      if (data.academicList?.isNotEmpty ?? false) ...[
-                        if (_showCollegeCourseTable)
-                          Padding(
-                            padding: const EdgeInsets.symmetric(horizontal: 16),
-                            child: Column(
-                              children: (data.academicList ?? []).map((entry) {
-                                final String collegeName =
-                                    (entry.college?.trim().isNotEmpty ?? false)
-                                    ? entry.college!.trim()
-                                    : '';
-                                final bool isExpanded = _expandedColleges
-                                    .contains(collegeName);
+                      if (data.academicList?.isNotEmpty ?? false)
+                        Padding(
+                          padding: const EdgeInsets.symmetric(horizontal: 16),
+                          child: Column(
+                            children: (data.academicList ?? []).map((entry) {
+                              final String collegeName =
+                                  (entry.college?.trim().isNotEmpty ?? false)
+                                  ? entry.college!.trim()
+                                  : '';
+                              final bool isExpanded = _expandedColleges
+                                  .contains(collegeName);
 
-                                return _CollegeAccordion(
-                                  collegeName: collegeName,
-                                  academicEntry: entry,
-                                  isExpanded: isExpanded,
-                                  selectedCourses: _selectedCourses,
-                                  onToggleExpand: () {
-                                    setState(() {
-                                      if (isExpanded) {
-                                        _expandedColleges.remove(collegeName);
-                                      } else {
-                                        _expandedColleges.add(collegeName);
-                                      }
-                                    });
-                                  },
-                                  onToggleCourse: (courseKey) {
-                                    setState(() {
-                                      if (_selectedCourses.contains(
-                                        courseKey,
-                                      )) {
-                                        _selectedCourses.remove(courseKey);
-                                      } else {
-                                        _selectedCourses.add(courseKey);
-                                      }
-                                    });
-                                  },
-                                  adminUniversity: data,
-                                );
-                              }).toList(),
+                              return _CollegeAccordion(
+                                collegeName: collegeName,
+                                academicEntry: entry,
+                                isExpanded: isExpanded,
+                                selectedCourses: _selectedCourses,
+                                onToggleExpand: () {
+                                  setState(() {
+                                    if (isExpanded) {
+                                      _expandedColleges.remove(collegeName);
+                                    } else {
+                                      _expandedColleges.add(collegeName);
+                                    }
+                                  });
+                                },
+                                onToggleCourse: (courseKey) {
+                                  setState(() {
+                                    if (_selectedCourses.contains(courseKey)) {
+                                      _selectedCourses.remove(courseKey);
+                                    } else {
+                                      _selectedCourses.add(courseKey);
+                                    }
+                                  });
+                                },
+                                adminUniversity: data,
+                              );
+                            }).toList(),
+                          ),
+                        )
+                      else
+                        Padding(
+                          padding: const EdgeInsets.all(16.0),
+                          child: Container(
+                            width: double.infinity,
+                            padding: const EdgeInsets.symmetric(
+                              vertical: 20,
+                              horizontal: 12,
                             ),
-                          )
-                        else
-                          Padding(
-                            padding: const EdgeInsets.all(16.0),
-                            child: Container(
-                              width: double.infinity,
-                              padding: const EdgeInsets.symmetric(
-                                vertical: 20,
-                                horizontal: 12,
+                            decoration: BoxDecoration(
+                              borderRadius: BorderRadius.circular(10),
+                              border: Border.all(
+                                color: const Color(0xFFE6E6E6),
                               ),
-                              decoration: BoxDecoration(
-                                borderRadius: BorderRadius.circular(10),
-                                border: Border.all(
-                                  color: const Color(0xFFE6E6E6),
-                                ),
-                                color: Colors.white,
-                              ),
-                              child: Text(
-                                context.l10n.text('No courses available'),
-                                textAlign: TextAlign.center,
-                                style: TextStyle(
-                                  color: Color(0xFF616161),
-                                  fontWeight: FontWeight.w500,
-                                ),
+                              color: Colors.white,
+                            ),
+                            child: Text(
+                              context.l10n.text('No courses available'),
+                              textAlign: TextAlign.center,
+                              style: TextStyle(
+                                color: Color(0xFF616161),
+                                fontWeight: FontWeight.w500,
                               ),
                             ),
                           ),
-                      ],
+                        ),
                     ],
                   ),
                 ),
@@ -347,7 +343,7 @@ class _CollegeAccordion extends StatelessWidget {
   final AdminUniversity adminUniversity;
   final VoidCallback onToggleExpand;
   final ValueChanged<String> onToggleCourse;
-  static const double _courseWidth = 180;
+  static const double _courseWidth = 200;
   static const double _feeWidth = 96;
   static const double _admissionWidth = 88;
   static const double _trackWidth = 120;
@@ -549,13 +545,11 @@ class _CollegeAccordion extends StatelessWidget {
                   const SizedBox(height: 4),
 
                   InkWell(
-                    onTap: ()
-                    {
+                    onTap: () {
                       Navigator.push(
                         context,
                         MaterialPageRoute(
-                          builder: (_) => UploadDocumentsScreen(
-                          ),
+                          builder: (_) => UploadDocumentsScreen(),
                         ),
                       );
                     },
