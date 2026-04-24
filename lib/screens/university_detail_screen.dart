@@ -33,7 +33,7 @@ class _UniversityDetailScreenState extends State<UniversityDetailScreen> {
     return isAccredited && isOman;
   }
 
-  Map<String, List<CourseDetails>> get _collegeCourses {
+  Map<String, List<AdminUniversity>> get _collegeCourses {
     final Map<String, List<CourseDetails>> grouped =
         <String, List<CourseDetails>>{};
     final List<ProgramLinks> links = data.programLinks ?? <ProgramLinks>[];
@@ -81,7 +81,7 @@ class _UniversityDetailScreenState extends State<UniversityDetailScreen> {
 
   @override
   Widget build(BuildContext context) {
-    final Map<String, List<CourseDetails>> collegeCourses = _collegeCourses;
+    final Map<String, List<AdminUniversity>> collegeCourses = _collegeCourses;
 
     return Directionality(
       textDirection: Directionality.of(context),
@@ -266,7 +266,7 @@ class _UniversityDetailScreenState extends State<UniversityDetailScreen> {
                           child: Column(
                             children: collegeCourses.entries.map((entry) {
                               final String collegeName = entry.key;
-                              final List<CourseDetails> courses = entry.value;
+                              final List<AdminUniversity> courses = entry.value;
                               final bool isExpanded = _expandedColleges
                                   .contains(collegeName);
                               return _CollegeAccordion(
@@ -320,7 +320,7 @@ class _CollegeAccordion extends StatelessWidget {
   });
 
   final String collegeName;
-  final List<CourseDetails> courses;
+  final List<AdminUniversity> courses;
   final bool isExpanded;
   final Set<String> selectedCourses;
   final VoidCallback onToggleExpand;
@@ -474,7 +474,7 @@ class _CollegeAccordion extends StatelessWidget {
                                 children: [
                                   SizedBox(
                                     width: _courseWidth,
-                                    child: Text(course.name ?? 'N/A'),
+                                    child: Text(course.academicList ?? 'N/A'),
                                   ),
                                   SizedBox(
                                     width: _feeWidth,
