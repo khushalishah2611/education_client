@@ -6,6 +6,7 @@ import '../core/app_theme.dart';
 import '../widgets/common_widgets.dart';
 import '../widgets/flow_widgets.dart';
 import 'course_detail_screen.dart';
+
 class UniversityDetailScreen extends StatefulWidget {
   const UniversityDetailScreen({super.key, required this.data});
 
@@ -343,6 +344,7 @@ class _UniversityDetailScreenState extends State<UniversityDetailScreen> {
                                       }
                                     });
                                   },
+                                  adminUniversity: data,
                                 );
                               }).toList(),
                             ),
@@ -394,12 +396,14 @@ class _CollegeAccordion extends StatelessWidget {
     required this.selectedCourses,
     required this.onToggleExpand,
     required this.onToggleCourse,
+    required this.adminUniversity,
   });
 
   final String collegeName;
   final AcademicList academicEntry;
   final bool isExpanded;
   final Set<String> selectedCourses;
+  final AdminUniversity adminUniversity;
   final VoidCallback onToggleExpand;
   final ValueChanged<String> onToggleCourse;
   static const double _courseWidth = 180;
@@ -470,7 +474,8 @@ class _CollegeAccordion extends StatelessWidget {
                           details: details,
                           isSelected: isSelected,
                           onTap: () => onToggleCourse(courseKey),
-                            context: context
+                          context: context,
+                          adminUniversity: adminUniversity,
                         );
                       }).toList()
                     else
@@ -519,7 +524,9 @@ class _CollegeAccordion extends StatelessWidget {
   Widget _buildCourseRow({
     required CourseDetails details,
     required bool isSelected,
-    required VoidCallback onTap, required BuildContext context,
+    required VoidCallback onTap,
+    required BuildContext context,
+    required adminUniversity,
   }) {
     return InkWell(
       onTap: onTap,
@@ -576,8 +583,8 @@ class _CollegeAccordion extends StatelessWidget {
                       Navigator.of(context).push(
                         MaterialPageRoute(
                           builder: (_) => CourseDetailScreen(
-                            university: widget.university,
-                            course: course,
+                            university: adminUniversity,
+                            course: details,
                           ),
                         ),
                       );
@@ -622,7 +629,7 @@ class _CollegeAccordion extends StatelessWidget {
                   ),
                 ],
               ),
-            )
+            ),
           ],
         ),
       ),

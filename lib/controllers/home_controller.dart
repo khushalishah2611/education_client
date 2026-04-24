@@ -176,7 +176,7 @@ class HomeController extends ChangeNotifier {
 
     return source.where((u) {
       if (u.accredited != true) return false;
-
+      if ((u.status ?? '').trim().toLowerCase() != 'active') return false;
       final effectiveCountry =
       (_loginDialCode ?? '').trim() == '+968'
           ? 'Oman'
