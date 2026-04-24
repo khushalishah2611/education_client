@@ -927,7 +927,6 @@ class _UniversityCard extends StatelessWidget {
                     mainAxisAlignment: MainAxisAlignment.spaceBetween,
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
-
                       /// LEFT SIDE (Location)
                       Expanded(
                         child: Row(
@@ -937,10 +936,7 @@ class _UniversityCard extends StatelessWidget {
                             const SizedBox(width: 4),
                             Expanded(
                               child: Text(
-                                [
-                                  data.city,
-                                  data.country ?? data.state,
-                                ].where((e) => e?.isNotEmpty == true).join(', '),
+                                data.country ?? "",
                                 maxLines: 2,
                                 overflow: TextOverflow.ellipsis,
                                 style: const TextStyle(fontSize: 11),
@@ -954,7 +950,11 @@ class _UniversityCard extends StatelessWidget {
                       Row(
                         mainAxisSize: MainAxisSize.min,
                         children: [
-                          const Icon(Icons.star, color: Color(0xFFFFB300), size: 16),
+                          const Icon(
+                            Icons.star,
+                            color: Color(0xFFFFB300),
+                            size: 16,
+                          ),
                           const SizedBox(width: 4),
                           Text(
                             (data.rating ?? 0).toStringAsFixed(1),
