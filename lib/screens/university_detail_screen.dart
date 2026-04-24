@@ -33,7 +33,7 @@ class _UniversityDetailScreenState extends State<UniversityDetailScreen> {
     return isAccredited && isOman;
   }
 
-  Map<String, List<AdminUniversity>> get _collegeCourses {
+  Map<String, List<CourseDetails>> get _collegeCourses {
     final Map<String, List<CourseDetails>> grouped =
         <String, List<CourseDetails>>{};
     final List<ProgramLinks> links = data.programLinks ?? <ProgramLinks>[];
@@ -81,7 +81,7 @@ class _UniversityDetailScreenState extends State<UniversityDetailScreen> {
 
   @override
   Widget build(BuildContext context) {
-    final Map<String, List<AdminUniversity>> collegeCourses = _collegeCourses;
+    final Map<String, List<AdminUniversity>> collegeCourses = _collegeCourses.cast<String, List<AdminUniversity>>();
 
     return Directionality(
       textDirection: Directionality.of(context),
@@ -474,25 +474,25 @@ class _CollegeAccordion extends StatelessWidget {
                                 children: [
                                   SizedBox(
                                     width: _courseWidth,
-                                    child: Text(course.academicList ?? 'N/A'),
+                                    child: Text(course.academicList?[0].college ?? 'N/A'),
                                   ),
-                                  SizedBox(
-                                    width: _feeWidth,
-                                    child: Text(
-                                      '${course.feePerCredit ?? '-'} ${course.currency ?? ''}'
-                                          .trim(),
-                                    ),
-                                  ),
-                                  SizedBox(
-                                    width: _admissionWidth,
-                                    child: Text(
-                                      '${course.minAdmissionRate ?? '-'}%',
-                                    ),
-                                  ),
-                                  SizedBox(
-                                    width: _trackWidth,
-                                    child: Text(course.track ?? '-'),
-                                  ),
+                                  // SizedBox(
+                                  //   width: _feeWidth,
+                                  //   child: Text(
+                                  //     '${course.programLinks?[0].program.requiredScore ?? '-'} ${course.currency ?? ''}'
+                                  //         .trim(),
+                                  //   ),
+                                  // ),
+                                  // SizedBox(
+                                  //   width: _admissionWidth,
+                                  //   child: Text(
+                                  //     '${course.minAdmissionRate ?? '-'}%',
+                                  //   ),
+                                  // ),
+                                  // SizedBox(
+                                  //   width: _trackWidth,
+                                  //   child: Text(course.track ?? '-'),
+                                  // ),
                                   SizedBox(
                                     width: _detailsWidth,
                                     child: Column(
