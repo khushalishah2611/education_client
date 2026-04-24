@@ -60,20 +60,64 @@ class _UniversityDetailScreenState extends State<UniversityDetailScreen> {
   }
 
   void _showAddressDialog() {
-    showDialog<void>(
+    showModalBottomSheet<void>(
       context: context,
-      builder: (_) {
-        return AlertDialog(
-          title: Text(context.l10n.text('location')),
-          content: Text(
-            data.address?.trim().isNotEmpty == true ? data.address! : '-',
-          ),
-          actions: [
-            TextButton(
-              onPressed: () => Navigator.of(context).pop(),
-              child: const Text('OK'),
+      isScrollControlled: true,
+      shape: const RoundedRectangleBorder(
+        borderRadius: BorderRadius.vertical(top: Radius.circular(20)),
+      ),
+      builder: (context) {
+        final String address = data.address?.trim().isNotEmpty == true
+            ? data.address!
+            : '-';
+
+        return SafeArea(
+          child: SizedBox(
+            height: MediaQuery.of(context).size.height * 0.3, // you can adjust
+            child: Padding(
+              padding: const EdgeInsets.fromLTRB(18, 14, 18, 26),
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  /// Header
+                  Row(
+                    children: [
+                      Expanded(
+                        child: Text(
+                          context.l10n.text('location'),
+                          style: const TextStyle(
+                            fontSize: 18,
+                            fontWeight: FontWeight.w700,
+                            color: AppColors.text,
+                          ),
+                        ),
+                      ),
+                      IconButton(
+                        onPressed: () => Navigator.of(context).pop(),
+                        icon: const Icon(Icons.close),
+                      ),
+                    ],
+                  ),
+
+                  const SizedBox(height: 8),
+
+                  /// Scrollable Address
+                  Expanded(
+                    child: SingleChildScrollView(
+                      child: Text(
+                        address,
+                        style: const TextStyle(
+                          height: 1.4,
+                          fontSize: 14,
+                          color: AppColors.textMuted,
+                        ),
+                      ),
+                    ),
+                  ),
+                ],
+              ),
             ),
-          ],
+          ),
         );
       },
     );
@@ -112,88 +156,91 @@ class _UniversityDetailScreenState extends State<UniversityDetailScreen> {
                     left: 20,
                     right: 20,
                     bottom: -40,
-                    child: Container(
-                      padding: const EdgeInsets.all(12),
-                      decoration: BoxDecoration(
-                        color: Colors.white,
-                        borderRadius: BorderRadius.circular(12),
-                        boxShadow: const [
-                          BoxShadow(
-                            color: AppColors.shadow,
-                            blurRadius: 18,
-                            offset: Offset(0, 8),
-                          ),
-                        ],
-                      ),
-                      child: Row(
-                        children: [
-                          Container(
-                            width: 64,
-                            height: 64,
-                            decoration: BoxDecoration(
-                              color: const Color(0xFFF3F3F3),
-                              borderRadius: BorderRadius.circular(10),
+                    child: InkWell(
+                      onTap: _showAddressDialog,
+                      child: Container(
+                        padding: const EdgeInsets.all(12),
+                        decoration: BoxDecoration(
+                          color: Colors.white,
+                          borderRadius: BorderRadius.circular(12),
+                          boxShadow: const [
+                            BoxShadow(
+                              color: AppColors.shadow,
+                              blurRadius: 18,
+                              offset: Offset(0, 8),
                             ),
-                            alignment: Alignment.center,
-                            child: Image.network(
-                              ImageUrlHelper.resolveUploadUrl(data.logoPath),
-                              fit: BoxFit.cover,
-                              errorBuilder: (_, __, ___) => Center(
-                                child: Image.asset('assets/images/logo.webp'),
+                          ],
+                        ),
+                        child: Row(
+                          children: [
+                            Container(
+                              width: 64,
+                              height: 64,
+                              decoration: BoxDecoration(
+                                color: const Color(0xFFF3F3F3),
+                                borderRadius: BorderRadius.circular(10),
+                              ),
+                              alignment: Alignment.center,
+                              child: Image.network(
+                                ImageUrlHelper.resolveUploadUrl(data.logoPath),
+                                fit: BoxFit.cover,
+                                errorBuilder: (_, __, ___) => Center(
+                                  child: Image.asset('assets/images/logo.webp'),
+                                ),
                               ),
                             ),
-                          ),
-                          const SizedBox(width: 12),
-                          Expanded(
-                            child: Column(
-                              crossAxisAlignment: CrossAxisAlignment.start,
-                              children: [
-                                Row(
-                                  children: [
-                                    Icon(
-                                      Icons.star,
-                                      color: Color(0xFFFFB300),
-                                      size: 16,
-                                    ),
-                                    SizedBox(width: 4),
-                                    Text(
-                                      data.averageRating!.toDouble().toString(),
-                                      style: TextStyle(
-                                        fontWeight: FontWeight.w700,
+                            const SizedBox(width: 12),
+                            Expanded(
+                              child: Column(
+                                crossAxisAlignment: CrossAxisAlignment.start,
+                                children: [
+                                  Row(
+                                    children: [
+                                      Icon(
+                                        Icons.star,
+                                        color: Color(0xFFFFB300),
+                                        size: 16,
                                       ),
+                                      SizedBox(width: 4),
+                                      Text(
+                                        data.averageRating!
+                                            .toDouble()
+                                            .toString(),
+                                        style: TextStyle(
+                                          fontWeight: FontWeight.w700,
+                                        ),
+                                      ),
+                                      SizedBox(width: 4),
+                                      Text(
+                                        '(${data.averageRating!.toDouble().toString()} reviews)',
+                                        style: TextStyle(
+                                          fontSize: 12,
+                                          color: AppColors.textMuted,
+                                        ),
+                                      ),
+                                    ],
+                                  ),
+                                  const SizedBox(height: 8),
+                                  Text(
+                                    data.name ?? "",
+                                    style: const TextStyle(
+                                      fontSize: 14,
+                                      fontWeight: FontWeight.w700,
                                     ),
-                                    SizedBox(width: 4),
-                                    Text(
-                                      '(${data.averageRating!.toDouble().toString()} reviews)',
-                                      style: TextStyle(
-                                        fontSize: 12,
+                                  ),
+                                  const SizedBox(height: 4),
+                                  Row(
+                                    crossAxisAlignment:
+                                        CrossAxisAlignment.start,
+                                    children: [
+                                      const Icon(
+                                        Icons.location_on_outlined,
+                                        size: 15,
                                         color: AppColors.textMuted,
                                       ),
-                                    ),
-                                  ],
-                                ),
-                                const SizedBox(height: 8),
-                                Text(
-                                  data.name ?? "",
-                                  style: const TextStyle(
-                                    fontSize: 14,
-                                    fontWeight: FontWeight.w700,
-                                  ),
-                                ),
-                                const SizedBox(height: 4),
-                                Row(
-                                  crossAxisAlignment: CrossAxisAlignment.start,
-                                  children: [
-                                    const Icon(
-                                      Icons.location_on_outlined,
-                                      size: 15,
-                                      color: AppColors.textMuted,
-                                    ),
-                                    const SizedBox(width: 4),
+                                      const SizedBox(width: 4),
 
-                                    Expanded(
-                                      child: InkWell(
-                                        onTap: _showAddressDialog,
+                                      Expanded(
                                         child: Text(
                                           data.address ?? "",
                                           maxLines: 1,
@@ -203,13 +250,13 @@ class _UniversityDetailScreenState extends State<UniversityDetailScreen> {
                                           ),
                                         ),
                                       ),
-                                    ),
-                                  ],
-                                ),
-                              ],
+                                    ],
+                                  ),
+                                ],
+                              ),
                             ),
-                          ),
-                        ],
+                          ],
+                        ),
                       ),
                     ),
                   ),
@@ -266,7 +313,7 @@ class _UniversityDetailScreenState extends State<UniversityDetailScreen> {
                                 final String collegeName =
                                     (entry.college?.trim().isNotEmpty ?? false)
                                     ? entry.college!.trim()
-                                    : 'College';
+                                    : '';
                                 final bool isExpanded = _expandedColleges
                                     .contains(collegeName);
 
@@ -286,7 +333,9 @@ class _UniversityDetailScreenState extends State<UniversityDetailScreen> {
                                   },
                                   onToggleCourse: (courseKey) {
                                     setState(() {
-                                      if (_selectedCourses.contains(courseKey)) {
+                                      if (_selectedCourses.contains(
+                                        courseKey,
+                                      )) {
                                         _selectedCourses.remove(courseKey);
                                       } else {
                                         _selectedCourses.add(courseKey);
@@ -356,7 +405,7 @@ class _CollegeAccordion extends StatelessWidget {
   static const double _feeWidth = 96;
   static const double _admissionWidth = 88;
   static const double _trackWidth = 120;
-  static const double _detailsWidth = 130;
+  static const double _detailsWidth = 100;
 
   @override
   Widget build(BuildContext context) {
@@ -376,7 +425,7 @@ class _CollegeAccordion extends StatelessWidget {
             onTap: onToggleExpand,
             child: Container(
               width: double.infinity,
-              color: const Color(0xFFF0F0F0),
+              color: AppColors.white,
               padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 14),
               child: Row(
                 children: [
@@ -391,7 +440,9 @@ class _CollegeAccordion extends StatelessWidget {
                     ),
                   ),
                   Icon(
-                    isExpanded ? Icons.keyboard_arrow_up : Icons.keyboard_arrow_down,
+                    isExpanded
+                        ? Icons.keyboard_arrow_up
+                        : Icons.keyboard_arrow_down,
                     color: const Color(0xFF595959),
                   ),
                 ],
@@ -402,18 +453,43 @@ class _CollegeAccordion extends StatelessWidget {
             SingleChildScrollView(
               scrollDirection: Axis.horizontal,
               child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
                   _buildTableHeader(),
-                  ...courseDetailsList.map((details) {
-                    final String courseKey =
-                        '$collegeName-${details.name ?? 'unknown-course'}';
-                    final bool isSelected = selectedCourses.contains(courseKey);
-                    return _buildCourseRow(
-                      details: details,
-                      isSelected: isSelected,
-                      onTap: () => onToggleCourse(courseKey),
-                    );
-                  }),
+                  ...[
+                    if (courseDetailsList.isNotEmpty)
+                      ...courseDetailsList.map((details) {
+                        final String courseKey =
+                            '$collegeName-${details.name ?? 'unknown-course'}';
+                        final bool isSelected = selectedCourses.contains(
+                          courseKey,
+                        );
+
+                        return _buildCourseRow(
+                          details: details,
+                          isSelected: isSelected,
+                          onTap: () => onToggleCourse(courseKey),
+                        );
+                      }).toList()
+                    else
+                      Padding(
+                        padding: const EdgeInsets.only(
+                          top: 12,
+                          left: 12,
+                          bottom: 12,
+                        ),
+                        child: Align(
+                          alignment: Alignment.topLeft,
+                          child: Text(
+                            'No data available',
+                            style: TextStyle(
+                              color: Color(0xFF9E9E9E),
+                              fontWeight: FontWeight.w500,
+                            ),
+                          ),
+                        ),
+                      ),
+                  ],
                 ],
               ),
             ),
@@ -432,7 +508,7 @@ class _CollegeAccordion extends StatelessWidget {
           _HeaderCell(width: _feeWidth, label: 'Credit\nHour Fee'),
           _HeaderCell(width: _admissionWidth, label: 'Min\nAdmis%'),
           _HeaderCell(width: _trackWidth, label: 'Track'),
-          _HeaderCell(width: _detailsWidth, label: 'Details\n/ Apply'),
+          _HeaderCell(width: _detailsWidth, label: 'Details / Apply'),
         ],
       ),
     );
@@ -446,7 +522,7 @@ class _CollegeAccordion extends StatelessWidget {
     return InkWell(
       onTap: onTap,
       child: Container(
-        padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 10),
+        padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 8),
         decoration: BoxDecoration(
           color: isSelected ? AppColors.peachSoft : Colors.white,
           border: Border(
@@ -544,10 +620,7 @@ class _HeaderCell extends StatelessWidget {
       width: width,
       child: Text(
         label,
-        style: const TextStyle(
-          fontWeight: FontWeight.w700,
-          height: 1.1,
-        ),
+        style: const TextStyle(fontWeight: FontWeight.w700, height: 1.1),
       ),
     );
   }
