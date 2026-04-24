@@ -73,16 +73,18 @@ class HomeController extends ChangeNotifier {
     notifyListeners();
 
     try {
-      final responses = await Future.wait([
-        _homeApiService.fetchUniversities(
-          country: _selectedCountry,
-          academic: _selectedAcademic,
-          track: _selectedTrack,
-          search: resultController.text,
-        ),
-        _homeApiService.fetchTrackMasters(),
-        _homeApiService.fetchAcademicMasters(),
-        _homeApiService.fetchCountries(),
+      final responses = await Future.wait<Object>([
+        _homeApiService
+            .fetchUniversities(
+              country: _selectedCountry,
+              academic: _selectedAcademic,
+              track: _selectedTrack,
+              search: resultController.text,
+            )
+            .catchError((_) => <AdminUniversity>[]),
+        _homeApiService.fetchTrackMasters().catchError((_) => <String>[]),
+        _homeApiService.fetchAcademicMasters().catchError((_) => <String>[]),
+        _homeApiService.fetchCountries().catchError((_) => <CountryMaster>[]),
       ]);
 
       final universitiesResponse = responses[0] as List<AdminUniversity>;
