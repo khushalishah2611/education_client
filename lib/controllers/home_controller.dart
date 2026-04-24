@@ -190,13 +190,12 @@ class HomeController extends ChangeNotifier {
       }
 
       if (_selectedAcademic != null && _selectedAcademic!.isNotEmpty) {
-        final match =
-            u.academicList?.any(
-                  (a) =>
-              (a.academicname ?? '').toLowerCase() ==
-                  _selectedAcademic!.toLowerCase(),
-            ) ??
-                false;
+        final selectedAcademic = _normalizeValue(_selectedAcademic);
+        final match = u.academicList?.any((a) {
+              final academicValues = _splitCsvValues(a.academicname);
+              return academicValues.contains(selectedAcademic);
+            }) ??
+            false;
         if (!match) return false;
       }
 
@@ -217,7 +216,7 @@ class HomeController extends ChangeNotifier {
     if (_selectedTrack == null || _selectedTrack!.isEmpty) return true;
 
     final tracks = _trackTypes(u);
-    return tracks.contains(_selectedTrack!.toUpperCase());
+    return tracks.contains(_normalizeValue(_selectedTrack));
   }
 
   Future<void> _loadSessionDefaults() async {
@@ -236,26 +235,66 @@ class HomeController extends ChangeNotifier {
   }
 
   Set<String> _trackTypes(AdminUniversity u) {
-    return u.programLinks
-        ?.map((e) => e.program?.track?.toUpperCase() ?? '')
-        .where((e) => e.isNotEmpty)
-        .toSet() ??
-        {};
+    final tracks = <String>{};
+
+    final topLevelTrack = _normalizeValue(u.track);
+    if (topLevelTrack.isNotEmpty) {
+      tracks.add(topLevelTrack);
+    }
+
+    for (final link in u.programLinks ?? const <ProgramLinks>[]) {
+      final value = _normalizeValue(link.program?.track);
+      if (value.isNotEmpty) {
+        tracks.add(value);
+      }
+    }
+
+    for (final academic in u.academicList ?? const <AcademicList>[]) {
+      final value = _normalizeValue(academic.program?.track);
+      if (value.isNotEmpty) {
+        tracks.add(value);
+      }
+    }
+
+    return tracks;
   }
 
   double? _minimumAdmissionRate(AdminUniversity u) {
-    return u.programLinks
-        ?.map((e) => e.program?.minAdmissionRate?.toDouble())
-        .whereType<double>()
-        .fold<double?>(
-      null,
-          (min, val) => min == null || val < min ? val : min,
+    final rates = <double>[];
+
+    rates.addAll(
+      (u.programLinks ?? const <ProgramLinks>[])
+          .map((e) => e.program?.minAdmissionRate?.toDouble())
+          .whereType<double>(),
     );
+
+    rates.addAll(
+      (u.academicList ?? const <AcademicList>[])
+          .map((e) => e.program?.minAdmissionRate?.toDouble())
+          .whereType<double>(),
+    );
+
+    if (rates.isEmpty) return null;
+
+    return rates.reduce((a, b) => a < b ? a : b);
   }
 
   bool _isScientificAndLiterary(String v) {
     return v.replaceAll(' ', '').toUpperCase() ==
         'SCIENTIFICANDLITERARY';
+  }
+
+  List<String> _splitCsvValues(String? csv) {
+    if (csv == null || csv.trim().isEmpty) return const [];
+    return csv
+        .split(',')
+        .map(_normalizeValue)
+        .where((e) => e.isNotEmpty)
+        .toList();
+  }
+
+  String _normalizeValue(String? value) {
+    return (value ?? '').trim().toUpperCase();
   }
 
   String _resolveCountryFlag(CountryMaster c) {
