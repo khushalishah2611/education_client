@@ -1,7 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
-import '../core/image_url_helper.dart';
 import '../models/admin_university.dart';
 import '../models/banner_item.dart';
 import '../models/country_master.dart';
@@ -96,9 +95,7 @@ class HomeController extends ChangeNotifier {
 
       allUniversities = universitiesResponse;
 
-      universities = _filterUniversities(
-        universitiesResponse,
-      ).map(_toUniversityData).toList();
+      universities = _filterUniversities(universitiesResponse);
 
       trackOptions = tracks
           .map((e) => e.trim())
@@ -131,9 +128,7 @@ class HomeController extends ChangeNotifier {
   }
 
   Future<void> applyFilters() async {
-    universities = _filterUniversities(
-      allUniversities,
-    ).map(_toUniversityData).toList();
+    universities = _filterUniversities(allUniversities);
     notifyListeners();
   }
 
@@ -244,19 +239,6 @@ class HomeController extends ChangeNotifier {
     return null;
   }
 
-  AdminUniversity _toUniversityData(AdminUniversity u) {
-    final location = [
-      u.city,
-      u.country ?? u.state,
-    ].where((e) => e != null && e!.isNotEmpty).join(', ');
-
-    return AdminUniversity(
-      name: u.name,
-      country: location.isEmpty ? 'N/A' : location,
-      logoPath: _toAbsoluteUrl(u.logoPath ?? ''),
-    );
-  }
-
   Set<String> _trackTypes(AdminUniversity u) {
     return u.programLinks
             ?.map((e) => e.program?.track?.toUpperCase() ?? '')
@@ -283,10 +265,6 @@ class HomeController extends ChangeNotifier {
     if (c.value.startsWith('http')) return c.value;
     final code = c.value.toLowerCase();
     return code.length == 2 ? 'https://flagcdn.com/w40/$code.png' : '';
-  }
-
-  String _toAbsoluteUrl(String path) {
-    return ImageUrlHelper.resolveUploadUrl(path);
   }
 
   @override

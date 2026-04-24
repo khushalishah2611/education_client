@@ -327,7 +327,7 @@ class _HomeScreenState extends State<HomeScreen> {
                                       return const _UniversityCardShimmer();
                                     }
                                     final item =
-                                        _controller.allUniversities[index];
+                                        _controller.universities[index];
                                     return _UniversityCard(
                                       data: item,
                                       onTap: () => Navigator.of(context).push(
@@ -938,7 +938,10 @@ class _UniversityCard extends StatelessWidget {
                             const SizedBox(width: 4),
                             Expanded(
                               child: Text(
-                                data.country ?? "",
+                                [
+                                  data.city,
+                                  data.country ?? data.state,
+                                ].where((e) => e?.isNotEmpty == true).join(', '),
                                 maxLines: 2,
                                 overflow: TextOverflow.ellipsis,
                                 style: const TextStyle(fontSize: 11),
