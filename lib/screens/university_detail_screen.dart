@@ -6,6 +6,7 @@ import '../core/app_theme.dart';
 import '../widgets/common_widgets.dart';
 import '../widgets/flow_widgets.dart';
 import 'course_detail_screen.dart';
+import 'upload_documents_screen.dart' show UploadDocumentsScreen;
 
 class UniversityDetailScreen extends StatefulWidget {
   const UniversityDetailScreen({super.key, required this.data});
@@ -547,23 +548,35 @@ class _CollegeAccordion extends StatelessWidget {
 
                   const SizedBox(height: 4),
 
-                  Container(
-                    padding: const EdgeInsets.symmetric(
-                      horizontal: 8,
-                      vertical: 6,
-                    ),
-                    decoration: BoxDecoration(
-                      color: const Color(0xFFBDEED3),
-                      borderRadius: BorderRadius.circular(6),
-                    ),
-                    child: const Text(
-                      'Apply & Pay\nApplication Fee',
-                      textAlign: TextAlign.center,
-                      style: TextStyle(
-                        fontSize: 10,
-                        fontWeight: FontWeight.w600,
-                        color: Color(0xFF206F49),
-                        height: 1.2,
+                  InkWell(
+                    onTap: ()
+                    {
+                      Navigator.push(
+                        context,
+                        MaterialPageRoute(
+                          builder: (_) => UploadDocumentsScreen(
+                          ),
+                        ),
+                      );
+                    },
+                    child: Container(
+                      padding: const EdgeInsets.symmetric(
+                        horizontal: 8,
+                        vertical: 6,
+                      ),
+                      decoration: BoxDecoration(
+                        color: const Color(0xFFBDEED3),
+                        borderRadius: BorderRadius.circular(6),
+                      ),
+                      child: const Text(
+                        'Apply & Pay\nApplication Fee',
+                        textAlign: TextAlign.center,
+                        style: TextStyle(
+                          fontSize: 10,
+                          fontWeight: FontWeight.w600,
+                          color: Color(0xFF206F49),
+                          height: 1.2,
+                        ),
                       ),
                     ),
                   ),

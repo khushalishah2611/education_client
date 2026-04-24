@@ -11,12 +11,10 @@ import 'payment_screen.dart';
 class UploadDocumentsScreen extends StatefulWidget {
   const UploadDocumentsScreen({
     super.key,
-    required this.university,
-    required this.course,
+
   });
 
-  final UniversityData university;
-  final CourseData course;
+
 
   @override
   State<UploadDocumentsScreen> createState() => _UploadDocumentsScreenState();
@@ -56,14 +54,14 @@ class _UploadDocumentsScreenState extends State<UploadDocumentsScreen> {
       return;
     }
 
-    Navigator.of(context).push(
-      MaterialPageRoute(
-        builder: (_) => PaymentScreen(
-          university: widget.university,
-          course: widget.course,
-        ),
-      ),
-    );
+    // Navigator.of(context).push(
+    //   MaterialPageRoute(
+    //     builder: (_) => PaymentScreen(
+    //       university: widget.university,
+    //       course: widget.course,
+    //     ),
+    //   ),
+    // );
   }
 
   @override
