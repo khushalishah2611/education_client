@@ -2,9 +2,7 @@ import 'package:education/core/app_localizations.dart';
 import 'package:education/core/image_url_helper.dart';
 import 'package:education/models/admin_university.dart';
 import 'package:flutter/material.dart';
-
 import '../core/app_theme.dart';
-import '../models/app_models.dart';
 import '../widgets/common_widgets.dart';
 import '../widgets/flow_widgets.dart';
 import 'upload_documents_screen.dart';
