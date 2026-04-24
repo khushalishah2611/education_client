@@ -263,31 +263,34 @@ class _UniversityDetailScreenState extends State<UniversityDetailScreen> {
                             padding: const EdgeInsets.symmetric(horizontal: 16),
                             child: Column(
                               children: (data.academicList ?? []).map((entry) {
-                                final String? collegeName = entry.college;
+                                final String collegeName =
+                                    (entry.college?.trim().isNotEmpty ?? false)
+                                    ? entry.college!.trim()
+                                    : 'College';
                                 final bool isExpanded = _expandedColleges
                                     .contains(collegeName);
 
                                 return _CollegeAccordion(
-                                  collegeName: collegeName ?? "",
-                                  courses: data,
+                                  collegeName: collegeName,
+                                  academicEntry: entry,
                                   isExpanded: isExpanded,
                                   selectedCourses: _selectedCourses,
                                   onToggleExpand: () {
                                     setState(() {
-                                      isExpanded
-                                          ? _expandedColleges.remove(
-                                              collegeName,
-                                            )
-                                          : _expandedColleges.add(
-                                              collegeName ?? "",
-                                            );
+                                      if (isExpanded) {
+                                        _expandedColleges.remove(collegeName);
+                                      } else {
+                                        _expandedColleges.add(collegeName);
+                                      }
                                     });
                                   },
                                   onToggleCourse: (courseKey) {
                                     setState(() {
-                                      _selectedCourses.contains(courseKey)
-                                          ? _selectedCourses.remove(courseKey)
-                                          : _selectedCourses.add(courseKey);
+                                      if (_selectedCourses.contains(courseKey)) {
+                                        _selectedCourses.remove(courseKey);
+                                      } else {
+                                        _selectedCourses.add(courseKey);
+                                      }
                                     });
                                   },
                                 );
@@ -336,7 +339,7 @@ class _UniversityDetailScreenState extends State<UniversityDetailScreen> {
 class _CollegeAccordion extends StatelessWidget {
   const _CollegeAccordion({
     required this.collegeName,
-    required this.courses,
+    required this.academicEntry,
     required this.isExpanded,
     required this.selectedCourses,
     required this.onToggleExpand,
@@ -344,7 +347,7 @@ class _CollegeAccordion extends StatelessWidget {
   });
 
   final String collegeName;
-  final AdminUniversity courses;
+  final AcademicList academicEntry;
   final bool isExpanded;
   final Set<String> selectedCourses;
   final VoidCallback onToggleExpand;
@@ -357,20 +360,43 @@ class _CollegeAccordion extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return SingleChildScrollView(
-      child: Column(
-        children: (courses.academicList ?? []).map((course) {
-          final String courseKey = '$collegeName-${course.college}';
-          final bool isSelected = selectedCourses.contains(courseKey);
+    final List<CourseDetails> courseDetailsList =
+        academicEntry.program?.courseDetails ?? <CourseDetails>[];
 
-          final courseDetailsList = course.program?.courseDetails ?? [];
+    return Column(
+      children: [
+        InkWell(
+          onTap: onToggleExpand,
+          child: Container(
+            decoration: BoxDecoration(
+              color: Colors.white,
+              border: const Border(
+                top: BorderSide(color: Color(0xFFE5E5E5)),
+              ),
+            ),
+            padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 10),
+            child: Row(
+              children: [
+                SizedBox(width: _courseWidth, child: Text(collegeName)),
+                const Spacer(),
+                Icon(
+                  isExpanded ? Icons.keyboard_arrow_down : Icons.chevron_right,
+                ),
+              ],
+            ),
+          ),
+        ),
+        if (isExpanded)
+          Column(
+            children: courseDetailsList.map((details) {
+              final String courseKey =
+                  '$collegeName-${details.name ?? 'unknown-course'}';
+              final bool isSelected = selectedCourses.contains(courseKey);
 
-          return Column(
-            children: [
-              /// 🔹 College Row (Expandable Header)
-              InkWell(
+              return InkWell(
                 onTap: () => onToggleCourse(courseKey),
                 child: Container(
+                  padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 10),
                   decoration: BoxDecoration(
                     color: isSelected ? AppColors.peachSoft : Colors.white,
                     border: Border(
@@ -383,80 +409,50 @@ class _CollegeAccordion extends StatelessWidget {
                       top: const BorderSide(color: Color(0xFFE5E5E5)),
                     ),
                   ),
-                  padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 10),
                   child: Row(
+                    crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
                       SizedBox(
                         width: _courseWidth,
-                        child: Text(course.college ?? 'College'),
+                        child: Text(details.name ?? 'N/A'),
                       ),
-                      const Spacer(),
-                      Icon(
-                        isSelected
-                            ? Icons.keyboard_arrow_down
-                            : Icons.chevron_right,
+                      SizedBox(
+                        width: _feeWidth,
+                        child: Text(
+                          '${details.creditHours?.toDouble() ?? 0.0} ${details.currency ?? ''}',
+                        ),
+                      ),
+                      SizedBox(
+                        width: _admissionWidth,
+                        child: Text(
+                          '${details.minAdmissionRate?.toDouble() ?? 0.0}',
+                        ),
+                      ),
+                      SizedBox(
+                        width: _trackWidth,
+                        child: Text(details.track ?? 'N/A'),
+                      ),
+                      SizedBox(
+                        width: _detailsWidth,
+                        child: const Row(
+                          children: [
+                            Text(
+                              'Details ',
+                              style: TextStyle(fontWeight: FontWeight.w600),
+                            ),
+                            Icon(Icons.chevron_right),
+                          ],
+                        ),
                       ),
                     ],
                   ),
                 ),
-              ),
-
-              /// 🔽 Expanded Course Details
-              if (isSelected)
-                Column(
-                  children: courseDetailsList.map((details) {
-                    return Container(
-                      padding: const EdgeInsets.symmetric(
-                          horizontal: 8, vertical: 10),
-                      decoration: const BoxDecoration(
-                        border: Border(
-                          top: BorderSide(color: Color(0xFFE5E5E5)),
-                        ),
-                      ),
-                      child: Row(
-                        crossAxisAlignment: CrossAxisAlignment.start,
-                        children: [
-                          SizedBox(
-                            width: _courseWidth,
-                            child: Text(details.name ?? 'N/A'),
-                          ),
-                          SizedBox(
-                            width: _feeWidth,
-                            child: Text(
-                              '${details.creditHours?.toDouble() ?? 0.0} ${details.currency ?? ''}',
-                            ),
-                          ),
-                          SizedBox(
-                            width: _admissionWidth,
-                            child: Text(
-                              '${details.minAdmissionRate?.toDouble() ?? 0.0}',
-                            ),
-                          ),
-                          SizedBox(
-                            width: _trackWidth,
-                            child: Text(details.track ?? 'N/A'),
-                          ),
-                          SizedBox(
-                            width: _detailsWidth,
-                            child: const Row(
-                              children: [
-                                Text(
-                                  'Details ',
-                                  style: TextStyle(fontWeight: FontWeight.w600),
-                                ),
-                                Icon(Icons.chevron_right),
-                              ],
-                            ),
-                          ),
-                        ],
-                      ),
-                    );
-                  }).toList(),
-                ),
-            ],
-          );
-        }).toList(),
-      ),
+              );
+            }).toList(),
+          )
+        else
+          const SizedBox.shrink(),
+      ],
     );
   }
 }
