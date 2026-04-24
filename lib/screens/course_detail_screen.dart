@@ -24,18 +24,28 @@ class CourseDetailScreen extends StatefulWidget {
 }
 
 class _CourseDetailScreenState extends State<CourseDetailScreen> {
-  final List<String> eligibilityList = [
-    'Bachelor’s degree from a recognized university',
-    'Minimum 50% aggregate marks',
-    'English proficiency (IELTS/TOEFL if applicable)',
-  ];
+  List<String> get eligibilityList =>
+      widget.course.eligibility?.where((item) => item.trim().isNotEmpty).toList() ?? const [];
 
-  final List<String> documentsList = [
-    'Academic Transcripts',
-    'Passport Copy',
-    'Statement of Purpose (SOP)',
-    'Resume / CV',
-  ];
+  List<String> get otherRequirementList =>
+      widget.course.otherRequirements?.where((item) => item.trim().isNotEmpty).toList() ?? const [];
+
+  List<String> get admissionRequirementList {
+    final requirements = <String>[];
+    if (widget.course.minAdmissionRate != null) {
+      requirements.add('Minimum admission rate: ${widget.course.minAdmissionRate}%');
+    }
+    if (widget.course.requiredScore != null) {
+      requirements.add('Required score: ${widget.course.requiredScore}');
+    }
+    return requirements;
+  }
+
+  String _priceWithCurrency(num? amount) {
+    final currency = widget.course.currency?.trim() ?? '';
+    if (amount == null) return '-';
+    return currency.isEmpty ? amount.toString() : '$currency $amount';
+  }
 
   void _showAddressDialog() {
     showAddressBottomSheet(
@@ -197,46 +207,33 @@ class _CourseDetailScreenState extends State<CourseDetailScreen> {
               child: ListView(
                 padding: EdgeInsets.zero,
                 children: [
-                  /// 🔷 ELIGIBILITY
-                  const Padding(
-                    padding: EdgeInsets.symmetric(horizontal: 20),
-                    child: Text('Eligibility',
-                        style: TextStyle(
-                            fontSize: 18, fontWeight: FontWeight.w700)),
+                  Padding(
+                    padding: const EdgeInsets.fromLTRB(20, 0, 20, 4),
+                    child: _InfoDetailsCard(
+                      course: widget.course,
+                      priceWithCurrency: _priceWithCurrency,
+                    ),
                   ),
 
-                  Padding(
-                    padding: const EdgeInsets.fromLTRB(20, 10, 20, 0),
-                    child: Column(
-                      children: List.generate(
-                        eligibilityList.length,
-                            (index) =>
-                            _BulletLine(eligibilityList[index]),
-                      ),
-                    ),
+                  const SizedBox(height: 16),
+
+                  _RequirementSection(
+                    title: 'Eligibility',
+                    items: eligibilityList,
                   ),
 
                   const SizedBox(height: 20),
 
-                  /// 🔷 DOCUMENTS
-                  const Padding(
-                    padding: EdgeInsets.symmetric(horizontal: 20),
-                    child: Text('Required Documents',
-                        style: TextStyle(
-                            fontSize: 18, fontWeight: FontWeight.w700)),
+                  _RequirementSection(
+                    title: 'Admission Requirements',
+                    items: admissionRequirementList,
                   ),
 
-                  Padding(
-                    padding: const EdgeInsets.fromLTRB(20, 12, 20, 0),
-                    child: Column(
-                      children: List.generate(
-                        documentsList.length,
-                            (index) => Padding(
-                          padding: const EdgeInsets.only(bottom: 8),
-                          child: _DocTile(documentsList[index]),
-                        ),
-                      ),
-                    ),
+                  const SizedBox(height: 20),
+
+                  _RequirementSection(
+                    title: 'Other Requirements',
+                    items: otherRequirementList,
                   ),
 
                   const SizedBox(height: 20),
@@ -271,6 +268,198 @@ class _CourseDetailScreenState extends State<CourseDetailScreen> {
     );
   }
 }
+
+class _InfoDetailsCard extends StatelessWidget {
+  const _InfoDetailsCard({
+    required this.course,
+    required this.priceWithCurrency,
+  });
+
+  final CourseDetails course;
+  final String Function(num? amount) priceWithCurrency;
+
+  @override
+  Widget build(BuildContext context) {
+    return Container(
+      decoration: BoxDecoration(
+        color: Colors.white,
+        borderRadius: BorderRadius.circular(10),
+        border: Border.all(color: const Color(0xFFE7E2DA)),
+      ),
+      child: Column(
+        children: [
+          Container(
+            decoration: const BoxDecoration(
+              color: Color(0xFFE5F8F2),
+              borderRadius: BorderRadius.vertical(top: Radius.circular(10)),
+            ),
+            padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 10),
+            child: const Row(
+              children: [
+                Expanded(
+                  child: Text(
+                    'Information',
+                    style: TextStyle(fontWeight: FontWeight.w700, fontSize: 12),
+                  ),
+                ),
+                Expanded(
+                  child: Text(
+                    'Details',
+                    textAlign: TextAlign.right,
+                    style: TextStyle(fontWeight: FontWeight.w700, fontSize: 12),
+                  ),
+                ),
+              ],
+            ),
+          ),
+          _InfoRow(label: 'Course Duration', value: course.duration ?? '-'),
+          _InfoRow(label: 'Credit Hours', value: '${course.creditHours ?? '-'}'),
+          _InfoRow(label: 'Min Admission Rate', value: '${course.minAdmissionRate ?? '-'}%'),
+          _InfoRow(
+            label: 'Annual Fee',
+            valueWidget: _PriceValue(
+              basePrice: course.basePrice,
+              discountedPrice: course.discountedScore,
+              priceWithCurrency: priceWithCurrency,
+            ),
+          ),
+          _InfoRow(
+            label: 'Application Fee',
+            value: priceWithCurrency(course.applicationFee),
+            isLast: true,
+          ),
+        ],
+      ),
+    );
+  }
+}
+
+class _PriceValue extends StatelessWidget {
+  const _PriceValue({
+    required this.basePrice,
+    required this.discountedPrice,
+    required this.priceWithCurrency,
+  });
+
+  final int? basePrice;
+  final int? discountedPrice;
+  final String Function(num? amount) priceWithCurrency;
+
+  @override
+  Widget build(BuildContext context) {
+    if (basePrice == null && discountedPrice == null) {
+      return const Text('-');
+    }
+
+    if (basePrice != null && discountedPrice != null && discountedPrice! < basePrice!) {
+      return Wrap(
+        alignment: WrapAlignment.end,
+        crossAxisAlignment: WrapCrossAlignment.center,
+        spacing: 8,
+        children: [
+          Text(
+            priceWithCurrency(basePrice),
+            style: const TextStyle(
+              color: Colors.red,
+              decoration: TextDecoration.lineThrough,
+              fontSize: 13,
+            ),
+          ),
+          Text(
+            priceWithCurrency(discountedPrice),
+            style: const TextStyle(
+              color: AppColors.primaryDark,
+              fontWeight: FontWeight.w700,
+            ),
+          ),
+        ],
+      );
+    }
+
+    return Text(
+      priceWithCurrency(discountedPrice ?? basePrice),
+      style: const TextStyle(fontWeight: FontWeight.w700),
+    );
+  }
+}
+
+class _InfoRow extends StatelessWidget {
+  const _InfoRow({
+    required this.label,
+    this.value,
+    this.valueWidget,
+    this.isLast = false,
+  });
+
+  final String label;
+  final String? value;
+  final Widget? valueWidget;
+  final bool isLast;
+
+  @override
+  Widget build(BuildContext context) {
+    return Container(
+      padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 10),
+      decoration: BoxDecoration(
+        border: Border(
+          bottom: isLast
+              ? BorderSide.none
+              : const BorderSide(color: Color(0xFFF1ECE4)),
+        ),
+      ),
+      child: Row(
+        children: [
+          Expanded(
+            child: Text(
+              label,
+              style: const TextStyle(fontSize: 13),
+            ),
+          ),
+          Expanded(
+            child: Align(
+              alignment: Alignment.centerRight,
+              child: valueWidget ?? Text(value ?? '-'),
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+}
+
+class _RequirementSection extends StatelessWidget {
+  const _RequirementSection({
+    required this.title,
+    required this.items,
+  });
+
+  final String title;
+  final List<String> items;
+
+  @override
+  Widget build(BuildContext context) {
+    return Column(
+      children: [
+        Padding(
+          padding: const EdgeInsets.symmetric(horizontal: 20),
+          child: Text(
+            title,
+            style: const TextStyle(fontSize: 18, fontWeight: FontWeight.w700),
+          ),
+        ),
+        Padding(
+          padding: const EdgeInsets.fromLTRB(20, 10, 20, 0),
+          child: items.isEmpty
+              ? const _BulletLine('No requirements available')
+              : Column(
+                  children: items.map(_BulletLine.new).toList(),
+                ),
+        ),
+      ],
+    );
+  }
+}
+
 class _BulletLine extends StatelessWidget {
   const _BulletLine(this.text);
 
