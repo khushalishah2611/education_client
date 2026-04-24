@@ -460,7 +460,7 @@ class _CollegeAccordion extends StatelessWidget {
                     if (courseDetailsList.isNotEmpty)
                       ...courseDetailsList.map((details) {
                         final String courseKey =
-                            '$collegeName-${details.name ?? 'unknown-course'}';
+                            '$collegeName-${details.name ?? ''}';
                         final bool isSelected = selectedCourses.contains(
                           courseKey,
                         );
