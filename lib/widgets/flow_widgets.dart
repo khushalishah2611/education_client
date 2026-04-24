@@ -3,6 +3,66 @@ import 'package:flutter/material.dart';
 import '../core/app_localizations.dart';
 import '../core/app_theme.dart';
 
+void showAddressBottomSheet({
+  required BuildContext context,
+  required String? address,
+}) {
+  showModalBottomSheet<void>(
+    context: context,
+    isScrollControlled: true,
+    shape: const RoundedRectangleBorder(
+      borderRadius: BorderRadius.vertical(top: Radius.circular(20)),
+    ),
+    builder: (sheetContext) {
+      final String value = address?.trim().isNotEmpty == true ? address!.trim() : '-';
+      return SafeArea(
+        child: SizedBox(
+          height: MediaQuery.of(sheetContext).size.height * 0.3,
+          child: Padding(
+            padding: const EdgeInsets.fromLTRB(18, 14, 18, 26),
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Row(
+                  children: [
+                    Expanded(
+                      child: Text(
+                        sheetContext.l10n.text('location'),
+                        style: const TextStyle(
+                          fontSize: 18,
+                          fontWeight: FontWeight.w700,
+                          color: AppColors.text,
+                        ),
+                      ),
+                    ),
+                    IconButton(
+                      onPressed: () => Navigator.of(sheetContext).pop(),
+                      icon: const Icon(Icons.close),
+                    ),
+                  ],
+                ),
+                const SizedBox(height: 8),
+                Expanded(
+                  child: SingleChildScrollView(
+                    child: Text(
+                      value,
+                      style: const TextStyle(
+                        height: 1.4,
+                        fontSize: 14,
+                        color: AppColors.textMuted,
+                      ),
+                    ),
+                  ),
+                ),
+              ],
+            ),
+          ),
+        ),
+      );
+    },
+  );
+}
+
 
 class TopRoundedHeader extends StatelessWidget {
   const TopRoundedHeader({

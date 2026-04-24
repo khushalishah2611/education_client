@@ -61,67 +61,7 @@ class _UniversityDetailScreenState extends State<UniversityDetailScreen> {
   }
 
   void _showAddressDialog() {
-    showModalBottomSheet<void>(
-      context: context,
-      isScrollControlled: true,
-      shape: const RoundedRectangleBorder(
-        borderRadius: BorderRadius.vertical(top: Radius.circular(20)),
-      ),
-      builder: (context) {
-        final String address = data.address?.trim().isNotEmpty == true
-            ? data.address!
-            : '-';
-
-        return SafeArea(
-          child: SizedBox(
-            height: MediaQuery.of(context).size.height * 0.3, // you can adjust
-            child: Padding(
-              padding: const EdgeInsets.fromLTRB(18, 14, 18, 26),
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  /// Header
-                  Row(
-                    children: [
-                      Expanded(
-                        child: Text(
-                          context.l10n.text('location'),
-                          style: const TextStyle(
-                            fontSize: 18,
-                            fontWeight: FontWeight.w700,
-                            color: AppColors.text,
-                          ),
-                        ),
-                      ),
-                      IconButton(
-                        onPressed: () => Navigator.of(context).pop(),
-                        icon: const Icon(Icons.close),
-                      ),
-                    ],
-                  ),
-
-                  const SizedBox(height: 8),
-
-                  /// Scrollable Address
-                  Expanded(
-                    child: SingleChildScrollView(
-                      child: Text(
-                        address,
-                        style: const TextStyle(
-                          height: 1.4,
-                          fontSize: 14,
-                          color: AppColors.textMuted,
-                        ),
-                      ),
-                    ),
-                  ),
-                ],
-              ),
-            ),
-          ),
-        );
-      },
-    );
+    showAddressBottomSheet(context: context, address: data.address);
   }
 
   @override

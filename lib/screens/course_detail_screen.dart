@@ -24,7 +24,6 @@ class CourseDetailScreen extends StatefulWidget {
 }
 
 class _CourseDetailScreenState extends State<CourseDetailScreen> {
-
   final List<String> eligibilityList = [
     'Bachelor’s degree from a recognized university',
     'Minimum 50% aggregate marks',
@@ -38,10 +37,19 @@ class _CourseDetailScreenState extends State<CourseDetailScreen> {
     'Resume / CV',
   ];
 
-  @override
+  void _showAddressDialog() {
+    showAddressBottomSheet(
+      context: context,
+      address: widget.university.address,
+    );
+  }
+
   @override
   Widget build(BuildContext context) {
-
+    final String courseTitle =
+        widget.course.name?.trim().isNotEmpty == true
+        ? widget.course.name!.trim()
+        : 'Course Details';
 
     return Scaffold(
       body: AppBackground(
@@ -177,7 +185,7 @@ class _CourseDetailScreenState extends State<CourseDetailScreen> {
                   ),
                 ),
 
-                TopRoundedHeader(title: widget.course.name ?? ""),
+                TopRoundedHeader(title: courseTitle),
               ],
             ),
 
@@ -237,21 +245,22 @@ class _CourseDetailScreenState extends State<CourseDetailScreen> {
             ),
 
             /// 🔷 BUTTON (FIXED)
-            Padding(
-              padding: const EdgeInsets.all(16),
-              child: AppPrimaryButton(
-                label: context.l10n.text('Save'),
-                onPressed: () {
-                  // Navigator.push(
-                  //   context,
-                  //   MaterialPageRoute(
-                  //     builder: (_) => UploadDocumentsScreen(
-                  //       university: widget.university,
-                  //       course: widget.course,
-                  //     ),
-                  //   ),
-                  // );
-                }
+            SafeArea(
+              top: false,
+              child: Padding(
+                padding: const EdgeInsets.all(16),
+                child: AppPrimaryButton(
+                  label: context.l10n.text('Save'),
+                  onPressed: () => Navigator.push(
+                    context,
+                    MaterialPageRoute(
+                      builder: (_) => UploadDocumentsScreen(
+                        university: widget.university,
+                        course: widget.course,
+                      ),
+                    ),
+                  ),
+                ),
               ),
             ),
           ],
