@@ -304,8 +304,9 @@ class _UniversityDetailScreenState extends State<UniversityDetailScreen> {
                             ),
                           ),
                         ),
-                      if (_showCollegeCourseTable) ...[
-                        if (data.academicList?.isNotEmpty ?? false)
+
+                      if (data.academicList?.isNotEmpty ?? false) ...[
+                        if (_showCollegeCourseTable)
                           Padding(
                             padding: const EdgeInsets.symmetric(horizontal: 16),
                             child: Column(
