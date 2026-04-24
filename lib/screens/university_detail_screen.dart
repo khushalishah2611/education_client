@@ -5,7 +5,7 @@ import 'package:flutter/material.dart';
 import '../core/app_theme.dart';
 import '../widgets/common_widgets.dart';
 import '../widgets/flow_widgets.dart';
-
+import 'course_detail_screen.dart';
 class UniversityDetailScreen extends StatefulWidget {
   const UniversityDetailScreen({super.key, required this.data});
 
@@ -470,6 +470,7 @@ class _CollegeAccordion extends StatelessWidget {
                           details: details,
                           isSelected: isSelected,
                           onTap: () => onToggleCourse(courseKey),
+                            context: context
                         );
                       }).toList()
                     else
@@ -518,7 +519,7 @@ class _CollegeAccordion extends StatelessWidget {
   Widget _buildCourseRow({
     required CourseDetails details,
     required bool isSelected,
-    required VoidCallback onTap,
+    required VoidCallback onTap, required BuildContext context,
   }) {
     return InkWell(
       onTap: onTap,
@@ -570,20 +571,39 @@ class _CollegeAccordion extends StatelessWidget {
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  const Row(
-                    children: [
-                      Text(
-                        'Details',
-                        style: TextStyle(fontWeight: FontWeight.w600),
+                  InkWell(
+                    onTap: () {
+                      Navigator.of(context).push(
+                        MaterialPageRoute(
+                          builder: (_) => CourseDetailScreen(
+                            university: widget.university,
+                            course: course,
+                          ),
+                        ),
+                      );
+                    },
+                    child: Padding(
+                      padding: const EdgeInsets.symmetric(vertical: 4),
+                      child: Row(
+                        mainAxisSize: MainAxisSize.min,
+                        children: const [
+                          Text(
+                            'Details',
+                            style: TextStyle(fontWeight: FontWeight.w600),
+                          ),
+                          SizedBox(width: 4),
+                          Icon(Icons.chevron_right, size: 18),
+                        ],
                       ),
-                      Icon(Icons.chevron_right),
-                    ],
+                    ),
                   ),
+
+                  const SizedBox(height: 4),
+
                   Container(
-                    margin: const EdgeInsets.only(top: 2),
                     padding: const EdgeInsets.symmetric(
                       horizontal: 8,
-                      vertical: 4,
+                      vertical: 6,
                     ),
                     decoration: BoxDecoration(
                       color: const Color(0xFFBDEED3),
@@ -591,17 +611,18 @@ class _CollegeAccordion extends StatelessWidget {
                     ),
                     child: const Text(
                       'Apply & Pay\nApplication Fee',
+                      textAlign: TextAlign.center,
                       style: TextStyle(
                         fontSize: 10,
                         fontWeight: FontWeight.w600,
                         color: Color(0xFF206F49),
-                        height: 1.1,
+                        height: 1.2,
                       ),
                     ),
                   ),
                 ],
               ),
-            ),
+            )
           ],
         ),
       ),
