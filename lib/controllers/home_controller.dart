@@ -76,11 +76,11 @@ class HomeController extends ChangeNotifier {
       final responses = await Future.wait<Object>([
         _homeApiService
             .fetchUniversities(
-              country: _selectedCountry,
-              academic: _selectedAcademic,
-              track: _selectedTrack,
-              search: resultController.text,
-            )
+          country: _selectedCountry,
+          academic: _selectedAcademic,
+          track: _selectedTrack,
+          search: resultController.text,
+        )
             .catchError((_) => <AdminUniversity>[]),
         _homeApiService.fetchTrackMasters().catchError((_) => <String>[]),
         _homeApiService.fetchAcademicMasters().catchError((_) => <String>[]),
@@ -92,8 +92,10 @@ class HomeController extends ChangeNotifier {
       final academics = responses[2] as List<String>;
       final countries = responses[3] as List<CountryMaster>;
 
-      _selectedCountry ??= _resolveAutoCountry(countries);
+      /// ✅ Force Oman if +968
+      _selectedCountry = _resolveAutoCountry(countries) ?? _selectedCountry;
 
+      /// ✅ Apply university filter
       universities = _filterUniversities(universitiesResponse);
 
       trackOptions = tracks
@@ -103,16 +105,31 @@ class HomeController extends ChangeNotifier {
 
       academicOptions = academics;
 
+      /// 🔥 COUNTRY LIST FIX (MAIN PART)
+      final isOmanUser =
+          (_loginDialCode ?? '').trim() == '+968' ||
+              (_selectedCountry ?? '').toLowerCase() == 'oman';
+
       countryOptions = countries
+          .where((c) {
+        final name = (c.nameEn.isNotEmpty ? c.nameEn : c.value)
+            .toLowerCase()
+            .trim();
+
+        if (isOmanUser) {
+          return name.contains('oman'); // only Oman
+        }
+
+        return name.isNotEmpty;
+      })
           .map(
             (c) => CountryOption(
-              name: c.nameEn.isNotEmpty ? c.nameEn : c.value,
-              flagEmoji: c.flagEmoji,
-              flagImageUrl: _resolveCountryFlag(c),
-              dialCode: c.dialCode,
-            ),
-          )
-          .where((e) => e.name.trim().isNotEmpty)
+          name: c.nameEn.isNotEmpty ? c.nameEn : c.value,
+          flagEmoji: c.flagEmoji,
+          flagImageUrl: _resolveCountryFlag(c),
+          dialCode: c.dialCode,
+        ),
+      )
           .toList();
     } catch (_) {
       universities = [];
@@ -158,20 +175,28 @@ class HomeController extends ChangeNotifier {
     final enteredResult = double.tryParse(resultController.text.trim());
 
     return source.where((u) {
-      if (_selectedCountry != null &&
-          _selectedCountry!.isNotEmpty &&
-          (u.country ?? '').toLowerCase() != _selectedCountry!.toLowerCase()) {
+      if (u.accredited != true) return false;
+
+      final effectiveCountry =
+      (_loginDialCode ?? '').trim() == '+968'
+          ? 'Oman'
+          : _selectedCountry;
+
+      if (effectiveCountry != null &&
+          effectiveCountry.isNotEmpty &&
+          (u.country ?? '').toLowerCase() !=
+              effectiveCountry.toLowerCase()) {
         return false;
       }
 
       if (_selectedAcademic != null && _selectedAcademic!.isNotEmpty) {
         final match =
             u.academicList?.any(
-              (a) =>
-                  (a.academicname ?? '').toLowerCase() ==
+                  (a) =>
+              (a.academicname ?? '').toLowerCase() ==
                   _selectedAcademic!.toLowerCase(),
             ) ??
-            false;
+                false;
         if (!match) return false;
       }
 
@@ -205,27 +230,16 @@ class HomeController extends ChangeNotifier {
 
   String? _resolveAutoCountry(List<CountryMaster> countries) {
     if ((_loginDialCode ?? '').trim() == '+968') {
-      final match = countries.where((c) => c.dialCode.trim() == '+968');
-
-      if (match.isNotEmpty) {
-        final country = match.first;
-        return country.nameEn.trim().isNotEmpty
-            ? country.nameEn.trim()
-            : country.value.trim();
-      }
-
-      // fallback if API doesn't return Oman
       return 'Oman';
     }
-
     return null;
   }
 
   Set<String> _trackTypes(AdminUniversity u) {
     return u.programLinks
-            ?.map((e) => e.program?.track?.toUpperCase() ?? '')
-            .where((e) => e.isNotEmpty)
-            .toSet() ??
+        ?.map((e) => e.program?.track?.toUpperCase() ?? '')
+        .where((e) => e.isNotEmpty)
+        .toSet() ??
         {};
   }
 
@@ -234,13 +248,14 @@ class HomeController extends ChangeNotifier {
         ?.map((e) => e.program?.minAdmissionRate?.toDouble())
         .whereType<double>()
         .fold<double?>(
-          null,
+      null,
           (min, val) => min == null || val < min ? val : min,
-        );
+    );
   }
 
   bool _isScientificAndLiterary(String v) {
-    return v.replaceAll(' ', '').toUpperCase() == 'SCIENTIFICANDLITERARY';
+    return v.replaceAll(' ', '').toUpperCase() ==
+        'SCIENTIFICANDLITERARY';
   }
 
   String _resolveCountryFlag(CountryMaster c) {
