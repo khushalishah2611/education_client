@@ -23,21 +23,21 @@ class CourseDetailScreen extends StatefulWidget {
 
 class _CourseDetailScreenState extends State<CourseDetailScreen> {
   List<String> get eligibilityList =>
-      widget.course.eligibility?.where((item) => item.trim().isNotEmpty).toList() ?? const [];
+      widget.course.eligibility
+          ?.where((item) => item.trim().isNotEmpty)
+          .toList() ??
+      const [];
 
   List<String> get otherRequirementList =>
-      widget.course.otherRequirements?.where((item) => item.trim().isNotEmpty).toList() ?? const [];
-
-  List<String> get admissionRequirementList {
-    final requirements = <String>[];
-    if (widget.course.minAdmissionRate != null) {
-      requirements.add('Minimum admission rate: ${widget.course.minAdmissionRate}%');
-    }
-    if (widget.course.requiredScore != null) {
-      requirements.add('Required score: ${widget.course.requiredScore}');
-    }
-    return requirements;
-  }
+      widget.course.otherRequirements
+          ?.where((item) => item.trim().isNotEmpty)
+          .toList() ??
+      const [];
+  List<String> get admissionRequirementList =>
+      widget.course.eligibility
+          ?.where((item) => item.trim().isNotEmpty)
+          .toList() ??
+      [];
 
   String _priceWithCurrency(num? amount) {
     final currency = widget.course.currency?.trim() ?? '';
@@ -54,8 +54,7 @@ class _CourseDetailScreenState extends State<CourseDetailScreen> {
 
   @override
   Widget build(BuildContext context) {
-    final String courseTitle =
-        widget.course.name?.trim().isNotEmpty == true
+    final String courseTitle = widget.course.name?.trim().isNotEmpty == true
         ? widget.course.name!.trim()
         : 'Course Details';
 
@@ -75,11 +74,12 @@ class _CourseDetailScreenState extends State<CourseDetailScreen> {
                     height: 280,
                     width: double.infinity,
                     child: Image.network(
-                      ImageUrlHelper.resolveUploadUrl(widget.university.coverImagePath),
-                      fit: BoxFit.fill,
-                      errorBuilder: (_, __, ___) => Center(
-                        child: Image.asset('assets/images/logo.webp'),
+                      ImageUrlHelper.resolveUploadUrl(
+                        widget.university.coverImagePath,
                       ),
+                      fit: BoxFit.fill,
+                      errorBuilder: (_, __, ___) =>
+                          Center(child: Image.asset('assets/images/logo.webp')),
                     ),
                   ),
                 ),
@@ -114,7 +114,9 @@ class _CourseDetailScreenState extends State<CourseDetailScreen> {
                             ),
                             alignment: Alignment.center,
                             child: Image.network(
-                              ImageUrlHelper.resolveUploadUrl(widget.university.logoPath),
+                              ImageUrlHelper.resolveUploadUrl(
+                                widget.university.logoPath,
+                              ),
                               fit: BoxFit.cover,
                               errorBuilder: (_, __, ___) => Center(
                                 child: Image.asset('assets/images/logo.webp'),
@@ -162,8 +164,7 @@ class _CourseDetailScreenState extends State<CourseDetailScreen> {
                                 ),
                                 const SizedBox(height: 4),
                                 Row(
-                                  crossAxisAlignment:
-                                  CrossAxisAlignment.start,
+                                  crossAxisAlignment: CrossAxisAlignment.start,
                                   children: [
                                     const Icon(
                                       Icons.location_on_outlined,
@@ -199,42 +200,34 @@ class _CourseDetailScreenState extends State<CourseDetailScreen> {
 
             const SizedBox(height: 60),
 
-
             /// 🔷 SCROLLABLE CONTENT ONLY
             Expanded(
               child: ListView(
                 padding: EdgeInsets.zero,
                 children: [
                   Padding(
-                    padding: const EdgeInsets.fromLTRB(20, 0, 20, 4),
+                    padding: const EdgeInsets.fromLTRB(20, 0, 20, 0),
                     child: _InfoDetailsCard(
                       course: widget.course,
                       priceWithCurrency: _priceWithCurrency,
                     ),
                   ),
-
-                  const SizedBox(height: 16),
-
-                  _RequirementSection(
-                    title: 'Eligibility',
-                    items: eligibilityList,
-                  ),
-
                   const SizedBox(height: 20),
-
-                  _RequirementSection(
-                    title: 'Admission Requirements',
-                    items: admissionRequirementList,
+                  Padding(
+                    padding: const EdgeInsets.fromLTRB(20, 0, 20, 0),
+                    child: _RequirementSection(
+                      title: 'Admission Requirements',
+                      items: admissionRequirementList,
+                    ),
                   ),
-
                   const SizedBox(height: 20),
-
-                  _RequirementSection(
-                    title: 'Other Requirements',
-                    items: otherRequirementList,
+                  Padding(
+                    padding: const EdgeInsets.fromLTRB(20, 0, 20, 0),
+                    child: _RequirementSection(
+                      title: 'Other Requirements',
+                      items: otherRequirementList,
+                    ),
                   ),
-
-                  const SizedBox(height: 20),
                 ],
               ),
             ),
@@ -256,7 +249,7 @@ class _CourseDetailScreenState extends State<CourseDetailScreen> {
                     //     ),
                     //   ),
                     // );
-                  }
+                  },
                 ),
               ),
             ),
@@ -310,11 +303,20 @@ class _InfoDetailsCard extends StatelessWidget {
               ],
             ),
           ),
-          _InfoRow(label: 'Course Duration', value: course.duration ?? '-'),
-          _InfoRow(label: 'Credit Hours', value: '${course.creditHours ?? '-'}'),
-          _InfoRow(label: 'Min Admission Rate', value: '${course.minAdmissionRate ?? '-'}%'),
+          _InfoRow(
+            label: 'Credit Hours',
+            value: '${course.creditHours ?? '-'}',
+          ),
+          _InfoRow(
+            label: 'Min Admission Rate',
+            value: '${course.minAdmissionRate ?? '-'}%',
+          ),
           _InfoRow(
             label: 'Annual Fee',
+            value: priceWithCurrency(course.annualFee),
+          ),
+          _InfoRow(
+            label: 'Total Cost',
             valueWidget: _PriceValue(
               basePrice: course.basePrice,
               discountedPrice: course.discountedScore,
@@ -345,18 +347,24 @@ class _PriceValue extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    if (basePrice == null && discountedPrice == null) {
-      return const Text('-');
-    }
+    final double base = (basePrice ?? 0).toDouble();
 
-    if (basePrice != null && discountedPrice != null && discountedPrice! < basePrice!) {
+    // Jo discountedPrice percent hoy (e.g. 33)
+    final double discountPercent = (discountedPrice ?? 0).toDouble();
+    final double finalPrice = base - (base * discountPercent / 100);
+
+    // Valid discount check
+    if (basePrice != null &&
+        discountedPrice != null &&
+        discountPercent > 0 &&
+        discountPercent < 100) {
       return Wrap(
         alignment: WrapAlignment.end,
         crossAxisAlignment: WrapCrossAlignment.center,
         spacing: 8,
         children: [
           Text(
-            priceWithCurrency(basePrice),
+            priceWithCurrency(base),
             style: const TextStyle(
               color: Colors.red,
               decoration: TextDecoration.lineThrough,
@@ -364,7 +372,7 @@ class _PriceValue extends StatelessWidget {
             ),
           ),
           Text(
-            priceWithCurrency(discountedPrice),
+            priceWithCurrency(finalPrice),
             style: const TextStyle(
               color: AppColors.primaryDark,
               fontWeight: FontWeight.w700,
@@ -374,8 +382,9 @@ class _PriceValue extends StatelessWidget {
       );
     }
 
+    // Fallback (no discount)
     return Text(
-      priceWithCurrency(discountedPrice ?? basePrice),
+      priceWithCurrency(base),
       style: const TextStyle(fontWeight: FontWeight.w700),
     );
   }
@@ -407,12 +416,7 @@ class _InfoRow extends StatelessWidget {
       ),
       child: Row(
         children: [
-          Expanded(
-            child: Text(
-              label,
-              style: const TextStyle(fontSize: 13),
-            ),
-          ),
+          Expanded(child: Text(label, style: const TextStyle(fontSize: 13))),
           Expanded(
             child: Align(
               alignment: Alignment.centerRight,
@@ -426,10 +430,7 @@ class _InfoRow extends StatelessWidget {
 }
 
 class _RequirementSection extends StatelessWidget {
-  const _RequirementSection({
-    required this.title,
-    required this.items,
-  });
+  const _RequirementSection({required this.title, required this.items});
 
   final String title;
   final List<String> items;
@@ -437,21 +438,24 @@ class _RequirementSection extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
       children: [
         Padding(
-          padding: const EdgeInsets.symmetric(horizontal: 20),
+          padding: const EdgeInsets.symmetric(horizontal: 10),
           child: Text(
             title,
             style: const TextStyle(fontSize: 18, fontWeight: FontWeight.w700),
           ),
         ),
-        Padding(
-          padding: const EdgeInsets.fromLTRB(20, 10, 20, 0),
-          child: items.isEmpty
-              ? const _BulletLine('No requirements available')
-              : Column(
-                  children: items.map(_BulletLine.new).toList(),
-                ),
+        SizedBox(height: 10),
+        Card(
+          color: AppColors.white,
+          child: Padding(
+            padding: const EdgeInsets.fromLTRB(10, 10, 10, 0),
+            child: items.isEmpty
+                ? const _BulletLine('No requirements available')
+                : Column(children: items.map(_BulletLine.new).toList()),
+          ),
         ),
       ],
     );
