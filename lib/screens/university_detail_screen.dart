@@ -352,107 +352,203 @@ class _CollegeAccordion extends StatelessWidget {
   final Set<String> selectedCourses;
   final VoidCallback onToggleExpand;
   final ValueChanged<String> onToggleCourse;
-  static const double _courseWidth = 150;
-  static const double _feeWidth = 100;
-  static const double _admissionWidth = 80;
+  static const double _courseWidth = 180;
+  static const double _feeWidth = 96;
+  static const double _admissionWidth = 88;
   static const double _trackWidth = 120;
-  static const double _detailsWidth = 120;
+  static const double _detailsWidth = 130;
 
   @override
   Widget build(BuildContext context) {
     final List<CourseDetails> courseDetailsList =
         academicEntry.program?.courseDetails ?? <CourseDetails>[];
 
-    return Column(
-      children: [
-        InkWell(
-          onTap: onToggleExpand,
-          child: Container(
-            decoration: BoxDecoration(
-              color: Colors.white,
-              border: const Border(
-                top: BorderSide(color: Color(0xFFE5E5E5)),
-              ),
-            ),
-            padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 10),
-            child: Row(
-              children: [
-                SizedBox(width: _courseWidth, child: Text(collegeName)),
-                const Spacer(),
-                Icon(
-                  isExpanded ? Icons.keyboard_arrow_down : Icons.chevron_right,
-                ),
-              ],
-            ),
-          ),
-        ),
-        if (isExpanded)
-          Column(
-            children: courseDetailsList.map((details) {
-              final String courseKey =
-                  '$collegeName-${details.name ?? 'unknown-course'}';
-              final bool isSelected = selectedCourses.contains(courseKey);
-
-              return InkWell(
-                onTap: () => onToggleCourse(courseKey),
-                child: Container(
-                  padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 10),
-                  decoration: BoxDecoration(
-                    color: isSelected ? AppColors.peachSoft : Colors.white,
-                    border: Border(
-                      left: BorderSide(
-                        color: isSelected
-                            ? AppColors.primaryDark
-                            : Colors.transparent,
-                        width: 3,
+    return Container(
+      margin: const EdgeInsets.only(bottom: 10),
+      decoration: BoxDecoration(
+        color: Colors.white,
+        borderRadius: BorderRadius.circular(4),
+        border: Border.all(color: const Color(0xFFE5E5E5)),
+      ),
+      child: Column(
+        children: [
+          InkWell(
+            onTap: onToggleExpand,
+            child: Container(
+              width: double.infinity,
+              color: const Color(0xFFF0F0F0),
+              padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 14),
+              child: Row(
+                children: [
+                  Expanded(
+                    child: Text(
+                      collegeName.toUpperCase(),
+                      style: const TextStyle(
+                        fontSize: 14,
+                        fontWeight: FontWeight.w700,
+                        color: Color(0xFF6A6A6A),
                       ),
-                      top: const BorderSide(color: Color(0xFFE5E5E5)),
                     ),
                   ),
-                  child: Row(
-                    crossAxisAlignment: CrossAxisAlignment.start,
+                  Icon(
+                    isExpanded ? Icons.keyboard_arrow_up : Icons.keyboard_arrow_down,
+                    color: const Color(0xFF595959),
+                  ),
+                ],
+              ),
+            ),
+          ),
+          if (isExpanded)
+            SingleChildScrollView(
+              scrollDirection: Axis.horizontal,
+              child: Column(
+                children: [
+                  _buildTableHeader(),
+                  ...courseDetailsList.map((details) {
+                    final String courseKey =
+                        '$collegeName-${details.name ?? 'unknown-course'}';
+                    final bool isSelected = selectedCourses.contains(courseKey);
+                    return _buildCourseRow(
+                      details: details,
+                      isSelected: isSelected,
+                      onTap: () => onToggleCourse(courseKey),
+                    );
+                  }),
+                ],
+              ),
+            ),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildTableHeader() {
+    return Container(
+      color: const Color(0xFFE3E3E3),
+      padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 12),
+      child: Row(
+        children: const [
+          _HeaderCell(width: _courseWidth, label: 'Course'),
+          _HeaderCell(width: _feeWidth, label: 'Credit\nHour Fee'),
+          _HeaderCell(width: _admissionWidth, label: 'Min\nAdmis%'),
+          _HeaderCell(width: _trackWidth, label: 'Track'),
+          _HeaderCell(width: _detailsWidth, label: 'Details\n/ Apply'),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildCourseRow({
+    required CourseDetails details,
+    required bool isSelected,
+    required VoidCallback onTap,
+  }) {
+    return InkWell(
+      onTap: onTap,
+      child: Container(
+        padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 10),
+        decoration: BoxDecoration(
+          color: isSelected ? AppColors.peachSoft : Colors.white,
+          border: Border(
+            left: BorderSide(
+              color: isSelected ? AppColors.primaryDark : Colors.transparent,
+              width: 3,
+            ),
+            bottom: const BorderSide(color: Color(0xFFE9E9E9)),
+          ),
+        ),
+        child: Row(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            SizedBox(
+              width: _courseWidth,
+              child: Text(
+                details.name ?? 'N/A',
+                style: const TextStyle(fontSize: 32 / 2, height: 1.05),
+              ),
+            ),
+            SizedBox(
+              width: _feeWidth,
+              child: Text(
+                '${details.creditHours ?? 0} ${details.currency ?? ''}',
+                style: const TextStyle(fontWeight: FontWeight.w500),
+              ),
+            ),
+            SizedBox(
+              width: _admissionWidth,
+              child: Text(
+                '${details.minAdmissionRate ?? 0}%',
+                style: const TextStyle(fontWeight: FontWeight.w500),
+              ),
+            ),
+            SizedBox(
+              width: _trackWidth,
+              child: Text(
+                details.track ?? 'N/A',
+                style: const TextStyle(fontWeight: FontWeight.w500),
+              ),
+            ),
+            SizedBox(
+              width: _detailsWidth,
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  const Row(
                     children: [
-                      SizedBox(
-                        width: _courseWidth,
-                        child: Text(details.name ?? 'N/A'),
+                      Text(
+                        'Details',
+                        style: TextStyle(fontWeight: FontWeight.w600),
                       ),
-                      SizedBox(
-                        width: _feeWidth,
-                        child: Text(
-                          '${details.creditHours?.toDouble() ?? 0.0} ${details.currency ?? ''}',
-                        ),
-                      ),
-                      SizedBox(
-                        width: _admissionWidth,
-                        child: Text(
-                          '${details.minAdmissionRate?.toDouble() ?? 0.0}',
-                        ),
-                      ),
-                      SizedBox(
-                        width: _trackWidth,
-                        child: Text(details.track ?? 'N/A'),
-                      ),
-                      SizedBox(
-                        width: _detailsWidth,
-                        child: const Row(
-                          children: [
-                            Text(
-                              'Details ',
-                              style: TextStyle(fontWeight: FontWeight.w600),
-                            ),
-                            Icon(Icons.chevron_right),
-                          ],
-                        ),
-                      ),
+                      Icon(Icons.chevron_right),
                     ],
                   ),
-                ),
-              );
-            }).toList(),
-          )
-        else
-          const SizedBox.shrink(),
-      ],
+                  Container(
+                    margin: const EdgeInsets.only(top: 2),
+                    padding: const EdgeInsets.symmetric(
+                      horizontal: 8,
+                      vertical: 4,
+                    ),
+                    decoration: BoxDecoration(
+                      color: const Color(0xFFBDEED3),
+                      borderRadius: BorderRadius.circular(6),
+                    ),
+                    child: const Text(
+                      'Apply & Pay\nApplication Fee',
+                      style: TextStyle(
+                        fontSize: 10,
+                        fontWeight: FontWeight.w600,
+                        color: Color(0xFF206F49),
+                        height: 1.1,
+                      ),
+                    ),
+                  ),
+                ],
+              ),
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+}
+
+class _HeaderCell extends StatelessWidget {
+  const _HeaderCell({required this.width, required this.label});
+
+  final double width;
+  final String label;
+
+  @override
+  Widget build(BuildContext context) {
+    return SizedBox(
+      width: width,
+      child: Text(
+        label,
+        style: const TextStyle(
+          fontWeight: FontWeight.w700,
+          height: 1.1,
+        ),
+      ),
     );
   }
 }
