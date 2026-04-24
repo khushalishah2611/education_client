@@ -251,15 +251,17 @@ class _CourseDetailScreenState extends State<CourseDetailScreen> {
                 padding: const EdgeInsets.all(16),
                 child: AppPrimaryButton(
                   label: context.l10n.text('Save'),
-                  onPressed: () => Navigator.push(
-                    context,
-                    MaterialPageRoute(
-                      builder: (_) => UploadDocumentsScreen(
-                        university: widget.university,
-                        course: widget.course,
-                      ),
-                    ),
-                  ),
+                  onPressed: () {
+                    // Navigator.push(
+                    //   context,
+                    //   MaterialPageRoute(
+                    //     builder: (_) => UploadDocumentsScreen(
+                    //       university: widget.university,
+                    //       course: widget.course,
+                    //     ),
+                    //   ),
+                    // );
+                  }
                 ),
               ),
             ),
