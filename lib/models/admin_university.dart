@@ -194,7 +194,7 @@ class Program {
   String? name;
   String? academicProgram;
   String? courseNames;
-  String? courseDetails;
+  List<CourseDetails>? courseDetails;
   String? track;
   int? minAdmissionRate;
   int? requiredScore;
@@ -205,8 +205,8 @@ class Program {
   String? currency;
   int? commissionPercent;
   String? coverImagePath;
-  String? eligibilityTitle;
-  Null? scholarshipInfoTitle;
+  List<String>? eligibilityTitle;
+  List<dynamic>? scholarshipInfoTitle;
   String? createdAt;
   String? updatedAt;
   List<Null>? intakes;
@@ -242,7 +242,12 @@ class Program {
     name = json['name'];
     academicProgram = json['academicProgram'];
     courseNames = json['courseNames'];
-    courseDetails = json['courseDetails'];
+    if (json['courseDetails'] != null) {
+      courseDetails = <CourseDetails>[];
+      json['courseDetails'].forEach((v) {
+        courseDetails!.add(new CourseDetails.fromJson(v));
+      });
+    }
     track = json['track'];
     minAdmissionRate = json['minAdmissionRate'];
     requiredScore = json['requiredScore'];
@@ -253,8 +258,12 @@ class Program {
     currency = json['currency'];
     commissionPercent = json['commissionPercent'];
     coverImagePath = json['coverImagePath'];
-    eligibilityTitle = json['eligibilityTitle'];
-    scholarshipInfoTitle = json['scholarshipInfoTitle'];
+    if (json['eligibilityTitle'] != null) {
+      eligibilityTitle = List<String>.from(json['eligibilityTitle']);
+    }
+    if (json['scholarshipInfoTitle'] != null) {
+      scholarshipInfoTitle = List<dynamic>.from(json['scholarshipInfoTitle']);
+    }
     createdAt = json['createdAt'];
     updatedAt = json['updatedAt'];
     if (json['universityLinks'] != null) {
@@ -272,7 +281,9 @@ class Program {
     data['name'] = this.name;
     data['academicProgram'] = this.academicProgram;
     data['courseNames'] = this.courseNames;
-    data['courseDetails'] = this.courseDetails;
+    if (this.courseDetails != null) {
+      data['courseDetails'] = this.courseDetails!.map((v) => v.toJson()).toList();
+    }
     data['track'] = this.track;
     data['minAdmissionRate'] = this.minAdmissionRate;
     data['requiredScore'] = this.requiredScore;
