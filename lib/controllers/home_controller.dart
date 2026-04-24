@@ -41,8 +41,6 @@ class HomeController extends ChangeNotifier {
   String? _selectedTrack;
   String? _loginDialCode;
 
-  bool _skipAutoCountrySelection = false;
-
   final TextEditingController resultController = TextEditingController();
 
   String? get selectedCountry => _selectedCountry;
