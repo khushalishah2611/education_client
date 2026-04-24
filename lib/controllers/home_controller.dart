@@ -27,7 +27,6 @@ class HomeController extends ChangeNotifier {
   bool isLoadingBanners = true;
 
   List<BannerItem> banners = [];
-  List<AdminUniversity> allUniversities = [];
   List<AdminUniversity> universities = [];
 
   List<String> trackOptions = [];
@@ -93,8 +92,6 @@ class HomeController extends ChangeNotifier {
 
       _selectedCountry ??= _resolveAutoCountry(countries);
 
-      allUniversities = universitiesResponse;
-
       universities = _filterUniversities(universitiesResponse);
 
       trackOptions = tracks
@@ -116,7 +113,6 @@ class HomeController extends ChangeNotifier {
           .where((e) => e.name.trim().isNotEmpty)
           .toList();
     } catch (_) {
-      allUniversities = [];
       universities = [];
       trackOptions = [];
       academicOptions = [];
@@ -128,7 +124,7 @@ class HomeController extends ChangeNotifier {
   }
 
   Future<void> applyFilters() async {
-    universities = _filterUniversities(allUniversities);
+    universities = _filterUniversities(universities);
     notifyListeners();
   }
 
