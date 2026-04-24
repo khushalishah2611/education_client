@@ -86,10 +86,26 @@ class HomeApiService {
       throw Exception('Failed to load universities.');
     }
 
-    return _asList(decoded['data'] ?? decoded)
+    return _asList(
+          decoded['data'] ??
+              decoded['items'] ??
+              decoded['results'] ??
+              decoded['universities'] ??
+              decoded,
+        )
         .whereType<Map<String, dynamic>>()
-        .map(AdminUniversity.fromJson)
-        .where((item) => item.name!.isNotEmpty)
+        .map((item) {
+          return AdminUniversity.fromJson(<String, dynamic>{
+            ...item,
+            'id': _readString(item, const ['id', '_id', 'universityId']),
+            'name': _readString(
+              item,
+              const ['name', 'universityName', 'title', 'displayName'],
+            ),
+            'country': _readString(item, const ['country', 'countryName']),
+          });
+        })
+        .where((item) => (item.name ?? '').trim().isNotEmpty)
         .toList(growable: false);
   }
 
