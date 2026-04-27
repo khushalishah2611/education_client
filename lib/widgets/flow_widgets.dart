@@ -15,9 +15,11 @@ void showAddressBottomSheet({
     ),
     builder: (sheetContext) {
       final String value = address?.trim().isNotEmpty == true ? address!.trim() : '-';
+      final double screenHeight = MediaQuery.of(sheetContext).size.height;
+      final double sheetHeight = (screenHeight * 0.3).clamp(210.0, 320.0);
       return SafeArea(
         child: SizedBox(
-          height: MediaQuery.of(sheetContext).size.height * 0.3,
+          height: sheetHeight,
           child: Padding(
             padding: const EdgeInsets.fromLTRB(18, 14, 18, 26),
             child: Column(
@@ -76,8 +78,20 @@ class TopRoundedHeader extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final double screenWidth = MediaQuery.sizeOf(context).width;
+    final bool isSmallMobile = screenWidth <= 360;
+    final bool isMediumMobile = screenWidth > 360 && screenWidth <= 420;
+    final double headerHeight = isSmallMobile
+        ? 70
+        : isMediumMobile
+        ? 76
+        : 80;
+    final double leftPadding = isSmallMobile ? 12 : 16;
+    final double horizontalTitlePadding = isSmallMobile ? 42 : 50;
+    final double titleFontSize = isSmallMobile ? 16 : 18;
+
     return Container(
-      height: 80,
+      height: headerHeight,
       decoration: const BoxDecoration(
         color: Colors.white,
         borderRadius: BorderRadius.vertical(
@@ -93,7 +107,7 @@ class TopRoundedHeader extends StatelessWidget {
             Align(
               alignment: Alignment.centerLeft,
               child: Padding(
-                padding: const EdgeInsets.only(left: 16),
+                padding: EdgeInsets.only(left: leftPadding),
                 child: InkWell(
                   onTap: onBack ?? () => Navigator.of(context).pop(),
                   borderRadius: BorderRadius.circular(20),
@@ -115,7 +129,7 @@ class TopRoundedHeader extends StatelessWidget {
 
             /// TITLE (PERFECT CENTER)
             Padding(
-              padding: const EdgeInsets.symmetric(horizontal: 50),
+              padding: EdgeInsets.symmetric(horizontal: horizontalTitlePadding),
               child: Text(
                 title,
                 textAlign: TextAlign.center,
@@ -124,7 +138,7 @@ class TopRoundedHeader extends StatelessWidget {
                 style: const TextStyle(
                   fontSize: 18,
                   fontWeight: FontWeight.w700,
-                ),
+                ).copyWith(fontSize: titleFontSize),
               ),
             ),
           ],

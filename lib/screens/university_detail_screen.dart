@@ -18,6 +18,7 @@ class UniversityDetailScreen extends StatefulWidget {
 }
 
 class _UniversityDetailScreenState extends State<UniversityDetailScreen> {
+  static const int _maxSelectableCourses = 5;
   final Set<String> _expandedColleges = <String>{};
   final Set<String> _selectedCourses = <String>{};
 
@@ -67,6 +68,17 @@ class _UniversityDetailScreenState extends State<UniversityDetailScreen> {
 
   @override
   Widget build(BuildContext context) {
+    final double screenWidth = MediaQuery.sizeOf(context).width;
+    final bool isSmallMobile = screenWidth <= 360;
+    final bool isMediumMobile = screenWidth > 360 && screenWidth <= 420;
+    final double headerHeight = isSmallMobile
+        ? 220
+        : isMediumMobile
+        ? 245
+        : 280;
+    final double topGap = isSmallMobile ? 52 : 60;
+    final double sectionPadding = isSmallMobile ? 14 : 16;
+
     return Directionality(
       textDirection: Directionality.of(context),
       child: Scaffold(
@@ -82,7 +94,7 @@ class _UniversityDetailScreenState extends State<UniversityDetailScreen> {
                       bottom: Radius.circular(20),
                     ),
                     child: SizedBox(
-                      height: 280,
+                      height: headerHeight,
                       width: double.infinity,
                       child: Image.network(
                         ImageUrlHelper.resolveUploadUrl(data.coverImagePath),
@@ -207,7 +219,7 @@ class _UniversityDetailScreenState extends State<UniversityDetailScreen> {
                 ],
               ),
 
-              const SizedBox(height: 60),
+              SizedBox(height: topGap),
 
               /// 🔥 SCROLL CONTENT
               Expanded(
@@ -216,25 +228,37 @@ class _UniversityDetailScreenState extends State<UniversityDetailScreen> {
                   child: Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
-                      const Padding(
-                        padding: EdgeInsets.symmetric(horizontal: 20),
+                      Padding(
+                        padding: EdgeInsets.symmetric(
+                          horizontal: sectionPadding + 4,
+                        ),
                         child: Text(
                           'About',
                           style: TextStyle(
-                            fontSize: 18,
+                            fontSize: isSmallMobile ? 16 : 18,
                             fontWeight: FontWeight.w700,
                           ),
                         ),
                       ),
 
                       Padding(
-                        padding: const EdgeInsets.fromLTRB(20, 10, 20, 0),
+                        padding: EdgeInsets.fromLTRB(
+                          sectionPadding + 4,
+                          10,
+                          sectionPadding + 4,
+                          0,
+                        ),
                         child: ReadMoreText(text: data.aboutUs.toString()),
                       ),
                       SizedBox(height: 10),
                       if (_selectedCourses.isNotEmpty)
                         Padding(
-                          padding: const EdgeInsets.fromLTRB(20, 0, 20, 10),
+                          padding: EdgeInsets.fromLTRB(
+                            sectionPadding + 4,
+                            0,
+                            sectionPadding + 4,
+                            10,
+                          ),
                           child: Align(
                             alignment: Alignment.centerLeft,
                             child: Text(
@@ -249,7 +273,9 @@ class _UniversityDetailScreenState extends State<UniversityDetailScreen> {
 
                       if (data.academicList?.isNotEmpty ?? false)
                         Padding(
-                          padding: const EdgeInsets.symmetric(horizontal: 16),
+                          padding: EdgeInsets.symmetric(
+                            horizontal: sectionPadding,
+                          ),
                           child: Column(
                             children: (data.academicList ?? []).map((entry) {
                               final String collegeName =
@@ -277,8 +303,19 @@ class _UniversityDetailScreenState extends State<UniversityDetailScreen> {
                                   setState(() {
                                     if (_selectedCourses.contains(courseKey)) {
                                       _selectedCourses.remove(courseKey);
-                                    } else {
+                                    } else if (_selectedCourses.length <
+                                        _maxSelectableCourses) {
                                       _selectedCourses.add(courseKey);
+                                    } else {
+                                      ScaffoldMessenger.of(context)
+                                        ..hideCurrentSnackBar()
+                                        ..showSnackBar(
+                                          const SnackBar(
+                                            content: Text(
+                                              'You can select up to 5 courses only.',
+                                            ),
+                                          ),
+                                        );
                                     }
                                   });
                                 },
@@ -317,6 +354,32 @@ class _UniversityDetailScreenState extends State<UniversityDetailScreen> {
                   ),
                 ),
               ),
+
+              SafeArea(
+                top: false,
+                child: Padding(
+                  padding: EdgeInsets.fromLTRB(
+                    sectionPadding,
+                    8,
+                    sectionPadding,
+                    isSmallMobile ? 12 : 16,
+                  ),
+                  child: AppPrimaryButton(
+                    label: 'View Courses (${_selectedCourses.length})',
+                    onPressed: _selectedCourses.isEmpty
+                        ? null
+                        : () {
+                            ScaffoldMessenger.of(context).showSnackBar(
+                              SnackBar(
+                                content: Text(
+                                  'Selected ${_selectedCourses.length} of $_maxSelectableCourses courses',
+                                ),
+                              ),
+                            );
+                          },
+                  ),
+                ),
+              ),
             ],
           ),
         ),
@@ -343,16 +406,39 @@ class _CollegeAccordion extends StatelessWidget {
   final AdminUniversity adminUniversity;
   final VoidCallback onToggleExpand;
   final ValueChanged<String> onToggleCourse;
-  static const double _courseWidth = 200;
-  static const double _feeWidth = 96;
-  static const double _admissionWidth = 88;
-  static const double _trackWidth = 120;
-  static const double _detailsWidth = 100;
 
   @override
   Widget build(BuildContext context) {
     final List<CourseDetails> courseDetailsList =
         academicEntry.program?.courseDetails ?? <CourseDetails>[];
+    final double screenWidth = MediaQuery.sizeOf(context).width;
+    final bool isSmallMobile = screenWidth <= 360;
+    final bool isMediumMobile = screenWidth > 360 && screenWidth <= 420;
+    final double courseWidth = isSmallMobile
+        ? 130
+        : isMediumMobile
+        ? 150
+        : 180;
+    final double feeWidth = isSmallMobile
+        ? 72
+        : isMediumMobile
+        ? 84
+        : 94;
+    final double admissionWidth = isSmallMobile
+        ? 68
+        : isMediumMobile
+        ? 78
+        : 86;
+    final double trackWidth = isSmallMobile
+        ? 82
+        : isMediumMobile
+        ? 100
+        : 115;
+    final double detailsWidth = isSmallMobile
+        ? 92
+        : isMediumMobile
+        ? 96
+        : 110;
 
     return Container(
       margin: const EdgeInsets.only(bottom: 10),
@@ -397,7 +483,13 @@ class _CollegeAccordion extends StatelessWidget {
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  _buildTableHeader(),
+                  _buildTableHeader(
+                    courseWidth: courseWidth,
+                    feeWidth: feeWidth,
+                    admissionWidth: admissionWidth,
+                    trackWidth: trackWidth,
+                    detailsWidth: detailsWidth,
+                  ),
                   ...[
                     if (courseDetailsList.isNotEmpty)
                       ...courseDetailsList.map((details) {
@@ -413,6 +505,11 @@ class _CollegeAccordion extends StatelessWidget {
                           onTap: () => onToggleCourse(courseKey),
                           context: context,
                           adminUniversity: adminUniversity,
+                          courseWidth: courseWidth,
+                          feeWidth: feeWidth,
+                          admissionWidth: admissionWidth,
+                          trackWidth: trackWidth,
+                          detailsWidth: detailsWidth,
                         );
                       }).toList()
                     else
@@ -442,17 +539,23 @@ class _CollegeAccordion extends StatelessWidget {
     );
   }
 
-  Widget _buildTableHeader() {
+  Widget _buildTableHeader({
+    required double courseWidth,
+    required double feeWidth,
+    required double admissionWidth,
+    required double trackWidth,
+    required double detailsWidth,
+  }) {
     return Container(
       color: const Color(0xFFE3E3E3),
       padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 12),
       child: Row(
-        children: const [
-          _HeaderCell(width: _courseWidth, label: 'Course'),
-          _HeaderCell(width: _feeWidth, label: 'Credit\nHour Fee'),
-          _HeaderCell(width: _admissionWidth, label: 'Min\nAdmis%'),
-          _HeaderCell(width: _trackWidth, label: 'Track'),
-          _HeaderCell(width: _detailsWidth, label: 'Details / Apply'),
+        children: [
+          _HeaderCell(width: courseWidth, label: 'Course'),
+          _HeaderCell(width: feeWidth, label: 'Credit\nHour Fee'),
+          _HeaderCell(width: admissionWidth, label: 'Min\nAdmis%'),
+          _HeaderCell(width: trackWidth, label: 'Track'),
+          _HeaderCell(width: detailsWidth, label: 'Details / Apply'),
         ],
       ),
     );
@@ -464,6 +567,11 @@ class _CollegeAccordion extends StatelessWidget {
     required VoidCallback onTap,
     required BuildContext context,
     required adminUniversity,
+    required double courseWidth,
+    required double feeWidth,
+    required double admissionWidth,
+    required double trackWidth,
+    required double detailsWidth,
   }) {
     return InkWell(
       onTap: onTap,
@@ -483,35 +591,35 @@ class _CollegeAccordion extends StatelessWidget {
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
             SizedBox(
-              width: _courseWidth,
+              width: courseWidth,
               child: Text(
                 details.name ?? 'N/A',
                 style: const TextStyle(fontSize: 32 / 2, height: 1.05),
               ),
             ),
             SizedBox(
-              width: _feeWidth,
+              width: feeWidth,
               child: Text(
                 '${details.creditHours ?? 0} ${details.currency ?? ''}',
                 style: const TextStyle(fontWeight: FontWeight.w500),
               ),
             ),
             SizedBox(
-              width: _admissionWidth,
+              width: admissionWidth,
               child: Text(
                 '${details.minAdmissionRate ?? 0}%',
                 style: const TextStyle(fontWeight: FontWeight.w500),
               ),
             ),
             SizedBox(
-              width: _trackWidth,
+              width: trackWidth,
               child: Text(
                 details.track ?? 'N/A',
                 style: const TextStyle(fontWeight: FontWeight.w500),
               ),
             ),
             SizedBox(
-              width: _detailsWidth,
+              width: detailsWidth,
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [

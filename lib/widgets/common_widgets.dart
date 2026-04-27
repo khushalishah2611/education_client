@@ -362,9 +362,12 @@ class AppPrimaryButton extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final double screenWidth = MediaQuery.sizeOf(context).width;
+    final bool isSmallMobile = screenWidth <= 360;
+
     return SizedBox(
       width: double.infinity,
-      height: 45,
+      height: isSmallMobile ? 42 : 45,
       child: FilledButton(
         onPressed: isLoading ? null : onPressed,
         style: FilledButton.styleFrom(
@@ -375,7 +378,10 @@ class AppPrimaryButton extends StatelessWidget {
           shape: RoundedRectangleBorder(
             borderRadius: BorderRadius.circular(12),
           ),
-          textStyle: const TextStyle(fontSize: 16, fontWeight: FontWeight.w700),
+          textStyle: TextStyle(
+            fontSize: isSmallMobile ? 15 : 16,
+            fontWeight: FontWeight.w700,
+          ),
         ),
         child: isLoading
             ? const SizedBox(

@@ -35,6 +35,34 @@ class _ArabUniversitiesAppState extends State<ArabUniversitiesApp> {
             title: 'Arab Universities',
             theme: AppTheme.theme,
             locale: _locale,
+            builder: (context, child) {
+              final media = MediaQuery.of(context);
+              final clampedScale = media.textScaler.clamp(
+                minScaleFactor: 0.9,
+                maxScaleFactor: 1.1,
+              );
+
+              return MediaQuery(
+                data: media.copyWith(textScaler: clampedScale),
+                child: LayoutBuilder(
+                  builder: (context, constraints) {
+                    final bool shouldConstrain = constraints.maxWidth > 520;
+                    if (!shouldConstrain) {
+                      return child ?? const SizedBox.shrink();
+                    }
+                    return ColoredBox(
+                      color: const Color(0xFFFFFAF5),
+                      child: Center(
+                        child: ConstrainedBox(
+                          constraints: const BoxConstraints(maxWidth: 520),
+                          child: child ?? const SizedBox.shrink(),
+                        ),
+                      ),
+                    );
+                  },
+                ),
+              );
+            },
             home: const SplashScreen(),
           ),
         );

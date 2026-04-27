@@ -14,12 +14,23 @@ class SideMenuScaffold extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final double screenWidth = MediaQuery.sizeOf(context).width;
+    final bool isSmallMobile = screenWidth <= 360;
+    final bool isMediumMobile = screenWidth > 360 && screenWidth <= 420;
+    final double headerHeight = isSmallMobile
+        ? 70
+        : isMediumMobile
+        ? 76
+        : 80;
+    final double contentPadding = isSmallMobile ? 12 : 16;
+    final double titleFontSize = isSmallMobile ? 16 : 18;
+
     return Material(
       child: AppBackground(
         child: Column(
           children: [
             Container(
-              height: 80,
+              height: headerHeight,
               decoration: const BoxDecoration(
                 color: Colors.white,
                 borderRadius: BorderRadius.vertical(bottom: Radius.circular(22)),
@@ -30,7 +41,7 @@ class SideMenuScaffold extends StatelessWidget {
                   Align(
                     alignment: Alignment.centerLeft,
                     child: Padding(
-                      padding: const EdgeInsets.only(left: 16),
+                      padding: EdgeInsets.only(left: isSmallMobile ? 12 : 16),
                       child: InkWell(
                         onTap: () => Navigator.of(context).pop(),
                         borderRadius: BorderRadius.circular(20),
@@ -50,7 +61,9 @@ class SideMenuScaffold extends StatelessWidget {
                     ),
                   ),
                   Padding(
-                    padding: const EdgeInsets.symmetric(horizontal: 50),
+                    padding: EdgeInsets.symmetric(
+                      horizontal: isSmallMobile ? 42 : 50,
+                    ),
                     child: Text(
                       title,
                       textAlign: TextAlign.center,
@@ -59,7 +72,7 @@ class SideMenuScaffold extends StatelessWidget {
                       style: const TextStyle(
                         fontSize: 18,
                         fontWeight: FontWeight.w700,
-                      ),
+                      ).copyWith(fontSize: titleFontSize),
                     ),
                   ),
                 ],
@@ -70,7 +83,7 @@ class SideMenuScaffold extends StatelessWidget {
                 context: context,
                 removeTop: true,
                 child: Padding(
-                  padding: const EdgeInsets.all(16.0),
+                  padding: EdgeInsets.all(contentPadding),
                   child: child,
                 ),
               ),
