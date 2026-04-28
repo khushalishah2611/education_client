@@ -726,7 +726,14 @@ class _CollegeAccordionState extends State<_CollegeAccordion> {
                 children: [
                   InkWell(
                     onTap: () {
-                      /* same */
+                      Navigator.of(context).push(
+                        MaterialPageRoute(
+                          builder: (_) => CourseDetailScreen(
+                            university: adminUniversity,
+                            course: details,
+                          ),
+                        ),
+                      );
                     },
                     child: const Text(
                       'Details',
@@ -740,7 +747,19 @@ class _CollegeAccordionState extends State<_CollegeAccordion> {
                   const SizedBox(height: 5),
                   InkWell(
                     onTap: () {
-                      /* same */
+                      Navigator.push(
+                        context,
+                        MaterialPageRoute(
+                          builder: (_) => UploadDocumentsScreen(
+                            universityName: widget.adminUniversity.name,
+                            universityHeroImage:
+                            ImageUrlHelper.resolveUploadUrl(
+                              widget.adminUniversity.coverImagePath,
+                            ),
+                            courseTitle: details.name,
+                          ),
+                        ),
+                      );
                     },
                     child: Container(
                       alignment: Alignment.center, // 👈 important
