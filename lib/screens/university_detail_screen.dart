@@ -84,25 +84,51 @@ class _UniversityDetailScreenState extends State<UniversityDetailScreen> {
         savedData.courseKeys.isNotEmpty;
 
     if (hasDifferentUniversitySelection) {
-      final bool? shouldReplaceSelection = await showDialog<bool>(
+      final bool? shouldReplaceSelection = await showModalBottomSheet<bool>(
         context: context,
-        builder: (BuildContext dialogContext) {
-          return AlertDialog(
-            title: const Text('Replace selected courses?'),
-            content: const Text(
-              'You already selected courses in another university. '
-              'Do you want to clear them and continue here?',
+        isScrollControlled: true,
+        shape: const RoundedRectangleBorder(
+          borderRadius: BorderRadius.vertical(top: Radius.circular(20)),
+        ),
+        builder: (BuildContext sheetContext) {
+          return SafeArea(
+            child: Padding(
+              padding: const EdgeInsets.fromLTRB(18, 18, 18, 22),
+              child: Column(
+                mainAxisSize: MainAxisSize.min,
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  const Text(
+                    'Replace selected courses?',
+                    style: TextStyle(fontSize: 18, fontWeight: FontWeight.w700),
+                  ),
+                  const SizedBox(height: 10),
+                  const Text(
+                    'You already selected courses in another university. '
+                    'Do you want to clear them and continue here?',
+                    style: TextStyle(height: 1.4),
+                  ),
+                  const SizedBox(height: 16),
+                  Row(
+                    children: [
+                      Expanded(
+                        child: OutlinedButton(
+                          onPressed: () => Navigator.of(sheetContext).pop(false),
+                          child: const Text('Cancel'),
+                        ),
+                      ),
+                      const SizedBox(width: 10),
+                      Expanded(
+                        child: ElevatedButton(
+                          onPressed: () => Navigator.of(sheetContext).pop(true),
+                          child: const Text('Confirm'),
+                        ),
+                      ),
+                    ],
+                  ),
+                ],
+              ),
             ),
-            actions: [
-              TextButton(
-                onPressed: () => Navigator.of(dialogContext).pop(false),
-                child: const Text('Cancel'),
-              ),
-              TextButton(
-                onPressed: () => Navigator.of(dialogContext).pop(true),
-                child: const Text('Confirm'),
-              ),
-            ],
           );
         },
       );
@@ -480,30 +506,30 @@ class _CollegeAccordionState extends State<_CollegeAccordion> {
     final bool isSmallMobile = screenWidth <= 360;
     final bool isMediumMobile = screenWidth > 360 && screenWidth <= 420;
     final double courseWidth = isSmallMobile
-        ? 130
+        ? 128
         : isMediumMobile
-        ? 150
-        : 180;
+        ? 138
+        : 148;
     final double feeWidth = isSmallMobile
-        ? 72
+        ? 70
+        : isMediumMobile
+        ? 76
+        : 80;
+    final double admissionWidth = isSmallMobile
+        ? 64
+        : isMediumMobile
+        ? 70
+        : 74;
+    final double trackWidth = isSmallMobile
+        ? 76
         : isMediumMobile
         ? 84
-        : 94;
-    final double admissionWidth = isSmallMobile
-        ? 68
-        : isMediumMobile
-        ? 78
-        : 86;
-    final double trackWidth = isSmallMobile
-        ? 82
-        : isMediumMobile
-        ? 100
-        : 115;
+        : 92;
     final double detailsWidth = isSmallMobile
-        ? 92
+        ? 102
         : isMediumMobile
-        ? 96
-        : 110;
+        ? 108
+        : 114;
 
     return Container(
       margin: const EdgeInsets.only(bottom: 10),
@@ -621,7 +647,7 @@ class _CollegeAccordionState extends State<_CollegeAccordion> {
   }) {
     return Container(
       color: const Color(0xFFE3E3E3),
-      padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 12),
+      padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 10),
       child: Row(
         children: [
           _HeaderCell(width: courseWidth, label: 'Course'),
@@ -649,7 +675,7 @@ class _CollegeAccordionState extends State<_CollegeAccordion> {
     return InkWell(
       onTap: onTap,
       child: Container(
-        padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 8),
+        padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 7),
         decoration: BoxDecoration(
           color: isSelected ? AppColors.peachSoft : Colors.white,
           border: Border(
@@ -667,28 +693,32 @@ class _CollegeAccordionState extends State<_CollegeAccordion> {
               width: courseWidth,
               child: Text(
                 details.name ?? 'N/A',
-                style: const TextStyle(fontSize: 32 / 2, height: 1.05),
+                style: const TextStyle(
+                  fontSize: 31 / 2,
+                  height: 1.05,
+                  fontWeight: FontWeight.w500,
+                ),
               ),
             ),
             SizedBox(
               width: feeWidth,
               child: Text(
                 '${details.creditHours ?? 0} ${details.currency ?? ''}',
-                style: const TextStyle(fontWeight: FontWeight.w500),
+                style: const TextStyle(fontWeight: FontWeight.w600, height: 1.15),
               ),
             ),
             SizedBox(
               width: admissionWidth,
               child: Text(
                 '${details.minAdmissionRate ?? 0}%',
-                style: const TextStyle(fontWeight: FontWeight.w500),
+                style: const TextStyle(fontWeight: FontWeight.w600),
               ),
             ),
             SizedBox(
               width: trackWidth,
               child: Text(
                 details.track ?? 'N/A',
-                style: const TextStyle(fontWeight: FontWeight.w500),
+                style: const TextStyle(fontWeight: FontWeight.w600),
               ),
             ),
             SizedBox(
@@ -708,22 +738,38 @@ class _CollegeAccordionState extends State<_CollegeAccordion> {
                       );
                     },
                     child: Padding(
-                      padding: const EdgeInsets.symmetric(vertical: 4),
+                      padding: const EdgeInsets.symmetric(vertical: 2),
                       child: Row(
                         mainAxisSize: MainAxisSize.min,
-                        children: const [
-                          Text(
+                        children: [
+                          const Text(
                             'Details',
                             style: TextStyle(fontWeight: FontWeight.w600),
                           ),
-                          SizedBox(width: 4),
-                          Icon(Icons.chevron_right, size: 18),
+                          const SizedBox(width: 4),
+                          Container(
+                            width: 17,
+                            height: 17,
+                            alignment: Alignment.center,
+                            decoration: BoxDecoration(
+                              borderRadius: BorderRadius.circular(1),
+                              border: Border.all(
+                                color: const Color(0xFF2F83C8),
+                                width: 1.2,
+                              ),
+                            ),
+                            child: const Icon(
+                              Icons.chevron_right,
+                              size: 14,
+                              color: Color(0xFF2F83C8),
+                            ),
+                          ),
                         ],
                       ),
                     ),
                   ),
 
-                  const SizedBox(height: 4),
+                  const SizedBox(height: 5),
 
                   InkWell(
                     onTap: () {
@@ -743,21 +789,24 @@ class _CollegeAccordionState extends State<_CollegeAccordion> {
                     },
                     child: Container(
                       padding: const EdgeInsets.symmetric(
-                        horizontal: 8,
-                        vertical: 6,
+                        horizontal: 7,
+                        vertical: 4,
                       ),
                       decoration: BoxDecoration(
-                        color: const Color(0xFFBDEED3),
-                        borderRadius: BorderRadius.circular(6),
+                        color: const Color(0xFFADE8C9),
+                        borderRadius: BorderRadius.circular(4),
+                        border: Border.all(
+                          color: const Color(0xFF78D09F),
+                        ),
                       ),
                       child: const Text(
                         'Apply & Pay\nApplication Fee',
                         textAlign: TextAlign.center,
                         style: TextStyle(
-                          fontSize: 10,
+                          fontSize: 9.2,
                           fontWeight: FontWeight.w600,
                           color: Color(0xFF206F49),
-                          height: 1.2,
+                          height: 1.1,
                         ),
                       ),
                     ),
@@ -784,7 +833,11 @@ class _HeaderCell extends StatelessWidget {
       width: width,
       child: Text(
         label,
-        style: const TextStyle(fontWeight: FontWeight.w700, height: 1.1),
+        style: const TextStyle(
+          fontWeight: FontWeight.w700,
+          height: 1.1,
+          fontSize: 12,
+        ),
       ),
     );
   }
