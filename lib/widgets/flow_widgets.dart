@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_svg/flutter_svg.dart';
 
 import '../core/app_localizations.dart';
 import '../core/app_theme.dart';
@@ -14,7 +15,9 @@ void showAddressBottomSheet({
       borderRadius: BorderRadius.vertical(top: Radius.circular(20)),
     ),
     builder: (sheetContext) {
-      final String value = address?.trim().isNotEmpty == true ? address!.trim() : '-';
+      final String value = address?.trim().isNotEmpty == true
+          ? address!.trim()
+          : '-';
       final double screenHeight = MediaQuery.of(sheetContext).size.height;
       final double sheetHeight = (screenHeight * 0.3).clamp(210.0, 320.0);
       return SafeArea(
@@ -65,13 +68,8 @@ void showAddressBottomSheet({
   );
 }
 
-
 class TopRoundedHeader extends StatelessWidget {
-  const TopRoundedHeader({
-    super.key,
-    required this.title,
-    this.onBack,
-  });
+  const TopRoundedHeader({super.key, required this.title, this.onBack});
 
   final String title;
   final VoidCallback? onBack;
@@ -94,9 +92,7 @@ class TopRoundedHeader extends StatelessWidget {
       height: headerHeight,
       decoration: const BoxDecoration(
         color: Colors.white,
-        borderRadius: BorderRadius.vertical(
-          bottom: Radius.circular(22),
-        ),
+        borderRadius: BorderRadius.vertical(bottom: Radius.circular(22)),
       ),
       child: SafeArea(
         bottom: false,
@@ -149,7 +145,11 @@ class TopRoundedHeader extends StatelessWidget {
 }
 
 class FlowStepHeader extends StatelessWidget {
-  const FlowStepHeader({super.key, required this.currentStep, required this.title});
+  const FlowStepHeader({
+    super.key,
+    required this.currentStep,
+    required this.title,
+  });
 
   final int currentStep;
   final String title;
@@ -187,7 +187,9 @@ class FlowStepHeader extends StatelessWidget {
                     height: 24,
                     alignment: Alignment.center,
                     decoration: BoxDecoration(
-                      color: isActive ? AppColors.accent : const Color(0xFFF0F0F0),
+                      color: isActive
+                          ? AppColors.accent
+                          : const Color(0xFFF0F0F0),
                       shape: BoxShape.circle,
                     ),
                     child: Text(
@@ -201,7 +203,11 @@ class FlowStepHeader extends StatelessWidget {
                   const SizedBox(height: 8),
                   SizedBox(
                     width: 58,
-                    child: Text(labels[stepIndex], textAlign: TextAlign.center, style: const TextStyle(fontSize: 12)),
+                    child: Text(
+                      labels[stepIndex],
+                      textAlign: TextAlign.center,
+                      style: const TextStyle(fontSize: 12),
+                    ),
                   ),
                 ],
               );
@@ -222,10 +228,10 @@ class BottomTabBarCard extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final items = [
-      (Icons.account_balance_outlined, context.l10n.text('university')),
-      (Icons.school_outlined, context.l10n.text('college')),
-      (Icons.corporate_fare_outlined, context.l10n.text('privateSchool')),
-      (Icons.location_on_outlined, context.l10n.text('location')),
+      ("assets/images/home.svg", context.l10n.text('university')),
+      ("assets/images/application.svg", context.l10n.text('My Application')),
+      ("assets/images/documents.svg", context.l10n.text('Manage Document')),
+      ("assets/images/updates.svg", context.l10n.text('Lates Updates')),
     ];
 
     return Container(
@@ -240,29 +246,54 @@ class BottomTabBarCard extends StatelessWidget {
           Row(
             children: List.generate(items.length, (index) {
               final item = items[index];
-              final isActive = activeIndex != null && index == activeIndex;
+              final isActive = activeIndex == index;
+
               return Expanded(
                 child: InkWell(
-                  onTap: onTap == null ? null : () => onTap!(index),
+                  onTap: () => onTap?.call(index),
                   child: Column(
                     mainAxisSize: MainAxisSize.min,
                     children: [
-                      Container(
-                        width: 40,
-                        height: 40,
+                      // 🔶 ICON CIRCLE
+                      AnimatedContainer(
+                        duration: const Duration(milliseconds: 200),
+                        width: 44,
+                        height: 44,
                         decoration: BoxDecoration(
-                          color: isActive ? const Color(0xFFFF9F2E) : Colors.transparent,
+                          color: isActive
+                              ? const Color(0xFFFF9F2E)
+                              : Colors.transparent,
                           shape: BoxShape.circle,
                         ),
-                        child: Icon(item.$1, color: isActive ? Colors.white : AppColors.textMuted),
+                        child: Center(
+                          child: SvgPicture.asset(
+                            item.$1.toString(),
+                            width: 22,
+                            height: 22,
+                            fit: BoxFit.contain,
+                            color: isActive
+                                ? Colors.white
+                                : AppColors.text,
+                          ),
+                        ),
                       ),
+
                       const SizedBox(height: 4),
+
+                      // 🔤 TEXT
                       Text(
                         item.$2,
                         textAlign: TextAlign.center,
                         maxLines: 1,
                         overflow: TextOverflow.ellipsis,
-                        style: const TextStyle(fontSize: 11.5),
+                        style: TextStyle(
+                          fontSize: 11.5,
+                          color: isActive
+                              ? Colors.black
+                              : AppColors.textMuted,
+                          fontWeight:
+                          isActive ? FontWeight.w600 : FontWeight.normal,
+                        ),
                       ),
                     ],
                   ),
@@ -270,8 +301,18 @@ class BottomTabBarCard extends StatelessWidget {
               );
             }),
           ),
-          const SizedBox(height: 4),
-          Container(width: 110, height: 3, decoration: BoxDecoration(color: Colors.black, borderRadius: BorderRadius.circular(100))),
+
+          const SizedBox(height: 6),
+
+          // ⬛ Bottom Indicator
+          Container(
+            width: 110,
+            height: 3,
+            decoration: BoxDecoration(
+              color: Colors.black,
+              borderRadius: BorderRadius.circular(100),
+            ),
+          ),
         ],
       ),
     );
