@@ -3,6 +3,7 @@ import 'package:education/core/image_url_helper.dart';
 import 'package:education/models/admin_university.dart';
 import 'package:education/services/selected_course_storage.dart';
 import 'package:flutter/material.dart';
+import 'package:shared_preferences/shared_preferences.dart' show SharedPreferences;
 import '../core/app_theme.dart';
 import '../widgets/common_widgets.dart';
 import '../widgets/flow_widgets.dart';
@@ -362,6 +363,20 @@ class _CollegeAccordion extends StatelessWidget {
   final AdminUniversity adminUniversity;
   final VoidCallback onToggleExpand;
   final ValueChanged<String> onToggleCourse;
+
+  static Future<SelectedCourseData?> load() async {
+    final SharedPreferences prefs = await SharedPreferences.getInstance();
+    final String? raw = prefs.getString(_key);
+    if (raw == null || raw.isEmpty) return null;
+
+    try {
+      final dynamic decoded = jsonDecode(raw);
+      if (decoded is! Map<String, dynamic>) return null;
+      return SelectedCourseData.fromJson(decoded);
+    } catch (_) {
+      return null;
+    }
+  }
 
   @override
   Widget build(BuildContext context) {
