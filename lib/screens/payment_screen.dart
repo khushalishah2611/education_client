@@ -9,10 +9,8 @@ import '../widgets/flow_widgets.dart';
 import 'payment_confirmation_screen.dart';
 
 class PaymentScreen extends StatefulWidget {
-  const PaymentScreen({super.key, required this.university, required this.course});
+  const PaymentScreen({super.key, });
 
-  final UniversityData university;
-  final CourseData course;
 
   @override
   State<PaymentScreen> createState() => _PaymentScreenState();
@@ -91,7 +89,7 @@ class _PaymentScreenState extends State<PaymentScreen> {
                   AppPrimaryButton(
                     label: context.l10n.text('payNow'),
                     onPressed: () => Navigator.of(context).push(
-                      MaterialPageRoute(builder: (_) => PaymentConfirmationScreen(university: widget.university, course: widget.course)),
+                      MaterialPageRoute(builder: (_) => PaymentConfirmationScreen()),
                     ),
                   ),
                 ],

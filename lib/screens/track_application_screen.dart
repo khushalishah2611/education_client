@@ -9,10 +9,8 @@ import '../widgets/flow_widgets.dart';
 import 'home_screen.dart';
 
 class TrackApplicationScreen extends StatelessWidget {
-  const TrackApplicationScreen({super.key, required this.university, required this.course});
+  const TrackApplicationScreen({super.key,});
 
-  final UniversityData university;
-  final CourseData course;
 
   @override
   Widget build(BuildContext context) {

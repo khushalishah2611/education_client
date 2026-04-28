@@ -9,10 +9,9 @@ import '../widgets/flow_widgets.dart';
 import 'track_application_screen.dart';
 
 class PaymentConfirmationScreen extends StatelessWidget {
-  const PaymentConfirmationScreen({super.key, required this.university, required this.course});
+  const PaymentConfirmationScreen({super.key,});
 
-  final UniversityData university;
-  final CourseData course;
+
 
   @override
   Widget build(BuildContext context) {
@@ -85,7 +84,7 @@ class PaymentConfirmationScreen extends StatelessWidget {
                   AppPrimaryButton(
                     label: context.l10n.text('trackApplication'),
                     onPressed: () => Navigator.of(context).push(
-                      MaterialPageRoute(builder: (_) => TrackApplicationScreen(university: university, course: course)),
+                      MaterialPageRoute(builder: (_) => TrackApplicationScreen()),
                     ),
                   ),
                   const SizedBox(height: 12),

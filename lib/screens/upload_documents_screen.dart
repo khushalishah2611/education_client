@@ -50,19 +50,17 @@ class _UploadDocumentsScreenState extends State<UploadDocumentsScreen> {
   bool get _allDocumentsSelected => _selectedFiles.values.every((file) => file != null);
 
   void _onContinue() {
-    if (!_allDocumentsSelected) {
-      // showAppSnackBar(context, context.l10n.text('uploadAllRequiredDocs'));
-      return;
-    }
+    // if (!_allDocumentsSelected) {
+    //   // showAppSnackBar(context, context.l10n.text('uploadAllRequiredDocs'));
+    //   return;
+    // }
 
-    // Navigator.of(context).push(
-    //   MaterialPageRoute(
-    //     builder: (_) => PaymentScreen(
-    //       university: widget.university,
-    //       course: widget.course,
-    //     ),
-    //   ),
-    // );
+    Navigator.of(context).push(
+      MaterialPageRoute(
+        builder: (_) => PaymentScreen(
+        ),
+      ),
+    );
   }
 
   @override
