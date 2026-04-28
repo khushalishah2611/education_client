@@ -2,6 +2,7 @@ import 'package:education/core/app_localizations.dart';
 import 'package:education/core/image_url_helper.dart';
 import 'package:education/core/responsive_helper.dart';
 import 'package:education/models/admin_university.dart';
+import 'package:education/screens/upload_documents_screen.dart' show UploadDocumentsScreen;
 import 'package:flutter/material.dart';
 import '../core/app_theme.dart';
 import '../widgets/common_widgets.dart';
@@ -249,7 +250,20 @@ class _CourseDetailScreenState extends State<CourseDetailScreen> {
                 padding: EdgeInsets.all(horizontalPadding),
                 child: AppPrimaryButton(
                   label: context.l10n.text('Save'),
-                  onPressed: () {},
+                  onPressed: () {
+
+                    Navigator.push(
+                      context,
+                      MaterialPageRoute(
+                        builder: (_) => UploadDocumentsScreen(
+                          universityName: data.name,
+                          universityHeroImage: ImageUrlHelper
+                              .resolveUploadUrl(data.coverImagePath),
+                          courseTitle: selectedCourseTitle,
+                        ),
+                      ),
+                    );
+                  },
                 ),
               ),
             ),
