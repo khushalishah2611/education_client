@@ -3,15 +3,21 @@ import 'package:flutter/material.dart';
 import '../core/app_localizations.dart';
 import '../core/responsive_helper.dart';
 import '../core/app_theme.dart';
-import '../models/app_models.dart';
 import '../widgets/common_widgets.dart';
 import '../widgets/flow_widgets.dart';
 import 'track_application_screen.dart';
 
 class PaymentConfirmationScreen extends StatelessWidget {
-  const PaymentConfirmationScreen({super.key,});
+  const PaymentConfirmationScreen({
+    super.key,
+    this.universityName,
+    this.universityHeroImage,
+    this.courseTitle,
+  });
 
-
+  final String? universityName;
+  final String? universityHeroImage;
+  final String? courseTitle;
 
   @override
   Widget build(BuildContext context) {
@@ -67,7 +73,8 @@ class PaymentConfirmationScreen extends StatelessWidget {
                   ClipRRect(
                     borderRadius: BorderRadius.circular(14),
                     child: Image.network(
-                      university.heroImage,
+                      universityHeroImage ??
+                          'https://images.unsplash.com/photo-1523050854058-8df90110c9f1?auto=format&fit=crop&w=1200&q=80',
                       height: 158,
                       width: double.infinity,
                       fit: BoxFit.cover,
@@ -76,7 +83,7 @@ class PaymentConfirmationScreen extends StatelessWidget {
                   ),
                   const SizedBox(height: 12),
                   Text(
-                    '${context.l10n.text('paymentProcessedPrefix')} ${course.title} ${context.l10n.text('paymentProcessedSuffix')}',
+                    '${context.l10n.text('paymentProcessedPrefix')} ${courseTitle ?? context.l10n.text('courseOrProgram')} ${context.l10n.text('paymentProcessedSuffix')}',
                     textAlign: TextAlign.center,
                     style: const TextStyle(fontSize: 15, color: AppColors.textMuted, height: 1.45),
                   ),
@@ -84,7 +91,13 @@ class PaymentConfirmationScreen extends StatelessWidget {
                   AppPrimaryButton(
                     label: context.l10n.text('trackApplication'),
                     onPressed: () => Navigator.of(context).push(
-                      MaterialPageRoute(builder: (_) => TrackApplicationScreen()),
+                      MaterialPageRoute(
+                        builder: (_) => TrackApplicationScreen(
+                          universityName: universityName,
+                          universityHeroImage: universityHeroImage,
+                          courseTitle: courseTitle,
+                        ),
+                      ),
                     ),
                   ),
                   const SizedBox(height: 12),

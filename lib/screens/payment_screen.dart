@@ -3,14 +3,21 @@ import 'package:flutter/material.dart';
 import '../core/app_localizations.dart';
 import '../core/responsive_helper.dart';
 import '../core/app_theme.dart';
-import '../models/app_models.dart';
 import '../widgets/common_widgets.dart';
 import '../widgets/flow_widgets.dart';
 import 'payment_confirmation_screen.dart';
 
 class PaymentScreen extends StatefulWidget {
-  const PaymentScreen({super.key, });
+  const PaymentScreen({
+    super.key,
+    this.universityName,
+    this.universityHeroImage,
+    this.courseTitle,
+  });
 
+  final String? universityName;
+  final String? universityHeroImage;
+  final String? courseTitle;
 
   @override
   State<PaymentScreen> createState() => _PaymentScreenState();
@@ -89,7 +96,13 @@ class _PaymentScreenState extends State<PaymentScreen> {
                   AppPrimaryButton(
                     label: context.l10n.text('payNow'),
                     onPressed: () => Navigator.of(context).push(
-                      MaterialPageRoute(builder: (_) => PaymentConfirmationScreen()),
+                      MaterialPageRoute(
+                        builder: (_) => PaymentConfirmationScreen(
+                          universityName: widget.universityName,
+                          universityHeroImage: widget.universityHeroImage,
+                          courseTitle: widget.courseTitle,
+                        ),
+                      ),
                     ),
                   ),
                 ],

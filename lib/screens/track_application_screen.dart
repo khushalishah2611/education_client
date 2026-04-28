@@ -3,14 +3,21 @@ import 'package:flutter/material.dart';
 import '../core/app_localizations.dart';
 import '../core/responsive_helper.dart';
 import '../core/app_theme.dart';
-import '../models/app_models.dart';
 import '../widgets/common_widgets.dart';
 import '../widgets/flow_widgets.dart';
 import 'home_screen.dart';
 
 class TrackApplicationScreen extends StatelessWidget {
-  const TrackApplicationScreen({super.key,});
+  const TrackApplicationScreen({
+    super.key,
+    this.universityName,
+    this.universityHeroImage,
+    this.courseTitle,
+  });
 
+  final String? universityName;
+  final String? universityHeroImage;
+  final String? courseTitle;
 
   @override
   Widget build(BuildContext context) {
@@ -47,7 +54,7 @@ class TrackApplicationScreen extends StatelessWidget {
                         Text(context.l10n.text('applicationIdValue'), style: const TextStyle(fontSize: 11)),
                         const SizedBox(height: 10),
                         Text(
-                          university.name,
+                          universityName ?? context.l10n.text('university'),
                           style: TextStyle(
                             fontSize: isSmallMobile ? 16 : 18,
                             fontWeight: FontWeight.w700,
@@ -60,7 +67,7 @@ class TrackApplicationScreen extends StatelessWidget {
                             const SizedBox(width: 6),
                             Expanded(
                               child: Text(
-                                course.title,
+                                courseTitle ?? context.l10n.text('courseOrProgram'),
                                 style: TextStyle(
                                   fontSize: isSmallMobile ? 14 : 16,
                                   fontWeight: FontWeight.w600,
@@ -73,7 +80,8 @@ class TrackApplicationScreen extends StatelessWidget {
                         ClipRRect(
                           borderRadius: BorderRadius.circular(10),
                           child: Image.network(
-                            university.heroImage,
+                            universityHeroImage ??
+                                'https://images.unsplash.com/photo-1523050854058-8df90110c9f1?auto=format&fit=crop&w=1200&q=80',
                             height: 150,
                             width: double.infinity,
                             fit: BoxFit.cover,

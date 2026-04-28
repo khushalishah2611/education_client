@@ -73,6 +73,47 @@ class _UniversityDetailScreenState extends State<UniversityDetailScreen> {
   }
 
   Future<void> _toggleCourseSelection(String courseKey) async {
+    final SelectedCourseData? savedData = await SelectedCourseStorage.load();
+    final bool selectingNewCourse = !_selectedCourses.contains(courseKey);
+    final bool hasDifferentUniversitySelection =
+        selectingNewCourse &&
+        _selectedCourses.isEmpty &&
+        savedData != null &&
+        savedData.universityKey.isNotEmpty &&
+        savedData.universityKey != _universityKey &&
+        savedData.courseKeys.isNotEmpty;
+
+    if (hasDifferentUniversitySelection) {
+      final bool? shouldReplaceSelection = await showDialog<bool>(
+        context: context,
+        builder: (BuildContext dialogContext) {
+          return AlertDialog(
+            title: const Text('Replace selected courses?'),
+            content: const Text(
+              'You already selected courses in another university. '
+              'Do you want to clear them and continue here?',
+            ),
+            actions: [
+              TextButton(
+                onPressed: () => Navigator.of(dialogContext).pop(false),
+                child: const Text('Cancel'),
+              ),
+              TextButton(
+                onPressed: () => Navigator.of(dialogContext).pop(true),
+                child: const Text('Confirm'),
+              ),
+            ],
+          );
+        },
+      );
+
+      if (shouldReplaceSelection != true) {
+        return;
+      }
+
+      await SelectedCourseStorage.clear();
+    }
+
     setState(() {
       if (_selectedCourses.contains(courseKey)) {
         _selectedCourses.remove(courseKey);
@@ -367,10 +408,17 @@ class _UniversityDetailScreenState extends State<UniversityDetailScreen> {
                     onPressed: _selectedCourses.isEmpty
                         ? null
                         : () {
+                            final String selectedCourseTitle =
+                                _selectedCourses.first.split('-').last.trim();
                             Navigator.push(
                               context,
                               MaterialPageRoute(
-                                builder: (_) => UploadDocumentsScreen(),
+                                builder: (_) => UploadDocumentsScreen(
+                                  universityName: data.name,
+                                  universityHeroImage: ImageUrlHelper
+                                      .resolveUploadUrl(data.coverImagePath),
+                                  courseTitle: selectedCourseTitle,
+                                ),
                               ),
                             );
                           },
@@ -682,7 +730,14 @@ class _CollegeAccordionState extends State<_CollegeAccordion> {
                       Navigator.push(
                         context,
                         MaterialPageRoute(
-                          builder: (_) => UploadDocumentsScreen(),
+                          builder: (_) => UploadDocumentsScreen(
+                            universityName: widget.adminUniversity.name,
+                            universityHeroImage: ImageUrlHelper
+                                .resolveUploadUrl(
+                                  widget.adminUniversity.coverImagePath,
+                                ),
+                            courseTitle: details.name,
+                          ),
                         ),
                       );
                     },

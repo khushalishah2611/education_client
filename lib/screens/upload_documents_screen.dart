@@ -12,10 +12,14 @@ import 'payment_screen.dart';
 class UploadDocumentsScreen extends StatefulWidget {
   const UploadDocumentsScreen({
     super.key,
-
+    this.universityName,
+    this.universityHeroImage,
+    this.courseTitle,
   });
 
-
+  final String? universityName;
+  final String? universityHeroImage;
+  final String? courseTitle;
 
   @override
   State<UploadDocumentsScreen> createState() => _UploadDocumentsScreenState();
@@ -58,6 +62,9 @@ class _UploadDocumentsScreenState extends State<UploadDocumentsScreen> {
     Navigator.of(context).push(
       MaterialPageRoute(
         builder: (_) => PaymentScreen(
+          universityName: widget.universityName,
+          universityHeroImage: widget.universityHeroImage,
+          courseTitle: widget.courseTitle,
         ),
       ),
     );
