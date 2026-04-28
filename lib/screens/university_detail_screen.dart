@@ -1,6 +1,7 @@
 import 'package:education/core/app_localizations.dart';
 import 'package:education/core/image_url_helper.dart';
 import 'package:education/models/admin_university.dart';
+import 'package:education/services/selected_course_storage.dart';
 import 'package:flutter/material.dart';
 import '../core/app_theme.dart';
 import '../widgets/common_widgets.dart';
@@ -505,6 +506,7 @@ class _CollegeAccordion extends StatelessWidget {
                           onTap: () => onToggleCourse(courseKey),
                           context: context,
                           adminUniversity: adminUniversity,
+                          collegeName: collegeName,
                           courseWidth: courseWidth,
                           feeWidth: feeWidth,
                           admissionWidth: admissionWidth,
@@ -567,6 +569,7 @@ class _CollegeAccordion extends StatelessWidget {
     required VoidCallback onTap,
     required BuildContext context,
     required adminUniversity,
+    required String collegeName,
     required double courseWidth,
     required double feeWidth,
     required double admissionWidth,
@@ -653,7 +656,13 @@ class _CollegeAccordion extends StatelessWidget {
                   const SizedBox(height: 4),
 
                   InkWell(
-                    onTap: () {
+                    onTap: () async {
+                      await SelectedCourseStorage.save(
+                        university: adminUniversity,
+                        course: details,
+                        collegeName: collegeName,
+                      );
+                      if (!context.mounted) return;
                       Navigator.push(
                         context,
                         MaterialPageRoute(
