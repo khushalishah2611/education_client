@@ -345,7 +345,9 @@ class Program {
     _addIfNotNull(data, 'updatedAt', updatedAt);
     _addIfNotNull(data, 'intakes', intakes);
     if (universityLinks != null) {
-      data['universityLinks'] = universityLinks!.map((v) => v.toJson()).toList();
+      data['universityLinks'] = universityLinks!
+          .map((v) => v.toJson())
+          .toList();
     }
     _addIfNotNull(data, 'educationInstitute', educationInstitute);
     return data;
@@ -363,7 +365,9 @@ class UniversityLinks {
     applicationFee = _asInt(json['applicationFee']);
     currency = json['currency']?.toString();
     if (json['university'] is Map<String, dynamic>) {
-      university = University.fromJson(json['university'] as Map<String, dynamic>);
+      university = University.fromJson(
+        json['university'] as Map<String, dynamic>,
+      );
     }
   }
 
@@ -585,7 +589,9 @@ class ProgramData {
     _addIfNotNull(data, 'updatedAt', updatedAt);
     _addIfNotNull(data, 'intakes', intakes);
     if (universityLinks != null) {
-      data['universityLinks'] = universityLinks!.map((v) => v.toJson()).toList();
+      data['universityLinks'] = universityLinks!
+          .map((v) => v.toJson())
+          .toList();
     }
     _addIfNotNull(data, 'educationInstitute', educationInstitute);
     _addIfNotNull(data, 'courses', courses);

@@ -104,10 +104,7 @@ class UniversityCardSkeleton extends StatelessWidget {
               ),
             ],
           ),
-          AppShimmerBox(
-            height: 40,
-            borderRadius: BorderRadius.circular(10),
-          ),
+          AppShimmerBox(height: 40, borderRadius: BorderRadius.circular(10)),
         ],
       ),
     );

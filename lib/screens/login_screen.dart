@@ -161,8 +161,9 @@ class _LoginScreenState extends State<LoginScreen> {
   }
 
   void _openTermsBottomSheet() {
-    final AgreementTemplate? agreement =
-    _agreementTemplates.isEmpty ? null : _agreementTemplates.first;
+    final AgreementTemplate? agreement = _agreementTemplates.isEmpty
+        ? null
+        : _agreementTemplates.first;
 
     if (agreement == null) {
       return;
@@ -225,6 +226,7 @@ class _LoginScreenState extends State<LoginScreen> {
       },
     );
   }
+
   @override
   Widget build(BuildContext context) {
     final AgreementTemplate? agreement = _agreementTemplates.isEmpty

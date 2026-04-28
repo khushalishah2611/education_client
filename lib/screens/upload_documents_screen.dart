@@ -29,10 +29,22 @@ class _UploadDocumentsScreenState extends State<UploadDocumentsScreen> {
   late final Map<String, PlatformFile?> _selectedFiles = {};
 
   List<({String title, String subtitle})> _docs(BuildContext context) => [
-    (title: context.l10n.text('docPassport'), subtitle: context.l10n.text('docPassportSubtitle')),
-    (title: context.l10n.text('docSop'), subtitle: context.l10n.text('docSopSubtitle')),
-    (title: context.l10n.text('docLor'), subtitle: context.l10n.text('docLorSubtitle')),
-    (title: context.l10n.text('docResume'), subtitle: context.l10n.text('docResumeSubtitle')),
+    (
+      title: context.l10n.text('docPassport'),
+      subtitle: context.l10n.text('docPassportSubtitle'),
+    ),
+    (
+      title: context.l10n.text('docSop'),
+      subtitle: context.l10n.text('docSopSubtitle'),
+    ),
+    (
+      title: context.l10n.text('docLor'),
+      subtitle: context.l10n.text('docLorSubtitle'),
+    ),
+    (
+      title: context.l10n.text('docResume'),
+      subtitle: context.l10n.text('docResumeSubtitle'),
+    ),
   ];
 
   Future<void> _pickDocument(String docTitle) async {
@@ -51,7 +63,8 @@ class _UploadDocumentsScreenState extends State<UploadDocumentsScreen> {
     });
   }
 
-  bool get _allDocumentsSelected => _selectedFiles.values.every((file) => file != null);
+  bool get _allDocumentsSelected =>
+      _selectedFiles.values.every((file) => file != null);
 
   void _onContinue() {
     // if (!_allDocumentsSelected) {
@@ -86,7 +99,10 @@ class _UploadDocumentsScreenState extends State<UploadDocumentsScreen> {
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              FlowStepHeader(currentStep: 0, title: context.l10n.text('uploadDocuments')),
+              FlowStepHeader(
+                currentStep: 0,
+                title: context.l10n.text('uploadDocuments'),
+              ),
               Expanded(
                 child: ListView(
                   padding: EdgeInsets.fromLTRB(
@@ -111,17 +127,19 @@ class _UploadDocumentsScreenState extends State<UploadDocumentsScreen> {
                       onTap: () => _pickDocument(docs.first.title),
                     ),
                     const SizedBox(height: 10),
-                    ...docs.skip(1).map(
-                      (doc) => Padding(
-                        padding: const EdgeInsets.only(bottom: 10),
-                        child: _UploadListTile(
-                          title: doc.title,
-                          subtitle: doc.subtitle,
-                          selectedFileName: _selectedFiles[doc.title]?.name,
-                          onTap: () => _pickDocument(doc.title),
+                    ...docs
+                        .skip(1)
+                        .map(
+                          (doc) => Padding(
+                            padding: const EdgeInsets.only(bottom: 10),
+                            child: _UploadListTile(
+                              title: doc.title,
+                              subtitle: doc.subtitle,
+                              selectedFileName: _selectedFiles[doc.title]?.name,
+                              onTap: () => _pickDocument(doc.title),
+                            ),
+                          ),
                         ),
-                      ),
-                    ),
                     const SizedBox(height: 18),
                     AppPrimaryButton(
                       label: context.l10n.text('saveContinue'),
@@ -280,8 +298,12 @@ class _UploadListTile extends StatelessWidget {
                   Text(
                     isUploaded ? selectedFileName! : subtitle,
                     style: TextStyle(
-                      color: isUploaded ? AppColors.accent : AppColors.textMuted,
-                      fontWeight: isUploaded ? FontWeight.w600 : FontWeight.w400,
+                      color: isUploaded
+                          ? AppColors.accent
+                          : AppColors.textMuted,
+                      fontWeight: isUploaded
+                          ? FontWeight.w600
+                          : FontWeight.w400,
                     ),
                     overflow: TextOverflow.ellipsis,
                   ),

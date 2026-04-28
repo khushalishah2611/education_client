@@ -11,10 +11,7 @@ class ProfileScreen extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return const SideMenuScaffold(
-      title: 'My Profile',
-      child: ProfileBody(),
-    );
+    return const SideMenuScaffold(title: 'My Profile', child: ProfileBody());
   }
 }
 
@@ -74,7 +71,11 @@ class ProfileBody extends StatelessWidget {
         ProfileSectionTitle('Address Information'),
         SizedBox(height: 10),
         ProfileLabel('Address'),
-        ProfileInput(hint: 'Address', icon: Icons.location_on_outlined, multiLine: true),
+        ProfileInput(
+          hint: 'Address',
+          icon: Icons.location_on_outlined,
+          multiLine: true,
+        ),
         SizedBox(height: 18),
         ProfileSectionTitle('Emergency Contact'),
         SizedBox(height: 10),
@@ -133,8 +134,15 @@ class ProfileAvatar extends StatelessWidget {
             child: Container(
               width: 28,
               height: 28,
-              decoration: const BoxDecoration(color: Colors.white, shape: BoxShape.circle),
-              child: const Icon(Icons.edit_rounded, size: 15, color: AppColors.accent),
+              decoration: const BoxDecoration(
+                color: Colors.white,
+                shape: BoxShape.circle,
+              ),
+              child: const Icon(
+                Icons.edit_rounded,
+                size: 15,
+                color: AppColors.accent,
+              ),
             ),
           ),
         ],
@@ -150,7 +158,10 @@ class ProfileSectionTitle extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return Text(title, style: const TextStyle(fontSize: 17.5, fontWeight: FontWeight.w800));
+    return Text(
+      title,
+      style: const TextStyle(fontSize: 17.5, fontWeight: FontWeight.w800),
+    );
   }
 }
 
@@ -163,7 +174,10 @@ class ProfileLabel extends StatelessWidget {
   Widget build(BuildContext context) {
     return Padding(
       padding: const EdgeInsets.only(bottom: 6),
-      child: Text(text, style: const TextStyle(fontSize: 16, fontWeight: FontWeight.w600)),
+      child: Text(
+        text,
+        style: const TextStyle(fontSize: 16, fontWeight: FontWeight.w600),
+      ),
     );
   }
 }
@@ -193,7 +207,9 @@ class ProfileInput extends StatelessWidget {
         border: Border.all(color: const Color(0xFFD7D5D3)),
       ),
       child: Row(
-        crossAxisAlignment: multiLine ? CrossAxisAlignment.start : CrossAxisAlignment.center,
+        crossAxisAlignment: multiLine
+            ? CrossAxisAlignment.start
+            : CrossAxisAlignment.center,
         children: [
           Padding(
             padding: EdgeInsets.only(top: multiLine ? 12 : 0),
@@ -203,10 +219,17 @@ class ProfileInput extends StatelessWidget {
           Expanded(
             child: Padding(
               padding: EdgeInsets.only(top: multiLine ? 12 : 0),
-              child: Text(hint, style: const TextStyle(fontSize: 15, color: AppColors.textMuted)),
+              child: Text(
+                hint,
+                style: const TextStyle(
+                  fontSize: 15,
+                  color: AppColors.textMuted,
+                ),
+              ),
             ),
           ),
-          if (trailing != null) Icon(trailing, size: 18, color: AppColors.textMuted),
+          if (trailing != null)
+            Icon(trailing, size: 18, color: AppColors.textMuted),
         ],
       ),
     );
@@ -244,18 +267,27 @@ class GenderOption extends StatelessWidget {
           alignment: Alignment.center,
           decoration: BoxDecoration(
             shape: BoxShape.circle,
-            border: Border.all(color: selected ? AppColors.accent : AppColors.textMuted, width: 1.2),
+            border: Border.all(
+              color: selected ? AppColors.accent : AppColors.textMuted,
+              width: 1.2,
+            ),
           ),
           child: selected
               ? Container(
                   width: 9,
                   height: 9,
-                  decoration: const BoxDecoration(color: AppColors.accent, shape: BoxShape.circle),
+                  decoration: const BoxDecoration(
+                    color: AppColors.accent,
+                    shape: BoxShape.circle,
+                  ),
                 )
               : null,
         ),
         const SizedBox(width: 8),
-        Text(label, style: const TextStyle(fontSize: 12, fontWeight: FontWeight.w500)),
+        Text(
+          label,
+          style: const TextStyle(fontSize: 12, fontWeight: FontWeight.w500),
+        ),
       ],
     );
   }
@@ -266,10 +298,11 @@ class SaveButton extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return   AppPrimaryButton(
+    return AppPrimaryButton(
       label: context.l10n.text('save'),
-      onPressed: () => Navigator.of(context).push(
-        MaterialPageRoute(builder: (_) => const HomeScreen()),
-      ));
+      onPressed: () => Navigator.of(
+        context,
+      ).push(MaterialPageRoute(builder: (_) => const HomeScreen())),
+    );
   }
 }

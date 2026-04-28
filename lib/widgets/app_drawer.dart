@@ -21,7 +21,7 @@ class CommonSideMenu extends StatelessWidget {
             icon: Icons.assignment_outlined,
             label: context.l10n.text('trackApplications'),
             danger: false,
-            screen: const SideMenuBottomNavScreen(initialIndex: 0),
+            screen: const TrackMyApplicationsScreen(),
           ),
           (
             icon: Icons.person_outline,
@@ -33,7 +33,7 @@ class CommonSideMenu extends StatelessWidget {
             icon: Icons.description_outlined,
             label: context.l10n.text('manageDocuments'),
             danger: false,
-            screen: const SideMenuBottomNavScreen(initialIndex: 1),
+            screen: const UploadedDocumentsScreen(),
           ),
           (
             icon: Icons.payments_outlined,
@@ -48,12 +48,6 @@ class CommonSideMenu extends StatelessWidget {
             screen: const NotificationsScreen(),
           ),
           (
-            icon: Icons.campaign_outlined,
-            label: 'Latest Updates',
-            danger: false,
-            screen: const SideMenuBottomNavScreen(initialIndex: 2),
-          ),
-          (
             icon: Icons.verified_user_outlined,
             label: context.l10n.text('termsAndConditions'),
             danger: false,
@@ -63,7 +57,7 @@ class CommonSideMenu extends StatelessWidget {
             icon: Icons.support_agent_outlined,
             label: context.l10n.text('help'),
             danger: false,
-            screen: const SideMenuBottomNavScreen(initialIndex: 3),
+            screen: const EmergencyContactScreen(),
           ),
           (
             icon: Icons.translate_outlined,

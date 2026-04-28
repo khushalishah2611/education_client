@@ -24,9 +24,15 @@ class NotificationsScreen extends StatelessWidget {
       title: context.l10n.text('notifications'),
       child: ListView(
         children: [
-          NotificationSection(title: context.l10n.text('today'), items: todayItems),
+          NotificationSection(
+            title: context.l10n.text('today'),
+            items: todayItems,
+          ),
           const SizedBox(height: 10),
-          NotificationSection(title: context.l10n.text('yesterday'), items: yesterdayItems),
+          NotificationSection(
+            title: context.l10n.text('yesterday'),
+            items: yesterdayItems,
+          ),
         ],
       ),
     );
@@ -34,7 +40,11 @@ class NotificationsScreen extends StatelessWidget {
 }
 
 class NotificationSection extends StatelessWidget {
-  const NotificationSection({super.key, required this.title, required this.items});
+  const NotificationSection({
+    super.key,
+    required this.title,
+    required this.items,
+  });
 
   final String title;
   final List<NotificationItemData> items;
@@ -44,7 +54,10 @@ class NotificationSection extends StatelessWidget {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        Text(title, style: const TextStyle(fontSize: 10, color: AppColors.textMuted)),
+        Text(
+          title,
+          style: const TextStyle(fontSize: 10, color: AppColors.textMuted),
+        ),
         const SizedBox(height: 10),
         ...List.generate(items.length, (index) {
           final item = items[index];
@@ -104,7 +117,10 @@ class NotificationCard extends StatelessWidget {
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          Text(title, style: const TextStyle(fontSize: 14, fontWeight: FontWeight.w700)),
+          Text(
+            title,
+            style: const TextStyle(fontSize: 14, fontWeight: FontWeight.w700),
+          ),
           const SizedBox(height: 4),
           Text(
             context.l10n.text('notificationDescription'),
@@ -113,9 +129,21 @@ class NotificationCard extends StatelessWidget {
           const SizedBox(height: 10),
           Row(
             children: [
-              Text(context.l10n.text('notificationTime'), style: const TextStyle(fontSize: 12, color: AppColors.textMuted)),
+              Text(
+                context.l10n.text('notificationTime'),
+                style: const TextStyle(
+                  fontSize: 12,
+                  color: AppColors.textMuted,
+                ),
+              ),
               const Spacer(),
-              Text(context.l10n.text('notificationDate'), style: const TextStyle(fontSize: 12, color: AppColors.textMuted)),
+              Text(
+                context.l10n.text('notificationDate'),
+                style: const TextStyle(
+                  fontSize: 12,
+                  color: AppColors.textMuted,
+                ),
+              ),
             ],
           ),
         ],

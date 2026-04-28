@@ -33,12 +33,18 @@ class PaymentsScreen extends StatelessWidget {
                 Expanded(
                   child: Text(
                     '${item.$1}   •   ${item.$2}',
-                    style: const TextStyle(fontSize: 12, color: AppColors.textMuted),
+                    style: const TextStyle(
+                      fontSize: 12,
+                      color: AppColors.textMuted,
+                    ),
                   ),
                 ),
                 Text(
                   item.$3,
-                  style: const TextStyle(color: AppColors.accent, fontWeight: FontWeight.w700),
+                  style: const TextStyle(
+                    color: AppColors.accent,
+                    fontWeight: FontWeight.w700,
+                  ),
                 ),
               ],
             ),

@@ -13,12 +13,9 @@ class HomeApiService {
   const HomeApiService();
 
   Future<List<BannerItem>> fetchBanners({int page = 1, int limit = 10}) async {
-    final Uri url = ApiConfig.uri('/api/admin/banners').replace(
-      queryParameters: {
-        'page': '$page',
-        'limit': '$limit',
-      },
-    );
+    final Uri url = ApiConfig.uri(
+      '/api/admin/banners',
+    ).replace(queryParameters: {'page': '$page', 'limit': '$limit'});
     final response = await http.get(url);
     final decoded = _decode(response.body);
 
@@ -34,11 +31,17 @@ class HomeApiService {
       throw Exception('Failed to load banners.');
     }
 
-    final List<dynamic> list = _asList(decoded['data'] ?? decoded['items'] ?? decoded);
+    final List<dynamic> list = _asList(
+      decoded['data'] ?? decoded['items'] ?? decoded,
+    );
     return list
         .whereType<Map<String, dynamic>>()
         .map((item) {
-          final imagePath = _readString(item, const ['imagePath', 'imageUrl', 'image']);
+          final imagePath = _readString(item, const [
+            'imagePath',
+            'imageUrl',
+            'image',
+          ]);
           return BannerItem.fromJson(<String, dynamic>{
             ...item,
             'imageUrl': _toAbsoluteUrl(imagePath),
@@ -82,7 +85,7 @@ class HomeApiService {
       responseBody: decoded,
     );
 
-    if (!ApiStatus.isSuccess(response. statusCode)) {
+    if (!ApiStatus.isSuccess(response.statusCode)) {
       throw Exception('Failed to load universities.');
     }
 
@@ -98,10 +101,12 @@ class HomeApiService {
           return AdminUniversity.fromJson(<String, dynamic>{
             ...item,
             'id': _readString(item, const ['id', '_id', 'universityId']),
-            'name': _readString(
-              item,
-              const ['name', 'universityName', 'title', 'displayName'],
-            ),
+            'name': _readString(item, const [
+              'name',
+              'universityName',
+              'title',
+              'displayName',
+            ]),
             'country': _readString(item, const ['country', 'countryName']),
           });
         })
@@ -182,7 +187,10 @@ class HomeApiService {
 
     final values = _asList(decoded['data'] ?? decoded)
         .whereType<Map<String, dynamic>>()
-        .map((item) => _readString(item, const ['name', 'nameEn', 'value', 'code']))
+        .map(
+          (item) =>
+              _readString(item, const ['name', 'nameEn', 'value', 'code']),
+        )
         .where((name) => name.isNotEmpty)
         .toSet()
         .toList(growable: false);

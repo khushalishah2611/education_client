@@ -14,9 +14,7 @@ class AuthApiService {
 
   Future<List<CountryMaster>> fetchCountries() async {
     const path = '/api/admin/masters/country';
-    final response = await http.get(
-      ApiConfig.uri(path),
-    );
+    final response = await http.get(ApiConfig.uri(path));
     logApiCall(
       method: 'GET',
       url: ApiConfig.uri(path).toString(),
@@ -33,7 +31,7 @@ class AuthApiService {
     final List<dynamic> items = decoded is List<dynamic>
         ? decoded
         : (decoded as Map<String, dynamic>)['data'] as List<dynamic>? ??
-            const <dynamic>[];
+              const <dynamic>[];
 
     return items
         .map((item) => CountryMaster.fromJson(item as Map<String, dynamic>))
@@ -43,9 +41,7 @@ class AuthApiService {
 
   Future<List<AgreementTemplate>> fetchAgreementTemplates() async {
     const path = '/api/student/agreements/templates';
-    final response = await http.get(
-      ApiConfig.uri(path),
-    );
+    final response = await http.get(ApiConfig.uri(path));
     logApiCall(
       method: 'GET',
       url: ApiConfig.uri(path).toString(),
@@ -62,11 +58,10 @@ class AuthApiService {
     final List<dynamic> items = decoded is List<dynamic>
         ? decoded
         : (decoded as Map<String, dynamic>)['data'] as List<dynamic>? ??
-            const <dynamic>[];
+              const <dynamic>[];
 
     return items
-        .map((item) =>
-            AgreementTemplate.fromJson(item as Map<String, dynamic>))
+        .map((item) => AgreementTemplate.fromJson(item as Map<String, dynamic>))
         .where((item) => item.isActive)
         .toList(growable: false);
   }
@@ -177,7 +172,6 @@ Map<String, dynamic> _decodeObject(String body) {
   return <String, dynamic>{};
 }
 
-
 Map<String, dynamic> _extractResponsePayload(Map<String, dynamic> decoded) {
   final dynamic data = decoded['data'];
   if (data is Map<String, dynamic>) {
@@ -206,7 +200,8 @@ class ApiResponseException implements Exception {
     required Map<String, dynamic> responseBody,
   }) {
     final dynamic apiMessage = responseBody['message'];
-    final fallbackMessage = 'Request failed with status ${response.statusCode}.';
+    final fallbackMessage =
+        'Request failed with status ${response.statusCode}.';
     return ApiResponseException(
       statusCode: response.statusCode,
       message: apiMessage is String ? apiMessage : fallbackMessage,

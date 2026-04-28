@@ -8,44 +8,46 @@ class EmergencyContactScreen extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return const SideMenuScaffold(
-      title: 'Emergency Contact',
-      child: EmergencyContactContent(),
-    );
+    return SideMenuScaffold(title: 'Help', child: EmergencyContactCard());
   }
 }
 
-class EmergencyContactContent extends StatelessWidget {
-  const EmergencyContactContent({super.key});
+class EmergencyContactCard extends StatelessWidget {
+  const EmergencyContactCard({super.key});
 
   @override
   Widget build(BuildContext context) {
-    return Column(
-      children: const [
-        ContactInfoField(
-          label: 'Guardian Name',
-          value: 'Abhishek Verma',
-          icon: Icons.person_outline_rounded,
-        ),
-        Divider(height: 1, color: Color(0xFFE4E2E0)),
-        ContactInfoField(
-          label: 'Relationship',
-          value: 'Brother',
-          icon: Icons.person_outline_rounded,
-        ),
-        Divider(height: 1, color: Color(0xFFE4E2E0)),
-        ContactInfoField(
-          label: 'Mobile Number',
-          value: '+91 89788 54588',
-          icon: Icons.call_outlined,
-        ),
-        Divider(height: 1, color: Color(0xFFE4E2E0)),
-        ContactInfoField(
-          label: 'Email ID',
-          value: 'theabc@gmail.com',
-          icon: Icons.mail_outline_rounded,
-        ),
-      ],
+    return Expanded(
+      child: Column(
+        children: const [
+          ContactInfoField(
+            label: 'Guardian Name',
+            value: 'Abhishek Verma',
+            icon: Icons.person_outline_rounded,
+          ),
+          Divider(height: 1, color: Color(0xFFE4E2E0)),
+
+          ContactInfoField(
+            label: 'Relationship',
+            value: 'Brother',
+            icon: Icons.person_outline_rounded,
+          ),
+          Divider(height: 1, color: Color(0xFFE4E2E0)),
+
+          ContactInfoField(
+            label: 'Mobile Number',
+            value: '+91 89788 54588',
+            icon: Icons.call_outlined,
+          ),
+          Divider(height: 1, color: Color(0xFFE4E2E0)),
+
+          ContactInfoField(
+            label: 'Email Address',
+            value: 'theabc@gmail.com',
+            icon: Icons.mail_outline_rounded,
+          ),
+        ],
+      ),
     );
   }
 }
@@ -75,25 +77,31 @@ class ContactInfoField extends StatelessWidget {
               children: [
                 Text(
                   label,
-                  style: const TextStyle(fontSize: 13.5, fontWeight: FontWeight.w700),
+                  style: const TextStyle(
+                    fontSize: 13.5,
+                    fontWeight: FontWeight.w700,
+                  ),
                 ),
                 const SizedBox(height: 4),
                 Text(
                   value,
-                  style: const TextStyle(fontSize: 13.5, color: AppColors.textMuted),
+                  style: const TextStyle(
+                    fontSize: 13.5,
+                    color: AppColors.textMuted,
+                  ),
                 ),
               ],
             ),
           ),
           const SizedBox(width: 8),
           Container(
-            width: 36,
-            height: 36,
+            width: 28,
+            height: 28,
             decoration: BoxDecoration(
-              color: const Color(0xFFA7E7C5),
-              borderRadius: BorderRadius.circular(8),
+              color: Color(0xFFA7E7C5),
+              borderRadius: BorderRadius.circular(6),
             ),
-            child: Icon(icon, size: 19, color: const Color(0xFF0A3F27)),
+            child: Icon(icon, size: 16, color: Color(0xFF0A3F27)),
           ),
         ],
       ),

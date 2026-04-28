@@ -29,13 +29,15 @@ class AppLocalizations {
 
   bool get isArabic => locale.languageCode == 'ar';
 
-  TextDirection get textDirection => isArabic ? TextDirection.rtl : TextDirection.ltr;
+  TextDirection get textDirection =>
+      isArabic ? TextDirection.rtl : TextDirection.ltr;
 
   String text(String key) {
     return _values[key] as String? ?? key;
   }
 
-  Locale get alternateLocale => isArabic ? const Locale('en') : const Locale('ar');
+  Locale get alternateLocale =>
+      isArabic ? const Locale('en') : const Locale('ar');
 }
 
 class AppLocalizationScope extends InheritedWidget {
@@ -50,7 +52,8 @@ class AppLocalizationScope extends InheritedWidget {
   final ValueChanged<Locale> changeLanguage;
 
   static AppLocalizationScope of(BuildContext context) {
-    final result = context.dependOnInheritedWidgetOfExactType<AppLocalizationScope>();
+    final result = context
+        .dependOnInheritedWidgetOfExactType<AppLocalizationScope>();
     assert(result != null, 'No AppLocalizationScope found in context');
     return result!;
   }
@@ -75,7 +78,8 @@ const Map<String, Map<String, dynamic>> _fallbackValues = {
     'appName': 'Arab Universities',
     'langLabel': 'AR',
     'welcomeTitle': 'Welcome to Arab\nUniversities',
-    'welcomeSubtitle': 'Discover top colleges and universities to shape your future',
+    'welcomeSubtitle':
+        'Discover top colleges and universities to shape your future',
     'login': 'Login',
     'createAccount': 'Create Account',
     'loginWithOtp': 'Login with OTP',
@@ -115,7 +119,8 @@ const Map<String, Map<String, dynamic>> _fallbackValues = {
     'privateSchool': 'Private School',
     'location': 'Location',
     'about': 'About',
-    'aboutText': 'Lorem ipsum dolor sit amet, consectetur adipiscing elit. Arcu, arcu dictumst habitant vel ut et pellentesque. Ut in egestas blandit netus in scelerisque. Eget lectus ultrices pellentesque id...Read More',
+    'aboutText':
+        'Lorem ipsum dolor sit amet, consectetur adipiscing elit. Arcu, arcu dictumst habitant vel ut et pellentesque. Ut in egestas blandit netus in scelerisque. Eget lectus ultrices pellentesque id...Read More',
     'rankingInfo': 'Ranking Info',
     'ranking': 'Ranking',
     'rankingValue': '#3 worldwide (2026)',
@@ -153,7 +158,8 @@ const Map<String, Map<String, dynamic>> _fallbackValues = {
     'applicationSubmitted': 'Application Submitted',
     'applicationIdValue': 'Application ID : #12345',
     'paymentProcessedPrefix': 'Your payment of ₹1,500.00 for the Fall 2026',
-    'paymentProcessedSuffix': 'program has been processed. Your application is now in the review queue.',
+    'paymentProcessedSuffix':
+        'program has been processed. Your application is now in the review queue.',
     'trackApplication': 'Track Application',
     'downloadReceipt': 'Download Receipt',
     'applicationProgress': 'Application Progress',
@@ -182,10 +188,12 @@ const Map<String, Map<String, dynamic>> _fallbackValues = {
     'supportedPrefix': 'Supported: ',
     'selectedPrefix': 'Selected: ',
     'documentsApprovedSuccessfully': 'Documents approved successfully',
-    'applicationDeadlineReminder': 'Reminder: Application deadline is approaching',
+    'applicationDeadlineReminder':
+        'Reminder: Application deadline is approaching',
     'today': 'Today',
     'yesterday': 'Yesterday',
-    'notificationDescription': 'Short description explaining the notification details\nin a compact way...',
+    'notificationDescription':
+        'Short description explaining the notification details\nin a compact way...',
     'notificationTime': '10:00 PM',
     'notificationDate': '03 Mar 2026',
     'logoutConfirmMessage': 'Are you sure you want to log out?',
@@ -236,7 +244,8 @@ const Map<String, Map<String, dynamic>> _fallbackValues = {
     'privateSchool': 'مدرسة خاصة',
     'location': 'الموقع',
     'about': 'نبذة',
-    'aboutText': 'هذا النص تجريبي لعرض شكل المحتوى والوصف داخل بطاقة الجامعة كما في التصميم.',
+    'aboutText':
+        'هذا النص تجريبي لعرض شكل المحتوى والوصف داخل بطاقة الجامعة كما في التصميم.',
     'rankingInfo': 'معلومات التصنيف',
     'ranking': 'التصنيف',
     'rankingValue': '#3 عالميًا (2026)',
@@ -273,7 +282,8 @@ const Map<String, Map<String, dynamic>> _fallbackValues = {
     'paymentConfirmation': 'تأكيد الدفع',
     'applicationSubmitted': 'تم إرسال الطلب',
     'applicationIdValue': 'رقم الطلب : #12345',
-    'paymentProcessedPrefix': 'تمت معالجة دفعتك بقيمة ₹1,500.00 لبرنامج خريف 2026',
+    'paymentProcessedPrefix':
+        'تمت معالجة دفعتك بقيمة ₹1,500.00 لبرنامج خريف 2026',
     'paymentProcessedSuffix': 'وأصبح طلبك الآن في قائمة المراجعة.',
     'trackApplication': 'تتبع الطلب',
     'downloadReceipt': 'تنزيل الإيصال',

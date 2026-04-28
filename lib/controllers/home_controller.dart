@@ -76,11 +76,11 @@ class HomeController extends ChangeNotifier {
       final responses = await Future.wait<Object>([
         _homeApiService
             .fetchUniversities(
-          country: _selectedCountry,
-          academic: _selectedAcademic,
-          track: _selectedTrack,
-          search: resultController.text,
-        )
+              country: _selectedCountry,
+              academic: _selectedAcademic,
+              track: _selectedTrack,
+              search: resultController.text,
+            )
             .catchError((_) => <AdminUniversity>[]),
         _homeApiService.fetchTrackMasters().catchError((_) => <String>[]),
         _homeApiService.fetchAcademicMasters().catchError((_) => <String>[]),
@@ -108,28 +108,28 @@ class HomeController extends ChangeNotifier {
       /// 🔥 COUNTRY LIST FIX (MAIN PART)
       final isOmanUser =
           (_loginDialCode ?? '').trim() == '+968' ||
-              (_selectedCountry ?? '').toLowerCase() == 'oman';
+          (_selectedCountry ?? '').toLowerCase() == 'oman';
 
       countryOptions = countries
           .where((c) {
-        final name = (c.nameEn.isNotEmpty ? c.nameEn : c.value)
-            .toLowerCase()
-            .trim();
+            final name = (c.nameEn.isNotEmpty ? c.nameEn : c.value)
+                .toLowerCase()
+                .trim();
 
-        if (isOmanUser) {
-          return name.contains('oman'); // only Oman
-        }
+            if (isOmanUser) {
+              return name.contains('oman'); // only Oman
+            }
 
-        return name.isNotEmpty;
-      })
+            return name.isNotEmpty;
+          })
           .map(
             (c) => CountryOption(
-          name: c.nameEn.isNotEmpty ? c.nameEn : c.value,
-          flagEmoji: c.flagEmoji,
-          flagImageUrl: _resolveCountryFlag(c),
-          dialCode: c.dialCode,
-        ),
-      )
+              name: c.nameEn.isNotEmpty ? c.nameEn : c.value,
+              flagEmoji: c.flagEmoji,
+              flagImageUrl: _resolveCountryFlag(c),
+              dialCode: c.dialCode,
+            ),
+          )
           .toList();
     } catch (_) {
       universities = [];
@@ -177,21 +177,20 @@ class HomeController extends ChangeNotifier {
     return source.where((u) {
       if (u.accredited != true) return false;
       if ((u.status ?? '').trim().toLowerCase() != 'active') return false;
-      final effectiveCountry =
-      (_loginDialCode ?? '').trim() == '+968'
+      final effectiveCountry = (_loginDialCode ?? '').trim() == '+968'
           ? 'Oman'
           : _selectedCountry;
 
       if (effectiveCountry != null &&
           effectiveCountry.isNotEmpty &&
-          (u.country ?? '').toLowerCase() !=
-              effectiveCountry.toLowerCase()) {
+          (u.country ?? '').toLowerCase() != effectiveCountry.toLowerCase()) {
         return false;
       }
 
       if (_selectedAcademic != null && _selectedAcademic!.isNotEmpty) {
         final selectedAcademic = _normalizeValue(_selectedAcademic);
-        final match = u.academicList?.any((a) {
+        final match =
+            u.academicList?.any((a) {
               final academicValues = _splitCsvValues(a.academicname);
               return academicValues.contains(selectedAcademic);
             }) ??
@@ -280,8 +279,7 @@ class HomeController extends ChangeNotifier {
   }
 
   bool _isScientificAndLiterary(String v) {
-    return v.replaceAll(' ', '').toUpperCase() ==
-        'SCIENTIFICANDLITERARY';
+    return v.replaceAll(' ', '').toUpperCase() == 'SCIENTIFICANDLITERARY';
   }
 
   List<String> _splitCsvValues(String? csv) {

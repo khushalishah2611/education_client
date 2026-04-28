@@ -33,7 +33,9 @@ class SideMenuScaffold extends StatelessWidget {
               height: headerHeight,
               decoration: const BoxDecoration(
                 color: Colors.white,
-                borderRadius: BorderRadius.vertical(bottom: Radius.circular(22)),
+                borderRadius: BorderRadius.vertical(
+                  bottom: Radius.circular(22),
+                ),
               ),
               child: Stack(
                 alignment: Alignment.center,
@@ -198,7 +200,10 @@ class SectionCard extends StatelessWidget {
               child: Row(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  const Text('• ', style: TextStyle(color: AppColors.textMuted)),
+                  const Text(
+                    '• ',
+                    style: TextStyle(color: AppColors.textMuted),
+                  ),
                   Expanded(
                     child: Text(
                       point,
@@ -238,12 +243,19 @@ Future<void> showLogoutDialog(BuildContext context) {
                   color: Color(0xFFFFEFE3),
                   shape: BoxShape.circle,
                 ),
-                child: const Icon(Icons.logout_rounded, color: Colors.red, size: 28),
+                child: const Icon(
+                  Icons.logout_rounded,
+                  color: Colors.red,
+                  size: 28,
+                ),
               ),
               const SizedBox(height: 12),
               Text(
                 context.l10n.text('logoutConfirmMessage'),
-                style: const TextStyle(fontSize: 18, fontWeight: FontWeight.w600),
+                style: const TextStyle(
+                  fontSize: 18,
+                  fontWeight: FontWeight.w600,
+                ),
                 textAlign: TextAlign.center,
               ),
               const SizedBox(height: 14),
@@ -301,7 +313,10 @@ Future<void> showLogoutDialog(BuildContext context) {
                         ),
                         child: Text(
                           context.l10n.text('confirm'),
-                          style: const TextStyle(fontWeight: FontWeight.w700, fontSize: 15),
+                          style: const TextStyle(
+                            fontWeight: FontWeight.w700,
+                            fontSize: 15,
+                          ),
                         ),
                       ),
                     ),

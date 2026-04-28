@@ -97,31 +97,46 @@ class _UniversityDetailScreenState extends State<UniversityDetailScreen> {
                 mainAxisSize: MainAxisSize.min,
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  const Text(
-                    'Replace selected courses?',
-                    style: TextStyle(fontSize: 18, fontWeight: FontWeight.w700),
+                  Row(
+                    children: [
+                      Expanded(
+                        child: Text(
+                          'Replace selected courses?',
+                          style: const TextStyle(
+                            fontSize: 18,
+                            fontWeight: FontWeight.w700,
+                            color: AppColors.text,
+                          ),
+                        ),
+                      ),
+                      IconButton(
+                        onPressed: () => Navigator.of(sheetContext).pop(),
+                        icon: const Icon(Icons.close),
+                      ),
+                    ],
                   ),
-                  const SizedBox(height: 10),
+                  const SizedBox(height: 5),
+
                   const Text(
                     'You already selected courses in another university. '
                     'Do you want to clear them and continue here?',
                     style: TextStyle(height: 1.4),
                   ),
-                  const SizedBox(height: 16),
+                  const SizedBox(height: 10),
                   Row(
                     children: [
                       Expanded(
-                        child: OutlinedButton(
+                        child: AppOutlinedButton(
+                          label: context.l10n.text('Cancel'),
                           onPressed: () =>
                               Navigator.of(sheetContext).pop(false),
-                          child: const Text('Cancel'),
                         ),
                       ),
-                      const SizedBox(width: 10),
+                      const SizedBox(width: 8),
                       Expanded(
-                        child: ElevatedButton(
+                        child: AppPrimaryButton(
+                          label: context.l10n.text('Continue'),
                           onPressed: () => Navigator.of(sheetContext).pop(true),
-                          child: const Text('Confirm'),
                         ),
                       ),
                     ],
@@ -753,9 +768,9 @@ class _CollegeAccordionState extends State<_CollegeAccordion> {
                           builder: (_) => UploadDocumentsScreen(
                             universityName: widget.adminUniversity.name,
                             universityHeroImage:
-                            ImageUrlHelper.resolveUploadUrl(
-                              widget.adminUniversity.coverImagePath,
-                            ),
+                                ImageUrlHelper.resolveUploadUrl(
+                                  widget.adminUniversity.coverImagePath,
+                                ),
                             courseTitle: details.name,
                           ),
                         ),

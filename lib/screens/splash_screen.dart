@@ -13,7 +13,8 @@ class SplashScreen extends StatefulWidget {
   State<SplashScreen> createState() => _SplashScreenState();
 }
 
-class _SplashScreenState extends State<SplashScreen> with SingleTickerProviderStateMixin {
+class _SplashScreenState extends State<SplashScreen>
+    with SingleTickerProviderStateMixin {
   Timer? _timer;
   late final AnimationController _logoController;
   late final Animation<double> _logoScale;
@@ -59,10 +60,7 @@ class _SplashScreenState extends State<SplashScreen> with SingleTickerProviderSt
       body: SizedBox(
         width: double.infinity,
         height: double.infinity,
-        child: Image.asset(
-          'assets/images/logo.gif',
-          fit: BoxFit.cover,
-        ),
+        child: Image.asset('assets/images/logo.gif', fit: BoxFit.cover),
       ),
     );
   }

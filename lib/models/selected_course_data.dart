@@ -30,7 +30,10 @@ class SelectedCourseData {
   factory SelectedCourseData.fromRawJson(String source) {
     final Object? parsed = jsonDecode(source);
     if (parsed is! Map<String, dynamic>) {
-      return const SelectedCourseData(universityKey: '', courseKeys: <String>[]);
+      return const SelectedCourseData(
+        universityKey: '',
+        courseKeys: <String>[],
+      );
     }
 
     return SelectedCourseData.fromJson(parsed);

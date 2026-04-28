@@ -26,14 +26,16 @@ class StudentLoginResponse {
     final profileMap = profile is Map<String, dynamic>
         ? profile
         : const <String, dynamic>{};
-    final country = _readString(
-      json,
-      const ['country', 'countryName', 'country_name'],
-    );
-    final dialCode = _readString(
-      json,
-      const ['dialCode', 'countryCode', 'dial_code'],
-    );
+    final country = _readString(json, const [
+      'country',
+      'countryName',
+      'country_name',
+    ]);
+    final dialCode = _readString(json, const [
+      'dialCode',
+      'countryCode',
+      'dial_code',
+    ]);
 
     return StudentLoginResponse(
       id: _readString(json, const ['id', '_id', 'studentId']),
@@ -41,10 +43,10 @@ class StudentLoginResponse {
       otp: _readString(json, const ['otp']),
       otpRequired: _readBool(json['otpRequired']),
       otpStatus: _readString(json, const ['otpStatus']),
-      whatsappOtpLink: _readString(
-        json,
-        const ['whatsappOtpLink', 'whatsappLink'],
-      ),
+      whatsappOtpLink: _readString(json, const [
+        'whatsappOtpLink',
+        'whatsappLink',
+      ]),
       existingUser: _readBool(json['existingUser']),
       country: country.isNotEmpty
           ? country

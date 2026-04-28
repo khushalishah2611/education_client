@@ -35,13 +35,17 @@ class HelpScreen extends StatelessWidget {
                             color: Color(0xFFE7E7E7),
                             shape: BoxShape.circle,
                           ),
-                          child: const Icon(Icons.arrow_back_ios_new_rounded, size: 17),
+                          child: const Icon(
+                            Icons.arrow_back_ios_new_rounded,
+                            size: 17,
+                          ),
                         ),
                       ),
                       const SizedBox(width: 10),
                       Text(
                         context.l10n.text('help'),
-                        style: Theme.of(context).textTheme.headlineSmall?.copyWith(fontWeight: FontWeight.w700),
+                        style: Theme.of(context).textTheme.headlineSmall
+                            ?.copyWith(fontWeight: FontWeight.w700),
                       ),
                       const Spacer(),
                       const _LanguageDropdownChip(),
@@ -57,7 +61,10 @@ class HelpScreen extends StatelessWidget {
                   const SizedBox(height: 12),
                   Container(
                     width: double.infinity,
-                    padding: const EdgeInsets.symmetric(horizontal: 18, vertical: 14),
+                    padding: const EdgeInsets.symmetric(
+                      horizontal: 18,
+                      vertical: 14,
+                    ),
                     decoration: BoxDecoration(
                       color: Colors.white,
                       borderRadius: BorderRadius.circular(14),
@@ -67,10 +74,26 @@ class HelpScreen extends StatelessWidget {
                       runSpacing: 12,
                       spacing: 14,
                       children: const [
-                        _SocialItem(icon: Icons.chat, label: 'Whatsapp', color: Color(0xFF31B74A)),
-                        _SocialItem(icon: Icons.camera_alt_outlined, label: 'Instagram', color: Color(0xFFDD2A7B)),
-                        _SocialItem(icon: Icons.tag_faces_rounded, label: 'Snapchat', color: Color(0xFFFFD728)),
-                        _SocialItem(icon: Icons.add, label: '+ View', color: AppColors.text),
+                        _SocialItem(
+                          icon: Icons.chat,
+                          label: 'Whatsapp',
+                          color: Color(0xFF31B74A),
+                        ),
+                        _SocialItem(
+                          icon: Icons.camera_alt_outlined,
+                          label: 'Instagram',
+                          color: Color(0xFFDD2A7B),
+                        ),
+                        _SocialItem(
+                          icon: Icons.tag_faces_rounded,
+                          label: 'Snapchat',
+                          color: Color(0xFFFFD728),
+                        ),
+                        _SocialItem(
+                          icon: Icons.add,
+                          label: '+ View',
+                          color: AppColors.text,
+                        ),
                       ],
                     ),
                   ),
@@ -87,9 +110,8 @@ class HelpScreen extends StatelessWidget {
                       children: [
                         Text(
                           context.l10n.text('needHelp'),
-                          style: Theme.of(context).textTheme.titleLarge?.copyWith(
-                            fontSize: isSmallMobile ? 22 : 26,
-                          ),
+                          style: Theme.of(context).textTheme.titleLarge
+                              ?.copyWith(fontSize: isSmallMobile ? 22 : 26),
                         ),
                         const SizedBox(height: 4),
                         Text(
@@ -107,7 +129,9 @@ class HelpScreen extends StatelessWidget {
                             style: FilledButton.styleFrom(
                               backgroundColor: const Color(0xFF95D7B8),
                               foregroundColor: AppColors.text,
-                              shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(6)),
+                              shape: RoundedRectangleBorder(
+                                borderRadius: BorderRadius.circular(6),
+                              ),
                             ),
                             child: Text(context.l10n.text('chatWithUs')),
                           ),
@@ -150,7 +174,10 @@ class _SocialItem extends StatelessWidget {
           child: Icon(icon, color: color, size: 21),
         ),
         const SizedBox(height: 6),
-        Text(label, style: const TextStyle(fontSize: 12, color: AppColors.textMuted)),
+        Text(
+          label,
+          style: const TextStyle(fontSize: 12, color: AppColors.textMuted),
+        ),
       ],
     );
   }
@@ -186,7 +213,11 @@ class _LanguageDropdownChip extends StatelessWidget {
               ),
             ),
             const SizedBox(width: 2),
-            const Icon(Icons.keyboard_arrow_down_rounded, size: 17, color: AppColors.text),
+            const Icon(
+              Icons.keyboard_arrow_down_rounded,
+              size: 17,
+              color: AppColors.text,
+            ),
           ],
         ),
       ),

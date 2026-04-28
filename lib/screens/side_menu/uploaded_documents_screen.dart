@@ -38,7 +38,10 @@ class UploadedDocumentsContent extends StatelessWidget {
             leading: Icons.picture_as_pdf_outlined,
             title: doc.$1,
             subtitle: doc.$2,
-            trailing: const Icon(Icons.cancel_outlined, color: AppColors.textMuted),
+            trailing: const Icon(
+              Icons.cancel_outlined,
+              color: AppColors.textMuted,
+            ),
           );
         },
       );

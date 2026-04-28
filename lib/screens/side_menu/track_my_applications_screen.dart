@@ -59,7 +59,10 @@ class TrackMyApplicationsContent extends StatelessWidget {
               children: [
                 Text(
                   'Application ID : ${item.appId}',
-                  style: const TextStyle(fontSize: 14, fontWeight: FontWeight.w500),
+                  style: const TextStyle(
+                    fontSize: 14,
+                    fontWeight: FontWeight.w500,
+                  ),
                 ),
                 const SizedBox(height: 10),
                 Row(
@@ -88,14 +91,20 @@ class TrackMyApplicationsContent extends StatelessWidget {
                         children: [
                           Text(
                             item.universityName,
-                            style: const TextStyle(fontSize: 16, fontWeight: FontWeight.w700),
+                            style: const TextStyle(
+                              fontSize: 16,
+                              fontWeight: FontWeight.w700,
+                            ),
                             maxLines: 2,
                             overflow: TextOverflow.ellipsis,
                           ),
                           const SizedBox(height: 2),
                           Text(
                             item.courseName,
-                            style: const TextStyle(fontSize: 14, color: AppColors.textMuted),
+                            style: const TextStyle(
+                              fontSize: 14,
+                              color: AppColors.textMuted,
+                            ),
                             maxLines: 2,
                             overflow: TextOverflow.ellipsis,
                           ),
@@ -111,7 +120,10 @@ class TrackMyApplicationsContent extends StatelessWidget {
                   children: [
                     const Text(
                       'Application Progress',
-                      style: TextStyle(fontSize: 16, fontWeight: FontWeight.w700),
+                      style: TextStyle(
+                        fontSize: 16,
+                        fontWeight: FontWeight.w700,
+                      ),
                     ),
                     const Spacer(),
                     Container(
@@ -121,7 +133,10 @@ class TrackMyApplicationsContent extends StatelessWidget {
                         color: Color(0xFFF1F1F1),
                         shape: BoxShape.circle,
                       ),
-                      child: const Icon(Icons.keyboard_arrow_down_rounded, size: 16),
+                      child: const Icon(
+                        Icons.keyboard_arrow_down_rounded,
+                        size: 16,
+                      ),
                     ),
                   ],
                 ),

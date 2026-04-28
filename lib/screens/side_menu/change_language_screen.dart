@@ -17,14 +17,18 @@ class ChangeLanguageScreen extends StatelessWidget {
             flag: '🇺🇸',
             label: 'English',
             selected: context.l10n.textDirection == TextDirection.ltr,
-            onTap: () => AppLocalizationScope.of(context).changeLanguage(const Locale('en')),
+            onTap: () => AppLocalizationScope.of(
+              context,
+            ).changeLanguage(const Locale('en')),
           ),
           const SizedBox(height: 8),
           LanguageTile(
             flag: '🇴🇲',
             label: 'العربية',
             selected: context.l10n.textDirection == TextDirection.rtl,
-            onTap: () => AppLocalizationScope.of(context).changeLanguage(const Locale('ar')),
+            onTap: () => AppLocalizationScope.of(
+              context,
+            ).changeLanguage(const Locale('ar')),
           ),
         ],
       ),
@@ -70,13 +74,19 @@ class LanguageTile extends StatelessWidget {
               alignment: Alignment.center,
               decoration: BoxDecoration(
                 shape: BoxShape.circle,
-                border: Border.all(width: 1.2, color: selected ? AppColors.accent : AppColors.textMuted),
+                border: Border.all(
+                  width: 1.2,
+                  color: selected ? AppColors.accent : AppColors.textMuted,
+                ),
               ),
               child: selected
                   ? Container(
                       width: 8,
                       height: 8,
-                      decoration: const BoxDecoration(color: AppColors.accent, shape: BoxShape.circle),
+                      decoration: const BoxDecoration(
+                        color: AppColors.accent,
+                        shape: BoxShape.circle,
+                      ),
                     )
                   : null,
             ),

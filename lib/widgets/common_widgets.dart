@@ -263,10 +263,12 @@ class AuthScaffold extends StatelessWidget {
   Widget build(BuildContext context) {
     final size = MediaQuery.sizeOf(context);
     final horizontalPadding = context.responsiveHorizontalPadding;
-    final topPadding =
-        size.height < 760 ? 28.0 : (context.isSmallMobile ? 32.0 : 52.0);
-    final bottomPadding =
-        size.height < 760 ? 28.0 : (context.isSmallMobile ? 32.0 : 52.0);
+    final topPadding = size.height < 760
+        ? 28.0
+        : (context.isSmallMobile ? 32.0 : 52.0);
+    final bottomPadding = size.height < 760
+        ? 28.0
+        : (context.isSmallMobile ? 32.0 : 52.0);
 
     return Directionality(
       textDirection: context.l10n.textDirection,

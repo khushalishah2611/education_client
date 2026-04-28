@@ -25,7 +25,8 @@ class _ArabUniversitiesAppState extends State<ArabUniversitiesApp> {
     return FutureBuilder<AppLocalizations>(
       future: AppLocalizations.load(_locale),
       builder: (context, snapshot) {
-        final localizations = snapshot.data ?? AppLocalizations.fallback(_locale);
+        final localizations =
+            snapshot.data ?? AppLocalizations.fallback(_locale);
 
         return AppLocalizationScope(
           localizations: localizations,

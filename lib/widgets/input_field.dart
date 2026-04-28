@@ -17,10 +17,7 @@ class InputField extends StatelessWidget {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        Text(
-          label,
-          style: const TextStyle(fontWeight: FontWeight.w700),
-        ),
+        Text(label, style: const TextStyle(fontWeight: FontWeight.w700)),
         const SizedBox(height: 10),
         TextField(
           obscureText: obscureText,

@@ -278,9 +278,7 @@ class BottomTabBarCard extends StatelessWidget {
                             width: 22,
                             height: 22,
                             fit: BoxFit.contain,
-                            color: isActive
-                                ? Colors.white
-                                : AppColors.text,
+                            color: isActive ? Colors.white : AppColors.text,
                           ),
                         ),
                       ),
@@ -295,11 +293,10 @@ class BottomTabBarCard extends StatelessWidget {
                         overflow: TextOverflow.ellipsis,
                         style: TextStyle(
                           fontSize: 11.5,
-                          color: isActive
-                              ? Colors.black
-                              : AppColors.textMuted,
-                          fontWeight:
-                          isActive ? FontWeight.w600 : FontWeight.normal,
+                          color: isActive ? Colors.black : AppColors.textMuted,
+                          fontWeight: isActive
+                              ? FontWeight.w600
+                              : FontWeight.normal,
                         ),
                       ),
                     ],
