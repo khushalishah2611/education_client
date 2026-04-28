@@ -19,49 +19,12 @@ class UniversityDetailScreen extends StatefulWidget {
 }
 
 class _UniversityDetailScreenState extends State<UniversityDetailScreen> {
-  static const int _maxSelectableCourses = 5;
+
   final Set<String> _expandedColleges = <String>{};
   final Set<String> _selectedCourses = <String>{};
 
   AdminUniversity get data => widget.data;
 
-  bool get _showCollegeCourseTable {
-    final bool isAccredited = data.accredited == true;
-    final String normalizedCountry = (data.country ?? '').trim().toLowerCase();
-    final String normalizedMobile = (data.mobile ?? '').trim();
-    final bool isOman =
-        normalizedCountry == 'oman' ||
-        normalizedCountry == 'om' ||
-        normalizedMobile.startsWith('+968');
-
-    return isAccredited && isOman;
-  }
-
-  Map<String, List<CourseDetails>> get _collegeCourses {
-    final Map<String, List<CourseDetails>> grouped =
-        <String, List<CourseDetails>>{};
-    final List<ProgramLinks> links = data.programLinks ?? <ProgramLinks>[];
-
-    for (final ProgramLinks link in links) {
-      final Program? program = link.program;
-      if (program == null) continue;
-      final String collegeName =
-          (program.educationInstitute?.trim().isNotEmpty ?? false)
-          ? program.educationInstitute!.trim().toUpperCase()
-          : 'COLLEGE';
-      final CourseDetails course = CourseDetails(
-        name: program.name ?? 'N/A',
-        feePerCredit: program.basePrice,
-        currency: program.currency ?? '',
-        minAdmissionRate: program.minAdmissionRate,
-        track: program.track ?? 'N/A',
-        applicationFee: link.applicationFee,
-      );
-      grouped.putIfAbsent(collegeName, () => <CourseDetails>[]).add(course);
-    }
-
-    return grouped;
-  }
 
   void _showAddressDialog() {
     showAddressBottomSheet(context: context, address: data.address);
@@ -304,19 +267,6 @@ class _UniversityDetailScreenState extends State<UniversityDetailScreen> {
                                   setState(() {
                                     if (_selectedCourses.contains(courseKey)) {
                                       _selectedCourses.remove(courseKey);
-                                    } else if (_selectedCourses.length <
-                                        _maxSelectableCourses) {
-                                      _selectedCourses.add(courseKey);
-                                    } else {
-                                      ScaffoldMessenger.of(context)
-                                        ..hideCurrentSnackBar()
-                                        ..showSnackBar(
-                                          const SnackBar(
-                                            content: Text(
-                                              'You can select up to 5 courses only.',
-                                            ),
-                                          ),
-                                        );
                                     }
                                   });
                                 },
@@ -370,13 +320,18 @@ class _UniversityDetailScreenState extends State<UniversityDetailScreen> {
                     onPressed: _selectedCourses.isEmpty
                         ? null
                         : () {
-                            ScaffoldMessenger.of(context).showSnackBar(
-                              SnackBar(
-                                content: Text(
-                                  'Selected ${_selectedCourses.length} of $_maxSelectableCourses courses',
-                                ),
-                              ),
-                            );
+                      await SelectedCourseStorage.save(
+                        university: adminUniversity,
+                        course: details,
+                        collegeName: collegeName,
+                      );
+                      if (!context.mounted) return;
+                      Navigator.push(
+                        context,
+                        MaterialPageRoute(
+                          builder: (_) => UploadDocumentsScreen(),
+                        ),
+                      );
                           },
                   ),
                 ),
