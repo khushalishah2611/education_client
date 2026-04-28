@@ -40,7 +40,6 @@ class _UniversityDetailScreenState extends State<UniversityDetailScreen> {
     _restoreSelectedCourses();
   }
 
-
   void _showAddressDialog() {
     showAddressBottomSheet(context: context, address: data.address);
   }
@@ -113,7 +112,8 @@ class _UniversityDetailScreenState extends State<UniversityDetailScreen> {
                     children: [
                       Expanded(
                         child: OutlinedButton(
-                          onPressed: () => Navigator.of(sheetContext).pop(false),
+                          onPressed: () =>
+                              Navigator.of(sheetContext).pop(false),
                           child: const Text('Cancel'),
                         ),
                       ),
@@ -434,15 +434,20 @@ class _UniversityDetailScreenState extends State<UniversityDetailScreen> {
                     onPressed: _selectedCourses.isEmpty
                         ? null
                         : () {
-                            final String selectedCourseTitle =
-                                _selectedCourses.first.split('-').last.trim();
+                            final String selectedCourseTitle = _selectedCourses
+                                .first
+                                .split('-')
+                                .last
+                                .trim();
                             Navigator.push(
                               context,
                               MaterialPageRoute(
                                 builder: (_) => UploadDocumentsScreen(
                                   universityName: data.name,
-                                  universityHeroImage: ImageUrlHelper
-                                      .resolveUploadUrl(data.coverImagePath),
+                                  universityHeroImage:
+                                      ImageUrlHelper.resolveUploadUrl(
+                                        data.coverImagePath,
+                                      ),
                                   courseTitle: selectedCourseTitle,
                                 ),
                               ),
@@ -505,32 +510,6 @@ class _CollegeAccordionState extends State<_CollegeAccordion> {
     final double screenWidth = MediaQuery.sizeOf(context).width;
     final bool isSmallMobile = screenWidth <= 360;
     final bool isMediumMobile = screenWidth > 360 && screenWidth <= 420;
-    final double courseWidth = isSmallMobile
-        ? 128
-        : isMediumMobile
-        ? 138
-        : 148;
-    final double feeWidth = isSmallMobile
-        ? 70
-        : isMediumMobile
-        ? 76
-        : 80;
-    final double admissionWidth = isSmallMobile
-        ? 64
-        : isMediumMobile
-        ? 70
-        : 74;
-    final double trackWidth = isSmallMobile
-        ? 76
-        : isMediumMobile
-        ? 84
-        : 92;
-    final double detailsWidth = isSmallMobile
-        ? 102
-        : isMediumMobile
-        ? 108
-        : 114;
-
     return Container(
       margin: const EdgeInsets.only(bottom: 10),
       decoration: BoxDecoration(
@@ -568,93 +547,83 @@ class _CollegeAccordionState extends State<_CollegeAccordion> {
               ),
             ),
           ),
-          if (widget.isExpanded)
-            Scrollbar(
-              controller: _horizontalScrollController,
-              thumbVisibility: true,
-              interactive: true,
-              scrollbarOrientation: ScrollbarOrientation.bottom,
-              radius: const Radius.circular(4),
-              thickness: 6,
-              child: SingleChildScrollView(
-                controller: _horizontalScrollController,
-                scrollDirection: Axis.horizontal,
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    _buildTableHeader(
-                      courseWidth: courseWidth,
-                      feeWidth: feeWidth,
-                      admissionWidth: admissionWidth,
-                      trackWidth: trackWidth,
-                      detailsWidth: detailsWidth,
-                    ),
-                    ...[
-                      if (courseDetailsList.isNotEmpty)
-                        ...courseDetailsList.map((details) {
-                          final String courseKey =
-                              '${widget.collegeName}-${details.name ?? ''}';
-                          final bool isSelected =
-                              widget.selectedCourses.contains(courseKey);
 
-                          return _buildCourseRow(
-                            details: details,
-                            isSelected: isSelected,
-                            onTap: () => widget.onToggleCourse(courseKey),
-                            context: context,
-                            adminUniversity: widget.adminUniversity,
-                            courseWidth: courseWidth,
-                            feeWidth: feeWidth,
-                            admissionWidth: admissionWidth,
-                            trackWidth: trackWidth,
-                            detailsWidth: detailsWidth,
-                          );
-                        }).toList()
-                      else
-                        Padding(
-                          padding: const EdgeInsets.only(
-                            top: 12,
-                            left: 12,
-                            bottom: 12,
-                          ),
-                          child: Align(
-                            alignment: Alignment.topLeft,
-                            child: Text(
-                              'No data available',
-                              style: TextStyle(
-                                color: Color(0xFF9E9E9E),
-                                fontWeight: FontWeight.w500,
-                              ),
-                            ),
-                          ),
-                        ),
-                    ],
-                  ],
-                ),
-              ),
+          if (widget.isExpanded)
+            Column(
+              children: [
+                _buildTableHeader(),
+                if (courseDetailsList.isNotEmpty)
+                  ...courseDetailsList.map((details) {
+                    final String courseKey =
+                        '${widget.collegeName}-${details.name ?? ''}';
+                    final bool isSelected = widget.selectedCourses.contains(
+                      courseKey,
+                    );
+
+                    return _buildCourseRow(
+                      details: details,
+                      isSelected: isSelected,
+                      onTap: () => widget.onToggleCourse(courseKey),
+                      context: context,
+                      adminUniversity: widget.adminUniversity,
+                    );
+                  }).toList()
+                else
+                  const Padding(
+                    padding: EdgeInsets.all(12),
+                    child: Align(
+                      alignment: Alignment.centerLeft,
+                      child: Text('No data available'),
+                    ),
+                  ),
+              ],
             ),
         ],
       ),
     );
   }
 
-  Widget _buildTableHeader({
-    required double courseWidth,
-    required double feeWidth,
-    required double admissionWidth,
-    required double trackWidth,
-    required double detailsWidth,
-  }) {
+  Widget _buildTableHeader() {
     return Container(
       color: const Color(0xFFE3E3E3),
-      padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 10),
-      child: Row(
+      padding: const EdgeInsets.symmetric(horizontal: 5, vertical: 5),
+      child: const Row(
         children: [
-          _HeaderCell(width: courseWidth, label: 'Course'),
-          _HeaderCell(width: feeWidth, label: 'Credit\nHour Fee'),
-          _HeaderCell(width: admissionWidth, label: 'Min\nAdmis%'),
-          _HeaderCell(width: trackWidth, label: 'Track'),
-          _HeaderCell(width: detailsWidth, label: 'Details / Apply'),
+          Expanded(
+            flex: 3,
+            child: Text(
+              'Course',
+              style: const TextStyle(fontWeight: FontWeight.w600, fontSize: 12),
+            ),
+          ),
+          Expanded(
+            flex: 2,
+            child: Text(
+              'Credit\nHour Fee',
+              style: const TextStyle(fontWeight: FontWeight.w600, fontSize: 12),
+            ),
+          ),
+          Expanded(
+            flex: 2,
+            child: Text(
+              'Min\nAdmis%',
+              style: const TextStyle(fontWeight: FontWeight.w600, fontSize: 12),
+            ),
+          ),
+          Expanded(
+            flex: 2,
+            child: Text(
+              'Track',
+              style: const TextStyle(fontWeight: FontWeight.w600, fontSize: 12),
+            ),
+          ),
+          Expanded(
+            flex: 3,
+            child: Text(
+              'Details / Apply',
+              style: const TextStyle(fontWeight: FontWeight.w600, fontSize: 12),
+            ),
+          ),
         ],
       ),
     );
@@ -666,16 +635,11 @@ class _CollegeAccordionState extends State<_CollegeAccordion> {
     required VoidCallback onTap,
     required BuildContext context,
     required adminUniversity,
-    required double courseWidth,
-    required double feeWidth,
-    required double admissionWidth,
-    required double trackWidth,
-    required double detailsWidth,
   }) {
     return InkWell(
       onTap: onTap,
       child: Container(
-        padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 7),
+        padding: const EdgeInsets.symmetric(horizontal: 5, vertical: 5),
         decoration: BoxDecoration(
           color: isSelected ? AppColors.peachSoft : Colors.white,
           border: Border(
@@ -689,40 +653,50 @@ class _CollegeAccordionState extends State<_CollegeAccordion> {
         child: Row(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            SizedBox(
-              width: courseWidth,
+            Expanded(
+              flex: 3,
               child: Text(
                 details.name ?? 'N/A',
+                maxLines: 3,
+                overflow: TextOverflow.ellipsis,
                 style: const TextStyle(
-                  fontSize: 31 / 2,
-                  height: 1.05,
-                  fontWeight: FontWeight.w500,
+                  fontWeight: FontWeight.w600,
+                  fontSize: 12,
                 ),
               ),
             ),
-            SizedBox(
-              width: feeWidth,
+            Expanded(
+              flex: 2,
               child: Text(
-                '${details.creditHours ?? 0} ${details.currency ?? ''}',
-                style: const TextStyle(fontWeight: FontWeight.w600, height: 1.15),
+                '${details.creditHours ?? 0} \n ${details.currency ?? ''}',
+                style: const TextStyle(
+                  fontWeight: FontWeight.w600,
+                  fontSize: 12,
+                ),
               ),
             ),
-            SizedBox(
-              width: admissionWidth,
+            Expanded(
+              flex: 2,
               child: Text(
                 '${details.minAdmissionRate ?? 0}%',
-                style: const TextStyle(fontWeight: FontWeight.w600),
+                style: const TextStyle(
+                  fontWeight: FontWeight.w600,
+                  fontSize: 12,
+                ),
               ),
             ),
-            SizedBox(
-              width: trackWidth,
+            Expanded(
+              flex: 2,
               child: Text(
                 details.track ?? 'N/A',
-                style: const TextStyle(fontWeight: FontWeight.w600),
+                style: const TextStyle(
+                  fontWeight: FontWeight.w600,
+                  fontSize: 12,
+                ),
               ),
             ),
-            SizedBox(
-              width: detailsWidth,
+            Expanded(
+              flex: 3,
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
@@ -737,40 +711,15 @@ class _CollegeAccordionState extends State<_CollegeAccordion> {
                         ),
                       );
                     },
-                    child: Padding(
-                      padding: const EdgeInsets.symmetric(vertical: 2),
-                      child: Row(
-                        mainAxisSize: MainAxisSize.min,
-                        children: [
-                          const Text(
-                            'Details',
-                            style: TextStyle(fontWeight: FontWeight.w600),
-                          ),
-                          const SizedBox(width: 4),
-                          Container(
-                            width: 17,
-                            height: 17,
-                            alignment: Alignment.center,
-                            decoration: BoxDecoration(
-                              borderRadius: BorderRadius.circular(1),
-                              border: Border.all(
-                                color: const Color(0xFF2F83C8),
-                                width: 1.2,
-                              ),
-                            ),
-                            child: const Icon(
-                              Icons.chevron_right,
-                              size: 14,
-                              color: Color(0xFF2F83C8),
-                            ),
-                          ),
-                        ],
+                    child: const Text(
+                      'Details',
+                      style: const TextStyle(
+                        fontWeight: FontWeight.w600,
+                        fontSize: 12,
                       ),
                     ),
                   ),
-
                   const SizedBox(height: 5),
-
                   InkWell(
                     onTap: () {
                       Navigator.push(
@@ -778,8 +727,8 @@ class _CollegeAccordionState extends State<_CollegeAccordion> {
                         MaterialPageRoute(
                           builder: (_) => UploadDocumentsScreen(
                             universityName: widget.adminUniversity.name,
-                            universityHeroImage: ImageUrlHelper
-                                .resolveUploadUrl(
+                            universityHeroImage:
+                                ImageUrlHelper.resolveUploadUrl(
                                   widget.adminUniversity.coverImagePath,
                                 ),
                             courseTitle: details.name,
@@ -795,9 +744,7 @@ class _CollegeAccordionState extends State<_CollegeAccordion> {
                       decoration: BoxDecoration(
                         color: const Color(0xFFADE8C9),
                         borderRadius: BorderRadius.circular(4),
-                        border: Border.all(
-                          color: const Color(0xFF78D09F),
-                        ),
+                        border: Border.all(color: const Color(0xFF78D09F)),
                       ),
                       child: const Text(
                         'Apply & Pay\nApplication Fee',
@@ -815,28 +762,6 @@ class _CollegeAccordionState extends State<_CollegeAccordion> {
               ),
             ),
           ],
-        ),
-      ),
-    );
-  }
-}
-
-class _HeaderCell extends StatelessWidget {
-  const _HeaderCell({required this.width, required this.label});
-
-  final double width;
-  final String label;
-
-  @override
-  Widget build(BuildContext context) {
-    return SizedBox(
-      width: width,
-      child: Text(
-        label,
-        style: const TextStyle(
-          fontWeight: FontWeight.w700,
-          height: 1.1,
-          fontSize: 12,
         ),
       ),
     );
