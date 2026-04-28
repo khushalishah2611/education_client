@@ -6,6 +6,7 @@ import 'package:flutter/material.dart';
 import '../core/app_theme.dart';
 import '../widgets/common_widgets.dart';
 import '../widgets/flow_widgets.dart';
+import 'upload_documents_screen.dart' show UploadDocumentsScreen;
 
 class CourseDetailScreen extends StatefulWidget {
   const CourseDetailScreen({
@@ -22,6 +23,12 @@ class CourseDetailScreen extends StatefulWidget {
 }
 
 class _CourseDetailScreenState extends State<CourseDetailScreen> {
+  AdminUniversity get data => widget.university;
+  String get selectedCourseTitle =>
+      widget.course.name?.trim().isNotEmpty == true
+      ? widget.course.name!.trim()
+      : 'Course Details';
+
   List<String> get eligibilityList =>
       widget.course.eligibility
           ?.where((item) => item.trim().isNotEmpty)
@@ -64,9 +71,7 @@ class _CourseDetailScreenState extends State<CourseDetailScreen> {
         : 280;
     final double topGap = isSmallMobile ? 52 : 60;
 
-    final String courseTitle = widget.course.name?.trim().isNotEmpty == true
-        ? widget.course.name!.trim()
-        : 'Course Details';
+    final String courseTitle = selectedCourseTitle;
 
     return Scaffold(
       body: AppBackground(
@@ -213,7 +218,7 @@ class _CourseDetailScreenState extends State<CourseDetailScreen> {
             /// 🔷 SCROLLABLE CONTENT ONLY
             Expanded(
               child: ListView(
-                padding: EdgeInsets.zero,
+                padding: EdgeInsets.only(bottom: isSmallMobile ? 10 : 14),
                 children: [
                   Padding(
                     padding: EdgeInsets.fromLTRB(horizontalPadding, 0, horizontalPadding, 0),
@@ -249,7 +254,19 @@ class _CourseDetailScreenState extends State<CourseDetailScreen> {
                 padding: EdgeInsets.all(horizontalPadding),
                 child: AppPrimaryButton(
                   label: context.l10n.text('Save'),
-                  onPressed: () {},
+                  onPressed: () {
+                    Navigator.of(context).push(
+                      MaterialPageRoute(
+                        builder: (_) => UploadDocumentsScreen(
+                          universityName: data.name,
+                          universityHeroImage: ImageUrlHelper.resolveUploadUrl(
+                            data.coverImagePath,
+                          ),
+                          courseTitle: selectedCourseTitle,
+                        ),
+                      ),
+                    );
+                  },
                 ),
               ),
             ),
