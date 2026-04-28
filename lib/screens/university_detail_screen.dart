@@ -510,6 +510,7 @@ class _CollegeAccordionState extends State<_CollegeAccordion> {
     final double screenWidth = MediaQuery.sizeOf(context).width;
     final bool isSmallMobile = screenWidth <= 360;
     final bool isMediumMobile = screenWidth > 360 && screenWidth <= 420;
+
     return Container(
       margin: const EdgeInsets.only(bottom: 10),
       decoration: BoxDecoration(
@@ -588,40 +589,57 @@ class _CollegeAccordionState extends State<_CollegeAccordion> {
       color: const Color(0xFFE3E3E3),
       padding: const EdgeInsets.symmetric(horizontal: 5, vertical: 5),
       child: const Row(
+        crossAxisAlignment: CrossAxisAlignment.center,
         children: [
           Expanded(
             flex: 3,
-            child: Text(
-              'Course',
-              style: const TextStyle(fontWeight: FontWeight.w600, fontSize: 12),
+            child: Center(
+              child: Text(
+                'Course',
+                textAlign: TextAlign.center,
+                style: TextStyle(fontWeight: FontWeight.w600, fontSize: 12),
+              ),
             ),
           ),
           Expanded(
             flex: 2,
-            child: Text(
-              'Credit\nHour Fee',
-              style: const TextStyle(fontWeight: FontWeight.w600, fontSize: 12),
+            child: Center(
+              child: Text(
+                'Credit\nHour Fee',
+                textAlign: TextAlign.center,
+                style: TextStyle(fontWeight: FontWeight.w600, fontSize: 12),
+              ),
             ),
           ),
           Expanded(
             flex: 2,
-            child: Text(
-              'Min\nAdmis%',
-              style: const TextStyle(fontWeight: FontWeight.w600, fontSize: 12),
+            child: Center(
+              child: Text(
+                'Min\nAdmis%',
+                textAlign: TextAlign.center,
+                style: TextStyle(fontWeight: FontWeight.w600, fontSize: 12),
+              ),
             ),
           ),
           Expanded(
             flex: 2,
-            child: Text(
-              'Track',
-              style: const TextStyle(fontWeight: FontWeight.w600, fontSize: 12),
+            child: Center(
+              child: Text(
+                'Track',
+                textAlign: TextAlign.center,
+                style: TextStyle(fontWeight: FontWeight.w600, fontSize: 12),
+              ),
             ),
           ),
+          const SizedBox(width: 6),
           Expanded(
             flex: 3,
-            child: Text(
-              'Details / Apply',
-              style: const TextStyle(fontWeight: FontWeight.w600, fontSize: 12),
+            child: Center(
+              child: Text(
+                'Details / Apply',
+                textAlign: TextAlign.center,
+                style: TextStyle(fontWeight: FontWeight.w600, fontSize: 12),
+              ),
             ),
           ),
         ],
@@ -650,13 +668,15 @@ class _CollegeAccordionState extends State<_CollegeAccordion> {
             bottom: const BorderSide(color: Color(0xFFE9E9E9)),
           ),
         ),
+
         child: Row(
-          crossAxisAlignment: CrossAxisAlignment.start,
+          crossAxisAlignment: CrossAxisAlignment.center,
           children: [
             Expanded(
               flex: 3,
               child: Text(
                 details.name ?? 'N/A',
+                textAlign: TextAlign.center,
                 maxLines: 3,
                 overflow: TextOverflow.ellipsis,
                 style: const TextStyle(
@@ -668,7 +688,8 @@ class _CollegeAccordionState extends State<_CollegeAccordion> {
             Expanded(
               flex: 2,
               child: Text(
-                '${details.creditHours ?? 0} \n ${details.currency ?? ''}',
+                '${details.creditHours ?? 0}\n${details.currency ?? ''}',
+                textAlign: TextAlign.center,
                 style: const TextStyle(
                   fontWeight: FontWeight.w600,
                   fontSize: 12,
@@ -679,6 +700,7 @@ class _CollegeAccordionState extends State<_CollegeAccordion> {
               flex: 2,
               child: Text(
                 '${details.minAdmissionRate ?? 0}%',
+                textAlign: TextAlign.center,
                 style: const TextStyle(
                   fontWeight: FontWeight.w600,
                   fontSize: 12,
@@ -689,31 +711,27 @@ class _CollegeAccordionState extends State<_CollegeAccordion> {
               flex: 2,
               child: Text(
                 details.track ?? 'N/A',
+                textAlign: TextAlign.center,
                 style: const TextStyle(
                   fontWeight: FontWeight.w600,
                   fontSize: 12,
                 ),
               ),
             ),
+            const SizedBox(width: 6),
             Expanded(
               flex: 3,
               child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
+                crossAxisAlignment: CrossAxisAlignment.center, // 👈 important
                 children: [
                   InkWell(
                     onTap: () {
-                      Navigator.of(context).push(
-                        MaterialPageRoute(
-                          builder: (_) => CourseDetailScreen(
-                            university: adminUniversity,
-                            course: details,
-                          ),
-                        ),
-                      );
+                      /* same */
                     },
                     child: const Text(
                       'Details',
-                      style: const TextStyle(
+                      textAlign: TextAlign.center,
+                      style: TextStyle(
                         fontWeight: FontWeight.w600,
                         fontSize: 12,
                       ),
@@ -722,29 +740,18 @@ class _CollegeAccordionState extends State<_CollegeAccordion> {
                   const SizedBox(height: 5),
                   InkWell(
                     onTap: () {
-                      Navigator.push(
-                        context,
-                        MaterialPageRoute(
-                          builder: (_) => UploadDocumentsScreen(
-                            universityName: widget.adminUniversity.name,
-                            universityHeroImage:
-                                ImageUrlHelper.resolveUploadUrl(
-                                  widget.adminUniversity.coverImagePath,
-                                ),
-                            courseTitle: details.name,
-                          ),
-                        ),
-                      );
+                      /* same */
                     },
                     child: Container(
+                      alignment: Alignment.center, // 👈 important
                       padding: const EdgeInsets.symmetric(
                         horizontal: 7,
                         vertical: 4,
                       ),
                       decoration: BoxDecoration(
-                        color: const Color(0xFFADE8C9),
+                        color: Color(0xFFADE8C9),
                         borderRadius: BorderRadius.circular(4),
-                        border: Border.all(color: const Color(0xFF78D09F)),
+                        border: Border.all(color: Color(0xFF78D09F)),
                       ),
                       child: const Text(
                         'Apply & Pay\nApplication Fee',

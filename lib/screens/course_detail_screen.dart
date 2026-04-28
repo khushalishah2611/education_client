@@ -221,7 +221,12 @@ class _CourseDetailScreenState extends State<CourseDetailScreen> {
                 padding: EdgeInsets.only(bottom: isSmallMobile ? 10 : 14),
                 children: [
                   Padding(
-                    padding: EdgeInsets.fromLTRB(horizontalPadding, 0, horizontalPadding, 0),
+                    padding: EdgeInsets.fromLTRB(
+                      horizontalPadding,
+                      0,
+                      horizontalPadding,
+                      0,
+                    ),
                     child: _InfoDetailsCard(
                       course: widget.course,
                       priceWithCurrency: _priceWithCurrency,
@@ -229,7 +234,12 @@ class _CourseDetailScreenState extends State<CourseDetailScreen> {
                   ),
                   const SizedBox(height: 20),
                   Padding(
-                    padding: EdgeInsets.fromLTRB(horizontalPadding, 0, horizontalPadding, 0),
+                    padding: EdgeInsets.fromLTRB(
+                      horizontalPadding,
+                      0,
+                      horizontalPadding,
+                      0,
+                    ),
                     child: _RequirementSection(
                       title: 'Admission Requirements',
                       items: admissionRequirementList,
@@ -237,7 +247,12 @@ class _CourseDetailScreenState extends State<CourseDetailScreen> {
                   ),
                   const SizedBox(height: 20),
                   Padding(
-                    padding: EdgeInsets.fromLTRB(horizontalPadding, 0, horizontalPadding, 0),
+                    padding: EdgeInsets.fromLTRB(
+                      horizontalPadding,
+                      0,
+                      horizontalPadding,
+                      0,
+                    ),
                     child: _RequirementSection(
                       title: 'Other Requirements',
                       items: otherRequirementList,
@@ -253,19 +268,9 @@ class _CourseDetailScreenState extends State<CourseDetailScreen> {
               child: Padding(
                 padding: EdgeInsets.all(horizontalPadding),
                 child: AppPrimaryButton(
-                  label: context.l10n.text('Save'),
+                  label: context.l10n.text('Go Back'),
                   onPressed: () {
-                    Navigator.of(context).push(
-                      MaterialPageRoute(
-                        builder: (_) => UploadDocumentsScreen(
-                          universityName: data.name,
-                          universityHeroImage: ImageUrlHelper.resolveUploadUrl(
-                            data.coverImagePath,
-                          ),
-                          courseTitle: selectedCourseTitle,
-                        ),
-                      ),
-                    );
+                    Navigator.of(context).pop();
                   },
                 ),
               ),
