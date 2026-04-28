@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 
 import '../core/app_localizations.dart';
+import '../core/responsive_helper.dart';
 import '../core/app_theme.dart';
 
 class HelpScreen extends StatelessWidget {
@@ -8,6 +9,10 @@ class HelpScreen extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final bool isSmallMobile = context.isSmallMobile;
+    final bool isMediumMobile = context.isMediumMobile;
+    final double horizontalPadding = context.responsiveHorizontalPadding;
+
     return Directionality(
       textDirection: context.l10n.textDirection,
       child: Scaffold(
@@ -15,9 +20,8 @@ class HelpScreen extends StatelessWidget {
           color: const Color(0xFFF8F4EE),
           child: SafeArea(
             child: Padding(
-              padding: const EdgeInsets.all(14),
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
+              padding: EdgeInsets.all(horizontalPadding),
+              child: ListView(
                 children: [
                   Row(
                     children: [
@@ -46,7 +50,9 @@ class HelpScreen extends StatelessWidget {
                   const SizedBox(height: 18),
                   Text(
                     context.l10n.text('needHelp'),
-                    style: Theme.of(context).textTheme.titleLarge?.copyWith(fontSize: 30),
+                    style: Theme.of(context).textTheme.titleLarge?.copyWith(
+                      fontSize: isSmallMobile ? 24 : (isMediumMobile ? 27 : 30),
+                    ),
                   ),
                   const SizedBox(height: 12),
                   Container(
@@ -56,9 +62,11 @@ class HelpScreen extends StatelessWidget {
                       color: Colors.white,
                       borderRadius: BorderRadius.circular(14),
                     ),
-                    child: const Row(
-                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                      children: [
+                    child: Wrap(
+                      alignment: WrapAlignment.spaceBetween,
+                      runSpacing: 12,
+                      spacing: 14,
+                      children: const [
                         _SocialItem(icon: Icons.chat, label: 'Whatsapp', color: Color(0xFF31B74A)),
                         _SocialItem(icon: Icons.camera_alt_outlined, label: 'Instagram', color: Color(0xFFDD2A7B)),
                         _SocialItem(icon: Icons.tag_faces_rounded, label: 'Snapchat', color: Color(0xFFFFD728)),
@@ -79,12 +87,17 @@ class HelpScreen extends StatelessWidget {
                       children: [
                         Text(
                           context.l10n.text('needHelp'),
-                          style: Theme.of(context).textTheme.titleLarge?.copyWith(fontSize: 26),
+                          style: Theme.of(context).textTheme.titleLarge?.copyWith(
+                            fontSize: isSmallMobile ? 22 : 26,
+                          ),
                         ),
                         const SizedBox(height: 4),
                         Text(
                           context.l10n.text('tapButtonBelow'),
-                          style: const TextStyle(color: AppColors.textMuted, fontSize: 18),
+                          style: TextStyle(
+                            color: AppColors.textMuted,
+                            fontSize: isSmallMobile ? 14 : 18,
+                          ),
                         ),
                         const SizedBox(height: 14),
                         SizedBox(

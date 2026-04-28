@@ -6,6 +6,7 @@ import 'package:shared_preferences/shared_preferences.dart';
 
 import '../core/app_localizations.dart';
 import '../core/app_theme.dart';
+import '../core/responsive_helper.dart';
 import '../core/url_launcher_helper.dart';
 import '../services/auth_api_service.dart';
 import '../widgets/common_widgets.dart';
@@ -214,6 +215,7 @@ class _VerifyOtpScreenState extends State<VerifyOtpScreen> {
 
   @override
   Widget build(BuildContext context) {
+    final bool isSmallMobile = context.isSmallMobile;
     return AuthScaffold(
       isLoading: _isSubmitting,
       bottomCardColor: _verifyCardShade,
@@ -225,7 +227,7 @@ class _VerifyOtpScreenState extends State<VerifyOtpScreen> {
             context.l10n.text('verifyOtp'),
             style: Theme.of(context).textTheme.headlineMedium,
           ),
-          const SizedBox(height: 18),
+          SizedBox(height: isSmallMobile ? 14 : 18),
           Center(
             child: Text(
               context.l10n.text('otpHelp'),
@@ -233,7 +235,7 @@ class _VerifyOtpScreenState extends State<VerifyOtpScreen> {
               style: Theme.of(context).textTheme.titleMedium,
             ),
           ),
-          const SizedBox(height: 24),
+          SizedBox(height: isSmallMobile ? 18 : 24),
           _OtpRow(controllers: _otpControllers, focusNodes: _focusNodes),
           const SizedBox(height: 10),
           Center(
@@ -249,7 +251,7 @@ class _VerifyOtpScreenState extends State<VerifyOtpScreen> {
               child: Text(_resendText(context)),
             ),
           ),
-          const SizedBox(height: 28),
+          SizedBox(height: isSmallMobile ? 22 : 28),
           AppPrimaryButton(
             label: context.l10n.text('verifyAndLogin'),
             onPressed: _isSubmitting ? null : () => _verifyOtp(context),
@@ -275,6 +277,7 @@ class _OtpRow extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final bool isSmallMobile = context.isSmallMobile;
     return Center(
       child: Wrap(
         alignment: WrapAlignment.center,
@@ -283,8 +286,8 @@ class _OtpRow extends StatelessWidget {
         children: List.generate(
           6,
           (index) => SizedBox(
-            width: 44,
-            height: 44,
+            width: isSmallMobile ? 40 : 44,
+            height: isSmallMobile ? 40 : 44,
             child: TextField(
               controller: controllers[index],
               focusNode: focusNodes[index],

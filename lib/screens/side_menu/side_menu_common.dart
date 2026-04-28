@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
 import '../../core/app_localizations.dart';
+import '../../core/responsive_helper.dart';
 import '../../core/app_theme.dart';
 import '../login_screen.dart';
 import '../../widgets/common_widgets.dart';
@@ -14,15 +15,14 @@ class SideMenuScaffold extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final double screenWidth = MediaQuery.sizeOf(context).width;
-    final bool isSmallMobile = screenWidth <= 360;
-    final bool isMediumMobile = screenWidth > 360 && screenWidth <= 420;
+    final bool isSmallMobile = context.isSmallMobile;
+    final bool isMediumMobile = context.isMediumMobile;
     final double headerHeight = isSmallMobile
         ? 70
         : isMediumMobile
         ? 76
         : 80;
-    final double contentPadding = isSmallMobile ? 12 : 16;
+    final double contentPadding = context.responsiveHorizontalPadding;
     final double titleFontSize = isSmallMobile ? 16 : 18;
 
     return Material(
@@ -84,7 +84,12 @@ class SideMenuScaffold extends StatelessWidget {
                 removeTop: true,
                 child: Padding(
                   padding: EdgeInsets.all(contentPadding),
-                  child: child,
+                  child: Center(
+                    child: ConstrainedBox(
+                      constraints: const BoxConstraints(maxWidth: 560),
+                      child: child,
+                    ),
+                  ),
                 ),
               ),
             ),
@@ -111,6 +116,7 @@ class SimpleTile extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final bool isSmallMobile = context.isSmallMobile;
     return Container(
       padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 8),
       decoration: BoxDecoration(
@@ -136,12 +142,18 @@ class SimpleTile extends StatelessWidget {
               children: [
                 Text(
                   title,
-                  style: const TextStyle(fontWeight: FontWeight.w600, fontSize: 12),
+                  style: TextStyle(
+                    fontWeight: FontWeight.w600,
+                    fontSize: isSmallMobile ? 11 : 12,
+                  ),
                 ),
                 const SizedBox(height: 2),
                 Text(
                   subtitle,
-                  style: const TextStyle(fontSize: 10, color: AppColors.textMuted),
+                  style: TextStyle(
+                    fontSize: isSmallMobile ? 9 : 10,
+                    color: AppColors.textMuted,
+                  ),
                 ),
               ],
             ),
@@ -161,6 +173,7 @@ class SectionCard extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final bool isSmallMobile = context.isSmallMobile;
     return Container(
       padding: const EdgeInsets.all(12),
       decoration: BoxDecoration(
@@ -171,7 +184,13 @@ class SectionCard extends StatelessWidget {
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          Text(title, style: const TextStyle(fontWeight: FontWeight.w700)),
+          Text(
+            title,
+            style: TextStyle(
+              fontWeight: FontWeight.w700,
+              fontSize: isSmallMobile ? 13 : 14,
+            ),
+          ),
           const SizedBox(height: 6),
           ...bullets.map(
             (point) => Padding(
@@ -183,7 +202,10 @@ class SectionCard extends StatelessWidget {
                   Expanded(
                     child: Text(
                       point,
-                      style: const TextStyle(fontSize: 12, color: AppColors.textMuted),
+                      style: TextStyle(
+                        fontSize: isSmallMobile ? 11 : 12,
+                        color: AppColors.textMuted,
+                      ),
                     ),
                   ),
                 ],

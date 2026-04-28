@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 
 import '../core/app_localizations.dart';
+import '../core/responsive_helper.dart';
 import '../core/app_theme.dart';
 import '../models/app_models.dart';
 import '../widgets/common_widgets.dart';
@@ -22,6 +23,9 @@ class _PaymentScreenState extends State<PaymentScreen> {
 
   @override
   Widget build(BuildContext context) {
+    final bool isSmallMobile = context.isSmallMobile;
+    final double horizontalPadding = context.responsiveHorizontalPadding;
+
     return Scaffold(
       body: AppBackground(
         child: AppPageEntrance(
@@ -31,9 +35,20 @@ class _PaymentScreenState extends State<PaymentScreen> {
             FlowStepHeader(currentStep: 2, title: context.l10n.text('payment')),
             Expanded(
               child: ListView(
-                padding: const EdgeInsets.fromLTRB(20, 20, 20, 20),
+                padding: EdgeInsets.fromLTRB(
+                  horizontalPadding,
+                  isSmallMobile ? 14 : 20,
+                  horizontalPadding,
+                  20,
+                ),
                 children: [
-                  Text(context.l10n.text('applicationFeeSummary'), style: const TextStyle(fontSize: 18, fontWeight: FontWeight.w700)),
+                  Text(
+                    context.l10n.text('applicationFeeSummary'),
+                    style: TextStyle(
+                      fontSize: isSmallMobile ? 16 : 18,
+                      fontWeight: FontWeight.w700,
+                    ),
+                  ),
                   const SizedBox(height: 12),
                   Container(
                     padding: const EdgeInsets.all(12),
@@ -59,7 +74,13 @@ class _PaymentScreenState extends State<PaymentScreen> {
                     ),
                   ),
                   const SizedBox(height: 18),
-                  Text(context.l10n.text('paymentMethod'), style: const TextStyle(fontSize: 18, fontWeight: FontWeight.w700)),
+                  Text(
+                    context.l10n.text('paymentMethod'),
+                    style: TextStyle(
+                      fontSize: isSmallMobile ? 16 : 18,
+                      fontWeight: FontWeight.w700,
+                    ),
+                  ),
                   const SizedBox(height: 12),
                   _PaymentMethodTile(label: context.l10n.text('creditCard'), iconText: 'VISA', selected: selected == 0, onTap: () => setState(() => selected = 0)),
                   const SizedBox(height: 10),
@@ -99,6 +120,7 @@ class _PaymentMethodTile extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final bool isSmallMobile = context.isSmallMobile;
     return InkWell(
       onTap: onTap,
       borderRadius: BorderRadius.circular(10),
@@ -119,7 +141,13 @@ class _PaymentMethodTile extends StatelessWidget {
               child: Text(iconText, style: const TextStyle(fontSize: 9, fontWeight: FontWeight.w700)),
             ),
             const SizedBox(width: 10),
-            Text(label, style: const TextStyle(fontSize: 16, color: AppColors.textMuted)),
+            Text(
+              label,
+              style: TextStyle(
+                fontSize: isSmallMobile ? 14 : 16,
+                color: AppColors.textMuted,
+              ),
+            ),
             const Spacer(),
             Container(
               width: 18,

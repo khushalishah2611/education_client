@@ -1,5 +1,6 @@
 import 'package:education/core/app_localizations.dart';
 import 'package:education/core/image_url_helper.dart';
+import 'package:education/core/responsive_helper.dart';
 import 'package:education/models/admin_university.dart';
 import 'package:flutter/material.dart';
 import '../core/app_theme.dart';
@@ -54,6 +55,16 @@ class _CourseDetailScreenState extends State<CourseDetailScreen> {
 
   @override
   Widget build(BuildContext context) {
+    final bool isSmallMobile = context.isSmallMobile;
+    final bool isMediumMobile = context.isMediumMobile;
+    final double horizontalPadding = context.responsiveHorizontalPadding;
+    final double headerHeight = isSmallMobile
+        ? 220
+        : isMediumMobile
+        ? 245
+        : 280;
+    final double topGap = isSmallMobile ? 52 : 60;
+
     final String courseTitle = widget.course.name?.trim().isNotEmpty == true
         ? widget.course.name!.trim()
         : 'Course Details';
@@ -71,7 +82,7 @@ class _CourseDetailScreenState extends State<CourseDetailScreen> {
                     bottom: Radius.circular(20),
                   ),
                   child: SizedBox(
-                    height: 280,
+                    height: headerHeight,
                     width: double.infinity,
                     child: Image.network(
                       ImageUrlHelper.resolveUploadUrl(
@@ -85,8 +96,8 @@ class _CourseDetailScreenState extends State<CourseDetailScreen> {
                 ),
 
                 Positioned(
-                  left: 20,
-                  right: 20,
+                  left: horizontalPadding,
+                  right: horizontalPadding,
                   bottom: -40,
                   child: InkWell(
                     onTap: _showAddressDialog,
@@ -198,7 +209,7 @@ class _CourseDetailScreenState extends State<CourseDetailScreen> {
               ],
             ),
 
-            const SizedBox(height: 60),
+            SizedBox(height: topGap),
 
             /// 🔷 SCROLLABLE CONTENT ONLY
             Expanded(
@@ -206,7 +217,7 @@ class _CourseDetailScreenState extends State<CourseDetailScreen> {
                 padding: EdgeInsets.zero,
                 children: [
                   Padding(
-                    padding: const EdgeInsets.fromLTRB(20, 0, 20, 0),
+                    padding: EdgeInsets.fromLTRB(horizontalPadding, 0, horizontalPadding, 0),
                     child: _InfoDetailsCard(
                       course: widget.course,
                       priceWithCurrency: _priceWithCurrency,
@@ -214,7 +225,7 @@ class _CourseDetailScreenState extends State<CourseDetailScreen> {
                   ),
                   const SizedBox(height: 20),
                   Padding(
-                    padding: const EdgeInsets.fromLTRB(20, 0, 20, 0),
+                    padding: EdgeInsets.fromLTRB(horizontalPadding, 0, horizontalPadding, 0),
                     child: _RequirementSection(
                       title: 'Admission Requirements',
                       items: admissionRequirementList,
@@ -222,7 +233,7 @@ class _CourseDetailScreenState extends State<CourseDetailScreen> {
                   ),
                   const SizedBox(height: 20),
                   Padding(
-                    padding: const EdgeInsets.fromLTRB(20, 0, 20, 0),
+                    padding: EdgeInsets.fromLTRB(horizontalPadding, 0, horizontalPadding, 0),
                     child: _RequirementSection(
                       title: 'Other Requirements',
                       items: otherRequirementList,
@@ -236,7 +247,7 @@ class _CourseDetailScreenState extends State<CourseDetailScreen> {
             SafeArea(
               top: false,
               child: Padding(
-                padding: const EdgeInsets.all(16),
+                padding: EdgeInsets.all(horizontalPadding),
                 child: AppPrimaryButton(
                   label: context.l10n.text('Save'),
                   onPressed: () {

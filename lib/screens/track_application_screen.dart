@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 
 import '../core/app_localizations.dart';
+import '../core/responsive_helper.dart';
 import '../core/app_theme.dart';
 import '../models/app_models.dart';
 import '../widgets/common_widgets.dart';
@@ -15,6 +16,9 @@ class TrackApplicationScreen extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final bool isSmallMobile = context.isSmallMobile;
+    final double horizontalPadding = context.responsiveHorizontalPadding;
+
     return Scaffold(
       body: AppBackground(
         child: AppPageEntrance(
@@ -29,7 +33,12 @@ class TrackApplicationScreen extends StatelessWidget {
             ),
             Expanded(
               child: ListView(
-                padding: const EdgeInsets.fromLTRB(20, 18, 20, 20),
+                padding: EdgeInsets.fromLTRB(
+                  horizontalPadding,
+                  isSmallMobile ? 14 : 18,
+                  horizontalPadding,
+                  20,
+                ),
                 children: [
                   Container(
                     padding: const EdgeInsets.all(12),
@@ -39,13 +48,27 @@ class TrackApplicationScreen extends StatelessWidget {
                       children: [
                         Text(context.l10n.text('applicationIdValue'), style: const TextStyle(fontSize: 11)),
                         const SizedBox(height: 10),
-                        Text(university.name, style: const TextStyle(fontSize: 18, fontWeight: FontWeight.w700)),
+                        Text(
+                          university.name,
+                          style: TextStyle(
+                            fontSize: isSmallMobile ? 16 : 18,
+                            fontWeight: FontWeight.w700,
+                          ),
+                        ),
                         const SizedBox(height: 6),
                         Row(
                           children: [
                             const Icon(Icons.school_outlined, size: 18),
                             const SizedBox(width: 6),
-                            Text(course.title, style: const TextStyle(fontSize: 16, fontWeight: FontWeight.w600)),
+                            Expanded(
+                              child: Text(
+                                course.title,
+                                style: TextStyle(
+                                  fontSize: isSmallMobile ? 14 : 16,
+                                  fontWeight: FontWeight.w600,
+                                ),
+                              ),
+                            ),
                           ],
                         ),
                         const SizedBox(height: 14),
@@ -60,7 +83,13 @@ class TrackApplicationScreen extends StatelessWidget {
                           ),
                         ),
                         const SizedBox(height: 14),
-                        Text(context.l10n.text('applicationProgress'), style: const TextStyle(fontSize: 18, fontWeight: FontWeight.w700)),
+                        Text(
+                          context.l10n.text('applicationProgress'),
+                          style: TextStyle(
+                            fontSize: isSmallMobile ? 16 : 18,
+                            fontWeight: FontWeight.w700,
+                          ),
+                        ),
                         const SizedBox(height: 18),
                         _ProgressStep(title: context.l10n.text('submitted'), subtitle: context.l10n.text('completedOnDate'), state: _StepState.done, showLine: true),
                         _ProgressStep(title: context.l10n.text('underReview'), subtitle: context.l10n.text('underReviewSubtitle'), state: _StepState.done, showLine: true),

@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 
 import '../core/app_localizations.dart';
+import '../core/responsive_helper.dart';
 import '../core/app_theme.dart';
 import '../models/app_models.dart';
 import '../widgets/common_widgets.dart';
@@ -15,6 +16,9 @@ class PaymentConfirmationScreen extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final bool isSmallMobile = context.isSmallMobile;
+    final double horizontalPadding = context.responsiveHorizontalPadding;
+
     return Scaffold(
       body: AppBackground(
         child: AppPageEntrance(
@@ -23,20 +27,39 @@ class PaymentConfirmationScreen extends StatelessWidget {
             FlowStepHeader(currentStep: 3, title: context.l10n.text('paymentConfirmation')),
             Expanded(
               child: ListView(
-                padding: const EdgeInsets.fromLTRB(20, 18, 20, 20),
+                padding: EdgeInsets.fromLTRB(
+                  horizontalPadding,
+                  isSmallMobile ? 14 : 18,
+                  horizontalPadding,
+                  20,
+                ),
                 children: [
                   const Icon(Icons.celebration, color: AppColors.accent, size: 20),
                   const SizedBox(height: 6),
-                  const CircleAvatar(
-                    radius: 44,
+                  CircleAvatar(
+                    radius: isSmallMobile ? 38 : 44,
                     backgroundColor: Color(0xFF0E9F58),
-                    child: Icon(Icons.check_rounded, size: 54, color: Colors.white),
+                    child: Icon(
+                      Icons.check_rounded,
+                      size: isSmallMobile ? 44 : 54,
+                      color: Colors.white,
+                    ),
                   ),
                   const SizedBox(height: 16),
-                  Text(context.l10n.text('applicationSubmitted'), textAlign: TextAlign.center, style: const TextStyle(fontSize: 20, fontWeight: FontWeight.w700, color: Color(0xFF0E9F58))),
+                  Text(
+                    context.l10n.text('applicationSubmitted'),
+                    textAlign: TextAlign.center,
+                    style: TextStyle(
+                      fontSize: isSmallMobile ? 18 : 20,
+                      fontWeight: FontWeight.w700,
+                      color: const Color(0xFF0E9F58),
+                    ),
+                  ),
                   const SizedBox(height: 10),
                   Container(
-                    margin: const EdgeInsets.symmetric(horizontal: 70),
+                    margin: EdgeInsets.symmetric(
+                      horizontal: isSmallMobile ? 30 : 70,
+                    ),
                     padding: const EdgeInsets.symmetric(vertical: 10),
                     decoration: BoxDecoration(color: const Color(0xFFE9F4E6), borderRadius: BorderRadius.circular(8)),
                     child: Text(context.l10n.text('applicationIdValue'), textAlign: TextAlign.center),

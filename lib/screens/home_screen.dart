@@ -4,6 +4,7 @@ import 'package:flutter/material.dart';
 import '../core/app_localizations.dart';
 import '../core/app_theme.dart';
 import '../core/image_url_helper.dart';
+import '../core/responsive_helper.dart';
 import '../controllers/home_controller.dart';
 import '../models/country_option.dart';
 import '../services/home_api_service.dart';
@@ -100,6 +101,10 @@ class _HomeScreenState extends State<HomeScreen> {
 
   @override
   Widget build(BuildContext context) {
+    final double horizontalPadding = context.responsiveHorizontalPadding;
+    final int gridColumns = context.responsiveGridColumns;
+    final double gridAspectRatio = context.isSmallMobile ? 0.92 : 0.8;
+
     return Directionality(
       textDirection: context.l10n.textDirection,
       child: Scaffold(
@@ -124,8 +129,8 @@ class _HomeScreenState extends State<HomeScreen> {
 
                         Positioned(
                           top: MediaQuery.of(context).padding.top,
-                          left: 16,
-                          right: 16,
+                          left: horizontalPadding,
+                          right: horizontalPadding,
                           child: Row(
                             children: [
                               _CircleIconButton(
@@ -163,8 +168,8 @@ class _HomeScreenState extends State<HomeScreen> {
 
                         Positioned(
                           top: MediaQuery.of(context).size.height * 0.10,
-                          left: 16,
-                          right: 16,
+                          left: horizontalPadding,
+                          right: horizontalPadding,
                           child: Column(
                             mainAxisSize: MainAxisSize.min,
                             children: [
@@ -315,11 +320,11 @@ class _HomeScreenState extends State<HomeScreen> {
                                   shrinkWrap: true,
                                   physics: const NeverScrollableScrollPhysics(),
                                   gridDelegate:
-                                      const SliverGridDelegateWithFixedCrossAxisCount(
-                                        crossAxisCount: 2,
+                                      SliverGridDelegateWithFixedCrossAxisCount(
+                                        crossAxisCount: gridColumns,
                                         mainAxisSpacing: 8,
                                         crossAxisSpacing: 8,
-                                        childAspectRatio: 0.8,
+                                        childAspectRatio: gridAspectRatio,
                                       ),
                                   itemBuilder: (context, index) {
                                     if (_controller.isLoadingUniversities) {

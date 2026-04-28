@@ -2,6 +2,7 @@ import 'package:file_picker/file_picker.dart';
 import 'package:flutter/material.dart';
 
 import '../core/app_localizations.dart';
+import '../core/responsive_helper.dart';
 import '../core/app_theme.dart';
 import '../models/app_models.dart';
 import '../widgets/common_widgets.dart';
@@ -66,6 +67,8 @@ class _UploadDocumentsScreenState extends State<UploadDocumentsScreen> {
 
   @override
   Widget build(BuildContext context) {
+    final bool isSmallMobile = context.isSmallMobile;
+    final double horizontalPadding = context.responsiveHorizontalPadding;
     final docs = _docs(context);
     if (_selectedFiles.isEmpty) {
       for (final doc in docs) {
@@ -81,11 +84,19 @@ class _UploadDocumentsScreenState extends State<UploadDocumentsScreen> {
               FlowStepHeader(currentStep: 0, title: context.l10n.text('uploadDocuments')),
               Expanded(
                 child: ListView(
-                  padding: const EdgeInsets.fromLTRB(20, 20, 20, 20),
+                  padding: EdgeInsets.fromLTRB(
+                    horizontalPadding,
+                    isSmallMobile ? 14 : 20,
+                    horizontalPadding,
+                    20,
+                  ),
                   children: [
                     Text(
                       context.l10n.text('requiredDocuments'),
-                      style: const TextStyle(fontSize: 18, fontWeight: FontWeight.w700),
+                      style: TextStyle(
+                        fontSize: isSmallMobile ? 16 : 18,
+                        fontWeight: FontWeight.w700,
+                      ),
                     ),
                     const SizedBox(height: 14),
                     _UploadDropZone(

@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 
 import '../core/app_localizations.dart';
 import '../core/app_theme.dart';
+import '../core/responsive_helper.dart';
 import '../screens/help_screen.dart';
 
 /// Backward-compatible gradient transform that translates by [dx]/[dy].
@@ -261,9 +262,11 @@ class AuthScaffold extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final size = MediaQuery.sizeOf(context);
-    final horizontalPadding = size.width < 360 ? 14.0 : 16.0;
-    final topPadding = size.height < 760 ? 32.0 : 52.0;
-    final bottomPadding = size.height < 760 ? 32.0 : 52.0;
+    final horizontalPadding = context.responsiveHorizontalPadding;
+    final topPadding =
+        size.height < 760 ? 28.0 : (context.isSmallMobile ? 32.0 : 52.0);
+    final bottomPadding =
+        size.height < 760 ? 28.0 : (context.isSmallMobile ? 32.0 : 52.0);
 
     return Directionality(
       textDirection: context.l10n.textDirection,
@@ -287,9 +290,9 @@ class AuthScaffold extends StatelessWidget {
                       children: [
                         /// 🔝 TOP BAR
                         Padding(
-                          padding: const EdgeInsets.symmetric(
-                            horizontal: 16,
-                            vertical: 12,
+                          padding: EdgeInsets.symmetric(
+                            horizontal: horizontalPadding,
+                            vertical: context.isSmallMobile ? 10 : 12,
                           ),
                           child: Row(
                             mainAxisAlignment: MainAxisAlignment.spaceBetween,
@@ -324,7 +327,12 @@ class AuthScaffold extends StatelessWidget {
                               top: Radius.circular(30),
                             ),
                           ),
-                          child: child,
+                          child: Center(
+                            child: ConstrainedBox(
+                              constraints: const BoxConstraints(maxWidth: 520),
+                              child: child,
+                            ),
+                          ),
                         ),
                       ],
                     ),

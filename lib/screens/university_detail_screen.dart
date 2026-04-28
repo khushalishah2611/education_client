@@ -1,6 +1,8 @@
 import 'package:education/core/app_localizations.dart';
 import 'package:education/core/image_url_helper.dart';
+import 'package:education/core/selected_course_storage.dart';
 import 'package:education/models/admin_university.dart';
+import 'package:education/models/selected_course_data.dart';
 import 'package:flutter/material.dart';
 import '../core/app_theme.dart';
 import '../widgets/common_widgets.dart';
@@ -9,9 +11,14 @@ import 'course_detail_screen.dart';
 import 'upload_documents_screen.dart' show UploadDocumentsScreen;
 
 class UniversityDetailScreen extends StatefulWidget {
-  const UniversityDetailScreen({super.key, required this.data});
+  const UniversityDetailScreen({
+    super.key,
+    required this.data,
+    this.initialSelectedCourseKeys = const <String>{},
+  });
 
   final AdminUniversity data;
+  final Set<String> initialSelectedCourseKeys;
 
   @override
   State<UniversityDetailScreen> createState() => _UniversityDetailScreenState();
@@ -23,6 +30,16 @@ class _UniversityDetailScreenState extends State<UniversityDetailScreen> {
   final Set<String> _selectedCourses = <String>{};
 
   AdminUniversity get data => widget.data;
+  String get _universityKey => data.id?.trim().isNotEmpty == true
+      ? data.id!.trim()
+      : (data.name ?? '').trim().toLowerCase();
+
+  @override
+  void initState() {
+    super.initState();
+    _selectedCourses.addAll(widget.initialSelectedCourseKeys);
+    _restoreAndSyncSelectedCourses();
+  }
 
   bool get _showCollegeCourseTable {
     final bool isAccredited = data.accredited == true;
@@ -64,6 +81,26 @@ class _UniversityDetailScreenState extends State<UniversityDetailScreen> {
 
   void _showAddressDialog() {
     showAddressBottomSheet(context: context, address: data.address);
+  }
+
+  Future<void> _restoreAndSyncSelectedCourses() async {
+    final SelectedCourseData? savedData = await SelectedCourseStorage.load();
+    if (savedData != null && savedData.universityKey == _universityKey) {
+      _selectedCourses.addAll(savedData.courseKeys);
+    }
+
+    if (!mounted) return;
+    setState(() {});
+    await _syncSelectedCourses();
+  }
+
+  Future<void> _syncSelectedCourses() {
+    return SelectedCourseStorage.save(
+      SelectedCourseData(
+        universityKey: _universityKey,
+        courseKeys: _selectedCourses.toList(),
+      ),
+    );
   }
 
   @override
@@ -318,6 +355,7 @@ class _UniversityDetailScreenState extends State<UniversityDetailScreen> {
                                         );
                                     }
                                   });
+                                  _syncSelectedCourses();
                                 },
                                 adminUniversity: data,
                               );

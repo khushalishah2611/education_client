@@ -37,9 +37,15 @@ class _ArabUniversitiesAppState extends State<ArabUniversitiesApp> {
             locale: _locale,
             builder: (context, child) {
               final media = MediaQuery.of(context);
-              final clampedScale = media.textScaler.clamp(
-                minScaleFactor: 0.9,
-                maxScaleFactor: 1.1,
+              final double width = media.size.width;
+              final double widthScale = width <= 360
+                  ? 0.92
+                  : width <= 420
+                  ? 1.0
+                  : 1.06;
+              final double baseScale = media.textScaler.scale(1.0);
+              final clampedScale = TextScaler.linear(
+                (baseScale * widthScale).clamp(0.88, 1.16),
               );
 
               return MediaQuery(

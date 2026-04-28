@@ -3,6 +3,7 @@ import 'package:flutter_svg/flutter_svg.dart';
 
 import '../core/app_localizations.dart';
 import '../core/app_theme.dart';
+import '../core/responsive_helper.dart';
 
 void showAddressBottomSheet({
   required BuildContext context,
@@ -156,6 +157,7 @@ class FlowStepHeader extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final bool isSmallMobile = context.isSmallMobile;
     final labels = [
       context.l10n.text('stepUploadDoc'),
       context.l10n.text('stepVerify'),
@@ -166,7 +168,12 @@ class FlowStepHeader extends StatelessWidget {
       children: [
         TopRoundedHeader(title: title),
         Padding(
-          padding: const EdgeInsets.fromLTRB(20, 14, 20, 0),
+          padding: EdgeInsets.fromLTRB(
+            context.responsiveHorizontalPadding,
+            14,
+            context.responsiveHorizontalPadding,
+            0,
+          ),
           child: Row(
             children: List.generate(labels.length * 2 - 1, (index) {
               if (index.isOdd) {
@@ -202,11 +209,11 @@ class FlowStepHeader extends StatelessWidget {
                   ),
                   const SizedBox(height: 8),
                   SizedBox(
-                    width: 58,
+                    width: isSmallMobile ? 50 : 58,
                     child: Text(
                       labels[stepIndex],
                       textAlign: TextAlign.center,
-                      style: const TextStyle(fontSize: 12),
+                      style: TextStyle(fontSize: isSmallMobile ? 10 : 12),
                     ),
                   ),
                 ],
