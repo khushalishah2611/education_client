@@ -6,7 +6,6 @@ import 'package:flutter/material.dart';
 import '../core/app_theme.dart';
 import '../widgets/common_widgets.dart';
 import '../widgets/flow_widgets.dart';
-import 'upload_documents_screen.dart';
 
 class CourseDetailScreen extends StatefulWidget {
   const CourseDetailScreen({
@@ -250,17 +249,7 @@ class _CourseDetailScreenState extends State<CourseDetailScreen> {
                 padding: EdgeInsets.all(horizontalPadding),
                 child: AppPrimaryButton(
                   label: context.l10n.text('Save'),
-                  onPressed: () {
-                    // Navigator.push(
-                    //   context,
-                    //   MaterialPageRoute(
-                    //     builder: (_) => UploadDocumentsScreen(
-                    //       university: widget.university,
-                    //       course: widget.course,
-                    //     ),
-                    //   ),
-                    // );
-                  },
+                  onPressed: () {},
                 ),
               ),
             ),

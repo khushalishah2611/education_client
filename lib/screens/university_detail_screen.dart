@@ -37,7 +37,7 @@ class _UniversityDetailScreenState extends State<UniversityDetailScreen> {
   void initState() {
     super.initState();
     _selectedCourses.addAll(widget.initialSelectedCourseKeys);
-    _restoreAndSyncSelectedCourses();
+    _restoreSelectedCourses();
   }
 
 
@@ -45,7 +45,7 @@ class _UniversityDetailScreenState extends State<UniversityDetailScreen> {
     showAddressBottomSheet(context: context, address: data.address);
   }
 
-  Future<void> _restoreAndSyncSelectedCourses() async {
+  Future<void> _restoreSelectedCourses() async {
     final SelectedCourseData? savedData = await SelectedCourseStorage.load();
     if (savedData != null && savedData.universityKey == _universityKey) {
       _selectedCourses.addAll(savedData.courseKeys);
@@ -53,16 +53,34 @@ class _UniversityDetailScreenState extends State<UniversityDetailScreen> {
 
     if (!mounted) return;
     setState(() {});
-    await _syncSelectedCourses();
   }
 
-  Future<void> _syncSelectedCourses() {
-    return SelectedCourseStorage.save(
+  Future<void> _syncSelectedCourses() async {
+    if (_selectedCourses.isEmpty) {
+      final SelectedCourseData? current = await SelectedCourseStorage.load();
+      if (current != null && current.universityKey == _universityKey) {
+        await SelectedCourseStorage.clear();
+      }
+      return;
+    }
+
+    await SelectedCourseStorage.save(
       SelectedCourseData(
         universityKey: _universityKey,
         courseKeys: _selectedCourses.toList(),
       ),
     );
+  }
+
+  Future<void> _toggleCourseSelection(String courseKey) async {
+    setState(() {
+      if (_selectedCourses.contains(courseKey)) {
+        _selectedCourses.remove(courseKey);
+      } else {
+        _selectedCourses.add(courseKey);
+      }
+    });
+    await _syncSelectedCourses();
   }
 
   @override
@@ -298,14 +316,7 @@ class _UniversityDetailScreenState extends State<UniversityDetailScreen> {
                                     }
                                   });
                                 },
-                                onToggleCourse: (courseKey) {
-                                  setState(() {
-                                    if (_selectedCourses.contains(courseKey)) {
-                                      _selectedCourses.remove(courseKey);
-                                    }
-                                  });
-                                  _syncSelectedCourses();
-                                },
+                                onToggleCourse: _toggleCourseSelection,
                                 adminUniversity: data,
                               );
                             }).toList(),
@@ -374,8 +385,9 @@ class _UniversityDetailScreenState extends State<UniversityDetailScreen> {
   }
 }
 
-class _CollegeAccordion extends StatelessWidget {
+class _CollegeAccordion extends StatefulWidget {
   const _CollegeAccordion({
+    super.key,
     required this.collegeName,
     required this.academicEntry,
     required this.isExpanded,
@@ -394,9 +406,28 @@ class _CollegeAccordion extends StatelessWidget {
   final ValueChanged<String> onToggleCourse;
 
   @override
+  State<_CollegeAccordion> createState() => _CollegeAccordionState();
+}
+
+class _CollegeAccordionState extends State<_CollegeAccordion> {
+  late final ScrollController _horizontalScrollController;
+
+  @override
+  void initState() {
+    super.initState();
+    _horizontalScrollController = ScrollController();
+  }
+
+  @override
+  void dispose() {
+    _horizontalScrollController.dispose();
+    super.dispose();
+  }
+
+  @override
   Widget build(BuildContext context) {
     final List<CourseDetails> courseDetailsList =
-        academicEntry.program?.courseDetails ?? <CourseDetails>[];
+        widget.academicEntry.program?.courseDetails ?? <CourseDetails>[];
     final double screenWidth = MediaQuery.sizeOf(context).width;
     final bool isSmallMobile = screenWidth <= 360;
     final bool isMediumMobile = screenWidth > 360 && screenWidth <= 420;
@@ -436,7 +467,7 @@ class _CollegeAccordion extends StatelessWidget {
       child: Column(
         children: [
           InkWell(
-            onTap: onToggleExpand,
+            onTap: widget.onToggleExpand,
             child: Container(
               width: double.infinity,
               color: AppColors.white,
@@ -445,7 +476,7 @@ class _CollegeAccordion extends StatelessWidget {
                 children: [
                   Expanded(
                     child: Text(
-                      collegeName.toUpperCase(),
+                      widget.collegeName.toUpperCase(),
                       style: const TextStyle(
                         fontSize: 14,
                         fontWeight: FontWeight.w700,
@@ -454,7 +485,7 @@ class _CollegeAccordion extends StatelessWidget {
                     ),
                   ),
                   Icon(
-                    isExpanded
+                    widget.isExpanded
                         ? Icons.keyboard_arrow_up
                         : Icons.keyboard_arrow_down,
                     color: const Color(0xFF595959),
@@ -463,61 +494,69 @@ class _CollegeAccordion extends StatelessWidget {
               ),
             ),
           ),
-          if (isExpanded)
-            SingleChildScrollView(
-              scrollDirection: Axis.horizontal,
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  _buildTableHeader(
-                    courseWidth: courseWidth,
-                    feeWidth: feeWidth,
-                    admissionWidth: admissionWidth,
-                    trackWidth: trackWidth,
-                    detailsWidth: detailsWidth,
-                  ),
-                  ...[
-                    if (courseDetailsList.isNotEmpty)
-                      ...courseDetailsList.map((details) {
-                        final String courseKey =
-                            '$collegeName-${details.name ?? ''}';
-                        final bool isSelected = selectedCourses.contains(
-                          courseKey,
-                        );
+          if (widget.isExpanded)
+            Scrollbar(
+              controller: _horizontalScrollController,
+              thumbVisibility: true,
+              interactive: true,
+              scrollbarOrientation: ScrollbarOrientation.bottom,
+              radius: const Radius.circular(4),
+              thickness: 6,
+              child: SingleChildScrollView(
+                controller: _horizontalScrollController,
+                scrollDirection: Axis.horizontal,
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    _buildTableHeader(
+                      courseWidth: courseWidth,
+                      feeWidth: feeWidth,
+                      admissionWidth: admissionWidth,
+                      trackWidth: trackWidth,
+                      detailsWidth: detailsWidth,
+                    ),
+                    ...[
+                      if (courseDetailsList.isNotEmpty)
+                        ...courseDetailsList.map((details) {
+                          final String courseKey =
+                              '${widget.collegeName}-${details.name ?? ''}';
+                          final bool isSelected =
+                              widget.selectedCourses.contains(courseKey);
 
-                        return _buildCourseRow(
-                          details: details,
-                          isSelected: isSelected,
-                          onTap: () => onToggleCourse(courseKey),
-                          context: context,
-                          adminUniversity: adminUniversity,
-                          courseWidth: courseWidth,
-                          feeWidth: feeWidth,
-                          admissionWidth: admissionWidth,
-                          trackWidth: trackWidth,
-                          detailsWidth: detailsWidth,
-                        );
-                      }).toList()
-                    else
-                      Padding(
-                        padding: const EdgeInsets.only(
-                          top: 12,
-                          left: 12,
-                          bottom: 12,
-                        ),
-                        child: Align(
-                          alignment: Alignment.topLeft,
-                          child: Text(
-                            'No data available',
-                            style: TextStyle(
-                              color: Color(0xFF9E9E9E),
-                              fontWeight: FontWeight.w500,
+                          return _buildCourseRow(
+                            details: details,
+                            isSelected: isSelected,
+                            onTap: () => widget.onToggleCourse(courseKey),
+                            context: context,
+                            adminUniversity: widget.adminUniversity,
+                            courseWidth: courseWidth,
+                            feeWidth: feeWidth,
+                            admissionWidth: admissionWidth,
+                            trackWidth: trackWidth,
+                            detailsWidth: detailsWidth,
+                          );
+                        }).toList()
+                      else
+                        Padding(
+                          padding: const EdgeInsets.only(
+                            top: 12,
+                            left: 12,
+                            bottom: 12,
+                          ),
+                          child: Align(
+                            alignment: Alignment.topLeft,
+                            child: Text(
+                              'No data available',
+                              style: TextStyle(
+                                color: Color(0xFF9E9E9E),
+                                fontWeight: FontWeight.w500,
+                              ),
                             ),
                           ),
                         ),
-                      ),
+                    ],
                   ],
-                ],
+                ),
               ),
             ),
         ],
