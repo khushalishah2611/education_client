@@ -249,6 +249,7 @@ class Program {
   List<CourseDetails>? courseDetails;
   String? track;
   int? minAdmissionRate;
+  String? minBaGpa;
   int? requiredScore;
   int? discountedScore;
   String? status;
@@ -273,6 +274,7 @@ class Program {
     this.courseDetails,
     this.track,
     this.minAdmissionRate,
+    this.minBaGpa,
     this.requiredScore,
     this.discountedScore,
     this.status,
@@ -298,6 +300,7 @@ class Program {
     courseDetails = _parseCourseDetails(json['courseDetails']);
     track = json['track']?.toString();
     minAdmissionRate = _asInt(json['minAdmissionRate']);
+    minBaGpa = json['minBaGpa']?.toString();
     requiredScore = _asInt(json['requiredScore']);
     discountedScore = _asInt(json['discountedScore']);
     status = json['status']?.toString();
@@ -331,6 +334,7 @@ class Program {
     }
     _addIfNotNull(data, 'track', track);
     _addIfNotNull(data, 'minAdmissionRate', minAdmissionRate);
+    _addIfNotNull(data, 'minBaGpa', minBaGpa);
     _addIfNotNull(data, 'requiredScore', requiredScore);
     _addIfNotNull(data, 'discountedScore', discountedScore);
     _addIfNotNull(data, 'status', status);
@@ -480,6 +484,7 @@ class ProgramData {
   dynamic description;
   dynamic durationMonths;
   int? minAdmissionRate;
+  String? minBaGpa;
   int? requiredScore;
   int? discountedScore;
   String? status;
@@ -507,6 +512,7 @@ class ProgramData {
     this.description,
     this.durationMonths,
     this.minAdmissionRate,
+    this.minBaGpa,
     this.requiredScore,
     this.discountedScore,
     this.status,
@@ -535,6 +541,7 @@ class ProgramData {
     description = json['description'];
     durationMonths = json['durationMonths'];
     minAdmissionRate = _asInt(json['minAdmissionRate']);
+    minBaGpa = json['minBaGpa']?.toString();
     requiredScore = _asInt(json['requiredScore']);
     discountedScore = _asInt(json['discountedScore']);
     status = json['status']?.toString();
@@ -571,6 +578,7 @@ class ProgramData {
     _addIfNotNull(data, 'description', description);
     _addIfNotNull(data, 'durationMonths', durationMonths);
     _addIfNotNull(data, 'minAdmissionRate', minAdmissionRate);
+    _addIfNotNull(data, 'minBaGpa', minBaGpa);
     _addIfNotNull(data, 'requiredScore', requiredScore);
     _addIfNotNull(data, 'discountedScore', discountedScore);
     _addIfNotNull(data, 'status', status);
@@ -601,11 +609,13 @@ class CourseDetails {
   int? creditHours;
   int? totalFees;
   int? semesters;
+  int? totalSemesters;
   int? feePerCredit;
   int? semesterFee;
   int? annualFee;
   int? basePrice;
   int? minAdmissionRate;
+  String? minBaGpa;
   int? requiredScore;
   int? discountedScore;
   List<String>? eligibility;
@@ -623,11 +633,13 @@ class CourseDetails {
     this.creditHours,
     this.totalFees,
     this.semesters,
+    this.totalSemesters,
     this.feePerCredit,
     this.semesterFee,
     this.annualFee,
     this.basePrice,
     this.minAdmissionRate,
+    this.minBaGpa,
     this.requiredScore,
     this.discountedScore,
     this.eligibility,
@@ -646,11 +658,13 @@ class CourseDetails {
     creditHours = _asInt(json['creditHours']);
     totalFees = _asInt(json['totalFees']);
     semesters = _asInt(json['semesters']);
+    totalSemesters = _asInt(json['totalSemesters']);
     feePerCredit = _asInt(json['feePerCredit']);
     semesterFee = _asInt(json['semesterFee']);
     annualFee = _asInt(json['annualFee']);
     basePrice = _asInt(json['basePrice']);
     minAdmissionRate = _asInt(json['minAdmissionRate']);
+    minBaGpa = json['minBaGpa']?.toString();
     requiredScore = _asInt(json['requiredScore']);
     discountedScore = _asInt(json['discountedScore']);
     eligibility = _toStringList(json['eligibility']);
@@ -670,11 +684,13 @@ class CourseDetails {
     _addIfNotNull(data, 'creditHours', creditHours);
     _addIfNotNull(data, 'totalFees', totalFees);
     _addIfNotNull(data, 'semesters', semesters);
+    _addIfNotNull(data, 'totalSemesters', totalSemesters);
     _addIfNotNull(data, 'feePerCredit', feePerCredit);
     _addIfNotNull(data, 'semesterFee', semesterFee);
     _addIfNotNull(data, 'annualFee', annualFee);
     _addIfNotNull(data, 'basePrice', basePrice);
     _addIfNotNull(data, 'minAdmissionRate', minAdmissionRate);
+    _addIfNotNull(data, 'minBaGpa', minBaGpa);
     _addIfNotNull(data, 'requiredScore', requiredScore);
     _addIfNotNull(data, 'discountedScore', discountedScore);
     _addIfNotNull(data, 'eligibility', eligibility);

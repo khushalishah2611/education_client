@@ -2,16 +2,13 @@ import 'package:flutter/material.dart';
 
 import '../core/app_localizations.dart';
 import '../core/app_theme.dart';
-import '../models/app_models.dart';
+import '../services/selected_course_storage.dart';
 import '../widgets/common_widgets.dart';
 import '../widgets/flow_widgets.dart';
 import 'payment_confirmation_screen.dart';
 
 class PaymentScreen extends StatefulWidget {
-  const PaymentScreen({super.key, required this.university, required this.course});
-
-  final UniversityData university;
-  final CourseData course;
+  const PaymentScreen({super.key});
 
   @override
   State<PaymentScreen> createState() => _PaymentScreenState();
@@ -19,6 +16,19 @@ class PaymentScreen extends StatefulWidget {
 
 class _PaymentScreenState extends State<PaymentScreen> {
   int selected = 1;
+  SelectedCourseData? _selectedCourseData;
+
+  @override
+  void initState() {
+    super.initState();
+    _loadSelectedCourse();
+  }
+
+  Future<void> _loadSelectedCourse() async {
+    final data = await SelectedCourseStorage.load();
+    if (!mounted) return;
+    setState(() => _selectedCourseData = data);
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -34,6 +44,13 @@ class _PaymentScreenState extends State<PaymentScreen> {
                 padding: const EdgeInsets.fromLTRB(20, 20, 20, 20),
                 children: [
                   Text(context.l10n.text('applicationFeeSummary'), style: const TextStyle(fontSize: 18, fontWeight: FontWeight.w700)),
+                  if (_selectedCourseData != null) ...[
+                    const SizedBox(height: 6),
+                    Text(
+                      _selectedCourseData!.course.name ?? '',
+                      style: const TextStyle(color: AppColors.textMuted),
+                    ),
+                  ],
                   const SizedBox(height: 12),
                   Container(
                     padding: const EdgeInsets.all(12),
@@ -70,7 +87,7 @@ class _PaymentScreenState extends State<PaymentScreen> {
                   AppPrimaryButton(
                     label: context.l10n.text('payNow'),
                     onPressed: () => Navigator.of(context).push(
-                      MaterialPageRoute(builder: (_) => PaymentConfirmationScreen(university: widget.university, course: widget.course)),
+                      MaterialPageRoute(builder: (_) => const PaymentConfirmationScreen()),
                     ),
                   ),
                 ],

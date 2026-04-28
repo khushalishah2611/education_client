@@ -3,7 +3,7 @@ import 'package:flutter/material.dart';
 
 import '../core/app_localizations.dart';
 import '../core/app_theme.dart';
-import '../models/app_models.dart';
+import '../services/selected_course_storage.dart';
 import '../widgets/common_widgets.dart';
 import '../widgets/flow_widgets.dart';
 import 'payment_screen.dart';
@@ -22,6 +22,21 @@ class UploadDocumentsScreen extends StatefulWidget {
 
 class _UploadDocumentsScreenState extends State<UploadDocumentsScreen> {
   late final Map<String, PlatformFile?> _selectedFiles = {};
+  SelectedCourseData? _selectedCourseData;
+
+  @override
+  void initState() {
+    super.initState();
+    _loadSelectedCourse();
+  }
+
+  Future<void> _loadSelectedCourse() async {
+    final SelectedCourseData? data = await SelectedCourseStorage.load();
+    if (!mounted) return;
+    setState(() {
+      _selectedCourseData = data;
+    });
+  }
 
   List<({String title, String subtitle})> _docs(BuildContext context) => [
     (title: context.l10n.text('docPassport'), subtitle: context.l10n.text('docPassportSubtitle')),
@@ -54,14 +69,9 @@ class _UploadDocumentsScreenState extends State<UploadDocumentsScreen> {
       return;
     }
 
-    // Navigator.of(context).push(
-    //   MaterialPageRoute(
-    //     builder: (_) => PaymentScreen(
-    //       university: widget.university,
-    //       course: widget.course,
-    //     ),
-    //   ),
-    // );
+    Navigator.of(context).push(
+      MaterialPageRoute(builder: (_) => const PaymentScreen()),
+    );
   }
 
   @override
@@ -87,6 +97,13 @@ class _UploadDocumentsScreenState extends State<UploadDocumentsScreen> {
                       context.l10n.text('requiredDocuments'),
                       style: const TextStyle(fontSize: 18, fontWeight: FontWeight.w700),
                     ),
+                    if (_selectedCourseData != null) ...[
+                      const SizedBox(height: 8),
+                      Text(
+                        'Selected: ${_selectedCourseData!.course.name ?? ''}',
+                        style: const TextStyle(color: AppColors.textMuted),
+                      ),
+                    ],
                     const SizedBox(height: 14),
                     _UploadDropZone(
                       title: docs.first.title,
