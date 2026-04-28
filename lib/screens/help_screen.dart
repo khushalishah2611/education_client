@@ -45,7 +45,10 @@ class HelpScreen extends StatelessWidget {
                       Text(
                         context.l10n.text('help'),
                         style: Theme.of(context).textTheme.headlineSmall
-                            ?.copyWith(fontWeight: FontWeight.w700),
+                            ?.copyWith(
+                              fontWeight: FontWeight.w700,
+                              fontSize: 16,
+                            ),
                       ),
                       const Spacer(),
                       const _LanguageDropdownChip(),
@@ -54,9 +57,9 @@ class HelpScreen extends StatelessWidget {
                   const SizedBox(height: 18),
                   Text(
                     context.l10n.text('needHelp'),
-                    style: Theme.of(context).textTheme.titleLarge?.copyWith(
-                      fontSize: isSmallMobile ? 24 : (isMediumMobile ? 27 : 30),
-                    ),
+                    style: Theme.of(
+                      context,
+                    ).textTheme.titleLarge?.copyWith(fontSize: 16),
                   ),
                   const SizedBox(height: 12),
                   Container(
@@ -110,15 +113,16 @@ class HelpScreen extends StatelessWidget {
                       children: [
                         Text(
                           context.l10n.text('needHelp'),
-                          style: Theme.of(context).textTheme.titleLarge
-                              ?.copyWith(fontSize: isSmallMobile ? 22 : 26),
+                          style: Theme.of(
+                            context,
+                          ).textTheme.titleLarge?.copyWith(fontSize: 16),
                         ),
                         const SizedBox(height: 4),
                         Text(
                           context.l10n.text('tapButtonBelow'),
                           style: TextStyle(
                             color: AppColors.textMuted,
-                            fontSize: isSmallMobile ? 14 : 18,
+                            fontSize: 16,
                           ),
                         ),
                         const SizedBox(height: 14),

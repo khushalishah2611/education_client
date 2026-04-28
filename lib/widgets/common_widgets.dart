@@ -221,9 +221,9 @@ class HelpPillButton extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return InkWell(
-      // onTap: () => Navigator.of(
-      //   context,
-      // ).push(MaterialPageRoute(builder: (_) => const HelpScreen())),
+      onTap: () => Navigator.of(
+        context,
+      ).push(MaterialPageRoute(builder: (_) => const HelpScreen())),
       borderRadius: BorderRadius.circular(12),
       child: Container(
         padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 8),
