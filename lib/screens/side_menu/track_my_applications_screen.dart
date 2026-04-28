@@ -8,6 +8,18 @@ class TrackMyApplicationsScreen extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    return const SideMenuScaffold(
+      title: 'Track My Applications',
+      child: TrackMyApplicationsContent(),
+    );
+  }
+}
+
+class TrackMyApplicationsContent extends StatelessWidget {
+  const TrackMyApplicationsContent({super.key});
+
+  @override
+  Widget build(BuildContext context) {
     final applications = [
       const ApplicationCardData(
         universityName: 'Harvard University',
@@ -29,9 +41,7 @@ class TrackMyApplicationsScreen extends StatelessWidget {
       ),
     ];
 
-    return SideMenuScaffold(
-      title: 'Track My Applications',
-      child: ListView.separated(
+    return ListView.separated(
         itemCount: applications.length,
         separatorBuilder: (_, __) => const SizedBox(height: 8),
         itemBuilder: (context, index) {
@@ -119,8 +129,7 @@ class TrackMyApplicationsScreen extends StatelessWidget {
             ),
           );
         },
-      ),
-    );
+      );
   }
 }
 

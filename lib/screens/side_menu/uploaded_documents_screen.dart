@@ -8,6 +8,18 @@ class UploadedDocumentsScreen extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    return const SideMenuScaffold(
+      title: 'Uploaded Documents',
+      child: UploadedDocumentsContent(),
+    );
+  }
+}
+
+class UploadedDocumentsContent extends StatelessWidget {
+  const UploadedDocumentsContent({super.key});
+
+  @override
+  Widget build(BuildContext context) {
     const docs = [
       ('Passport', '2.6 MB'),
       ('Academic Transcript', '2.2 MB'),
@@ -17,9 +29,7 @@ class UploadedDocumentsScreen extends StatelessWidget {
       ('Resume / CV', '2.1 MB'),
     ];
 
-    return SideMenuScaffold(
-      title: 'Uploaded Documents',
-      child: ListView.separated(
+    return ListView.separated(
         itemCount: docs.length,
         separatorBuilder: (_, __) => const SizedBox(height: 8),
         itemBuilder: (context, index) {
@@ -31,7 +41,6 @@ class UploadedDocumentsScreen extends StatelessWidget {
             trailing: const Icon(Icons.cancel_outlined, color: AppColors.textMuted),
           );
         },
-      ),
-    );
+      );
   }
 }
