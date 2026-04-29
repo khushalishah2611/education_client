@@ -538,7 +538,6 @@ class _CollegeAccordionState extends State<_CollegeAccordion> {
         widget.academicEntry.program?.courseDetails ?? <CourseDetails>[];
     final double screenWidth = MediaQuery.sizeOf(context).width;
 
-
     return Container(
       margin: const EdgeInsets.only(bottom: 10),
       decoration: BoxDecoration(
