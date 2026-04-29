@@ -580,47 +580,77 @@ class _CountrySelectionDialogState extends State<_CountrySelectionDialog> {
           child: Column(
             mainAxisSize: MainAxisSize.min,
             children: [
+              Row(
+                children: [
+                  Expanded(
+                    child: Text(
+                      "Select Country",
+                      style: const TextStyle(
+                        fontSize: 18,
+                        fontWeight: FontWeight.w700,
+                        color: AppColors.text,
+                      ),
+                    ),
+                  ),
+                  IconButton(
+                    onPressed: () => Navigator.of(context).pop(),
+                    icon: const Icon(Icons.close),
+                  ),
+                ],
+              ),
+              const SizedBox(height: 8),
               SizedBox(
                 height: 45,
                 child: TextField(
                   controller: _searchController,
                   onChanged: _onSearchChanged,
                   decoration: const InputDecoration(
-                    hintText: 'Selection Country',
+                    hintText: 'Select Country', // 👈 fixed text
                     isDense: true,
                     contentPadding: EdgeInsets.symmetric(
-                      vertical: 5,
-                      horizontal: 5,
+                      vertical: 8,
+                      horizontal: 8,
                     ),
                     suffixIcon: Icon(Icons.keyboard_arrow_down_rounded),
-                    border: InputBorder.none,
+                    border: OutlineInputBorder(), // 👈 better UI
                   ),
                 ),
               ),
+
+              const SizedBox(height: 8),
+
               ConstrainedBox(
                 constraints: const BoxConstraints(maxHeight: 320),
-                child: ListView.separated(
-                  shrinkWrap: true,
-                  itemCount: _filteredCountries.length,
-                  separatorBuilder: (_, __) => const Divider(height: 1),
-                  itemBuilder: (_, index) {
-                    final country = _filteredCountries[index];
-                    return ListTile(
-                      dense: true,
-                      contentPadding: EdgeInsets.zero,
-                      leading: _CountryFlag(country: country),
-                      title: Text(
-                        country.name,
-                        style: TextStyle(
-                          fontWeight: widget.selected == country.name
-                              ? FontWeight.w700
-                              : FontWeight.w500,
+                child: _filteredCountries.isEmpty
+                    ? const Center(
+                        child: Padding(
+                          padding: EdgeInsets.all(16),
+                          child: Text('No countries found'),
                         ),
+                      )
+                    : ListView.separated(
+                        shrinkWrap: true,
+                        itemCount: _filteredCountries.length,
+                        separatorBuilder: (_, __) => const Divider(height: 1),
+                        itemBuilder: (_, index) {
+                          final country = _filteredCountries[index];
+
+                          return ListTile(
+                            dense: true,
+                            contentPadding: EdgeInsets.zero,
+                            leading: _CountryFlag(country: country),
+                            title: Text(
+                              country.name,
+                              style: TextStyle(
+                                fontWeight: widget.selected == country.name
+                                    ? FontWeight.w700
+                                    : FontWeight.w500,
+                              ),
+                            ),
+                            onTap: () => Navigator.of(context).pop(country),
+                          );
+                        },
                       ),
-                      onTap: () => Navigator.of(context).pop(country),
-                    );
-                  },
-                ),
               ),
             ],
           ),
@@ -775,6 +805,25 @@ class _AdvanceSearchDialogState extends State<_AdvanceSearchDialog> {
           mainAxisSize: MainAxisSize.min,
           crossAxisAlignment: CrossAxisAlignment.stretch,
           children: [
+            Row(
+              children: [
+                Expanded(
+                  child: Text(
+                    "Advance Search",
+                    style: const TextStyle(
+                      fontSize: 18,
+                      fontWeight: FontWeight.w700,
+                      color: AppColors.text,
+                    ),
+                  ),
+                ),
+                IconButton(
+                  onPressed: () => Navigator.of(context).pop(),
+                  icon: const Icon(Icons.close),
+                ),
+              ],
+            ),
+            const SizedBox(height: 8),
             dropdownTile(
               title: 'Country',
               options: widget.countryOptions,
