@@ -65,8 +65,11 @@ class _HomeScreenState extends State<HomeScreen> {
   }
 
   Future<void> _openCountryDialog() async {
-    final selected = await showDialog<CountryOption>(
+    final selected = await showModalBottomSheet<CountryOption>(
       context: context,
+      isScrollControlled: true,
+      useSafeArea: true,
+      backgroundColor: Colors.transparent,
       builder: (_) => _CountrySelectionDialog(
         countries: _controller.countryOptions,
         selected: _controller.selectedCountry,
@@ -78,8 +81,11 @@ class _HomeScreenState extends State<HomeScreen> {
   }
 
   Future<void> _openAdvanceSearchDialog() async {
-    await showDialog<void>(
+    await showModalBottomSheet<void>(
       context: context,
+      isScrollControlled: true,
+      useSafeArea: true,
+      backgroundColor: Colors.transparent,
       builder: (_) => _AdvanceSearchDialog(
         countryOptions: _controller.countryOptions
             .map((item) => item.name)
@@ -571,22 +577,34 @@ class _CountrySelectionDialogState extends State<_CountrySelectionDialog> {
 
   @override
   Widget build(BuildContext context) {
-    return Dialog(
-      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8)),
-      child: SizedBox(
-        width: 320,
+    final bool isSmall = context.isSmallMobile;
+    return SafeArea(
+      child: Container(
+        decoration: const BoxDecoration(
+          color: Colors.white,
+          borderRadius: BorderRadius.vertical(top: Radius.circular(18)),
+        ),
         child: Padding(
           padding: const EdgeInsets.fromLTRB(12, 10, 12, 8),
           child: Column(
             mainAxisSize: MainAxisSize.min,
             children: [
+              Container(
+                width: 44,
+                height: 4,
+                margin: const EdgeInsets.only(bottom: 10),
+                decoration: BoxDecoration(
+                  color: const Color(0xFFD1D1D1),
+                  borderRadius: BorderRadius.circular(99),
+                ),
+              ),
               Row(
                 children: [
                   Expanded(
                     child: Text(
                       "Select Country",
-                      style: const TextStyle(
-                        fontSize: 18,
+                      style: TextStyle(
+                        fontSize: isSmall ? 16 : 18,
                         fontWeight: FontWeight.w700,
                         color: AppColors.text,
                       ),
@@ -605,14 +623,14 @@ class _CountrySelectionDialogState extends State<_CountrySelectionDialog> {
                   controller: _searchController,
                   onChanged: _onSearchChanged,
                   decoration: const InputDecoration(
-                    hintText: 'Select Country', // 👈 fixed text
+                    hintText: 'Search country',
                     isDense: true,
                     contentPadding: EdgeInsets.symmetric(
                       vertical: 8,
                       horizontal: 8,
                     ),
                     suffixIcon: Icon(Icons.keyboard_arrow_down_rounded),
-                    border: OutlineInputBorder(), // 👈 better UI
+                    border: OutlineInputBorder(),
                   ),
                 ),
               ),
@@ -699,6 +717,8 @@ class _AdvanceSearchDialogState extends State<_AdvanceSearchDialog> {
   String? _selectedCountry;
   String? _selectedAcademic;
   String? _selectedTrack;
+  final TextEditingController _countrySearchController = TextEditingController();
+  late List<String> _filteredCountryOptions;
 
   @override
   void initState() {
@@ -706,6 +726,26 @@ class _AdvanceSearchDialogState extends State<_AdvanceSearchDialog> {
     _selectedCountry = widget.selectedCountry;
     _selectedAcademic = widget.selectedAcademic;
     _selectedTrack = widget.selectedTrack;
+    _filteredCountryOptions = widget.countryOptions;
+  }
+
+  @override
+  void dispose() {
+    _countrySearchController.dispose();
+    super.dispose();
+  }
+
+  void _filterCountryOptions(String query) {
+    final normalized = query.trim().toLowerCase();
+    setState(() {
+      if (normalized.isEmpty) {
+        _filteredCountryOptions = widget.countryOptions;
+      } else {
+        _filteredCountryOptions = widget.countryOptions
+            .where((country) => country.toLowerCase().contains(normalized))
+            .toList(growable: false);
+      }
+    });
   }
 
   bool _isOnlyCountryAndAcademicAllowed(String? academicValue) {
@@ -797,21 +837,36 @@ class _AdvanceSearchDialogState extends State<_AdvanceSearchDialog> {
       _selectedAcademic,
     );
 
-    return Dialog(
-      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(6)),
+    return SafeArea(
+        child: Container(
+      decoration: const BoxDecoration(
+        color: Colors.white,
+        borderRadius: BorderRadius.vertical(top: Radius.circular(18)),
+      ),
       child: Padding(
         padding: const EdgeInsets.fromLTRB(12, 14, 12, 12),
         child: Column(
           mainAxisSize: MainAxisSize.min,
           crossAxisAlignment: CrossAxisAlignment.stretch,
           children: [
+            Center(
+              child: Container(
+                width: 44,
+                height: 4,
+                margin: const EdgeInsets.only(bottom: 10),
+                decoration: BoxDecoration(
+                  color: const Color(0xFFD1D1D1),
+                  borderRadius: BorderRadius.circular(99),
+                ),
+              ),
+            ),
             Row(
               children: [
                 Expanded(
                   child: Text(
                     "Advance Search",
-                    style: const TextStyle(
-                      fontSize: 18,
+                    style: TextStyle(
+                      fontSize: context.isSmallMobile ? 16 : 18,
                       fontWeight: FontWeight.w700,
                       color: AppColors.text,
                     ),
@@ -824,11 +879,26 @@ class _AdvanceSearchDialogState extends State<_AdvanceSearchDialog> {
               ],
             ),
             const SizedBox(height: 8),
+            TextField(
+              controller: _countrySearchController,
+              onChanged: _filterCountryOptions,
+              decoration: const InputDecoration(
+                hintText: 'Search country',
+                border: OutlineInputBorder(),
+                isDense: true,
+                prefixIcon: Icon(Icons.search),
+              ),
+            ),
+            const SizedBox(height: 10),
             dropdownTile(
               title: 'Country',
-              options: widget.countryOptions,
+              options: _filteredCountryOptions,
               value: _selectedCountry,
-              onChanged: (value) => setState(() => _selectedCountry = value),
+              onChanged: (value) async {
+                setState(() => _selectedCountry = value);
+                widget.onCountryChanged(value);
+                await widget.onApplyFilters();
+              },
               icon: Icons.flag_outlined,
             ),
             dropdownTile(
@@ -907,7 +977,8 @@ class _AdvanceSearchDialogState extends State<_AdvanceSearchDialog> {
           ],
         ),
       ),
-    );
+        ),
+      );
   }
 }
 
