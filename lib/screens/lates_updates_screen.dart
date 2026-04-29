@@ -3,7 +3,9 @@ import 'package:flutter/material.dart';
 import '../../core/app_theme.dart';
 
 class LatestUpdatesScreen extends StatelessWidget {
-  const LatestUpdatesScreen({super.key, required bool _activeTab});
+  const LatestUpdatesScreen({super.key, this.activeTab = false});
+
+  final bool activeTab;
 
   @override
   Widget build(BuildContext context) {

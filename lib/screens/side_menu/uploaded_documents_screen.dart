@@ -4,13 +4,16 @@ import '../../core/app_theme.dart';
 import 'side_menu_common.dart';
 
 class UploadedDocumentsScreen extends StatelessWidget {
-  const UploadedDocumentsScreen({super.key, required bool _activeTab});
+  const UploadedDocumentsScreen({super.key, this.activeTab = false});
+
+  final bool activeTab;
 
   @override
   Widget build(BuildContext context) {
-    return const SideMenuScaffold(
+    return SideMenuScaffold(
       title: 'Uploaded Documents',
       child: UploadedDocumentsContent(),
+      showBackButton: !activeTab,
     );
   }
 }

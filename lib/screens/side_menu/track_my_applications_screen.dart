@@ -4,13 +4,16 @@ import '../../core/app_theme.dart';
 import 'side_menu_common.dart';
 
 class TrackMyApplicationsScreen extends StatelessWidget {
-  const TrackMyApplicationsScreen({super.key, required bool _activeTab});
+  const TrackMyApplicationsScreen({super.key, this.activeTab = false});
+
+  final bool activeTab;
 
   @override
   Widget build(BuildContext context) {
-    return const SideMenuScaffold(
+    return SideMenuScaffold(
       title: 'Track My Applications',
       child: TrackMyApplicationsContent(),
+      showBackButton: !activeTab,
     );
   }
 }

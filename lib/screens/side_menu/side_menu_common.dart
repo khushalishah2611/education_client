@@ -8,10 +8,16 @@ import '../login_screen.dart';
 import '../../widgets/common_widgets.dart';
 
 class SideMenuScaffold extends StatelessWidget {
-  const SideMenuScaffold({super.key, required this.title, required this.child});
+  const SideMenuScaffold({
+    super.key,
+    required this.title,
+    required this.child,
+    this.showBackButton = true,
+  });
 
   final String title;
   final Widget child;
+  final bool showBackButton;
 
   @override
   Widget build(BuildContext context) {
@@ -40,28 +46,29 @@ class SideMenuScaffold extends StatelessWidget {
               child: Stack(
                 alignment: Alignment.center,
                 children: [
-                  Align(
-                    alignment: Alignment.centerLeft,
-                    child: Padding(
-                      padding: EdgeInsets.only(left: isSmallMobile ? 12 : 16),
-                      child: InkWell(
-                        onTap: () => Navigator.of(context).pop(),
-                        borderRadius: BorderRadius.circular(20),
-                        child: Container(
-                          width: 34,
-                          height: 34,
-                          decoration: const BoxDecoration(
-                            color: Color(0xFFF6F6F6),
-                            shape: BoxShape.circle,
-                          ),
-                          child: const Icon(
-                            Icons.arrow_back_ios_new_rounded,
-                            size: 18,
+                  if (showBackButton)
+                    Align(
+                      alignment: Alignment.centerLeft,
+                      child: Padding(
+                        padding: EdgeInsets.only(left: isSmallMobile ? 12 : 16),
+                        child: InkWell(
+                          onTap: () => Navigator.of(context).pop(),
+                          borderRadius: BorderRadius.circular(20),
+                          child: Container(
+                            width: 34,
+                            height: 34,
+                            decoration: const BoxDecoration(
+                              color: Color(0xFFF6F6F6),
+                              shape: BoxShape.circle,
+                            ),
+                            child: const Icon(
+                              Icons.arrow_back_ios_new_rounded,
+                              size: 18,
+                            ),
                           ),
                         ),
                       ),
                     ),
-                  ),
                   Padding(
                     padding: EdgeInsets.symmetric(
                       horizontal: isSmallMobile ? 42 : 50,

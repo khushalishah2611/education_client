@@ -21,7 +21,7 @@ class CommonSideMenu extends StatelessWidget {
             icon: Icons.assignment_outlined,
             label: context.l10n.text('trackApplications'),
             danger: false,
-            screen: const TrackMyApplicationsScreen(),
+            screen: const TrackMyApplicationsScreen(activeTab: true),
           ),
           (
             icon: Icons.person_outline,
@@ -33,7 +33,7 @@ class CommonSideMenu extends StatelessWidget {
             icon: Icons.description_outlined,
             label: context.l10n.text('manageDocuments'),
             danger: false,
-            screen: const UploadedDocumentsScreen(),
+            screen: const UploadedDocumentsScreen(activeTab: true),
           ),
           (
             icon: Icons.payments_outlined,
