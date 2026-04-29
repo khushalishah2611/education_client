@@ -537,8 +537,7 @@ class _CollegeAccordionState extends State<_CollegeAccordion> {
     final List<CourseDetails> courseDetailsList =
         widget.academicEntry.program?.courseDetails ?? <CourseDetails>[];
     final double screenWidth = MediaQuery.sizeOf(context).width;
-    final bool isSmallMobile = screenWidth <= 360;
-    final bool isMediumMobile = screenWidth > 360 && screenWidth <= 420;
+
 
     return Container(
       margin: const EdgeInsets.only(bottom: 10),
