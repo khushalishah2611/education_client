@@ -8,7 +8,16 @@ class EmergencyContactScreen extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return SideMenuScaffold(title: 'Help', child: EmergencyContactCard());
+    return SideMenuScaffold(
+      title: 'Help',
+      child: Align(
+        alignment: Alignment.topCenter,
+        child: const Padding(
+          padding: EdgeInsets.all(8),
+          child: EmergencyContactCard(),
+        ),
+      ),
+    );
   }
 }
 
@@ -17,29 +26,36 @@ class EmergencyContactCard extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return Expanded(
+    return Container(
+      width: double.infinity,
+      decoration: BoxDecoration(
+        color: Colors.white,
+        borderRadius: BorderRadius.circular(12),
+        border: Border.all(color: Colors.grey.shade300),
+      ),
       child: Column(
+        mainAxisSize: MainAxisSize.min,
         children: const [
           ContactInfoField(
             label: 'Guardian Name',
             value: 'Abhishek Verma',
             icon: Icons.person_outline_rounded,
           ),
-          Divider(height: 1, color: Color(0xFFE4E2E0)),
+          Divider(height: 1),
 
           ContactInfoField(
             label: 'Relationship',
             value: 'Brother',
             icon: Icons.person_outline_rounded,
           ),
-          Divider(height: 1, color: Color(0xFFE4E2E0)),
+          Divider(height: 1),
 
           ContactInfoField(
             label: 'Mobile Number',
             value: '+91 89788 54588',
             icon: Icons.call_outlined,
           ),
-          Divider(height: 1, color: Color(0xFFE4E2E0)),
+          Divider(height: 1),
 
           ContactInfoField(
             label: 'Email Address',
@@ -67,10 +83,11 @@ class ContactInfoField extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Padding(
-      padding: const EdgeInsets.symmetric(vertical: 10),
+      padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 12),
       child: Row(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
+          /// TEXT
           Expanded(
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
@@ -78,7 +95,7 @@ class ContactInfoField extends StatelessWidget {
                 Text(
                   label,
                   style: const TextStyle(
-                    fontSize: 13.5,
+                    fontSize: 13,
                     fontWeight: FontWeight.w700,
                   ),
                 ),
@@ -86,22 +103,27 @@ class ContactInfoField extends StatelessWidget {
                 Text(
                   value,
                   style: const TextStyle(
-                    fontSize: 13.5,
+                    fontSize: 13,
                     color: AppColors.textMuted,
                   ),
                 ),
               ],
             ),
           ),
-          const SizedBox(width: 8),
+
+          /// ICON BOX
           Container(
-            width: 28,
-            height: 28,
+            width: 32,
+            height: 32,
             decoration: BoxDecoration(
-              color: Color(0xFFA7E7C5),
+              color: const Color(0xFFA7E7C5),
               borderRadius: BorderRadius.circular(6),
             ),
-            child: Icon(icon, size: 16, color: Color(0xFF0A3F27)),
+            child: Icon(
+              icon,
+              size: 18,
+              color: const Color(0xFF0A3F27),
+            ),
           ),
         ],
       ),

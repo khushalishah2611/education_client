@@ -32,78 +32,82 @@ class SideMenuScaffold extends StatelessWidget {
     final double titleFontSize = isSmallMobile ? 16 : 18;
 
     return Material(
-      child: AppBackground(
-        child: Column(
-          children: [
-            Container(
-              width: MediaQuery.sizeOf(context).width,
-              height: headerHeight,
-              decoration: const BoxDecoration(
-                color: Colors.white,
-                borderRadius: BorderRadius.vertical(
-                  bottom: Radius.circular(22),
+      child: SafeArea(
+        child: AppBackground(
+          child: Column(
+            children: [
+              Container(
+                width: MediaQuery.sizeOf(context).width,
+                height: headerHeight,
+                decoration: const BoxDecoration(
+                  color: Colors.white,
+                  borderRadius: BorderRadius.vertical(
+                    bottom: Radius.circular(22),
+                  ),
                 ),
-              ),
-              child: Stack(
-                alignment: Alignment.center,
-                children: [
-                  if (showBackButton)
-                    Align(
-                      alignment: Alignment.centerLeft,
-                      child: Padding(
-                        padding: EdgeInsets.only(left: isSmallMobile ? 12 : 16),
-                        child: InkWell(
-                          onTap: () => Navigator.of(context).pop(),
-                          borderRadius: BorderRadius.circular(20),
-                          child: Container(
-                            width: 34,
-                            height: 34,
-                            decoration: const BoxDecoration(
-                              color: Color(0xFFF6F6F6),
-                              shape: BoxShape.circle,
-                            ),
-                            child: const Icon(
-                              Icons.arrow_back_ios_new_rounded,
-                              size: 18,
+                child: Stack(
+                  alignment: Alignment.center,
+                  children: [
+                    if (showBackButton)
+                      Align(
+                        alignment: Alignment.centerLeft,
+                        child: Padding(
+                          padding: EdgeInsets.only(
+                            left: isSmallMobile ? 12 : 16,
+                          ),
+                          child: InkWell(
+                            onTap: () => Navigator.of(context).pop(),
+                            borderRadius: BorderRadius.circular(20),
+                            child: Container(
+                              width: 34,
+                              height: 34,
+                              decoration: const BoxDecoration(
+                                color: Color(0xFFF6F6F6),
+                                shape: BoxShape.circle,
+                              ),
+                              child: const Icon(
+                                Icons.arrow_back_ios_new_rounded,
+                                size: 18,
+                              ),
                             ),
                           ),
                         ),
                       ),
+                    Padding(
+                      padding: EdgeInsets.symmetric(
+                        horizontal: isSmallMobile ? 42 : 50,
+                      ),
+                      child: Text(
+                        title,
+                        textAlign: TextAlign.center,
+                        maxLines: 1,
+                        overflow: TextOverflow.ellipsis,
+                        style: const TextStyle(
+                          fontSize: 18,
+                          fontWeight: FontWeight.w700,
+                        ).copyWith(fontSize: titleFontSize),
+                      ),
                     ),
-                  Padding(
-                    padding: EdgeInsets.symmetric(
-                      horizontal: isSmallMobile ? 42 : 50,
-                    ),
-                    child: Text(
-                      title,
-                      textAlign: TextAlign.center,
-                      maxLines: 1,
-                      overflow: TextOverflow.ellipsis,
-                      style: const TextStyle(
-                        fontSize: 18,
-                        fontWeight: FontWeight.w700,
-                      ).copyWith(fontSize: titleFontSize),
-                    ),
-                  ),
-                ],
+                  ],
+                ),
               ),
-            ),
-            Expanded(
-              child: MediaQuery.removePadding(
-                context: context,
-                removeTop: true,
-                child: Padding(
-                  padding: EdgeInsets.all(contentPadding),
-                  child: Center(
-                    child: ConstrainedBox(
-                      constraints: const BoxConstraints(maxWidth: 560),
-                      child: child,
+              Expanded(
+                child: MediaQuery.removePadding(
+                  context: context,
+                  removeTop: true,
+                  child: Padding(
+                    padding: EdgeInsets.all(contentPadding),
+                    child: Center(
+                      child: ConstrainedBox(
+                        constraints: const BoxConstraints(maxWidth: 560),
+                        child: child,
+                      ),
                     ),
                   ),
                 ),
               ),
-            ),
-          ],
+            ],
+          ),
         ),
       ),
     );
