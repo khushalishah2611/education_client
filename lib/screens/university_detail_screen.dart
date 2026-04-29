@@ -518,9 +518,17 @@ class _CollegeAccordion extends StatefulWidget {
 }
 
 class _CollegeAccordionState extends State<_CollegeAccordion> {
+  final ScrollController _horizontalScrollController = ScrollController();
+
   bool _isSmallMobile(double width) => width <= 360;
 
   bool _isMediumMobile(double width) => width > 360 && width <= 420;
+
+  @override
+  void dispose() {
+    _horizontalScrollController.dispose();
+    super.dispose();
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -574,39 +582,45 @@ class _CollegeAccordionState extends State<_CollegeAccordion> {
           ),
 
           if (widget.isExpanded)
-            SingleChildScrollView(
-              scrollDirection: Axis.horizontal,
-              child: ConstrainedBox(
-                constraints: BoxConstraints(minWidth: minTableWidth),
-                child: Column(
-                  children: [
-                    _buildTableHeader(context, isSmallMobile: isSmallMobile),
-                    if (courseDetailsList.isNotEmpty)
-                      ...courseDetailsList.map((details) {
-                        final String courseKey =
-                            '${widget.collegeName}-${details.name ?? ''}';
-                        final bool isSelected = widget.selectedCourses.contains(
-                          courseKey,
-                        );
+            Scrollbar(
+              controller: _horizontalScrollController,
+              thumbVisibility: true,
+              trackVisibility: true,
+              child: SingleChildScrollView(
+                controller: _horizontalScrollController,
+                scrollDirection: Axis.horizontal,
+                child: ConstrainedBox(
+                  constraints: BoxConstraints(minWidth: minTableWidth),
+                  child: Column(
+                    children: [
+                      _buildTableHeader(context, isSmallMobile: isSmallMobile),
+                      if (courseDetailsList.isNotEmpty)
+                        ...courseDetailsList.map((details) {
+                          final String courseKey =
+                              '${widget.collegeName}-${details.name ?? ''}';
+                          final bool isSelected = widget.selectedCourses.contains(
+                            courseKey,
+                          );
 
-                        return _buildCourseRow(
-                          details: details,
-                          isSelected: isSelected,
-                          onTap: () => widget.onToggleCourse(courseKey),
-                          context: context,
-                          adminUniversity: widget.adminUniversity,
-                          isSmallMobile: isSmallMobile,
-                        );
-                      }).toList()
-                    else
-                      Padding(
-                        padding: const EdgeInsets.all(12),
-                        child: Align(
-                          alignment: Alignment.centerLeft,
-                          child: Text(context.l10n.text('No data available')),
+                          return _buildCourseRow(
+                            details: details,
+                            isSelected: isSelected,
+                            onTap: () => widget.onToggleCourse(courseKey),
+                            context: context,
+                            adminUniversity: widget.adminUniversity,
+                            isSmallMobile: isSmallMobile,
+                          );
+                        }).toList()
+                      else
+                        Padding(
+                          padding: const EdgeInsets.all(12),
+                          child: Align(
+                            alignment: Alignment.centerLeft,
+                            child: Text(context.l10n.text('No data available')),
+                          ),
                         ),
-                      ),
-                  ],
+                    ],
+                  ),
                 ),
               ),
             ),
