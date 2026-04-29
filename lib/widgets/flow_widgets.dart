@@ -12,6 +12,7 @@ void showAddressBottomSheet({
   showModalBottomSheet<void>(
     context: context,
     isScrollControlled: true,
+    backgroundColor: AppColors.white,
     shape: const RoundedRectangleBorder(
       borderRadius: BorderRadius.vertical(top: Radius.circular(20)),
     ),
@@ -28,7 +29,20 @@ void showAddressBottomSheet({
             padding: const EdgeInsets.fromLTRB(18, 14, 18, 26),
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
+
               children: [
+                Align(
+                  alignment: Alignment.center,
+                  child: Container(
+                    width: 44,
+                    height: 4,
+                    margin: const EdgeInsets.only(bottom: 10),
+                    decoration: BoxDecoration(
+                      color: const Color(0xFFD1D1D1),
+                      borderRadius: BorderRadius.circular(99),
+                    ),
+                  ),
+                ),
                 Row(
                   children: [
                     Expanded(
@@ -49,15 +63,19 @@ void showAddressBottomSheet({
                 ),
                 const SizedBox(height: 8),
                 Expanded(
-                  child: SingleChildScrollView(
-                    child: Text(
-                      value,
-                      style: const TextStyle(
-                        height: 1.4,
-                        fontSize: 14,
-                        color: AppColors.textMuted,
+                  child: Column(
+                    children: [
+                      SingleChildScrollView(
+                        child: Text(
+                          value,
+                          style: const TextStyle(
+                            height: 1.4,
+                            fontSize: 14,
+                            color: AppColors.textMuted,
+                          ),
+                        ),
                       ),
-                    ),
+                    ],
                   ),
                 ),
               ],

@@ -86,6 +86,8 @@ class _UniversityDetailScreenState extends State<UniversityDetailScreen> {
       final bool? shouldReplaceSelection = await showModalBottomSheet<bool>(
         context: context,
         isScrollControlled: true,
+
+        backgroundColor: AppColors.white,
         shape: const RoundedRectangleBorder(
           borderRadius: BorderRadius.vertical(top: Radius.circular(20)),
         ),
@@ -97,6 +99,18 @@ class _UniversityDetailScreenState extends State<UniversityDetailScreen> {
                 mainAxisSize: MainAxisSize.min,
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
+                  Align(
+                    alignment: Alignment.center,
+                    child: Container(
+                      width: 44,
+                      height: 4,
+                      margin: const EdgeInsets.only(bottom: 10),
+                      decoration: BoxDecoration(
+                        color: const Color(0xFFD1D1D1),
+                        borderRadius: BorderRadius.circular(99),
+                      ),
+                    ),
+                  ),
                   Row(
                     children: [
                       Expanded(
