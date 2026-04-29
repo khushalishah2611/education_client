@@ -78,7 +78,7 @@ class _HomeScreenState extends State<HomeScreen> {
     if (selected == null || !mounted) return;
     _controller.updateCountry(selected.name);
 
-    await _controller.applyFilters();
+    await _controller.loadUniversities();
   }
 
   Future<void> _openAdvanceSearchDialog() async {
