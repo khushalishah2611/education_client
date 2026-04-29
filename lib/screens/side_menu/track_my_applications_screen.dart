@@ -12,8 +12,8 @@ class TrackMyApplicationsScreen extends StatelessWidget {
   Widget build(BuildContext context) {
     return SideMenuScaffold(
       title: 'Track My Applications',
+      showBackButton: activeTab,
       child: TrackMyApplicationsContent(),
-      showBackButton: !activeTab,
     );
   }
 }

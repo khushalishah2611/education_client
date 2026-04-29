@@ -360,11 +360,11 @@ class _HomeScreenState extends State<HomeScreen> {
                       ),
                     ),
                   ] else if (_activeTab == 1) ...[
-                    Expanded(child: TrackMyApplicationsScreen(_activeTab : true)),
+                    Expanded(child: TrackMyApplicationsScreen(activeTab : true)),
                   ] else if (_activeTab == 2) ...[
-                    Expanded(child: UploadedDocumentsScreen(_activeTab : true)),
+                    Expanded(child: UploadedDocumentsScreen(activeTab : true)),
                   ] else ...[
-                    Expanded(child: LatestUpdatesScreen(_activeTab : true)),
+                    Expanded(child: LatestUpdatesScreen(activeTab : true)),
                   ],
 
                   BottomTabBarCard(

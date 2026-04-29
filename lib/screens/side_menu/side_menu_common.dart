@@ -36,6 +36,7 @@ class SideMenuScaffold extends StatelessWidget {
         child: Column(
           children: [
             Container(
+              width: MediaQuery.sizeOf(context).width,
               height: headerHeight,
               decoration: const BoxDecoration(
                 color: Colors.white,

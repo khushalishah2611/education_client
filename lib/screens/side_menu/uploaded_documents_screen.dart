@@ -12,8 +12,8 @@ class UploadedDocumentsScreen extends StatelessWidget {
   Widget build(BuildContext context) {
     return SideMenuScaffold(
       title: 'Uploaded Documents',
+      showBackButton: activeTab,
       child: UploadedDocumentsContent(),
-      showBackButton: !activeTab,
     );
   }
 }
@@ -33,20 +33,20 @@ class UploadedDocumentsContent extends StatelessWidget {
     ];
 
     return ListView.separated(
-        itemCount: docs.length,
-        separatorBuilder: (_, __) => const SizedBox(height: 8),
-        itemBuilder: (context, index) {
-          final doc = docs[index];
-          return SimpleTile(
-            leading: Icons.picture_as_pdf_outlined,
-            title: doc.$1,
-            subtitle: doc.$2,
-            trailing: const Icon(
-              Icons.cancel_outlined,
-              color: AppColors.textMuted,
-            ),
-          );
-        },
-      );
+      itemCount: docs.length,
+      separatorBuilder: (_, __) => const SizedBox(height: 8),
+      itemBuilder: (context, index) {
+        final doc = docs[index];
+        return SimpleTile(
+          leading: Icons.picture_as_pdf_outlined,
+          title: doc.$1,
+          subtitle: doc.$2,
+          trailing: const Icon(
+            Icons.cancel_outlined,
+            color: AppColors.textMuted,
+          ),
+        );
+      },
+    );
   }
 }
