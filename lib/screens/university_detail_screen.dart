@@ -593,7 +593,11 @@ class _CollegeAccordionState extends State<_CollegeAccordion> {
                   constraints: BoxConstraints(minWidth: minTableWidth),
                   child: Column(
                     children: [
-                      _buildTableHeader(context, isSmallMobile: isSmallMobile),
+                      _buildTableHeader(
+                        context,
+                        isSmallMobile: isSmallMobile,
+                        tableWidth: minTableWidth,
+                      ),
                       if (courseDetailsList.isNotEmpty)
                         ...courseDetailsList.map((details) {
                           final String courseKey =
@@ -609,6 +613,7 @@ class _CollegeAccordionState extends State<_CollegeAccordion> {
                             context: context,
                             adminUniversity: widget.adminUniversity,
                             isSmallMobile: isSmallMobile,
+                            tableWidth: minTableWidth,
                           );
                         }).toList()
                       else
@@ -629,14 +634,20 @@ class _CollegeAccordionState extends State<_CollegeAccordion> {
     );
   }
 
-  Widget _buildTableHeader(BuildContext context, {required bool isSmallMobile}) {
+  Widget _buildTableHeader(
+    BuildContext context, {
+    required bool isSmallMobile,
+    required double tableWidth,
+  }) {
     return Container(
       color: const Color(0xFFE3E3E3),
       padding: EdgeInsets.symmetric(horizontal: isSmallMobile ? 4 : 5, vertical: isSmallMobile ? 4 : 5),
-      child: Row(
-        crossAxisAlignment: CrossAxisAlignment.center,
-        children: [
-          Expanded(
+      child: SizedBox(
+        width: tableWidth,
+        child: Row(
+          crossAxisAlignment: CrossAxisAlignment.center,
+          children: [
+            Expanded(
             flex: 3,
             child: Center(
               child: Text(
@@ -686,8 +697,9 @@ class _CollegeAccordionState extends State<_CollegeAccordion> {
                 style: TextStyle(fontWeight: FontWeight.w600, fontSize: isSmallMobile ? 11 : 12),
               ),
             ),
-          ),
-        ],
+            ),
+          ],
+        ),
       ),
     );
   }
@@ -699,6 +711,7 @@ class _CollegeAccordionState extends State<_CollegeAccordion> {
     required BuildContext context,
     required AdminUniversity adminUniversity,
     required bool isSmallMobile,
+    required double tableWidth,
   }) {
     return InkWell(
       onTap: onTap,
@@ -715,10 +728,12 @@ class _CollegeAccordionState extends State<_CollegeAccordion> {
           ),
         ),
 
-        child: Row(
-          crossAxisAlignment: CrossAxisAlignment.center,
-          children: [
-            Expanded(
+        child: SizedBox(
+          width: tableWidth,
+          child: Row(
+            crossAxisAlignment: CrossAxisAlignment.center,
+            children: [
+              Expanded(
               flex: 3,
               child: Text(
                 details.name ?? 'N/A',
@@ -832,8 +847,9 @@ class _CollegeAccordionState extends State<_CollegeAccordion> {
                   ),
                 ],
               ),
-            ),
-          ],
+              ),
+            ],
+          ),
         ),
       ),
     );
