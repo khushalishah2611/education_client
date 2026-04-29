@@ -4,7 +4,7 @@ import '../../core/app_theme.dart';
 import 'side_menu_common.dart';
 
 class TrackMyApplicationsScreen extends StatelessWidget {
-  const TrackMyApplicationsScreen({super.key});
+  const TrackMyApplicationsScreen({super.key, required bool _activeTab});
 
   @override
   Widget build(BuildContext context) {

@@ -4,7 +4,7 @@ import '../../core/app_theme.dart';
 import 'side_menu_common.dart';
 
 class UploadedDocumentsScreen extends StatelessWidget {
-  const UploadedDocumentsScreen({super.key});
+  const UploadedDocumentsScreen({super.key, required bool _activeTab});
 
   @override
   Widget build(BuildContext context) {

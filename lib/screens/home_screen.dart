@@ -1,5 +1,8 @@
 import 'package:education/models/admin_university.dart';
 import 'package:education/models/banner_item.dart';
+import 'package:education/screens/lates_updates_screen.dart';
+import 'package:education/screens/side_menu/track_my_applications_screen.dart';
+import 'package:education/screens/side_menu/uploaded_documents_screen.dart';
 import 'package:flutter/material.dart';
 import '../core/app_localizations.dart';
 import '../core/app_theme.dart';
@@ -118,242 +121,250 @@ class _HomeScreenState extends State<HomeScreen> {
                 children: [
                   if (_activeTab == 0) ...[
                     SizedBox(
-                    height: MediaQuery.of(context).size.height * 0.40,
-                    child: Stack(
-                      children: [
-                        Image.asset(
-                          'assets/images/img.png',
-                          width: double.infinity,
-                          height: double.infinity,
-                          fit: BoxFit.cover,
-                        ),
-
-                        Positioned(
-                          top: MediaQuery.of(context).padding.top,
-                          left: horizontalPadding,
-                          right: horizontalPadding,
-                          child: Row(
-                            children: [
-                              _CircleIconButton(
-                                icon: Icons.menu_rounded,
-                                onTap: () =>
-                                    _scaffoldKey.currentState?.openDrawer(),
-                              ),
-                              const Spacer(),
-                              const AppLogo(compact: true, center: true),
-                              const Spacer(),
-                              Stack(
-                                clipBehavior: Clip.none,
-                                children: [
-                                  const Icon(
-                                    Icons.notifications_none_rounded,
-                                    size: 26,
-                                  ),
-                                  Positioned(
-                                    right: 2,
-                                    top: 2,
-                                    child: Container(
-                                      width: 8,
-                                      height: 8,
-                                      decoration: BoxDecoration(
-                                        color: Colors.red,
-                                        borderRadius: BorderRadius.circular(10),
-                                      ),
-                                    ),
-                                  ),
-                                ],
-                              ),
-                            ],
+                      height: MediaQuery.of(context).size.height * 0.40,
+                      child: Stack(
+                        children: [
+                          Image.asset(
+                            'assets/images/img.png',
+                            width: double.infinity,
+                            height: double.infinity,
+                            fit: BoxFit.cover,
                           ),
-                        ),
 
-                        Positioned(
-                          top: MediaQuery.of(context).size.height * 0.10,
-                          left: horizontalPadding,
-                          right: horizontalPadding,
-                          child: Column(
-                            mainAxisSize: MainAxisSize.min,
-                            children: [
-                              /// Country
-                              InkWell(
-                                onTap: _openCountryDialog,
-                                child: Container(
-                                  height: 44,
-                                  padding: const EdgeInsets.symmetric(
-                                    horizontal: 14,
-                                  ),
-                                  decoration: BoxDecoration(
-                                    color: Colors.white,
-                                    borderRadius: BorderRadius.circular(6),
-                                    border: Border.all(
-                                      color: Color(0xFFE4B88B),
+                          Positioned(
+                            top: MediaQuery.of(context).padding.top,
+                            left: horizontalPadding,
+                            right: horizontalPadding,
+                            child: Row(
+                              children: [
+                                _CircleIconButton(
+                                  icon: Icons.menu_rounded,
+                                  onTap: () =>
+                                      _scaffoldKey.currentState?.openDrawer(),
+                                ),
+                                const Spacer(),
+                                const AppLogo(compact: true, center: true),
+                                const Spacer(),
+                                Stack(
+                                  clipBehavior: Clip.none,
+                                  children: [
+                                    const Icon(
+                                      Icons.notifications_none_rounded,
+                                      size: 26,
                                     ),
-                                  ),
-                                  child: Row(
-                                    children: [
-                                      Expanded(
-                                        child: Text(
-                                          _controller.selectedCountry ??
-                                              'Select Country',
-                                          overflow: TextOverflow.ellipsis,
+                                    Positioned(
+                                      right: 2,
+                                      top: 2,
+                                      child: Container(
+                                        width: 8,
+                                        height: 8,
+                                        decoration: BoxDecoration(
+                                          color: Colors.red,
+                                          borderRadius: BorderRadius.circular(
+                                            10,
+                                          ),
                                         ),
                                       ),
-                                      const Icon(
-                                        Icons.keyboard_arrow_down_rounded,
+                                    ),
+                                  ],
+                                ),
+                              ],
+                            ),
+                          ),
+
+                          Positioned(
+                            top: MediaQuery.of(context).size.height * 0.10,
+                            left: horizontalPadding,
+                            right: horizontalPadding,
+                            child: Column(
+                              mainAxisSize: MainAxisSize.min,
+                              children: [
+                                /// Country
+                                InkWell(
+                                  onTap: _openCountryDialog,
+                                  child: Container(
+                                    height: 44,
+                                    padding: const EdgeInsets.symmetric(
+                                      horizontal: 14,
+                                    ),
+                                    decoration: BoxDecoration(
+                                      color: Colors.white,
+                                      borderRadius: BorderRadius.circular(6),
+                                      border: Border.all(
+                                        color: Color(0xFFE4B88B),
                                       ),
-                                    ],
+                                    ),
+                                    child: Row(
+                                      children: [
+                                        Expanded(
+                                          child: Text(
+                                            _controller.selectedCountry ??
+                                                'Select Country',
+                                            overflow: TextOverflow.ellipsis,
+                                          ),
+                                        ),
+                                        const Icon(
+                                          Icons.keyboard_arrow_down_rounded,
+                                        ),
+                                      ],
+                                    ),
                                   ),
                                 ),
-                              ),
 
-                              const SizedBox(height: 12),
+                                const SizedBox(height: 12),
 
-                              /// Advance Search
-                              InkWell(
-                                onTap: _openAdvanceSearchDialog,
-                                child: Container(
-                                  height: 44,
-                                  alignment: Alignment.center,
-                                  decoration: BoxDecoration(
-                                    borderRadius: BorderRadius.circular(6),
-                                    border: Border.all(
-                                      color: Color(0xFFE4B88B),
-                                    ),
-                                    color: Colors.white,
-                                  ),
-                                  child: const Row(
-                                    mainAxisAlignment: MainAxisAlignment.center,
-                                    children: [
-                                      Icon(
-                                        Icons.tune_rounded,
-                                        color: AppColors.accent,
+                                /// Advance Search
+                                InkWell(
+                                  onTap: _openAdvanceSearchDialog,
+                                  child: Container(
+                                    height: 44,
+                                    alignment: Alignment.center,
+                                    decoration: BoxDecoration(
+                                      borderRadius: BorderRadius.circular(6),
+                                      border: Border.all(
+                                        color: Color(0xFFE4B88B),
                                       ),
-                                      SizedBox(width: 8),
-                                      Text(
-                                        'Advance Search',
-                                        style: TextStyle(
+                                      color: Colors.white,
+                                    ),
+                                    child: const Row(
+                                      mainAxisAlignment:
+                                          MainAxisAlignment.center,
+                                      children: [
+                                        Icon(
+                                          Icons.tune_rounded,
                                           color: AppColors.accent,
                                         ),
-                                      ),
-                                    ],
+                                        SizedBox(width: 8),
+                                        Text(
+                                          'Advance Search',
+                                          style: TextStyle(
+                                            color: AppColors.accent,
+                                          ),
+                                        ),
+                                      ],
+                                    ),
                                   ),
                                 ),
-                              ),
 
-                              const SizedBox(height: 16),
+                                const SizedBox(height: 16),
 
-                              _DiscoverBanner(
-                                banners: _controller.banners,
-                                isLoading: _controller.isLoadingBanners,
-                                pageController: _bannerPageController,
-                                onPageChanged: (index) {
-                                  if (!mounted) return;
-                                  setState(() => _activeBannerIndex = index);
-                                },
-                              ),
+                                _DiscoverBanner(
+                                  banners: _controller.banners,
+                                  isLoading: _controller.isLoadingBanners,
+                                  pageController: _bannerPageController,
+                                  onPageChanged: (index) {
+                                    if (!mounted) return;
+                                    setState(() => _activeBannerIndex = index);
+                                  },
+                                ),
 
-                              const SizedBox(height: 8),
+                                const SizedBox(height: 8),
 
-                              _BannerIndicator(
-                                count: _controller.banners.isEmpty
-                                    ? 1
-                                    : _controller.banners.length,
-                                activeIndex: _activeBannerIndex,
-                              ),
-                            ],
+                                _BannerIndicator(
+                                  count: _controller.banners.isEmpty
+                                      ? 1
+                                      : _controller.banners.length,
+                                  activeIndex: _activeBannerIndex,
+                                ),
+                              ],
+                            ),
                           ),
-                        ),
-                      ],
-                    ),
+                        ],
+                      ),
                     ),
                     SizedBox(height: 10),
                     Expanded(
                       child: RefreshIndicator(
                         onRefresh: _refreshHomeData,
                         child: SingleChildScrollView(
-                        physics: const AlwaysScrollableScrollPhysics(),
-                        child: Padding(
-                          padding: const EdgeInsets.only(
-                            left: 16.0,
-                            right: 16.0,
-                            bottom: 16.0,
-                          ),
-                          child: Column(
-                            crossAxisAlignment: CrossAxisAlignment.start,
-                            children: [
-                              SectionTitle(
-                                context.l10n.text('popularUniversities'),
-                              ),
-
-                              const SizedBox(height: 12),
-
-                              if (!_controller.isLoadingUniversities &&
-                                  _controller.universities.isEmpty)
-                                Container(
-                                  width: double.infinity,
-                                  padding: const EdgeInsets.symmetric(
-                                    vertical: 20,
-                                    horizontal: 12,
-                                  ),
-                                  decoration: BoxDecoration(
-                                    borderRadius: BorderRadius.circular(10),
-                                    border: Border.all(
-                                      color: const Color(0xFFE6E6E6),
-                                    ),
-                                    color: Colors.white,
-                                  ),
-                                  child: Text(
-                                    context.l10n.text(
-                                      'No education institute data available',
-                                    ),
-                                    textAlign: TextAlign.center,
-                                    style: TextStyle(
-                                      color: Color(0xFF616161),
-                                      fontWeight: FontWeight.w500,
-                                    ),
-                                  ),
-                                )
-                              else
-                                GridView.builder(
-                                  itemCount: _controller.isLoadingUniversities
-                                      ? 4
-                                      : _controller.universities.length,
-                                  shrinkWrap: true,
-                                  physics: const NeverScrollableScrollPhysics(),
-                                  gridDelegate:
-                                      SliverGridDelegateWithFixedCrossAxisCount(
-                                        crossAxisCount: gridColumns,
-                                        mainAxisSpacing: 8,
-                                        crossAxisSpacing: 8,
-                                        childAspectRatio: gridAspectRatio,
-                                      ),
-                                  itemBuilder: (context, index) {
-                                    if (_controller.isLoadingUniversities) {
-                                      return const _UniversityCardShimmer();
-                                    }
-                                    final item =
-                                        _controller.universities[index];
-                                    return _UniversityCard(
-                                      data: item,
-                                      onTap: () => Navigator.of(context).push(
-                                        MaterialPageRoute(
-                                          builder: (_) =>
-                                              UniversityDetailScreen(
-                                                data: item,
-                                              ),
-                                        ),
-                                      ),
-                                    );
-                                  },
+                          physics: const AlwaysScrollableScrollPhysics(),
+                          child: Padding(
+                            padding: const EdgeInsets.only(
+                              left: 16.0,
+                              right: 16.0,
+                              bottom: 16.0,
+                            ),
+                            child: Column(
+                              crossAxisAlignment: CrossAxisAlignment.start,
+                              children: [
+                                SectionTitle(
+                                  context.l10n.text('popularUniversities'),
                                 ),
-                            ],
+
+                                const SizedBox(height: 12),
+
+                                if (!_controller.isLoadingUniversities &&
+                                    _controller.universities.isEmpty)
+                                  Container(
+                                    width: double.infinity,
+                                    padding: const EdgeInsets.symmetric(
+                                      vertical: 20,
+                                      horizontal: 12,
+                                    ),
+                                    decoration: BoxDecoration(
+                                      borderRadius: BorderRadius.circular(10),
+                                      border: Border.all(
+                                        color: const Color(0xFFE6E6E6),
+                                      ),
+                                      color: Colors.white,
+                                    ),
+                                    child: Text(
+                                      context.l10n.text(
+                                        'No education institute data available',
+                                      ),
+                                      textAlign: TextAlign.center,
+                                      style: TextStyle(
+                                        color: Color(0xFF616161),
+                                        fontWeight: FontWeight.w500,
+                                      ),
+                                    ),
+                                  )
+                                else
+                                  GridView.builder(
+                                    itemCount: _controller.isLoadingUniversities
+                                        ? 4
+                                        : _controller.universities.length,
+                                    shrinkWrap: true,
+                                    physics:
+                                        const NeverScrollableScrollPhysics(),
+                                    gridDelegate:
+                                        SliverGridDelegateWithFixedCrossAxisCount(
+                                          crossAxisCount: gridColumns,
+                                          mainAxisSpacing: 8,
+                                          crossAxisSpacing: 8,
+                                          childAspectRatio: gridAspectRatio,
+                                        ),
+                                    itemBuilder: (context, index) {
+                                      if (_controller.isLoadingUniversities) {
+                                        return const _UniversityCardShimmer();
+                                      }
+                                      final item =
+                                          _controller.universities[index];
+                                      return _UniversityCard(
+                                        data: item,
+                                        onTap: () => Navigator.of(context).push(
+                                          MaterialPageRoute(
+                                            builder: (_) =>
+                                                UniversityDetailScreen(
+                                                  data: item,
+                                                ),
+                                          ),
+                                        ),
+                                      );
+                                    },
+                                  ),
+                              ],
+                            ),
                           ),
-                        ),
                         ),
                       ),
                     ),
+                  ] else if (_activeTab == 1) ...[
+                    Expanded(child: TrackMyApplicationsScreen(_activeTab : true)),
+                  ] else if (_activeTab == 2) ...[
+                    Expanded(child: UploadedDocumentsScreen(_activeTab : true)),
                   ] else ...[
-                    Expanded(child: _BottomTabComingSoon(index: _activeTab)),
+                    Expanded(child: LatestUpdatesScreen(_activeTab : true)),
                   ],
 
                   BottomTabBarCard(
@@ -391,68 +402,6 @@ class _CircleIconButton extends StatelessWidget {
           shape: BoxShape.circle,
         ),
         child: Icon(icon, color: AppColors.text, size: 26),
-      ),
-    );
-  }
-}
-
-class _BottomTabComingSoon extends StatelessWidget {
-  const _BottomTabComingSoon({required this.index});
-
-  final int index;
-
-  @override
-  Widget build(BuildContext context) {
-    const tabTitles = [
-      'University',
-      'My Application',
-      'Manage Document',
-      'Latest Updates',
-    ];
-    final title = tabTitles[index];
-
-    return Padding(
-      padding: const EdgeInsets.symmetric(horizontal: 20),
-      child: Center(
-        child: Container(
-          width: double.infinity,
-          padding: const EdgeInsets.symmetric(vertical: 24, horizontal: 16),
-          decoration: BoxDecoration(
-            color: Colors.white,
-            borderRadius: BorderRadius.circular(12),
-            border: Border.all(color: const Color(0xFFE6E6E6)),
-          ),
-          child: Column(
-            mainAxisSize: MainAxisSize.min,
-            children: [
-              const Icon(
-                Icons.construction_rounded,
-                color: AppColors.accent,
-                size: 34,
-              ),
-              const SizedBox(height: 10),
-              Text(
-                title,
-                textAlign: TextAlign.center,
-                style: const TextStyle(
-                  fontSize: 18,
-                  fontWeight: FontWeight.w700,
-                  color: AppColors.text,
-                ),
-              ),
-              const SizedBox(height: 8),
-              const Text(
-                'Coming soon...',
-                textAlign: TextAlign.center,
-                style: TextStyle(
-                  fontSize: 15,
-                  fontWeight: FontWeight.w500,
-                  color: AppColors.textMuted,
-                ),
-              ),
-            ],
-          ),
-        ),
       ),
     );
   }
