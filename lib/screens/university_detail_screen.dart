@@ -582,56 +582,70 @@ class _CollegeAccordionState extends State<_CollegeAccordion> {
           ),
 
           if (widget.isExpanded)
-            Scrollbar(
-              controller: _horizontalScrollController,
-              thumbVisibility: true,
-              trackVisibility: true,
-              thickness: 4,
-              radius: const Radius.circular(8),
-              child: SingleChildScrollView(
-                controller: _horizontalScrollController,
-                scrollDirection: Axis.horizontal,
-                child: ConstrainedBox(
-                  constraints: BoxConstraints(minWidth: minTableWidth),
-                  child: Column(
-                    children: [
-                      _buildTableHeader(
-                        context,
-                        isSmallMobile: isSmallMobile,
-                        tableWidth: minTableWidth,
-                      ),
-                      if (courseDetailsList.isNotEmpty)
-                        ...courseDetailsList.map((details) {
-                          final String courseKey =
-                              '${widget.collegeName}-${details.name ?? ''}';
-                          final bool isSelected = widget.selectedCourses.contains(
-                            courseKey,
-                          );
+            if (widget.isExpanded)
+              ScrollbarTheme(
+                data: ScrollbarThemeData(
+                  thickness: MaterialStateProperty.all(5),
+                  radius: const Radius.circular(8),
+                  thumbColor: MaterialStateProperty.all(Colors.grey.shade500),
+                  trackVisibility: MaterialStateProperty.all(false),
+                  crossAxisMargin: -22, // 👈 space from bottom
+                ),
+                child: Scrollbar(
+                  controller: _horizontalScrollController,
+                  thumbVisibility: true,
 
-                          return _buildCourseRow(
-                            details: details,
-                            isSelected: isSelected,
-                            onTap: () => widget.onToggleCourse(courseKey),
-                            context: context,
-                            adminUniversity: widget.adminUniversity,
+                  thickness: 6,
+                  child: SingleChildScrollView(
+                    controller: _horizontalScrollController,
+                    scrollDirection: Axis.horizontal,
+                    child: ConstrainedBox(
+                      constraints: BoxConstraints(minWidth: minTableWidth),
+                      child: Column(
+                        mainAxisSize: MainAxisSize.min,
+                        children: [
+                          _buildTableHeader(
+                            context,
                             isSmallMobile: isSmallMobile,
                             tableWidth: minTableWidth,
-                          );
-                        }).toList()
-                      else
-                        Padding(
-                          padding: const EdgeInsets.all(12),
-                          child: Align(
-                            alignment: Alignment.centerLeft,
-                            child: Text(context.l10n.text('No data available')),
                           ),
-                        ),
-                      const SizedBox(height: 8),
-                    ],
+
+                          if (courseDetailsList.isNotEmpty) ...[
+                            ...courseDetailsList.map((details) {
+                              final String courseKey =
+                                  '${widget.collegeName}-${details.name ?? ''}';
+                              final bool isSelected =
+                              widget.selectedCourses.contains(courseKey);
+
+                              return _buildCourseRow(
+                                details: details,
+                                isSelected: isSelected,
+                                onTap: () => widget.onToggleCourse(courseKey),
+                                context: context,
+                                adminUniversity: widget.adminUniversity,
+                                isSmallMobile: isSmallMobile,
+                                tableWidth: minTableWidth,
+                              );
+                            }).toList(),
+
+                            const SizedBox(height: 10), // ✅ keeps scrollbar below rows
+                          ] else ...[
+                            Padding(
+                              padding: const EdgeInsets.all(12),
+                              child: Align(
+                                alignment: Alignment.centerLeft,
+                                child: Text(
+                                  context.l10n.text('No data available'),
+                                ),
+                              ),
+                            ),
+                          ],
+                        ],
+                      ),
+                    ),
                   ),
                 ),
               ),
-            ),
         ],
       ),
     );
