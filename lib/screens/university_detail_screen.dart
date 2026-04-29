@@ -586,6 +586,8 @@ class _CollegeAccordionState extends State<_CollegeAccordion> {
               controller: _horizontalScrollController,
               thumbVisibility: true,
               trackVisibility: true,
+              thickness: 4,
+              radius: const Radius.circular(8),
               child: SingleChildScrollView(
                 controller: _horizontalScrollController,
                 scrollDirection: Axis.horizontal,
@@ -624,6 +626,7 @@ class _CollegeAccordionState extends State<_CollegeAccordion> {
                             child: Text(context.l10n.text('No data available')),
                           ),
                         ),
+                      const SizedBox(height: 10),
                     ],
                   ),
                 ),
