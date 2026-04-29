@@ -135,6 +135,7 @@ class HomeController extends ChangeNotifier {
   Future<void> applyFilters() async {
     universities = _filterUniversities(universities);
     notifyListeners();
+    loadUniversities();
   }
 
   void updateCountry(String? value) {
