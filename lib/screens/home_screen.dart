@@ -69,7 +69,10 @@ class _HomeScreenState extends State<HomeScreen> {
       context: context,
       isScrollControlled: true,
       useSafeArea: true,
-      backgroundColor: Colors.transparent,
+      backgroundColor: Colors.white,
+      shape: const RoundedRectangleBorder(
+        borderRadius: BorderRadius.vertical(top: Radius.circular(20)),
+      ),
       builder: (_) => _CountrySelectionDialog(
         countries: _controller.countryOptions,
         selected: _controller.selectedCountry,
@@ -86,7 +89,10 @@ class _HomeScreenState extends State<HomeScreen> {
       context: context,
       isScrollControlled: true,
       useSafeArea: true,
-      backgroundColor: Colors.transparent,
+      backgroundColor: Colors.white,
+      shape: const RoundedRectangleBorder(
+        borderRadius: BorderRadius.vertical(top: Radius.circular(20)),
+      ),
       builder: (_) => _AdvanceSearchDialog(
         countryOptions: _controller.countryOptions
             .map((item) => item.name)
@@ -583,7 +589,7 @@ class _CountrySelectionDialogState extends State<_CountrySelectionDialog> {
       child: Container(
         decoration: const BoxDecoration(
           color: Colors.white,
-          borderRadius: BorderRadius.vertical(top: Radius.circular(18)),
+          borderRadius: BorderRadius.vertical(top: Radius.circular(20)),
         ),
         child: Padding(
           padding: const EdgeInsets.fromLTRB(12, 10, 12, 8),
@@ -838,7 +844,7 @@ class _AdvanceSearchDialogState extends State<_AdvanceSearchDialog> {
       child: Container(
         decoration: const BoxDecoration(
           color: Colors.white,
-          borderRadius: BorderRadius.vertical(top: Radius.circular(18)),
+          borderRadius: BorderRadius.vertical(top: Radius.circular(20)),
         ),
         child: Padding(
           padding: const EdgeInsets.fromLTRB(12, 14, 12, 12),
@@ -931,6 +937,7 @@ class _AdvanceSearchDialogState extends State<_AdvanceSearchDialog> {
                           widget.resultController.clear();
                         });
                         widget.onResetFilters();
+                        Navigator.of(context).pop();
                       },
                     ),
                   ),
