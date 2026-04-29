@@ -69,7 +69,7 @@ class _HomeScreenState extends State<HomeScreen> {
       context: context,
       isScrollControlled: true,
       useSafeArea: true,
-      backgroundColor: Colors.transparent,
+      backgroundColor: Colors.white,
       builder: (_) => _CountrySelectionDialog(
         countries: _controller.countryOptions,
         selected: _controller.selectedCountry,
@@ -86,7 +86,7 @@ class _HomeScreenState extends State<HomeScreen> {
       context: context,
       isScrollControlled: true,
       useSafeArea: true,
-      backgroundColor: Colors.transparent,
+      backgroundColor: Colors.white,
       builder: (_) => _AdvanceSearchDialog(
         countryOptions: _controller.countryOptions
             .map((item) => item.name)
@@ -668,7 +668,6 @@ class _CountrySelectionDialogState extends State<_CountrySelectionDialog> {
                             ),
                             onTap: () {
                               Navigator.of(context).pop(country);
-                              loadUniversities();
                             },
                           );
                         },
