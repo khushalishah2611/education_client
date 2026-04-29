@@ -162,6 +162,7 @@ class HomeController extends ChangeNotifier {
     notifyListeners();
   }
 
+
   void resetFilters() {
     _selectedCountry = null;
     _selectedAcademic = null;

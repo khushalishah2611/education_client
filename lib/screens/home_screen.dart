@@ -77,6 +77,7 @@ class _HomeScreenState extends State<HomeScreen> {
     );
     if (selected == null || !mounted) return;
     _controller.updateCountry(selected.name);
+
     await _controller.applyFilters();
   }
 
@@ -665,7 +666,10 @@ class _CountrySelectionDialogState extends State<_CountrySelectionDialog> {
                                     : FontWeight.w500,
                               ),
                             ),
-                            onTap: () => Navigator.of(context).pop(country),
+                            onTap: () {
+                              Navigator.of(context).pop(country);
+                              loadUniversities();
+                            },
                           );
                         },
                       ),
@@ -717,7 +721,6 @@ class _AdvanceSearchDialogState extends State<_AdvanceSearchDialog> {
   String? _selectedCountry;
   String? _selectedAcademic;
   String? _selectedTrack;
-  final TextEditingController _countrySearchController = TextEditingController();
   late List<String> _filteredCountryOptions;
 
   @override
@@ -727,12 +730,6 @@ class _AdvanceSearchDialogState extends State<_AdvanceSearchDialog> {
     _selectedAcademic = widget.selectedAcademic;
     _selectedTrack = widget.selectedTrack;
     _filteredCountryOptions = widget.countryOptions;
-  }
-
-  @override
-  void dispose() {
-    _countrySearchController.dispose();
-    super.dispose();
   }
 
   void _filterCountryOptions(String query) {
@@ -838,147 +835,125 @@ class _AdvanceSearchDialogState extends State<_AdvanceSearchDialog> {
     );
 
     return SafeArea(
-        child: Container(
-      decoration: const BoxDecoration(
-        color: Colors.white,
-        borderRadius: BorderRadius.vertical(top: Radius.circular(18)),
-      ),
-      child: Padding(
-        padding: const EdgeInsets.fromLTRB(12, 14, 12, 12),
-        child: Column(
-          mainAxisSize: MainAxisSize.min,
-          crossAxisAlignment: CrossAxisAlignment.stretch,
-          children: [
-            Center(
-              child: Container(
-                width: 44,
-                height: 4,
-                margin: const EdgeInsets.only(bottom: 10),
-                decoration: BoxDecoration(
-                  color: const Color(0xFFD1D1D1),
-                  borderRadius: BorderRadius.circular(99),
-                ),
-              ),
-            ),
-            Row(
-              children: [
-                Expanded(
-                  child: Text(
-                    "Advance Search",
-                    style: TextStyle(
-                      fontSize: context.isSmallMobile ? 16 : 18,
-                      fontWeight: FontWeight.w700,
-                      color: AppColors.text,
+      child: Container(
+        decoration: const BoxDecoration(
+          color: Colors.white,
+          borderRadius: BorderRadius.vertical(top: Radius.circular(18)),
+        ),
+        child: Padding(
+          padding: const EdgeInsets.fromLTRB(12, 14, 12, 12),
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            crossAxisAlignment: CrossAxisAlignment.stretch,
+            children: [
+              Row(
+                children: [
+                  Expanded(
+                    child: Text(
+                      "Advance Search",
+                      style: TextStyle(
+                        fontSize: context.isSmallMobile ? 16 : 18,
+                        fontWeight: FontWeight.w700,
+                        color: AppColors.text,
+                      ),
                     ),
                   ),
-                ),
-                IconButton(
-                  onPressed: () => Navigator.of(context).pop(),
-                  icon: const Icon(Icons.close),
-                ),
-              ],
-            ),
-            const SizedBox(height: 8),
-            TextField(
-              controller: _countrySearchController,
-              onChanged: _filterCountryOptions,
-              decoration: const InputDecoration(
-                hintText: 'Search country',
-                border: OutlineInputBorder(),
-                isDense: true,
-                prefixIcon: Icon(Icons.search),
+                  IconButton(
+                    onPressed: () => Navigator.of(context).pop(),
+                    icon: const Icon(Icons.close),
+                  ),
+                ],
               ),
-            ),
-            const SizedBox(height: 10),
-            dropdownTile(
-              title: 'Country',
-              options: _filteredCountryOptions,
-              value: _selectedCountry,
-              onChanged: (value) async {
-                setState(() => _selectedCountry = value);
-                widget.onCountryChanged(value);
-                await widget.onApplyFilters();
-              },
-              icon: Icons.flag_outlined,
-            ),
-            dropdownTile(
-              title: 'Academic Qualification',
-              options: widget.academicOptions,
-              value: _selectedAcademic,
-              onChanged: (value) => setState(() {
-                _selectedAcademic = value;
-                if (_isOnlyCountryAndAcademicAllowed(value)) {
-                  _selectedTrack = null;
-                  widget.resultController.clear();
-                }
-              }),
-              icon: Icons.school_outlined,
-            ),
+              const SizedBox(height: 8),
+              dropdownTile(
+                title: 'Country',
+                options: _filteredCountryOptions,
+                value: _selectedCountry,
+                onChanged: (value) async {
+                  setState(() => _selectedCountry = value);
+                  widget.onCountryChanged(value);
+                  await widget.onApplyFilters();
+                },
+                icon: Icons.flag_outlined,
+              ),
+              dropdownTile(
+                title: 'Academic Qualification',
+                options: widget.academicOptions,
+                value: _selectedAcademic,
+                onChanged: (value) => setState(() {
+                  _selectedAcademic = value;
+                  if (_isOnlyCountryAndAcademicAllowed(value)) {
+                    _selectedTrack = null;
+                    widget.resultController.clear();
+                  }
+                }),
+                icon: Icons.school_outlined,
+              ),
 
-            Opacity(
-              opacity: shouldDisableDetails ? 0.55 : 1,
-              child: dropdownTile(
-                title: 'Secondary School Certificate Program',
-                options: widget.trackOptions,
-                value: _selectedTrack,
-                onChanged: (value) => setState(() => _selectedTrack = value),
-                icon: Icons.menu_book_outlined,
-                enabled: !shouldDisableDetails,
-              ),
-            ),
-            Opacity(
-              opacity: shouldDisableDetails ? 0.55 : 1,
-              child: IgnorePointer(
-                ignoring: shouldDisableDetails,
-                child: AppTextField(
-                  label: widget.currencyOptions.isNotEmpty
-                      ? 'High school graduation rate (${widget.currencyOptions.first})'
-                      : 'High school graduation rate',
-                  hint: 'Enter high school graduation rate',
-                  controller: widget.resultController,
-                  keyboardType: TextInputType.number,
-                  height: 48,
+              Opacity(
+                opacity: shouldDisableDetails ? 0.55 : 1,
+                child: dropdownTile(
+                  title: 'Secondary School Certificate Program',
+                  options: widget.trackOptions,
+                  value: _selectedTrack,
+                  onChanged: (value) => setState(() => _selectedTrack = value),
+                  icon: Icons.menu_book_outlined,
+                  enabled: !shouldDisableDetails,
                 ),
               ),
-            ),
-
-            const SizedBox(height: 10),
-            Row(
-              children: [
-                Expanded(
-                  child: AppOutlinedButton(
-                    label: context.l10n.text('Reset'),
-                    onPressed: () async {
-                      setState(() {
-                        _selectedCountry = null;
-                        _selectedAcademic = null;
-                        _selectedTrack = null;
-                        widget.resultController.clear();
-                      });
-                      widget.onResetFilters();
-                    },
+              Opacity(
+                opacity: shouldDisableDetails ? 0.55 : 1,
+                child: IgnorePointer(
+                  ignoring: shouldDisableDetails,
+                  child: AppTextField(
+                    label: widget.currencyOptions.isNotEmpty
+                        ? 'High school graduation rate (${widget.currencyOptions.first})'
+                        : 'High school graduation rate',
+                    hint: 'Enter high school graduation rate',
+                    controller: widget.resultController,
+                    keyboardType: TextInputType.number,
+                    height: 48,
                   ),
                 ),
-                const SizedBox(width: 8),
-                Expanded(
-                  child: AppPrimaryButton(
-                    label: context.l10n.text('Continue'),
-                    onPressed: () async {
-                      widget.onCountryChanged(_selectedCountry);
-                      widget.onAcademicChanged(_selectedAcademic);
-                      widget.onTrackChanged(_selectedTrack);
-                      Navigator.of(context).pop();
-                      await widget.onApplyFilters();
-                    },
+              ),
+
+              const SizedBox(height: 10),
+              Row(
+                children: [
+                  Expanded(
+                    child: AppOutlinedButton(
+                      label: context.l10n.text('Reset'),
+                      onPressed: () async {
+                        setState(() {
+                          _selectedCountry = null;
+                          _selectedAcademic = null;
+                          _selectedTrack = null;
+                          widget.resultController.clear();
+                        });
+                        widget.onResetFilters();
+                      },
+                    ),
                   ),
-                ),
-              ],
-            ),
-          ],
+                  const SizedBox(width: 8),
+                  Expanded(
+                    child: AppPrimaryButton(
+                      label: context.l10n.text('Continue'),
+                      onPressed: () async {
+                        widget.onCountryChanged(_selectedCountry);
+                        widget.onAcademicChanged(_selectedAcademic);
+                        widget.onTrackChanged(_selectedTrack);
+                        Navigator.of(context).pop();
+                        await widget.onApplyFilters();
+                      },
+                    ),
+                  ),
+                ],
+              ),
+            ],
+          ),
         ),
       ),
-        ),
-      );
+    );
   }
 }
 
