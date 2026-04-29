@@ -583,7 +583,7 @@ class _CountrySelectionDialogState extends State<_CountrySelectionDialog> {
       child: Container(
         decoration: const BoxDecoration(
           color: Colors.white,
-          borderRadius: BorderRadius.vertical(top: Radius.circular(18)),
+          borderRadius: BorderRadius.vertical(top: Radius.circular(20)),
         ),
         child: Padding(
           padding: const EdgeInsets.fromLTRB(12, 10, 12, 8),
@@ -843,8 +843,17 @@ class _AdvanceSearchDialogState extends State<_AdvanceSearchDialog> {
           padding: const EdgeInsets.fromLTRB(12, 14, 12, 12),
           child: Column(
             mainAxisSize: MainAxisSize.min,
-            crossAxisAlignment: CrossAxisAlignment.stretch,
+
             children: [
+              Container(
+                width: 44,
+                height: 4,
+                margin: const EdgeInsets.only(bottom: 10),
+                decoration: BoxDecoration(
+                  color: const Color(0xFFD1D1D1),
+                  borderRadius: BorderRadius.circular(99),
+                ),
+              ),
               Row(
                 children: [
                   Expanded(

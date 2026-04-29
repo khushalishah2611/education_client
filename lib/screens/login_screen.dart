@@ -172,6 +172,7 @@ class _LoginScreenState extends State<LoginScreen> {
     showModalBottomSheet<void>(
       context: context,
       isScrollControlled: true,
+      backgroundColor: AppColors.white,
       shape: const RoundedRectangleBorder(
         borderRadius: BorderRadius.vertical(top: Radius.circular(20)),
       ),
@@ -180,10 +181,19 @@ class _LoginScreenState extends State<LoginScreen> {
           child: SizedBox(
             height: MediaQuery.of(context).size.height * 0.85, // limit height
             child: Padding(
-              padding: const EdgeInsets.fromLTRB(18, 14, 18, 26),
+              padding: const EdgeInsets.fromLTRB(12, 10, 12, 8),
               child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
+                crossAxisAlignment: CrossAxisAlignment.center,
                 children: [
+                  Container(
+                    width: 44,
+                    height: 4,
+                    margin: const EdgeInsets.only(bottom: 10),
+                    decoration: BoxDecoration(
+                      color: const Color(0xFFD1D1D1),
+                      borderRadius: BorderRadius.circular(99),
+                    ),
+                  ),
                   Row(
                     children: [
                       Expanded(
