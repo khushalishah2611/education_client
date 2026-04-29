@@ -105,21 +105,11 @@ class HomeController extends ChangeNotifier {
 
       academicOptions = academics;
 
-      /// 🔥 COUNTRY LIST FIX (MAIN PART)
-      final isOmanUser =
-          (_loginDialCode ?? '').trim() == '+968' ||
-          (_selectedCountry ?? '').toLowerCase() == 'oman';
-
       countryOptions = countries
           .where((c) {
             final name = (c.nameEn.isNotEmpty ? c.nameEn : c.value)
                 .toLowerCase()
                 .trim();
-
-            if (isOmanUser) {
-              return name.contains('oman'); // only Oman
-            }
-
             return name.isNotEmpty;
           })
           .map(
@@ -178,9 +168,7 @@ class HomeController extends ChangeNotifier {
     return source.where((u) {
       if (u.accredited != true) return false;
       if ((u.status ?? '').trim().toLowerCase() != 'active') return false;
-      final effectiveCountry = (_loginDialCode ?? '').trim() == '+968'
-          ? 'Oman'
-          : _selectedCountry;
+      final effectiveCountry = _selectedCountry;
 
       if (effectiveCountry != null &&
           effectiveCountry.isNotEmpty &&
@@ -229,7 +217,7 @@ class HomeController extends ChangeNotifier {
 
   String? _resolveAutoCountry(List<CountryMaster> countries) {
     if ((_loginDialCode ?? '').trim() == '+968') {
-      return 'Oman';
+      return _selectedCountry ?? 'Oman';
     }
     return null;
   }
