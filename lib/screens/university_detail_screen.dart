@@ -518,9 +518,17 @@ class _CollegeAccordion extends StatefulWidget {
 }
 
 class _CollegeAccordionState extends State<_CollegeAccordion> {
+  final ScrollController _horizontalScrollController = ScrollController();
+
   bool _isSmallMobile(double width) => width <= 360;
 
   bool _isMediumMobile(double width) => width > 360 && width <= 420;
+
+  @override
+  void dispose() {
+    _horizontalScrollController.dispose();
+    super.dispose();
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -574,44 +582,45 @@ class _CollegeAccordionState extends State<_CollegeAccordion> {
           ),
 
           if (widget.isExpanded)
-            SingleChildScrollView(
-              scrollDirection: Axis.horizontal,
-              child: ConstrainedBox(
-                constraints: BoxConstraints(minWidth: minTableWidth),
-                child: Column(
-                  children: [
-                    _buildTableHeader(
-                      context,
-                      isSmallMobile: isSmallMobile,
-                      tableWidth: minTableWidth,
-                    ),
-                    if (courseDetailsList.isNotEmpty)
-                      ...courseDetailsList.map((details) {
-                        final String courseKey =
-                            '${widget.collegeName}-${details.name ?? ''}';
-                        final bool isSelected = widget.selectedCourses.contains(
-                          courseKey,
-                        );
+            Scrollbar(
+              controller: _horizontalScrollController,
+              thumbVisibility: true,
+              trackVisibility: true,
+              child: SingleChildScrollView(
+                controller: _horizontalScrollController,
+                scrollDirection: Axis.horizontal,
+                child: ConstrainedBox(
+                  constraints: BoxConstraints(minWidth: minTableWidth),
+                  child: Column(
+                    children: [
+                      _buildTableHeader(context, isSmallMobile: isSmallMobile),
+                      if (courseDetailsList.isNotEmpty)
+                        ...courseDetailsList.map((details) {
+                          final String courseKey =
+                              '${widget.collegeName}-${details.name ?? ''}';
+                          final bool isSelected = widget.selectedCourses.contains(
+                            courseKey,
+                          );
 
-                        return _buildCourseRow(
-                          details: details,
-                          isSelected: isSelected,
-                          onTap: () => widget.onToggleCourse(courseKey),
-                          context: context,
-                          adminUniversity: widget.adminUniversity,
-                          isSmallMobile: isSmallMobile,
-                          tableWidth: minTableWidth,
-                        );
-                      }).toList()
-                    else
-                      Padding(
-                        padding: const EdgeInsets.all(12),
-                        child: Align(
-                          alignment: Alignment.centerLeft,
-                          child: Text(context.l10n.text('No data available')),
+                          return _buildCourseRow(
+                            details: details,
+                            isSelected: isSelected,
+                            onTap: () => widget.onToggleCourse(courseKey),
+                            context: context,
+                            adminUniversity: widget.adminUniversity,
+                            isSmallMobile: isSmallMobile,
+                          );
+                        }).toList()
+                      else
+                        Padding(
+                          padding: const EdgeInsets.all(12),
+                          child: Align(
+                            alignment: Alignment.centerLeft,
+                            child: Text(context.l10n.text('No data available')),
+                          ),
                         ),
-                      ),
-                  ],
+                    ],
+                  ),
                 ),
               ),
             ),
@@ -620,24 +629,15 @@ class _CollegeAccordionState extends State<_CollegeAccordion> {
     );
   }
 
-  Widget _buildTableHeader(
-    BuildContext context, {
-    required bool isSmallMobile,
-    required double tableWidth,
-  }) {
-    final double totalFlex = 12;
-    final double availableWidth = tableWidth - 6;
-    final double col3 = availableWidth * (3 / totalFlex);
-    final double col2 = availableWidth * (2 / totalFlex);
-
+  Widget _buildTableHeader(BuildContext context, {required bool isSmallMobile}) {
     return Container(
       color: const Color(0xFFE3E3E3),
       padding: EdgeInsets.symmetric(horizontal: isSmallMobile ? 4 : 5, vertical: isSmallMobile ? 4 : 5),
       child: Row(
         crossAxisAlignment: CrossAxisAlignment.center,
         children: [
-          SizedBox(
-            width: col3,
+          Expanded(
+            flex: 3,
             child: Center(
               child: Text(
                 context.l10n.text('Course'),
@@ -646,8 +646,8 @@ class _CollegeAccordionState extends State<_CollegeAccordion> {
               ),
             ),
           ),
-          SizedBox(
-            width: col2,
+          Expanded(
+            flex: 2,
             child: Center(
               child: Text(
                 context.l10n.text('Credit\nHour Fee'),
@@ -656,8 +656,8 @@ class _CollegeAccordionState extends State<_CollegeAccordion> {
               ),
             ),
           ),
-          SizedBox(
-            width: col2,
+          Expanded(
+            flex: 2,
             child: Center(
               child: Text(
                 context.l10n.text('Min\nAdmis%'),
@@ -666,8 +666,8 @@ class _CollegeAccordionState extends State<_CollegeAccordion> {
               ),
             ),
           ),
-          SizedBox(
-            width: col2,
+          Expanded(
+            flex: 2,
             child: Center(
               child: Text(
                 context.l10n.text('Track'),
@@ -677,8 +677,8 @@ class _CollegeAccordionState extends State<_CollegeAccordion> {
             ),
           ),
           const SizedBox(width: 6),
-          SizedBox(
-            width: col3,
+          Expanded(
+            flex: 3,
             child: Center(
               child: Text(
                 context.l10n.text('Details / Apply'),
@@ -699,12 +699,7 @@ class _CollegeAccordionState extends State<_CollegeAccordion> {
     required BuildContext context,
     required AdminUniversity adminUniversity,
     required bool isSmallMobile,
-    required double tableWidth,
   }) {
-    final double totalFlex = 12;
-    final double availableWidth = tableWidth - 6;
-    final double col3 = availableWidth * (3 / totalFlex);
-    final double col2 = availableWidth * (2 / totalFlex);
     return InkWell(
       onTap: onTap,
       child: Container(
@@ -723,8 +718,8 @@ class _CollegeAccordionState extends State<_CollegeAccordion> {
         child: Row(
           crossAxisAlignment: CrossAxisAlignment.center,
           children: [
-            SizedBox(
-              width: col3,
+            Expanded(
+              flex: 3,
               child: Text(
                 details.name ?? 'N/A',
                 textAlign: TextAlign.center,
@@ -736,8 +731,8 @@ class _CollegeAccordionState extends State<_CollegeAccordion> {
                 ),
               ),
             ),
-            SizedBox(
-              width: col2,
+            Expanded(
+              flex: 2,
               child: Text(
                 '${details.creditHours ?? 0}\n${details.currency ?? ''}',
                 textAlign: TextAlign.center,
@@ -747,8 +742,8 @@ class _CollegeAccordionState extends State<_CollegeAccordion> {
                 ),
               ),
             ),
-            SizedBox(
-              width: col2,
+            Expanded(
+              flex: 2,
               child: Text(
                 '${details.minAdmissionRate ?? 0}%',
                 textAlign: TextAlign.center,
@@ -758,8 +753,8 @@ class _CollegeAccordionState extends State<_CollegeAccordion> {
                 ),
               ),
             ),
-            SizedBox(
-              width: col2,
+            Expanded(
+              flex: 2,
               child: Text(
                 details.track ?? 'N/A',
                 textAlign: TextAlign.center,
@@ -770,8 +765,8 @@ class _CollegeAccordionState extends State<_CollegeAccordion> {
               ),
             ),
             const SizedBox(width: 6),
-            SizedBox(
-              width: col3,
+            Expanded(
+              flex: 3,
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.center, // 👈 important
                 children: [
