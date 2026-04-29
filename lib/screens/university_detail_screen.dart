@@ -576,8 +576,8 @@ class _CollegeAccordionState extends State<_CollegeAccordion> {
           if (widget.isExpanded)
             SingleChildScrollView(
               scrollDirection: Axis.horizontal,
-              child: ConstrainedBox(
-                constraints: BoxConstraints(minWidth: minTableWidth),
+              child: SizedBox(
+                width: minTableWidth,
                 child: Column(
                   children: [
                     _buildTableHeader(context, isSmallMobile: isSmallMobile),
