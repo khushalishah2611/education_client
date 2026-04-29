@@ -116,7 +116,8 @@ class _HomeScreenState extends State<HomeScreen> {
             child: SafeArea(
               child: Column(
                 children: [
-                  SizedBox(
+                  if (_activeTab == 0) ...[
+                    SizedBox(
                     height: MediaQuery.of(context).size.height * 0.40,
                     child: Stack(
                       children: [
@@ -264,12 +265,12 @@ class _HomeScreenState extends State<HomeScreen> {
                         ),
                       ],
                     ),
-                  ),
-                  SizedBox(height: 10),
-                  Expanded(
-                    child: RefreshIndicator(
-                      onRefresh: _refreshHomeData,
-                      child: SingleChildScrollView(
+                    ),
+                    SizedBox(height: 10),
+                    Expanded(
+                      child: RefreshIndicator(
+                        onRefresh: _refreshHomeData,
+                        child: SingleChildScrollView(
                         physics: const AlwaysScrollableScrollPhysics(),
                         child: Padding(
                           padding: const EdgeInsets.only(
@@ -348,9 +349,12 @@ class _HomeScreenState extends State<HomeScreen> {
                             ],
                           ),
                         ),
+                        ),
                       ),
                     ),
-                  ),
+                  ] else ...[
+                    Expanded(child: _BottomTabComingSoon(index: _activeTab)),
+                  ],
 
                   BottomTabBarCard(
                     activeIndex: _activeTab,
@@ -387,6 +391,68 @@ class _CircleIconButton extends StatelessWidget {
           shape: BoxShape.circle,
         ),
         child: Icon(icon, color: AppColors.text, size: 26),
+      ),
+    );
+  }
+}
+
+class _BottomTabComingSoon extends StatelessWidget {
+  const _BottomTabComingSoon({required this.index});
+
+  final int index;
+
+  @override
+  Widget build(BuildContext context) {
+    const tabTitles = [
+      'University',
+      'My Application',
+      'Manage Document',
+      'Latest Updates',
+    ];
+    final title = tabTitles[index];
+
+    return Padding(
+      padding: const EdgeInsets.symmetric(horizontal: 20),
+      child: Center(
+        child: Container(
+          width: double.infinity,
+          padding: const EdgeInsets.symmetric(vertical: 24, horizontal: 16),
+          decoration: BoxDecoration(
+            color: Colors.white,
+            borderRadius: BorderRadius.circular(12),
+            border: Border.all(color: const Color(0xFFE6E6E6)),
+          ),
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              const Icon(
+                Icons.construction_rounded,
+                color: AppColors.accent,
+                size: 34,
+              ),
+              const SizedBox(height: 10),
+              Text(
+                title,
+                textAlign: TextAlign.center,
+                style: const TextStyle(
+                  fontSize: 18,
+                  fontWeight: FontWeight.w700,
+                  color: AppColors.text,
+                ),
+              ),
+              const SizedBox(height: 8),
+              const Text(
+                'Coming soon...',
+                textAlign: TextAlign.center,
+                style: TextStyle(
+                  fontSize: 15,
+                  fontWeight: FontWeight.w500,
+                  color: AppColors.textMuted,
+                ),
+              ),
+            ],
+          ),
+        ),
       ),
     );
   }
