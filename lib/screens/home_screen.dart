@@ -360,7 +360,9 @@ class _HomeScreenState extends State<HomeScreen> {
                       ),
                     ),
                   ] else if (_activeTab == 1) ...[
-                    Expanded(child: TrackMyApplicationsScreen(activeTab: false)),
+                    Expanded(
+                      child: TrackMyApplicationsScreen(activeTab: false),
+                    ),
                   ] else if (_activeTab == 2) ...[
                     Expanded(child: UploadedDocumentsScreen(activeTab: false)),
                   ] else ...[

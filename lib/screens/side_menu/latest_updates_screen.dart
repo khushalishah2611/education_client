@@ -58,10 +58,7 @@ class LatestUpdatesScreen extends StatelessWidget {
                   item.$2,
                   maxLines: 1,
                   overflow: TextOverflow.ellipsis,
-                  style: const TextStyle(
-                    color: AppColors.text,
-                    fontSize: 15,
-                  ),
+                  style: const TextStyle(color: AppColors.text, fontSize: 15),
                 ),
               ],
             ),

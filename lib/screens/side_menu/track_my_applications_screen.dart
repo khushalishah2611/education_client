@@ -45,109 +45,106 @@ class TrackMyApplicationsContent extends StatelessWidget {
     ];
 
     return ListView.separated(
-        itemCount: applications.length,
-        separatorBuilder: (_, __) => const SizedBox(height: 8),
-        itemBuilder: (context, index) {
-          final item = applications[index];
+      itemCount: applications.length,
+      separatorBuilder: (_, __) => const SizedBox(height: 8),
+      itemBuilder: (context, index) {
+        final item = applications[index];
 
-          return Container(
-            padding: const EdgeInsets.all(12),
-            decoration: BoxDecoration(
-              color: Colors.white,
-              borderRadius: BorderRadius.circular(8),
-              border: Border.all(color: const Color(0xFFE0DDD8)),
-            ),
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                Text(
-                  'Application ID : ${item.appId}',
-                  style: const TextStyle(
-                    fontSize: 14,
-                    fontWeight: FontWeight.w500,
+        return Container(
+          padding: const EdgeInsets.all(12),
+          decoration: BoxDecoration(
+            color: Colors.white,
+            borderRadius: BorderRadius.circular(8),
+            border: Border.all(color: const Color(0xFFE0DDD8)),
+          ),
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Text(
+                'Application ID : ${item.appId}',
+                style: const TextStyle(
+                  fontSize: 14,
+                  fontWeight: FontWeight.w500,
+                ),
+              ),
+              const SizedBox(height: 10),
+              Row(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Container(
+                    width: 54,
+                    height: 54,
+                    alignment: Alignment.center,
+                    decoration: BoxDecoration(
+                      color: const Color(0xFFF5F5F5),
+                      borderRadius: BorderRadius.circular(8),
+                    ),
+                    child: Text(
+                      item.shortCode,
+                      style: const TextStyle(
+                        fontWeight: FontWeight.w800,
+                        color: AppColors.textMuted,
+                      ),
+                    ),
                   ),
-                ),
-                const SizedBox(height: 10),
-                Row(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    Container(
-                      width: 54,
-                      height: 54,
-                      alignment: Alignment.center,
-                      decoration: BoxDecoration(
-                        color: const Color(0xFFF5F5F5),
-                        borderRadius: BorderRadius.circular(8),
-                      ),
-                      child: Text(
-                        item.shortCode,
-                        style: const TextStyle(
-                          fontWeight: FontWeight.w800,
-                          color: AppColors.textMuted,
+                  const SizedBox(width: 10),
+                  Expanded(
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        Text(
+                          item.universityName,
+                          style: const TextStyle(
+                            fontSize: 16,
+                            fontWeight: FontWeight.w700,
+                          ),
+                          maxLines: 2,
+                          overflow: TextOverflow.ellipsis,
                         ),
-                      ),
-                    ),
-                    const SizedBox(width: 10),
-                    Expanded(
-                      child: Column(
-                        crossAxisAlignment: CrossAxisAlignment.start,
-                        children: [
-                          Text(
-                            item.universityName,
-                            style: const TextStyle(
-                              fontSize: 16,
-                              fontWeight: FontWeight.w700,
-                            ),
-                            maxLines: 2,
-                            overflow: TextOverflow.ellipsis,
+                        const SizedBox(height: 2),
+                        Text(
+                          item.courseName,
+                          style: const TextStyle(
+                            fontSize: 14,
+                            color: AppColors.textMuted,
                           ),
-                          const SizedBox(height: 2),
-                          Text(
-                            item.courseName,
-                            style: const TextStyle(
-                              fontSize: 14,
-                              color: AppColors.textMuted,
-                            ),
-                            maxLines: 2,
-                            overflow: TextOverflow.ellipsis,
-                          ),
-                        ],
-                      ),
+                          maxLines: 2,
+                          overflow: TextOverflow.ellipsis,
+                        ),
+                      ],
                     ),
-                  ],
-                ),
-                const SizedBox(height: 12),
-                const Divider(height: 1, color: Color(0xFFE0DDD8)),
-                const SizedBox(height: 10),
-                Row(
-                  children: [
-                    const Text(
-                      'Application Progress',
-                      style: TextStyle(
-                        fontSize: 16,
-                        fontWeight: FontWeight.w700,
-                      ),
+                  ),
+                ],
+              ),
+              const SizedBox(height: 12),
+              const Divider(height: 1, color: Color(0xFFE0DDD8)),
+              const SizedBox(height: 10),
+              Row(
+                children: [
+                  const Text(
+                    'Application Progress',
+                    style: TextStyle(fontSize: 16, fontWeight: FontWeight.w700),
+                  ),
+                  const Spacer(),
+                  Container(
+                    width: 18,
+                    height: 18,
+                    decoration: const BoxDecoration(
+                      color: Color(0xFFF1F1F1),
+                      shape: BoxShape.circle,
                     ),
-                    const Spacer(),
-                    Container(
-                      width: 18,
-                      height: 18,
-                      decoration: const BoxDecoration(
-                        color: Color(0xFFF1F1F1),
-                        shape: BoxShape.circle,
-                      ),
-                      child: const Icon(
-                        Icons.keyboard_arrow_down_rounded,
-                        size: 16,
-                      ),
+                    child: const Icon(
+                      Icons.keyboard_arrow_down_rounded,
+                      size: 16,
                     ),
-                  ],
-                ),
-              ],
-            ),
-          );
-        },
-      );
+                  ),
+                ],
+              ),
+            ],
+          ),
+        );
+      },
+    );
   }
 }
 

@@ -119,11 +119,7 @@ class ContactInfoField extends StatelessWidget {
               color: const Color(0xFFA7E7C5),
               borderRadius: BorderRadius.circular(6),
             ),
-            child: Icon(
-              icon,
-              size: 18,
-              color: const Color(0xFF0A3F27),
-            ),
+            child: Icon(icon, size: 18, color: const Color(0xFF0A3F27)),
           ),
         ],
       ),
