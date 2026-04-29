@@ -626,7 +626,7 @@ class _CollegeAccordionState extends State<_CollegeAccordion> {
                             child: Text(context.l10n.text('No data available')),
                           ),
                         ),
-                      const SizedBox(height: 10),
+                      const SizedBox(height: 30),
                     ],
                   ),
                 ),
@@ -828,7 +828,7 @@ class _CollegeAccordionState extends State<_CollegeAccordion> {
                     child: Container(
                       alignment: Alignment.center, // 👈 important
                       padding: const EdgeInsets.symmetric(
-                        horizontal: 7,
+                        horizontal: 5,
                         vertical: 4,
                       ),
                       decoration: BoxDecoration(
