@@ -281,7 +281,7 @@ class _UniversityDetailScreenState extends State<UniversityDetailScreen> {
                                       Text(
                                         '(${data.averageRating!.toDouble().toString()} reviews)',
                                         style: TextStyle(
-                                          fontSize: 12,
+                                          fontSize: isSmallMobile ? 11 : 12,
                                           color: AppColors.textMuted,
                                         ),
                                       ),
@@ -518,25 +518,22 @@ class _CollegeAccordion extends StatefulWidget {
 }
 
 class _CollegeAccordionState extends State<_CollegeAccordion> {
-  late final ScrollController _horizontalScrollController;
+  bool _isSmallMobile(double width) => width <= 360;
 
-  @override
-  void initState() {
-    super.initState();
-    _horizontalScrollController = ScrollController();
-  }
-
-  @override
-  void dispose() {
-    _horizontalScrollController.dispose();
-    super.dispose();
-  }
+  bool _isMediumMobile(double width) => width > 360 && width <= 420;
 
   @override
   Widget build(BuildContext context) {
     final List<CourseDetails> courseDetailsList =
         widget.academicEntry.program?.courseDetails ?? <CourseDetails>[];
     final double screenWidth = MediaQuery.sizeOf(context).width;
+    final bool isSmallMobile = _isSmallMobile(screenWidth);
+    final bool isMediumMobile = _isMediumMobile(screenWidth);
+    final double minTableWidth = isSmallMobile
+        ? 620
+        : isMediumMobile
+        ? 680
+        : 740;
 
     return Container(
       margin: const EdgeInsets.only(bottom: 10),
@@ -552,14 +549,14 @@ class _CollegeAccordionState extends State<_CollegeAccordion> {
             child: Container(
               width: double.infinity,
               color: AppColors.white,
-              padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 14),
+              padding: EdgeInsets.symmetric(horizontal: isSmallMobile ? 10 : 12, vertical: isSmallMobile ? 12 : 14),
               child: Row(
                 children: [
                   Expanded(
                     child: Text(
                       widget.collegeName.toUpperCase(),
-                      style: const TextStyle(
-                        fontSize: 14,
+                      style: TextStyle(
+                        fontSize: isSmallMobile ? 12.5 : 14,
                         fontWeight: FontWeight.w700,
                         color: Color(0xFF6A6A6A),
                       ),
@@ -577,54 +574,61 @@ class _CollegeAccordionState extends State<_CollegeAccordion> {
           ),
 
           if (widget.isExpanded)
-            Column(
-              children: [
-                _buildTableHeader(),
-                if (courseDetailsList.isNotEmpty)
-                  ...courseDetailsList.map((details) {
-                    final String courseKey =
-                        '${widget.collegeName}-${details.name ?? ''}';
-                    final bool isSelected = widget.selectedCourses.contains(
-                      courseKey,
-                    );
+            SingleChildScrollView(
+              scrollDirection: Axis.horizontal,
+              child: ConstrainedBox(
+                constraints: BoxConstraints(minWidth: minTableWidth),
+                child: Column(
+                  children: [
+                    _buildTableHeader(context, isSmallMobile: isSmallMobile),
+                    if (courseDetailsList.isNotEmpty)
+                      ...courseDetailsList.map((details) {
+                        final String courseKey =
+                            '${widget.collegeName}-${details.name ?? ''}';
+                        final bool isSelected = widget.selectedCourses.contains(
+                          courseKey,
+                        );
 
-                    return _buildCourseRow(
-                      details: details,
-                      isSelected: isSelected,
-                      onTap: () => widget.onToggleCourse(courseKey),
-                      context: context,
-                      adminUniversity: widget.adminUniversity,
-                    );
-                  }).toList()
-                else
-                  const Padding(
-                    padding: EdgeInsets.all(12),
-                    child: Align(
-                      alignment: Alignment.centerLeft,
-                      child: Text('No data available'),
-                    ),
-                  ),
-              ],
+                        return _buildCourseRow(
+                          details: details,
+                          isSelected: isSelected,
+                          onTap: () => widget.onToggleCourse(courseKey),
+                          context: context,
+                          adminUniversity: widget.adminUniversity,
+                          isSmallMobile: isSmallMobile,
+                        );
+                      }).toList()
+                    else
+                      Padding(
+                        padding: const EdgeInsets.all(12),
+                        child: Align(
+                          alignment: Alignment.centerLeft,
+                          child: Text(context.l10n.text('No data available')),
+                        ),
+                      ),
+                  ],
+                ),
+              ),
             ),
         ],
       ),
     );
   }
 
-  Widget _buildTableHeader() {
+  Widget _buildTableHeader(BuildContext context, {required bool isSmallMobile}) {
     return Container(
       color: const Color(0xFFE3E3E3),
-      padding: const EdgeInsets.symmetric(horizontal: 5, vertical: 5),
-      child: const Row(
+      padding: EdgeInsets.symmetric(horizontal: isSmallMobile ? 4 : 5, vertical: isSmallMobile ? 4 : 5),
+      child: Row(
         crossAxisAlignment: CrossAxisAlignment.center,
         children: [
           Expanded(
             flex: 3,
             child: Center(
               child: Text(
-                'Course',
+                context.l10n.text('Course'),
                 textAlign: TextAlign.center,
-                style: TextStyle(fontWeight: FontWeight.w600, fontSize: 12),
+                style: TextStyle(fontWeight: FontWeight.w600, fontSize: isSmallMobile ? 11 : 12),
               ),
             ),
           ),
@@ -632,9 +636,9 @@ class _CollegeAccordionState extends State<_CollegeAccordion> {
             flex: 2,
             child: Center(
               child: Text(
-                'Credit\nHour Fee',
+                context.l10n.text('Credit\nHour Fee'),
                 textAlign: TextAlign.center,
-                style: TextStyle(fontWeight: FontWeight.w600, fontSize: 12),
+                style: TextStyle(fontWeight: FontWeight.w600, fontSize: isSmallMobile ? 11 : 12),
               ),
             ),
           ),
@@ -642,9 +646,9 @@ class _CollegeAccordionState extends State<_CollegeAccordion> {
             flex: 2,
             child: Center(
               child: Text(
-                'Min\nAdmis%',
+                context.l10n.text('Min\nAdmis%'),
                 textAlign: TextAlign.center,
-                style: TextStyle(fontWeight: FontWeight.w600, fontSize: 12),
+                style: TextStyle(fontWeight: FontWeight.w600, fontSize: isSmallMobile ? 11 : 12),
               ),
             ),
           ),
@@ -652,9 +656,9 @@ class _CollegeAccordionState extends State<_CollegeAccordion> {
             flex: 2,
             child: Center(
               child: Text(
-                'Track',
+                context.l10n.text('Track'),
                 textAlign: TextAlign.center,
-                style: TextStyle(fontWeight: FontWeight.w600, fontSize: 12),
+                style: TextStyle(fontWeight: FontWeight.w600, fontSize: isSmallMobile ? 11 : 12),
               ),
             ),
           ),
@@ -663,9 +667,9 @@ class _CollegeAccordionState extends State<_CollegeAccordion> {
             flex: 3,
             child: Center(
               child: Text(
-                'Details / Apply',
+                context.l10n.text('Details / Apply'),
                 textAlign: TextAlign.center,
-                style: TextStyle(fontWeight: FontWeight.w600, fontSize: 12),
+                style: TextStyle(fontWeight: FontWeight.w600, fontSize: isSmallMobile ? 11 : 12),
               ),
             ),
           ),
@@ -679,12 +683,13 @@ class _CollegeAccordionState extends State<_CollegeAccordion> {
     required bool isSelected,
     required VoidCallback onTap,
     required BuildContext context,
-    required adminUniversity,
+    required AdminUniversity adminUniversity,
+    required bool isSmallMobile,
   }) {
     return InkWell(
       onTap: onTap,
       child: Container(
-        padding: const EdgeInsets.symmetric(horizontal: 5, vertical: 5),
+        padding: EdgeInsets.symmetric(horizontal: isSmallMobile ? 4 : 5, vertical: isSmallMobile ? 4 : 5),
         decoration: BoxDecoration(
           color: isSelected ? AppColors.peachSoft : Colors.white,
           border: Border(
@@ -706,9 +711,9 @@ class _CollegeAccordionState extends State<_CollegeAccordion> {
                 textAlign: TextAlign.center,
                 maxLines: 3,
                 overflow: TextOverflow.ellipsis,
-                style: const TextStyle(
+                style: TextStyle(
                   fontWeight: FontWeight.w600,
-                  fontSize: 12,
+                  fontSize: isSmallMobile ? 11 : 12,
                 ),
               ),
             ),
@@ -717,9 +722,9 @@ class _CollegeAccordionState extends State<_CollegeAccordion> {
               child: Text(
                 '${details.creditHours ?? 0}\n${details.currency ?? ''}',
                 textAlign: TextAlign.center,
-                style: const TextStyle(
+                style: TextStyle(
                   fontWeight: FontWeight.w600,
-                  fontSize: 12,
+                  fontSize: isSmallMobile ? 11 : 12,
                 ),
               ),
             ),
@@ -728,9 +733,9 @@ class _CollegeAccordionState extends State<_CollegeAccordion> {
               child: Text(
                 '${details.minAdmissionRate ?? 0}%',
                 textAlign: TextAlign.center,
-                style: const TextStyle(
+                style: TextStyle(
                   fontWeight: FontWeight.w600,
-                  fontSize: 12,
+                  fontSize: isSmallMobile ? 11 : 12,
                 ),
               ),
             ),
@@ -739,9 +744,9 @@ class _CollegeAccordionState extends State<_CollegeAccordion> {
               child: Text(
                 details.track ?? 'N/A',
                 textAlign: TextAlign.center,
-                style: const TextStyle(
+                style: TextStyle(
                   fontWeight: FontWeight.w600,
-                  fontSize: 12,
+                  fontSize: isSmallMobile ? 11 : 12,
                 ),
               ),
             ),
@@ -762,12 +767,12 @@ class _CollegeAccordionState extends State<_CollegeAccordion> {
                         ),
                       );
                     },
-                    child: const Text(
-                      'Details',
+                    child: Text(
+                      context.l10n.text('Details'),
                       textAlign: TextAlign.center,
                       style: TextStyle(
                         fontWeight: FontWeight.w600,
-                        fontSize: 12,
+                        fontSize: isSmallMobile ? 11 : 12,
                       ),
                     ),
                   ),
@@ -799,8 +804,8 @@ class _CollegeAccordionState extends State<_CollegeAccordion> {
                         borderRadius: BorderRadius.circular(4),
                         border: Border.all(color: Color(0xFF78D09F)),
                       ),
-                      child: const Text(
-                        'Apply & Pay\nApplication Fee',
+                      child: Text(
+                        context.l10n.text('Apply & Pay\nApplication Fee'),
                         textAlign: TextAlign.center,
                         style: TextStyle(
                           fontSize: 9.2,

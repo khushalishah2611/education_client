@@ -117,6 +117,14 @@
   "acceptTermsMessage": "Please accept the Terms & Conditions to continue.",
   "accountReadyMessage": "Looks good! Account details verified successfully.",
   "termsAndConditionsTitle": "Terms & Conditions",
-  "No education institute data available" : "No education institute data available.",
-  "termsAndConditionsDescription": "By creating an account, you agree to provide valid and accurate information. Your details will be used only for admission-related communication and application processing. Please review all information before submitting."
+  "No education institute data available": "No education institute data available.",
+  "termsAndConditionsDescription": "By creating an account, you agree to provide valid and accurate information. Your details will be used only for admission-related communication and application processing. Please review all information before submitting.",
+  "Course": "Course",
+  "Credit\nHour Fee": "Credit\nHour Fee",
+  "Min\nAdmis%": "Min\nAdmis%",
+  "Track": "Track",
+  "Details / Apply": "Details / Apply",
+  "Details": "Details",
+  "Apply & Pay\nApplication Fee": "Apply & Pay\nApplication Fee",
+  "No data available": "No data available"
 }
