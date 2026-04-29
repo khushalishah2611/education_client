@@ -626,7 +626,7 @@ class _CollegeAccordionState extends State<_CollegeAccordion> {
                             child: Text(context.l10n.text('No data available')),
                           ),
                         ),
-                      const SizedBox(height: 30),
+                      const SizedBox(height: 8),
                     ],
                   ),
                 ),
@@ -828,8 +828,8 @@ class _CollegeAccordionState extends State<_CollegeAccordion> {
                     child: Container(
                       alignment: Alignment.center, // 👈 important
                       padding: const EdgeInsets.symmetric(
-                        horizontal: 5,
-                        vertical: 4,
+                        horizontal: 4,
+                        vertical: 3,
                       ),
                       decoration: BoxDecoration(
                         color: Color(0xFFADE8C9),
@@ -840,7 +840,7 @@ class _CollegeAccordionState extends State<_CollegeAccordion> {
                         context.l10n.text('Apply & Pay\nApplication Fee'),
                         textAlign: TextAlign.center,
                         style: TextStyle(
-                          fontSize: 9.2,
+                          fontSize: 8.6,
                           fontWeight: FontWeight.w600,
                           color: Color(0xFF206F49),
                           height: 1.1,
