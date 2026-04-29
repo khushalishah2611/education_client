@@ -580,7 +580,11 @@ class _CollegeAccordionState extends State<_CollegeAccordion> {
                 constraints: BoxConstraints(minWidth: minTableWidth),
                 child: Column(
                   children: [
-                    _buildTableHeader(context, isSmallMobile: isSmallMobile),
+                    _buildTableHeader(
+                      context,
+                      isSmallMobile: isSmallMobile,
+                      tableWidth: minTableWidth,
+                    ),
                     if (courseDetailsList.isNotEmpty)
                       ...courseDetailsList.map((details) {
                         final String courseKey =
@@ -596,6 +600,7 @@ class _CollegeAccordionState extends State<_CollegeAccordion> {
                           context: context,
                           adminUniversity: widget.adminUniversity,
                           isSmallMobile: isSmallMobile,
+                          tableWidth: minTableWidth,
                         );
                       }).toList()
                     else
@@ -615,15 +620,24 @@ class _CollegeAccordionState extends State<_CollegeAccordion> {
     );
   }
 
-  Widget _buildTableHeader(BuildContext context, {required bool isSmallMobile}) {
+  Widget _buildTableHeader(
+    BuildContext context, {
+    required bool isSmallMobile,
+    required double tableWidth,
+  }) {
+    final double totalFlex = 12;
+    final double availableWidth = tableWidth - 6;
+    final double col3 = availableWidth * (3 / totalFlex);
+    final double col2 = availableWidth * (2 / totalFlex);
+
     return Container(
       color: const Color(0xFFE3E3E3),
       padding: EdgeInsets.symmetric(horizontal: isSmallMobile ? 4 : 5, vertical: isSmallMobile ? 4 : 5),
       child: Row(
         crossAxisAlignment: CrossAxisAlignment.center,
         children: [
-          Expanded(
-            flex: 3,
+          SizedBox(
+            width: col3,
             child: Center(
               child: Text(
                 context.l10n.text('Course'),
@@ -632,8 +646,8 @@ class _CollegeAccordionState extends State<_CollegeAccordion> {
               ),
             ),
           ),
-          Expanded(
-            flex: 2,
+          SizedBox(
+            width: col2,
             child: Center(
               child: Text(
                 context.l10n.text('Credit\nHour Fee'),
@@ -642,8 +656,8 @@ class _CollegeAccordionState extends State<_CollegeAccordion> {
               ),
             ),
           ),
-          Expanded(
-            flex: 2,
+          SizedBox(
+            width: col2,
             child: Center(
               child: Text(
                 context.l10n.text('Min\nAdmis%'),
@@ -652,8 +666,8 @@ class _CollegeAccordionState extends State<_CollegeAccordion> {
               ),
             ),
           ),
-          Expanded(
-            flex: 2,
+          SizedBox(
+            width: col2,
             child: Center(
               child: Text(
                 context.l10n.text('Track'),
@@ -663,8 +677,8 @@ class _CollegeAccordionState extends State<_CollegeAccordion> {
             ),
           ),
           const SizedBox(width: 6),
-          Expanded(
-            flex: 3,
+          SizedBox(
+            width: col3,
             child: Center(
               child: Text(
                 context.l10n.text('Details / Apply'),
@@ -685,7 +699,12 @@ class _CollegeAccordionState extends State<_CollegeAccordion> {
     required BuildContext context,
     required AdminUniversity adminUniversity,
     required bool isSmallMobile,
+    required double tableWidth,
   }) {
+    final double totalFlex = 12;
+    final double availableWidth = tableWidth - 6;
+    final double col3 = availableWidth * (3 / totalFlex);
+    final double col2 = availableWidth * (2 / totalFlex);
     return InkWell(
       onTap: onTap,
       child: Container(
@@ -704,8 +723,8 @@ class _CollegeAccordionState extends State<_CollegeAccordion> {
         child: Row(
           crossAxisAlignment: CrossAxisAlignment.center,
           children: [
-            Expanded(
-              flex: 3,
+            SizedBox(
+              width: col3,
               child: Text(
                 details.name ?? 'N/A',
                 textAlign: TextAlign.center,
@@ -717,8 +736,8 @@ class _CollegeAccordionState extends State<_CollegeAccordion> {
                 ),
               ),
             ),
-            Expanded(
-              flex: 2,
+            SizedBox(
+              width: col2,
               child: Text(
                 '${details.creditHours ?? 0}\n${details.currency ?? ''}',
                 textAlign: TextAlign.center,
@@ -728,8 +747,8 @@ class _CollegeAccordionState extends State<_CollegeAccordion> {
                 ),
               ),
             ),
-            Expanded(
-              flex: 2,
+            SizedBox(
+              width: col2,
               child: Text(
                 '${details.minAdmissionRate ?? 0}%',
                 textAlign: TextAlign.center,
@@ -739,8 +758,8 @@ class _CollegeAccordionState extends State<_CollegeAccordion> {
                 ),
               ),
             ),
-            Expanded(
-              flex: 2,
+            SizedBox(
+              width: col2,
               child: Text(
                 details.track ?? 'N/A',
                 textAlign: TextAlign.center,
@@ -751,8 +770,8 @@ class _CollegeAccordionState extends State<_CollegeAccordion> {
               ),
             ),
             const SizedBox(width: 6),
-            Expanded(
-              flex: 3,
+            SizedBox(
+              width: col3,
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.center, // 👈 important
                 children: [
