@@ -528,6 +528,8 @@ class _CollegeAccordionState extends State<_CollegeAccordion> {
     final bool isSmallMobile = _isSmallMobile(screenWidth);
     final double tableWidth = screenWidth;
 
+    final bool isEmpty = courseDetailsList.isEmpty;
+
     return Container(
       margin: const EdgeInsets.only(bottom: 10),
       decoration: BoxDecoration(
@@ -542,7 +544,10 @@ class _CollegeAccordionState extends State<_CollegeAccordion> {
             child: Container(
               width: double.infinity,
               color: AppColors.white,
-              padding: EdgeInsets.symmetric(horizontal: isSmallMobile ? 10 : 12, vertical: isSmallMobile ? 12 : 14),
+              padding: EdgeInsets.symmetric(
+                horizontal: isSmallMobile ? 10 : 12,
+                vertical: isSmallMobile ? 12 : 14,
+              ),
               child: Row(
                 children: [
                   Expanded(
@@ -550,8 +555,8 @@ class _CollegeAccordionState extends State<_CollegeAccordion> {
                       widget.collegeName.toUpperCase(),
                       style: TextStyle(
                         fontSize: isSmallMobile ? 12.5 : 14,
-                        fontWeight: FontWeight.w700,
-                        color: Color(0xFF6A6A6A),
+                        fontWeight: FontWeight.bold,
+                        color: AppColors.text,
                       ),
                     ),
                   ),
@@ -559,7 +564,6 @@ class _CollegeAccordionState extends State<_CollegeAccordion> {
                     widget.isExpanded
                         ? Icons.keyboard_arrow_up
                         : Icons.keyboard_arrow_down,
-                    color: const Color(0xFF595959),
                   ),
                 ],
               ),
@@ -567,49 +571,44 @@ class _CollegeAccordionState extends State<_CollegeAccordion> {
           ),
 
           if (widget.isExpanded)
-            ConstrainedBox(
-              constraints: BoxConstraints(minWidth: tableWidth),
-              child: Column(
-                mainAxisSize: MainAxisSize.min,
-                children: [
-                  _buildTableHeader(
-                    context,
-                    isSmallMobile: isSmallMobile,
-                    tableWidth: tableWidth,
+            Column(
+              children: [
+                _buildTableHeader(
+                  context,
+                  isSmallMobile: isSmallMobile,
+                  tableWidth: tableWidth,
+                  isEmpty: isEmpty,
+                ),
+
+                if (!isEmpty) ...[
+                  ...courseDetailsList.asMap().entries.map((entry) {
+                    final int index = entry.key;
+                    final details = entry.value;
+
+                    final String courseKey =
+                        '${widget.collegeName}-${details.name ?? ''}';
+                    final bool isSelected = widget.selectedCourses.contains(
+                      courseKey,
+                    );
+
+                    return _buildCourseRow(
+                      index: index,
+                      details: details,
+                      isSelected: isSelected,
+                      onTap: () => widget.onToggleCourse(courseKey),
+                      context: context,
+                      adminUniversity: widget.adminUniversity,
+                      isSmallMobile: isSmallMobile,
+                      tableWidth: tableWidth,
+                    );
+                  }).toList(),
+                ] else ...[
+                  Padding(
+                    padding: const EdgeInsets.all(12),
+                    child: Text(context.l10n.text('No data available')),
                   ),
-
-                  if (courseDetailsList.isNotEmpty) ...[
-                    ...courseDetailsList.map((details) {
-                      final String courseKey =
-                          '${widget.collegeName}-${details.name ?? ''}';
-                      final bool isSelected =
-                          widget.selectedCourses.contains(courseKey);
-
-                      return _buildCourseRow(
-                        details: details,
-                        isSelected: isSelected,
-                        onTap: () => widget.onToggleCourse(courseKey),
-                        context: context,
-                        adminUniversity: widget.adminUniversity,
-                        isSmallMobile: isSmallMobile,
-                        tableWidth: tableWidth,
-                      );
-                    }).toList(),
-
-                    const SizedBox(height: 10),
-                  ] else ...[
-                    Padding(
-                      padding: const EdgeInsets.all(12),
-                      child: Align(
-                        alignment: Alignment.centerLeft,
-                        child: Text(
-                          context.l10n.text('No data available'),
-                        ),
-                      ),
-                    ),
-                  ],
                 ],
-              ),
+              ],
             ),
         ],
       ),
@@ -620,65 +619,85 @@ class _CollegeAccordionState extends State<_CollegeAccordion> {
     BuildContext context, {
     required bool isSmallMobile,
     required double tableWidth,
+    required bool isEmpty,
   }) {
     return Container(
       color: const Color(0xFFE3E3E3),
-      padding: EdgeInsets.symmetric(horizontal: isSmallMobile ? 4 : 5, vertical: isSmallMobile ? 4 : 5),
+      padding: EdgeInsets.symmetric(
+        horizontal: isSmallMobile ? 4 : 5,
+        vertical: isSmallMobile ? 4 : 5,
+      ),
       child: SizedBox(
         width: tableWidth,
         child: Row(
-          crossAxisAlignment: CrossAxisAlignment.center,
           children: [
             Expanded(
-            flex: 3,
-            child: Center(
-              child: Text(
-                context.l10n.text('Course'),
-                textAlign: TextAlign.center,
-                style: TextStyle(fontWeight: FontWeight.w600, fontSize: isSmallMobile ? 11 : 12),
+              flex: 3,
+              child: Center(
+                child: Text(
+                  context.l10n.text('Course'),
+                  textAlign: TextAlign.center,
+                  style: TextStyle(
+                    fontWeight: FontWeight.w600,
+                    fontSize: isSmallMobile ? 11 : 12,
+                  ),
+                ),
               ),
             ),
-          ),
-          Expanded(
-            flex: 2,
-            child: Center(
-              child: Text(
-                context.l10n.text('Credit\nHour Fee'),
-                textAlign: TextAlign.center,
-                style: TextStyle(fontWeight: FontWeight.w600, fontSize: isSmallMobile ? 11 : 12),
+            Expanded(
+              flex: 2,
+              child: Center(
+                child: Text(
+                  context.l10n.text('Credit\nHour Fee'),
+                  textAlign: TextAlign.center,
+                  style: TextStyle(
+                    fontWeight: FontWeight.w600,
+                    fontSize: isSmallMobile ? 11 : 12,
+                  ),
+                ),
               ),
             ),
-          ),
-          Expanded(
-            flex: 2,
-            child: Center(
-              child: Text(
-                context.l10n.text('Min\nAdmis%'),
-                textAlign: TextAlign.center,
-                style: TextStyle(fontWeight: FontWeight.w600, fontSize: isSmallMobile ? 11 : 12),
+            Expanded(
+              flex: 2,
+              child: Center(
+                child: Text(
+                  context.l10n.text('Min\nAdmis%'),
+                  textAlign: TextAlign.center,
+                  style: TextStyle(
+                    fontWeight: FontWeight.w600,
+                    fontSize: isSmallMobile ? 11 : 12,
+                  ),
+                ),
               ),
             ),
-          ),
-          Expanded(
-            flex: 2,
-            child: Center(
-              child: Text(
-                context.l10n.text('Track'),
-                textAlign: TextAlign.center,
-                style: TextStyle(fontWeight: FontWeight.w600, fontSize: isSmallMobile ? 11 : 12),
+            Expanded(
+              flex: 2,
+              child: Center(
+                child: Text(
+                  isEmpty
+                      ? 'Min\nBA GPA'
+                      : context.l10n.text('Track'),
+                  textAlign: TextAlign.center,
+                  style: TextStyle(
+                    fontWeight: FontWeight.w600,
+                    fontSize: isSmallMobile ? 11 : 12,
+                  ),
+                ),
               ),
             ),
-          ),
-          const SizedBox(width: 6),
-          Expanded(
-            flex: 3,
-            child: Center(
-              child: Text(
-                context.l10n.text('Details / Apply'),
-                textAlign: TextAlign.center,
-                style: TextStyle(fontWeight: FontWeight.w600, fontSize: isSmallMobile ? 11 : 12),
+            const SizedBox(width: 6),
+            Expanded(
+              flex: 3,
+              child: Center(
+                child: Text(
+                  context.l10n.text('Details / Apply'),
+                  textAlign: TextAlign.center,
+                  style: TextStyle(
+                    fontWeight: FontWeight.w600,
+                    fontSize: isSmallMobile ? 11 : 12,
+                  ),
+                ),
               ),
-            ),
             ),
           ],
         ),
@@ -687,6 +706,7 @@ class _CollegeAccordionState extends State<_CollegeAccordion> {
   }
 
   Widget _buildCourseRow({
+    required int index,
     required CourseDetails details,
     required bool isSelected,
     required VoidCallback onTap,
@@ -698,9 +718,14 @@ class _CollegeAccordionState extends State<_CollegeAccordion> {
     return InkWell(
       onTap: onTap,
       child: Container(
-        padding: EdgeInsets.symmetric(horizontal: isSmallMobile ? 4 : 5, vertical: isSmallMobile ? 4 : 5),
+        padding: EdgeInsets.symmetric(
+          horizontal: isSmallMobile ? 4 : 5,
+          vertical: isSmallMobile ? 4 : 5,
+        ),
         decoration: BoxDecoration(
-          color: isSelected ? AppColors.peachSoft : Colors.white,
+          color: isSelected
+              ? AppColors.primaryDark.withOpacity(0.2)
+              : (index % 2 == 0 ? Colors.white : AppColors.peachSoft),
           border: Border(
             left: BorderSide(
               color: isSelected ? AppColors.primaryDark : Colors.transparent,
@@ -709,126 +734,126 @@ class _CollegeAccordionState extends State<_CollegeAccordion> {
             bottom: const BorderSide(color: Color(0xFFE9E9E9)),
           ),
         ),
-
         child: SizedBox(
           width: tableWidth,
           child: Row(
-            crossAxisAlignment: CrossAxisAlignment.center,
             children: [
               Expanded(
-              flex: 3,
-              child: Text(
-                details.name ?? 'N/A',
-                textAlign: TextAlign.center,
-                maxLines: 3,
-                overflow: TextOverflow.ellipsis,
-                style: TextStyle(
-                  fontWeight: FontWeight.w600,
-                  fontSize: isSmallMobile ? 11 : 12,
-                ),
-              ),
-            ),
-            Expanded(
-              flex: 2,
-              child: Text(
-                '${details.creditHours ?? 0}\n${details.currency ?? ''}',
-                textAlign: TextAlign.center,
-                style: TextStyle(
-                  fontWeight: FontWeight.w600,
-                  fontSize: isSmallMobile ? 11 : 12,
-                ),
-              ),
-            ),
-            Expanded(
-              flex: 2,
-              child: Text(
-                '${details.minAdmissionRate ?? 0}%',
-                textAlign: TextAlign.center,
-                style: TextStyle(
-                  fontWeight: FontWeight.w600,
-                  fontSize: isSmallMobile ? 11 : 12,
-                ),
-              ),
-            ),
-            Expanded(
-              flex: 2,
-              child: Text(
-                details.track ?? 'N/A',
-                textAlign: TextAlign.center,
-                style: TextStyle(
-                  fontWeight: FontWeight.w600,
-                  fontSize: isSmallMobile ? 11 : 12,
-                ),
-              ),
-            ),
-            const SizedBox(width: 6),
-            Expanded(
-              flex: 3,
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.center, // 👈 important
-                children: [
-                  InkWell(
-                    onTap: () {
-                      Navigator.of(context).push(
-                        MaterialPageRoute(
-                          builder: (_) => CourseDetailScreen(
-                            university: adminUniversity,
-                            course: details,
-                          ),
-                        ),
-                      );
-                    },
-                    child: Text(
-                      context.l10n.text('Details'),
-                      textAlign: TextAlign.center,
-                      style: TextStyle(
-                        fontWeight: FontWeight.w600,
-                        fontSize: isSmallMobile ? 11 : 12,
-                      ),
-                    ),
+                flex: 3,
+                child: Text(
+                  details.name ?? 'N/A',
+                  textAlign: TextAlign.center,
+                  maxLines: 3,
+                  overflow: TextOverflow.ellipsis,
+                  style: TextStyle(
+                    fontWeight: FontWeight.w400,
+                    fontSize: isSmallMobile ? 11 : 12,
                   ),
-                  const SizedBox(height: 5),
-                  InkWell(
-                    onTap: () {
-                      Navigator.push(
-                        context,
-                        MaterialPageRoute(
-                          builder: (_) => UploadDocumentsScreen(
-                            universityName: widget.adminUniversity.name,
-                            universityHeroImage:
-                                ImageUrlHelper.resolveUploadUrl(
-                                  widget.adminUniversity.coverImagePath,
-                                ),
-                            courseTitle: details.name,
+                ),
+              ),
+              Expanded(
+                flex: 2,
+                child: Text(
+                  '${details.creditHours ?? 0}\n${details.currency ?? ''}',
+                  textAlign: TextAlign.center,
+                  style: TextStyle(
+                    fontWeight: FontWeight.w400,
+                    fontSize: isSmallMobile ? 11 : 12,
+                  ),
+                ),
+              ),
+              Expanded(
+                flex: 2,
+                child: Text(
+                  '${details.minAdmissionRate ?? 0}%',
+                  textAlign: TextAlign.center,
+                  style: TextStyle(
+                    fontWeight: FontWeight.w400,
+                    fontSize: isSmallMobile ? 11 : 12,
+                  ),
+                ),
+              ),
+              Expanded(
+                flex: 2,
+                child: Text(
+                  details.track == null || details.track!.isEmpty
+                      ? details.track!
+                      : details.track!,
+                  textAlign: TextAlign.center,
+                  style: TextStyle(
+                    fontWeight: FontWeight.w400,
+                    fontSize: isSmallMobile ? 11 : 12,
+                  ),
+                ),
+              ),
+              const SizedBox(width: 6),
+              Expanded(
+                flex: 3,
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.center,
+                  children: [
+                    InkWell(
+                      onTap: () {
+                        Navigator.of(context).push(
+                          MaterialPageRoute(
+                            builder: (_) => CourseDetailScreen(
+                              university: adminUniversity,
+                              course: details,
+                            ),
                           ),
-                        ),
-                      );
-                    },
-                    child: Container(
-                      alignment: Alignment.center, // 👈 important
-                      padding: const EdgeInsets.symmetric(
-                        horizontal: 4,
-                        vertical: 3,
-                      ),
-                      decoration: BoxDecoration(
-                        color: Color(0xFFADE8C9),
-                        borderRadius: BorderRadius.circular(4),
-                        border: Border.all(color: Color(0xFF78D09F)),
-                      ),
+                        );
+                      },
                       child: Text(
-                        context.l10n.text('Apply & Pay\nApplication Fee'),
+                        context.l10n.text('Details'),
                         textAlign: TextAlign.center,
                         style: TextStyle(
-                          fontSize: 8.6,
-                          fontWeight: FontWeight.w600,
-                          color: Color(0xFF206F49),
-                          height: 1.1,
+                          fontWeight: FontWeight.w400,
+                          fontSize: isSmallMobile ? 11 : 12,
                         ),
                       ),
                     ),
-                  ),
-                ],
-              ),
+                    const SizedBox(height: 5),
+                    InkWell(
+                      onTap: () {
+                        Navigator.push(
+                          context,
+                          MaterialPageRoute(
+                            builder: (_) => UploadDocumentsScreen(
+                              universityName: widget.adminUniversity.name,
+                              universityHeroImage:
+                                  ImageUrlHelper.resolveUploadUrl(
+                                    widget.adminUniversity.coverImagePath,
+                                  ),
+                              courseTitle: details.name,
+                            ),
+                          ),
+                        );
+                      },
+                      child: Container(
+                        alignment: Alignment.center,
+                        padding: const EdgeInsets.symmetric(
+                          horizontal: 4,
+                          vertical: 3,
+                        ),
+                        decoration: BoxDecoration(
+                          color: Color(0xFF0070e2),
+                          borderRadius: BorderRadius.circular(4),
+                          border: Border.all(color: Color(0xFF0070e2)),
+                        ),
+                        child: Text(
+                          context.l10n.text('Apply & Pay\nApplication Fee'),
+                          textAlign: TextAlign.center,
+                          style: TextStyle(
+                            fontSize: 8.6,
+                            fontWeight: FontWeight.w600,
+                            color: AppColors.white,
+                            height: 1.1,
+                          ),
+                        ),
+                      ),
+                    ),
+                  ],
+                ),
               ),
             ],
           ),
