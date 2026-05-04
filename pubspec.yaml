@@ -40,7 +40,6 @@ dependencies:
   shared_preferences:
   url_launcher:
   flutter_svg:
-  flutter_plugin_android_lifecycle:
 
 dev_dependencies:
   flutter_test:
