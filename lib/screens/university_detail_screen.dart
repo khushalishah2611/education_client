@@ -8,7 +8,7 @@ import '../core/app_theme.dart';
 import '../widgets/common_widgets.dart';
 import '../widgets/flow_widgets.dart';
 import 'course_detail_screen.dart';
-import 'upload_documents_screen.dart' show UploadDocumentsScreen;
+// import 'upload_documents_screen.dart' show UploadDocumentsScreen;
 
 class UniversityDetailScreen extends StatefulWidget {
   const UniversityDetailScreen({
@@ -468,19 +468,19 @@ class _UniversityDetailScreenState extends State<UniversityDetailScreen> {
                                 .split('-')
                                 .last
                                 .trim();
-                            Navigator.push(
-                              context,
-                              MaterialPageRoute(
-                                builder: (_) => UploadDocumentsScreen(
-                                  universityName: data.name,
-                                  universityHeroImage:
-                                      ImageUrlHelper.resolveUploadUrl(
-                                        data.coverImagePath,
-                                      ),
-                                  courseTitle: selectedCourseTitle,
-                                ),
-                              ),
-                            );
+                            // Navigator.push(
+                            //   context,
+                            //   MaterialPageRoute(
+                            //     builder: (_) => UploadDocumentsScreen(
+                            //       universityName: data.name,
+                            //       universityHeroImage:
+                            //           ImageUrlHelper.resolveUploadUrl(
+                            //             data.coverImagePath,
+                            //           ),
+                            //       courseTitle: selectedCourseTitle,
+                            //     ),
+                            //   ),
+                            // );
                           },
                   ),
                 ),
@@ -815,19 +815,19 @@ class _CollegeAccordionState extends State<_CollegeAccordion> {
                     const SizedBox(height: 5),
                     InkWell(
                       onTap: () {
-                        Navigator.push(
-                          context,
-                          MaterialPageRoute(
-                            builder: (_) => UploadDocumentsScreen(
-                              universityName: widget.adminUniversity.name,
-                              universityHeroImage:
-                                  ImageUrlHelper.resolveUploadUrl(
-                                    widget.adminUniversity.coverImagePath,
-                                  ),
-                              courseTitle: details.name,
-                            ),
-                          ),
-                        );
+                        // Navigator.push(
+                        //   context,
+                        //   MaterialPageRoute(
+                        //     builder: (_) => UploadDocumentsScreen(
+                        //       universityName: widget.adminUniversity.name,
+                        //       universityHeroImage:
+                        //           ImageUrlHelper.resolveUploadUrl(
+                        //             widget.adminUniversity.coverImagePath,
+                        //           ),
+                        //       courseTitle: details.name,
+                        //     ),
+                        //   ),
+                        // );
                       },
                       child: Container(
                         alignment: Alignment.center,

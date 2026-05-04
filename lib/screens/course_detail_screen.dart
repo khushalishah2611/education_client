@@ -6,7 +6,7 @@ import 'package:flutter/material.dart';
 import '../core/app_theme.dart';
 import '../widgets/common_widgets.dart';
 import '../widgets/flow_widgets.dart';
-import 'upload_documents_screen.dart' show UploadDocumentsScreen;
+
 
 class CourseDetailScreen extends StatefulWidget {
   const CourseDetailScreen({
