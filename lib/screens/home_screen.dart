@@ -113,7 +113,7 @@ class _HomeScreenState extends State<HomeScreen> {
   Widget build(BuildContext context) {
     final double horizontalPadding = context.responsiveHorizontalPadding;
     final int gridColumns = context.responsiveGridColumns;
-    final double gridAspectRatio = context.isSmallMobile ? 0.92 : 0.8;
+    final double gridAspectRatio = context.isSmallMobile ? 0.92 : 0.25;
 
     return Directionality(
       textDirection: context.l10n.textDirection,
@@ -128,7 +128,7 @@ class _HomeScreenState extends State<HomeScreen> {
                 children: [
                   if (_activeTab == 0) ...[
                     SizedBox(
-                      height: MediaQuery.of(context).size.height * 0.40,
+                      height: MediaQuery.of(context).size.height * 0.50,
                       child: Stack(
                         children: [
                           Image.asset(
@@ -178,9 +178,10 @@ class _HomeScreenState extends State<HomeScreen> {
                               ],
                             ),
                           ),
+                          SizedBox(height: 10,),
 
                           Positioned(
-                            top: MediaQuery.of(context).size.height * 0.10,
+                            top: MediaQuery.of(context).size.height * 0.12,
                             left: horizontalPadding,
                             right: horizontalPadding,
                             child: Column(
