@@ -1,9 +1,11 @@
 import 'package:file_picker/file_picker.dart';
 import 'package:flutter/material.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 
 import '../core/app_localizations.dart';
 import '../core/app_theme.dart';
 import '../core/responsive_helper.dart';
+import '../services/application_api_service.dart';
 import '../widgets/common_widgets.dart';
 import '../widgets/flow_widgets.dart';
 import 'payment_screen.dart';
@@ -28,27 +30,33 @@ class UploadDocumentsScreen extends StatefulWidget {
 
 class _UploadDocumentsScreenState extends State<UploadDocumentsScreen> {
   late final Map<String, PlatformFile?> _selectedFiles = {};
+  final ApplicationApiService _applicationApiService = const ApplicationApiService();
+  bool _isUploading = false;
 
-  List<({String title, String subtitle})> _docs(BuildContext context) => [
+  List<({String type, String title, String subtitle})> _docs(BuildContext context) => [
     (
+      type: 'PASSPORT',
       title: context.l10n.text('docPassport'),
       subtitle: context.l10n.text('docPassportSubtitle'),
     ),
     (
+      type: 'SOP',
       title: context.l10n.text('docSop'),
       subtitle: context.l10n.text('docSopSubtitle'),
     ),
     (
+      type: 'LOR',
       title: context.l10n.text('docLor'),
       subtitle: context.l10n.text('docLorSubtitle'),
     ),
     (
+      type: 'RESUME',
       title: context.l10n.text('docResume'),
       subtitle: context.l10n.text('docResumeSubtitle'),
     ),
   ];
 
-  Future<void> _pickDocument(String docTitle) async {
+  Future<void> _pickDocument(({String type, String title, String subtitle}) doc) async {
     final result = await FilePicker.platform.pickFiles(
       type: FileType.custom,
       allowedExtensions: ['pdf', 'jpg', 'jpeg', 'png'],
@@ -59,9 +67,48 @@ class _UploadDocumentsScreenState extends State<UploadDocumentsScreen> {
       return;
     }
 
-    setState(() {
-      _selectedFiles[docTitle] = result.files.first;
-    });
+    final file = result.files.first;
+    final filePath = file.path;
+    if (filePath == null || filePath.isEmpty) {
+      return;
+    }
+
+    setState(() => _isUploading = true);
+    try {
+      final SharedPreferences prefs = await SharedPreferences.getInstance();
+      final String studentUserId = prefs.getString('studentUserId')?.trim() ?? '';
+      if (studentUserId.isEmpty) {
+        throw Exception('studentUserId not found');
+      }
+
+      await _applicationApiService.uploadStudentDocument(
+        studentUserId: studentUserId,
+        type: doc.type,
+        filePath: filePath,
+        fileName: file.name,
+      );
+
+      setState(() {
+        _selectedFiles[doc.title] = file;
+      });
+      if (!mounted) return;
+      showAppSnackBar(
+        context,
+        type: AppSnackBarType.success,
+        message: '${doc.title} uploaded successfully',
+      );
+    } catch (e) {
+      if (!mounted) return;
+      showAppSnackBar(
+        context,
+        type: AppSnackBarType.error,
+        message: e.toString(),
+      );
+    } finally {
+      if (mounted) {
+        setState(() => _isUploading = false);
+      }
+    }
   }
 
   bool get _allDocumentsSelected => _selectedFiles.values.every((file) => file != null);
@@ -131,7 +178,7 @@ class _UploadDocumentsScreenState extends State<UploadDocumentsScreen> {
                       title: docs.first.title,
                       subtitle: docs.first.subtitle,
                       selectedFileName: _selectedFiles[docs.first.title]?.name,
-                      onTap: () => _pickDocument(docs.first.title),
+                      onTap: _isUploading ? () {} : () => _pickDocument(docs.first),
                     ),
                     const SizedBox(height: 10),
                     ...docs.skip(1).map(
@@ -141,14 +188,14 @@ class _UploadDocumentsScreenState extends State<UploadDocumentsScreen> {
                               title: doc.title,
                               subtitle: doc.subtitle,
                               selectedFileName: _selectedFiles[doc.title]?.name,
-                              onTap: () => _pickDocument(doc.title),
+                              onTap: _isUploading ? () {} : () => _pickDocument(doc),
                             ),
                           ),
                         ),
                     const SizedBox(height: 18),
                     AppPrimaryButton(
                       label: context.l10n.text('saveContinue'),
-                      onPressed: _onContinue,
+                      onPressed: _isUploading ? null : _onContinue,
                     ),
                   ],
                 ),
