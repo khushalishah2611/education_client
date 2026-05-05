@@ -116,7 +116,7 @@ class _UploadDocumentsScreenState extends State<UploadDocumentsScreen> {
       );
 
       setState(() {
-        _selectedFiles[doc.title] = file;
+        _selectedFiles[doc.type] = file;
       });
       if (!mounted) return;
       showAppSnackBar(
@@ -138,7 +138,8 @@ class _UploadDocumentsScreenState extends State<UploadDocumentsScreen> {
     }
   }
 
-  bool get _allDocumentsSelected => _selectedFiles.values.every((file) => file != null);
+  bool get _allDocumentsSelected =>
+      _docs.isNotEmpty && _docs.every((doc) => _selectedFiles[doc.type] != null);
 
   Future<void> _onContinue() async {
     if (!_allDocumentsSelected) {
@@ -254,7 +255,7 @@ class _UploadDocumentsScreenState extends State<UploadDocumentsScreen> {
                             _UploadDropZone(
                               title: _docs.first.title,
                               subtitle: _docs.first.subtitle,
-                              selectedFileName: _selectedFiles[_docs.first.title]?.name,
+                              selectedFileName: _selectedFiles[_docs.first.type]?.name,
                               onTap: _isUploading ? () {} : () => _pickDocument(_docs.first),
                             ),
                             const SizedBox(height: 10),
@@ -264,7 +265,7 @@ class _UploadDocumentsScreenState extends State<UploadDocumentsScreen> {
                                 child: _UploadListTile(
                                   title: doc.title,
                                   subtitle: doc.subtitle,
-                                  selectedFileName: _selectedFiles[doc.title]?.name,
+                                  selectedFileName: _selectedFiles[doc.type]?.name,
                                   onTap: _isUploading ? () {} : () => _pickDocument(doc),
                                 ),
                               ),

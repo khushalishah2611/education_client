@@ -138,9 +138,12 @@ extension ApplicationApiDocuments on ApplicationApiService {
       throw Exception(decoded['message']?.toString() ?? 'Failed to fetch student documents');
     }
 
-    final items = decoded['items'];
+    final Object? items = decoded['items'] ?? decoded['data'] ?? decoded['documents'] ?? decoded;
     if (items is List) {
-      return items.whereType<Map<String, dynamic>>().toList(growable: false);
+      return items
+          .whereType<Map>()
+          .map((item) => item.map((key, value) => MapEntry(key.toString(), value)))
+          .toList(growable: false);
     }
     return const <Map<String, dynamic>>[];
   }
