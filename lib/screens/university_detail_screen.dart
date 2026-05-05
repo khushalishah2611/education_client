@@ -452,39 +452,39 @@ class _UniversityDetailScreenState extends State<UniversityDetailScreen> {
                 ),
               ),
 
-              SafeArea(
-                top: false,
-                child: Padding(
-                  padding: EdgeInsets.fromLTRB(
-                    sectionPadding,
-                    8,
-                    sectionPadding,
-                    isSmallMobile ? 12 : 16,
-                  ),
-                  child: AppPrimaryButton(
-                    label: 'View Courses (${_selectedCourses.length})',
-                    onPressed: _selectedCourses.isEmpty
-                        ? null
-                        : () {
-                            final String selectedCourseTitle =
-                                _selectedCourses.first.split('-').last.trim();
-                            Navigator.push(
-                              context,
-                              MaterialPageRoute(
-                                builder: (_) => UploadDocumentsScreen(
-                                  universityName: data.name,
-                                  universityHeroImage:
-                                      ImageUrlHelper.resolveUploadUrl(
-                                        data.coverImagePath,
-                                      ),
-                                  courseTitle: selectedCourseTitle,
-                                ),
-                              ),
-                            );
-                          },
-                  ),
-                ),
-              ),
+              // SafeArea(
+              //   top: false,
+              //   child: Padding(
+              //     padding: EdgeInsets.fromLTRB(
+              //       sectionPadding,
+              //       8,
+              //       sectionPadding,
+              //       isSmallMobile ? 12 : 16,
+              //     ),
+              //     child: AppPrimaryButton(
+              //       label: 'View Courses (${_selectedCourses.length})',
+              //       onPressed: _selectedCourses.isEmpty
+              //           ? null
+              //           : () {
+              //               final String selectedCourseTitle =
+              //                   _selectedCourses.first.split('-').last.trim();
+              //               Navigator.push(
+              //                 context,
+              //                 MaterialPageRoute(
+              //                   builder: (_) => UploadDocumentsScreen(
+              //                     universityName: data.name,
+              //                     universityHeroImage:
+              //                         ImageUrlHelper.resolveUploadUrl(
+              //                           data.coverImagePath,
+              //                         ),
+              //                     courseTitle: selectedCourseTitle,
+              //                   ),
+              //                 ),
+              //               );
+              //             },
+              //     ),
+              //   ),
+              // ),
             ],
           ),
         ),
@@ -816,19 +816,19 @@ class _CollegeAccordionState extends State<_CollegeAccordion> {
                     const SizedBox(height: 5),
                     InkWell(
                       onTap: () {
-                        // Navigator.push(
-                        //   context,
-                        //   MaterialPageRoute(
-                        //     builder: (_) => UploadDocumentsScreen(
-                        //       universityName: widget.adminUniversity.name,
-                        //       universityHeroImage:
-                        //           ImageUrlHelper.resolveUploadUrl(
-                        //             widget.adminUniversity.coverImagePath,
-                        //           ),
-                        //       courseTitle: details.name,
-                        //     ),
-                        //   ),
-                        // );
+                        Navigator.push(
+                          context,
+                          MaterialPageRoute(
+                            builder: (_) => UploadDocumentsScreen(
+                              universityName: widget.adminUniversity.name,
+                              universityHeroImage:
+                                  ImageUrlHelper.resolveUploadUrl(
+                                    widget.adminUniversity.coverImagePath,
+                                  ),
+                              courseTitle: details.name,
+                            ),
+                          ),
+                        );
                       },
                       child: Container(
                         alignment: Alignment.center,
