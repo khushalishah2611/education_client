@@ -33,27 +33,76 @@ class _UploadDocumentsScreenState extends State<UploadDocumentsScreen> {
   late final Map<String, PlatformFile?> _selectedFiles = {};
   final ApplicationApiService _applicationApiService = const ApplicationApiService();
   bool _isUploading = false;
-  late final Future<List<({String type, String title, String subtitle})>> _docsFuture;
+  List<({String type, String title, String subtitle})> _docs = const [];
+  String? _loadError;
 
   @override
   void initState() {
     super.initState();
-    _docsFuture = _loadDocs();
+    _initializeScreen();
   }
 
-  Future<List<({String type, String title, String subtitle})>> _loadDocs() async {
-    final List<DocumentTypeItem> items = await _applicationApiService.fetchDocumentTypes();
-    final bool isArabic = (WidgetsBinding.instance.platformDispatcher.locale.languageCode) == 'ar';
+  Future<void> _initializeScreen() async {
+    setState(() {
+      _isUploading = true;
+      _loadError = null;
+    });
 
-    return items
-        .map(
-          (item) => (
-            type: item.value,
-            title: isArabic ? item.labelAr : item.labelEn,
-            subtitle: item.value,
-          ),
-        )
-        .toList(growable: false);
+    try {
+      final SharedPreferences prefs = await SharedPreferences.getInstance();
+      final String studentUserId = prefs.getString('studentUserId')?.trim() ?? '';
+      if (studentUserId.isEmpty) {
+        throw Exception('studentUserId not found');
+      }
+
+      final List<DocumentTypeItem> types = await _applicationApiService.fetchDocumentTypes();
+      final List<Map<String, dynamic>> uploaded = await _applicationApiService.fetchStudentDocuments(
+        studentUserId: studentUserId,
+      );
+      final bool isArabic = (WidgetsBinding.instance.platformDispatcher.locale.languageCode) == 'ar';
+
+      final docs = types
+          .map(
+            (item) => (
+              type: item.value,
+              title: isArabic ? item.labelAr : item.labelEn,
+              subtitle: item.value,
+            ),
+          )
+          .toList(growable: false);
+
+      final Map<String, String> uploadedByType = <String, String>{};
+      for (final item in uploaded) {
+        final String type = item['type']?.toString() ?? '';
+        final String fileName = item['fileName']?.toString() ?? '';
+        if (type.isNotEmpty && fileName.isNotEmpty) {
+          uploadedByType[type] = fileName;
+        }
+      }
+
+      if (!mounted) return;
+      setState(() {
+        _docs = docs;
+        _selectedFiles
+          ..clear()
+          ..addEntries(
+            docs.map((doc) {
+              final String? fileName = uploadedByType[doc.type];
+              final PlatformFile? file = fileName == null ? null : PlatformFile(name: fileName, size: 0);
+              return MapEntry<String, PlatformFile?>(doc.title, file);
+            }),
+          );
+      });
+    } catch (e) {
+      if (!mounted) return;
+      setState(() {
+        _loadError = e.toString();
+      });
+    } finally {
+      if (mounted) {
+        setState(() => _isUploading = false);
+      }
+    }
   }
 
   Future<void> _pickDocument(({String type, String title, String subtitle}) doc) async {
@@ -121,22 +170,18 @@ class _UploadDocumentsScreenState extends State<UploadDocumentsScreen> {
         message: context.l10n.text('uploadAllRequiredDocs'),
       );
       return;
-    }
-    else
-      {
-        Navigator.of(context).push(
-          MaterialPageRoute(
-            builder: (_) => PaymentScreen(
-              universityName: widget.universityName,
-              universityHeroImage: widget.universityHeroImage,
-              courseTitle: widget.courseTitle,
-              applicationsPayload: widget.applicationsPayload,
-            ),
+    } else {
+      Navigator.of(context).push(
+        MaterialPageRoute(
+          builder: (_) => PaymentScreen(
+            universityName: widget.universityName,
+            universityHeroImage: widget.universityHeroImage,
+            courseTitle: widget.courseTitle,
+            applicationsPayload: widget.applicationsPayload,
           ),
-        );
-      }
-
-
+        ),
+      );
+    }
   }
 
   @override
@@ -154,73 +199,76 @@ class _UploadDocumentsScreenState extends State<UploadDocumentsScreen> {
                 title: context.l10n.text('uploadDocuments'),
               ),
               Expanded(
-                child: FutureBuilder<List<({String type, String title, String subtitle})>>(
-                  future: _docsFuture,
-                  builder: (context, snapshot) {
-                    if (snapshot.connectionState == ConnectionState.waiting) {
-                      return const Center(child: CircularProgressIndicator());
-                    }
-
-                    if (snapshot.hasError) {
-                      return Center(
-                        child: Text(
-                          snapshot.error.toString(),
-                          style: const TextStyle(color: AppColors.accent),
-                        ),
-                      );
-                    }
-
-                    final docs = snapshot.data ?? const <({String type, String title, String subtitle})>[];
-                    if (docs.isEmpty) {
-                      return const Center(child: Text('No document types found'));
-                    }
-
-                    for (final doc in docs) {
-                      _selectedFiles.putIfAbsent(doc.title, () => null);
-                    }
-
-                    return ListView(
-                  padding: EdgeInsets.fromLTRB(
-                    horizontalPadding,
-                    isSmallMobile ? 14 : 20,
-                    horizontalPadding,
-                    20,
-                  ),
+                child: Stack(
                   children: [
-                    Text(
-                      context.l10n.text('requiredDocuments'),
-                      style: TextStyle(
-                        fontSize: isSmallMobile ? 16 : 18,
-                        fontWeight: FontWeight.w700,
-                      ),
-                    ),
-                    const SizedBox(height: 14),
-                    _UploadDropZone(
-                      title: docs.first.title,
-                      subtitle: docs.first.subtitle,
-                      selectedFileName: _selectedFiles[docs.first.title]?.name,
-                      onTap: _isUploading ? () {} : () => _pickDocument(docs.first),
-                    ),
-                    const SizedBox(height: 10),
-                    ...docs.skip(1).map(
-                          (doc) => Padding(
-                            padding: const EdgeInsets.only(bottom: 10),
-                            child: _UploadListTile(
-                              title: doc.title,
-                              subtitle: doc.subtitle,
-                              selectedFileName: _selectedFiles[doc.title]?.name,
-                              onTap: _isUploading ? () {} : () => _pickDocument(doc),
+                    Builder(
+                      builder: (context) {
+                        if (_loadError != null) {
+                          return Center(
+                            child: Text(
+                              _loadError!,
+                              style: const TextStyle(color: AppColors.accent),
                             ),
+                          );
+                        }
+
+                        if (_docs.isEmpty) {
+                          return const Center(child: Text('No document types found'));
+                        }
+
+                        return ListView(
+                          padding: EdgeInsets.fromLTRB(
+                            horizontalPadding,
+                            isSmallMobile ? 14 : 20,
+                            horizontalPadding,
+                            20,
+                          ),
+                          children: [
+                            Text(
+                              context.l10n.text('requiredDocuments'),
+                              style: TextStyle(
+                                fontSize: isSmallMobile ? 16 : 18,
+                                fontWeight: FontWeight.w700,
+                              ),
+                            ),
+                            const SizedBox(height: 14),
+                            _UploadDropZone(
+                              title: _docs.first.title,
+                              subtitle: _docs.first.subtitle,
+                              selectedFileName: _selectedFiles[_docs.first.title]?.name,
+                              onTap: _isUploading ? () {} : () => _pickDocument(_docs.first),
+                            ),
+                            const SizedBox(height: 10),
+                            ..._docs.skip(1).map(
+                              (doc) => Padding(
+                                padding: const EdgeInsets.only(bottom: 10),
+                                child: _UploadListTile(
+                                  title: doc.title,
+                                  subtitle: doc.subtitle,
+                                  selectedFileName: _selectedFiles[doc.title]?.name,
+                                  onTap: _isUploading ? () {} : () => _pickDocument(doc),
+                                ),
+                              ),
+                            ),
+                            const SizedBox(height: 18),
+                            AppPrimaryButton(
+                              label: context.l10n.text('saveContinue'),
+                              onPressed: _isUploading ? null : _onContinue,
+                            ),
+                          ],
+                        );
+                      },
+                    ),
+                    if (_isUploading)
+                      const Positioned.fill(
+                        child: ColoredBox(
+                          color: Color.fromRGBO(0, 0, 0, 0.25),
+                          child: Center(
+                            child: CircularProgressIndicator(color: AppColors.primary),
                           ),
                         ),
-                    const SizedBox(height: 18),
-                    AppPrimaryButton(
-                      label: context.l10n.text('saveContinue'),
-                      onPressed: _isUploading ? null : _onContinue,
-                    ),
+                      ),
                   ],
-                );
-                  },
                 ),
               ),
             ],
