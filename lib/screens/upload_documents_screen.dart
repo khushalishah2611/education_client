@@ -162,7 +162,7 @@ class _UploadDocumentsScreenState extends State<UploadDocumentsScreen> {
 
   bool get _allDocumentsSelected => _selectedFiles.values.every((file) => file != null);
 
-  void _onContinue() {
+  Future<void> _onContinue() async {
     if (!_allDocumentsSelected) {
       showAppSnackBar(
         context,
@@ -170,7 +170,37 @@ class _UploadDocumentsScreenState extends State<UploadDocumentsScreen> {
         message: context.l10n.text('uploadAllRequiredDocs'),
       );
       return;
-    } else {
+    }
+
+    setState(() => _isUploading = true);
+    try {
+      final SharedPreferences prefs = await SharedPreferences.getInstance();
+      final String studentUserId = prefs.getString('studentUserId')?.trim() ?? '';
+      if (studentUserId.isEmpty) {
+        throw Exception('studentUserId not found');
+      }
+
+      final List<Map<String, dynamic>> uploaded = await _applicationApiService.fetchStudentDocuments(
+        studentUserId: studentUserId,
+      );
+
+      final Set<String> uploadedTypes = uploaded
+          .map((item) => item['type']?.toString() ?? '')
+          .where((type) => type.isNotEmpty)
+          .toSet();
+      final bool hasAllRequiredFromApi = _docs.every((doc) => uploadedTypes.contains(doc.type));
+
+      if (!hasAllRequiredFromApi) {
+        if (!mounted) return;
+        showAppSnackBar(
+          context,
+          type: AppSnackBarType.error,
+          message: context.l10n.text('uploadAllRequiredDocs'),
+        );
+        return;
+      }
+
+      if (!mounted) return;
       Navigator.of(context).push(
         MaterialPageRoute(
           builder: (_) => PaymentScreen(
@@ -181,6 +211,17 @@ class _UploadDocumentsScreenState extends State<UploadDocumentsScreen> {
           ),
         ),
       );
+    } catch (e) {
+      if (!mounted) return;
+      showAppSnackBar(
+        context,
+        type: AppSnackBarType.error,
+        message: e.toString(),
+      );
+    } finally {
+      if (mounted) {
+        setState(() => _isUploading = false);
+      }
     }
   }
 
@@ -253,7 +294,7 @@ class _UploadDocumentsScreenState extends State<UploadDocumentsScreen> {
                             const SizedBox(height: 18),
                             AppPrimaryButton(
                               label: context.l10n.text('saveContinue'),
-                              onPressed: _isUploading ? null : _onContinue,
+                              onPressed: _isUploading ? null : () => _onContinue(),
                             ),
                           ],
                         );
