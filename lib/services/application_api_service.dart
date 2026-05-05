@@ -86,7 +86,7 @@ extension ApplicationApiDocuments on ApplicationApiService {
     );
 
     final request = http.MultipartRequest('POST', uri)
-
+      ..headers.addAll(await _authHeaders())
       ..fields['type'] = type
       ..files.add(
         await http.MultipartFile.fromPath(
