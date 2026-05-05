@@ -114,25 +114,29 @@ class _UploadDocumentsScreenState extends State<UploadDocumentsScreen> {
   bool get _allDocumentsSelected => _selectedFiles.values.every((file) => file != null);
 
   void _onContinue() {
-    // if (!_allDocumentsSelected) {
-    //   showAppSnackBar(
-    //     context,
-    //     type: AppSnackBarType.error,
-    //     message: context.l10n.text('uploadAllRequiredDocs'),
-    //   );
-    //   return;
-    // }
+    if (!_allDocumentsSelected) {
+      showAppSnackBar(
+        context,
+        type: AppSnackBarType.error,
+        message: context.l10n.text('uploadAllRequiredDocs'),
+      );
+      return;
+    }
+    else
+      {
+        Navigator.of(context).push(
+          MaterialPageRoute(
+            builder: (_) => PaymentScreen(
+              universityName: widget.universityName,
+              universityHeroImage: widget.universityHeroImage,
+              courseTitle: widget.courseTitle,
+              applicationsPayload: widget.applicationsPayload,
+            ),
+          ),
+        );
+      }
 
-    Navigator.of(context).push(
-      MaterialPageRoute(
-        builder: (_) => PaymentScreen(
-          universityName: widget.universityName,
-          universityHeroImage: widget.universityHeroImage,
-          courseTitle: widget.courseTitle,
-          applicationsPayload: widget.applicationsPayload,
-        ),
-      ),
-    );
+
   }
 
   @override
@@ -161,7 +165,7 @@ class _UploadDocumentsScreenState extends State<UploadDocumentsScreen> {
                       return Center(
                         child: Text(
                           snapshot.error.toString(),
-                          style: const TextStyle(color: AppColors.error),
+                          style: const TextStyle(color: AppColors.accent),
                         ),
                       );
                     }
