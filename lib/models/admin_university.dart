@@ -620,6 +620,7 @@ class CourseDetails {
   int? applicationFee;
   String? coverImagePath;
   String? status;
+  String? minBaGpa;
 
   CourseDetails({
     this.name,
@@ -642,6 +643,7 @@ class CourseDetails {
     this.applicationFee,
     this.coverImagePath,
     this.status,
+    this.minBaGpa,
   });
 
   CourseDetails.fromJson(Map<String, dynamic> json) {
@@ -665,6 +667,7 @@ class CourseDetails {
     applicationFee = _asInt(json['applicationFee']);
     coverImagePath = json['coverImagePath']?.toString();
     status = json['status']?.toString();
+    minBaGpa = json['minBaGpa']?.toString();
   }
 
   Map<String, dynamic> toJson() {
@@ -689,6 +692,7 @@ class CourseDetails {
     _addIfNotNull(data, 'applicationFee', applicationFee);
     _addIfNotNull(data, 'coverImagePath', coverImagePath);
     _addIfNotNull(data, 'status', status);
+    _addIfNotNull(data, 'minBaGpa', minBaGpa);
     return data;
   }
 }

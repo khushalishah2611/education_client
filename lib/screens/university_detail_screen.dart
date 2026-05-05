@@ -74,8 +74,7 @@ class _UniversityDetailScreenState extends State<UniversityDetailScreen> {
   Future<void> _toggleCourseSelection(String courseKey) async {
     final SelectedCourseData? savedData = await SelectedCourseStorage.load();
     final bool selectingNewCourse = !_selectedCourses.contains(courseKey);
-    final bool hasDifferentUniversitySelection =
-        selectingNewCourse &&
+    final bool hasDifferentUniversitySelection = selectingNewCourse &&
         _selectedCourses.isEmpty &&
         savedData != null &&
         savedData.universityKey.isNotEmpty &&
@@ -86,7 +85,6 @@ class _UniversityDetailScreenState extends State<UniversityDetailScreen> {
       final bool? shouldReplaceSelection = await showModalBottomSheet<bool>(
         context: context,
         isScrollControlled: true,
-
         backgroundColor: AppColors.white,
         shape: const RoundedRectangleBorder(
           borderRadius: BorderRadius.vertical(top: Radius.circular(20)),
@@ -130,7 +128,6 @@ class _UniversityDetailScreenState extends State<UniversityDetailScreen> {
                     ],
                   ),
                   const SizedBox(height: 5),
-
                   const Text(
                     'You already selected courses in another university. '
                     'Do you want to clear them and continue here?',
@@ -187,8 +184,8 @@ class _UniversityDetailScreenState extends State<UniversityDetailScreen> {
     final double headerHeight = isSmallMobile
         ? 220
         : isMediumMobile
-        ? 245
-        : 280;
+            ? 245
+            : 280;
     final double topGap = isSmallMobile ? 52 : 60;
     final double sectionPadding = isSmallMobile ? 14 : 16;
 
@@ -218,7 +215,6 @@ class _UniversityDetailScreenState extends State<UniversityDetailScreen> {
                       ),
                     ),
                   ),
-
                   Positioned(
                     left: 20,
                     right: 20,
@@ -306,7 +302,6 @@ class _UniversityDetailScreenState extends State<UniversityDetailScreen> {
                                         color: AppColors.textMuted,
                                       ),
                                       const SizedBox(width: 4),
-
                                       Expanded(
                                         child: Text(
                                           data.address ?? "",
@@ -327,7 +322,6 @@ class _UniversityDetailScreenState extends State<UniversityDetailScreen> {
                       ),
                     ),
                   ),
-
                   TopRoundedHeader(title: data.name ?? ""),
                 ],
               ),
@@ -353,7 +347,6 @@ class _UniversityDetailScreenState extends State<UniversityDetailScreen> {
                           ),
                         ),
                       ),
-
                       Padding(
                         padding: EdgeInsets.fromLTRB(
                           sectionPadding + 4,
@@ -383,7 +376,6 @@ class _UniversityDetailScreenState extends State<UniversityDetailScreen> {
                             ),
                           ),
                         ),
-
                       if (data.academicList?.isNotEmpty ?? false)
                         Padding(
                           padding: EdgeInsets.symmetric(
@@ -393,10 +385,10 @@ class _UniversityDetailScreenState extends State<UniversityDetailScreen> {
                             children: (data.academicList ?? []).map((entry) {
                               final String collegeName =
                                   (entry.college?.trim().isNotEmpty ?? false)
-                                  ? entry.college!.trim()
-                                  : '';
-                              final bool isExpanded = _expandedColleges
-                                  .contains(collegeName);
+                                      ? entry.college!.trim()
+                                      : '';
+                              final bool isExpanded =
+                                  _expandedColleges.contains(collegeName);
 
                               return _CollegeAccordion(
                                 collegeName: collegeName,
@@ -463,11 +455,8 @@ class _UniversityDetailScreenState extends State<UniversityDetailScreen> {
                     onPressed: _selectedCourses.isEmpty
                         ? null
                         : () {
-                            final String selectedCourseTitle = _selectedCourses
-                                .first
-                                .split('-')
-                                .last
-                                .trim();
+                            final String selectedCourseTitle =
+                                _selectedCourses.first.split('-').last.trim();
                             // Navigator.push(
                             //   context,
                             //   MaterialPageRoute(
@@ -528,7 +517,9 @@ class _CollegeAccordionState extends State<_CollegeAccordion> {
     final bool isSmallMobile = _isSmallMobile(screenWidth);
     final double tableWidth = screenWidth;
 
-    final bool isEmpty = courseDetailsList.isEmpty;
+    final bool isEmpty = courseDetailsList.every(
+      (e) => (e.track ?? '').trim().isEmpty,
+    );
 
     return Container(
       margin: const EdgeInsets.only(bottom: 10),
@@ -552,7 +543,9 @@ class _CollegeAccordionState extends State<_CollegeAccordion> {
                 children: [
                   Expanded(
                     child: Text(
-                      widget.academicEntry.academicname.toString().toUpperCase(),
+                      widget.academicEntry.academicname
+                          .toString()
+                          .toUpperCase(),
                       style: TextStyle(
                         fontSize: isSmallMobile ? 12.5 : 14,
                         fontWeight: FontWeight.bold,
@@ -569,18 +562,15 @@ class _CollegeAccordionState extends State<_CollegeAccordion> {
               ),
             ),
           ),
-
           if (widget.isExpanded)
             Column(
               children: [
-                _buildTableHeader(
-                  context,
-                  isSmallMobile: isSmallMobile,
-                  tableWidth: tableWidth,
-                  isEmpty: isEmpty,
-                ),
-
-                if (!isEmpty) ...[
+                _buildTableHeader(context,
+                    isSmallMobile: isSmallMobile,
+                    tableWidth: tableWidth,
+                    isEmpty: isEmpty,
+                    collegeName: widget.collegeName),
+                if (courseDetailsList.isNotEmpty) ...[
                   ...courseDetailsList.asMap().entries.map((entry) {
                     final int index = entry.key;
                     final details = entry.value;
@@ -620,7 +610,9 @@ class _CollegeAccordionState extends State<_CollegeAccordion> {
     required bool isSmallMobile,
     required double tableWidth,
     required bool isEmpty,
+    required String collegeName,
   }) {
+    String formattedName = collegeName.split('-').first.trim();
     return Container(
       color: const Color(0xFFE3E3E3),
       padding: EdgeInsets.symmetric(
@@ -635,7 +627,7 @@ class _CollegeAccordionState extends State<_CollegeAccordion> {
               flex: 3,
               child: Center(
                 child: Text(
-                  context.l10n.text('Course'),
+                  formattedName,
                   textAlign: TextAlign.center,
                   style: TextStyle(
                     fontWeight: FontWeight.w600,
@@ -674,9 +666,7 @@ class _CollegeAccordionState extends State<_CollegeAccordion> {
               flex: 2,
               child: Center(
                 child: Text(
-                  isEmpty
-                      ? 'Min\nBA GPA'
-                      : context.l10n.text('Track'),
+                  isEmpty ? 'Min\nBA GPA' : context.l10n.text('Track'),
                   textAlign: TextAlign.center,
                   style: TextStyle(
                     fontWeight: FontWeight.w600,
@@ -777,8 +767,8 @@ class _CollegeAccordionState extends State<_CollegeAccordion> {
                 flex: 2,
                 child: Text(
                   details.track == null || details.track!.isEmpty
-                      ? details.track!
-                      : details.track!,
+                      ? details.minBaGpa ?? "-"
+                      : details.track ?? "-",
                   textAlign: TextAlign.center,
                   style: TextStyle(
                     fontWeight: FontWeight.w400,
@@ -919,16 +909,14 @@ class _ReadMoreTextState extends State<ReadMoreText> {
             Text(
               widget.text,
               maxLines: isExpanded ? null : widget.trimLines,
-              overflow: isExpanded
-                  ? TextOverflow.visible
-                  : TextOverflow.ellipsis,
+              overflow:
+                  isExpanded ? TextOverflow.visible : TextOverflow.ellipsis,
               style: const TextStyle(
                 fontSize: 15,
                 color: AppColors.textMuted,
                 height: 1.35,
               ),
             ),
-
             if (isOverflowing)
               GestureDetector(
                 onTap: () {
