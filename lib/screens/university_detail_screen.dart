@@ -29,6 +29,15 @@ class _UniversityDetailScreenState extends State<UniversityDetailScreen> {
   final Set<String> _selectedCourses = <String>{};
 
   AdminUniversity get data => widget.data;
+
+  Map<String, List<AcademicList>> get _academicProgramGroups {
+    final Map<String, List<AcademicList>> grouped = <String, List<AcademicList>>{};
+    for (final AcademicList entry in data.academicList ?? <AcademicList>[]) {
+      final String programName = entry.program?.academicProgram?.trim() ?? '';
+      grouped.putIfAbsent(programName, () => <AcademicList>[]).add(entry);
+    }
+    return grouped;
+  }
   String get _universityKey => data.id?.trim().isNotEmpty == true
       ? data.id!.trim()
       : (data.name ?? '').trim().toLowerCase();
@@ -382,32 +391,55 @@ class _UniversityDetailScreenState extends State<UniversityDetailScreen> {
                             horizontal: sectionPadding,
                           ),
                           child: Column(
-                            children: (data.academicList ?? []).map((entry) {
-                              final String collegeName =
-                                  (entry.college?.trim().isNotEmpty ?? false)
-                                      ? entry.college!.trim()
-                                      : '';
-                              final bool isExpanded =
-                                  _expandedColleges.contains(collegeName);
+                            crossAxisAlignment: CrossAxisAlignment.start,
+                            children: _academicProgramGroups.entries
+                                .map((groupEntry) {
+                                  return Column(
+                                    crossAxisAlignment: CrossAxisAlignment.start,
+                                    children: [
+                                      Padding(
+                                        padding: const EdgeInsets.fromLTRB(4, 8, 4, 10),
+                                        child: Text(
+                                          groupEntry.key.toUpperCase(),
+                                          style: const TextStyle(
+                                            fontSize: 14,
+                                            fontWeight: FontWeight.w700,
+                                            color: AppColors.primaryDark,
+                                          ),
+                                        ),
+                                      ),
+                                      ...groupEntry.value.map((entry) {
+                                        final String collegeName =
+                                            (entry.college?.trim().isNotEmpty ?? false)
+                                            ? entry.college!.trim()
+                                            : '';
+                                        final String expandedKey =
+                                            '${groupEntry.key}-$collegeName-${entry.academicname ?? ''}';
+                                        final bool isExpanded =
+                                            _expandedColleges.contains(expandedKey);
 
-                              return _CollegeAccordion(
-                                collegeName: collegeName,
-                                academicEntry: entry,
-                                isExpanded: isExpanded,
-                                selectedCourses: _selectedCourses,
-                                onToggleExpand: () {
-                                  setState(() {
-                                    if (isExpanded) {
-                                      _expandedColleges.remove(collegeName);
-                                    } else {
-                                      _expandedColleges.add(collegeName);
-                                    }
-                                  });
-                                },
-                                onToggleCourse: _toggleCourseSelection,
-                                adminUniversity: data,
-                              );
-                            }).toList(),
+                                        return _CollegeAccordion(
+                                          collegeName: collegeName,
+                                          academicEntry: entry,
+                                          isExpanded: isExpanded,
+                                          selectedCourses: _selectedCourses,
+                                          onToggleExpand: () {
+                                            setState(() {
+                                              if (isExpanded) {
+                                                _expandedColleges.remove(expandedKey);
+                                              } else {
+                                                _expandedColleges.add(expandedKey);
+                                              }
+                                            });
+                                          },
+                                          onToggleCourse: _toggleCourseSelection,
+                                          adminUniversity: data,
+                                        );
+                                      }),
+                                    ],
+                                  );
+                                })
+                                .toList(),
                           ),
                         )
                       else
