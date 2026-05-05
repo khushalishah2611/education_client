@@ -56,9 +56,6 @@ class _UploadDocumentsScreenState extends State<UploadDocumentsScreen> {
       }
 
       final List<DocumentTypeItem> types = await _applicationApiService.fetchDocumentTypes();
-      final List<Map<String, dynamic>> uploaded = await _applicationApiService.fetchStudentDocuments(
-        studentUserId: studentUserId,
-      );
       final bool isArabic = (WidgetsBinding.instance.platformDispatcher.locale.languageCode) == 'ar';
 
       final docs = types
@@ -70,28 +67,9 @@ class _UploadDocumentsScreenState extends State<UploadDocumentsScreen> {
             ),
           )
           .toList(growable: false);
-
-      final Map<String, String> uploadedByType = <String, String>{};
-      for (final item in uploaded) {
-        final String type = item['type']?.toString() ?? '';
-        final String fileName = item['fileName']?.toString() ?? '';
-        if (type.isNotEmpty && fileName.isNotEmpty) {
-          uploadedByType[type] = fileName;
-        }
-      }
-
       if (!mounted) return;
       setState(() {
         _docs = docs;
-        _selectedFiles
-          ..clear()
-          ..addEntries(
-            docs.map((doc) {
-              final String? fileName = uploadedByType[doc.type];
-              final PlatformFile? file = fileName == null ? null : PlatformFile(name: fileName, size: 0);
-              return MapEntry<String, PlatformFile?>(doc.title, file);
-            }),
-          );
       });
     } catch (e) {
       if (!mounted) return;
