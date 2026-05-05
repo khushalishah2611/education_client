@@ -284,125 +284,118 @@ class _HomeScreenState extends State<HomeScreen> {
                     Expanded(
                       child: RefreshIndicator(
                         onRefresh: _refreshHomeData,
-                        child: SingleChildScrollView(
-                          physics: const AlwaysScrollableScrollPhysics(),
-                          child: Padding(
-                            padding: const EdgeInsets.only(
-                              left: 16.0,
-                              right: 16.0,
-                              bottom: 16.0,
-                            ),
-                            child: Column(
-                              crossAxisAlignment: CrossAxisAlignment.start,
-                              children: [
-                                SectionTitle(
-                                  context.l10n.text('popularUniversities'),
-                                ),
+                        child: Padding(
+                          padding: const EdgeInsets.only(
+                            left: 16.0,
+                            right: 16.0,
+                            bottom: 16.0,
+                          ),
+                          child: Column(
+                            crossAxisAlignment: CrossAxisAlignment.start,
+                            children: [
+                              SectionTitle(
+                                context.l10n.text('popularUniversities'),
+                              ),
 
-                                const SizedBox(height: 12),
+                              const SizedBox(height: 12),
 
-                                if (!_controller.isLoadingUniversities &&
-                                    _controller.universities.isEmpty)
-                                  Container(
-                                    width: double.infinity,
-                                    padding: const EdgeInsets.symmetric(
-                                      vertical: 20,
-                                      horizontal: 12,
+                              if (!_controller.isLoadingUniversities &&
+                                  _controller.universities.isEmpty)
+                                Container(
+                                  width: double.infinity,
+                                  padding: const EdgeInsets.symmetric(
+                                    vertical: 20,
+                                    horizontal: 12,
+                                  ),
+                                  decoration: BoxDecoration(
+                                    borderRadius: BorderRadius.circular(10),
+                                    border: Border.all(
+                                      color: const Color(0xFFE6E6E6),
                                     ),
-                                    decoration: BoxDecoration(
-                                      borderRadius: BorderRadius.circular(10),
-                                      border: Border.all(
-                                        color: const Color(0xFFE6E6E6),
-                                      ),
-                                      color: Colors.white,
+                                    color: Colors.white,
+                                  ),
+                                  child: Text(
+                                    context.l10n.text(
+                                      'No education institute data available',
                                     ),
-                                    child: Text(
-                                      context.l10n.text(
-                                        'No education institute data available',
-                                      ),
-                                      textAlign: TextAlign.center,
-                                      style: TextStyle(
-                                        color: Color(0xFF616161),
-                                        fontWeight: FontWeight.w500,
-                                      ),
+                                    textAlign: TextAlign.center,
+                                    style: TextStyle(
+                                      color: Color(0xFF616161),
+                                      fontWeight: FontWeight.w500,
                                     ),
-                                  )
-                                else
-                                  context.isSmallMobile
-                                      ? ListView.separated(
-                                          itemCount:
-                                              _controller.isLoadingUniversities
-                                              ? 4
-                                              : _controller
-                                                    .universities
-                                                    .length,
-                                          shrinkWrap: true,
-                                          physics:
-                                              const NeverScrollableScrollPhysics(),
-                                          separatorBuilder: (_, __) =>
-                                              const SizedBox(height: 8),
-                                          itemBuilder: (context, index) {
-                                            if (_controller
-                                                .isLoadingUniversities) {
-                                              return const _UniversityCardShimmer();
-                                            }
-                                            final item =
-                                                _controller.universities[index];
-                                            return _UniversityCard(
-                                              data: item,
-                                              onTap: () =>
-                                                  Navigator.of(context).push(
-                                                    MaterialPageRoute(
-                                                      builder: (_) =>
-                                                          UniversityDetailScreen(
-                                                            data: item,
-                                                          ),
-                                                    ),
+                                  ),
+                                )
+                              else
+                                context.isSmallMobile
+                                    ? ListView.separated(
+                                        itemCount:
+                                            _controller.isLoadingUniversities
+                                            ? 4
+                                            : _controller
+                                                  .universities
+                                                  .length,
+                                        shrinkWrap: true,
+                                        separatorBuilder: (_, __) =>
+                                            const SizedBox(height: 8),
+                                        itemBuilder: (context, index) {
+                                          if (_controller
+                                              .isLoadingUniversities) {
+                                            return const _UniversityCardShimmer();
+                                          }
+                                          final item =
+                                              _controller.universities[index];
+                                          return _UniversityCard(
+                                            data: item,
+                                            onTap: () =>
+                                                Navigator.of(context).push(
+                                                  MaterialPageRoute(
+                                                    builder: (_) =>
+                                                        UniversityDetailScreen(
+                                                          data: item,
+                                                        ),
                                                   ),
-                                            );
-                                          },
-                                        )
-                                      : GridView.builder(
-                                          itemCount:
-                                              _controller.isLoadingUniversities
-                                              ? 4
-                                              : _controller
-                                                    .universities
-                                                    .length,
-                                          shrinkWrap: true,
-                                          physics:
-                                              const NeverScrollableScrollPhysics(),
-                                          gridDelegate:
-                                              SliverGridDelegateWithFixedCrossAxisCount(
-                                                crossAxisCount: gridColumns,
-                                                mainAxisSpacing: 8,
-                                                crossAxisSpacing: 8,
-                                                childAspectRatio:
-                                                    gridAspectRatio,
-                                              ),
-                                          itemBuilder: (context, index) {
-                                            if (_controller
-                                                .isLoadingUniversities) {
-                                              return const _UniversityCardShimmer();
-                                            }
-                                            final item =
-                                                _controller.universities[index];
-                                            return _UniversityCard(
-                                              data: item,
-                                              onTap: () =>
-                                                  Navigator.of(context).push(
-                                                    MaterialPageRoute(
-                                                      builder: (_) =>
-                                                          UniversityDetailScreen(
-                                                            data: item,
-                                                          ),
-                                                    ),
+                                                ),
+                                          );
+                                        },
+                                      )
+                                    : GridView.builder(
+                                        itemCount:
+                                            _controller.isLoadingUniversities
+                                            ? 4
+                                            : _controller
+                                                  .universities
+                                                  .length,
+                                        shrinkWrap: true,
+                                        gridDelegate:
+                                            SliverGridDelegateWithFixedCrossAxisCount(
+                                              crossAxisCount: gridColumns,
+                                              mainAxisSpacing: 8,
+                                              crossAxisSpacing: 8,
+                                              childAspectRatio:
+                                                  gridAspectRatio,
+                                            ),
+                                        itemBuilder: (context, index) {
+                                          if (_controller
+                                              .isLoadingUniversities) {
+                                            return const _UniversityCardShimmer();
+                                          }
+                                          final item =
+                                              _controller.universities[index];
+                                          return _UniversityCard(
+                                            data: item,
+                                            onTap: () =>
+                                                Navigator.of(context).push(
+                                                  MaterialPageRoute(
+                                                    builder: (_) =>
+                                                        UniversityDetailScreen(
+                                                          data: item,
+                                                        ),
                                                   ),
-                                            );
-                                          },
-                                        ),
-                              ],
-                            ),
+                                                ),
+                                          );
+                                        },
+                                      ),
+                            ],
                           ),
                         ),
                       ),
