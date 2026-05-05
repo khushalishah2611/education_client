@@ -168,13 +168,16 @@ class _VerifyOtpScreenState extends State<VerifyOtpScreen> {
 
     setState(() => _isSubmitting = true);
     try {
-      final message = await _authApiService.verifyStudentOtp(
+      final response = await _authApiService.verifyStudentOtp(
         studentId: widget.studentId,
         otp: otp,
       );
       final prefs = await SharedPreferences.getInstance();
       await prefs.setBool('isLoggedIn', true);
-      await prefs.setString('studentUserId', widget.studentId);
+      await prefs.setString(
+        'studentUserId',
+        response.id.isNotEmpty ? response.id : widget.studentId,
+      );
       if (widget.loginCountry.trim().isNotEmpty) {
         await prefs.setString('loginCountry', widget.loginCountry.trim());
       }
@@ -182,7 +185,15 @@ class _VerifyOtpScreenState extends State<VerifyOtpScreen> {
         await prefs.setString('loginDialCode', widget.loginDialCode.trim());
       }
       if (!mounted) return;
-      showAppSnackBar(context, type: AppSnackBarType.success, message: message);
+      showAppSnackBar(
+        context,
+        type: AppSnackBarType.success,
+        message: response.message.isNotEmpty
+            ? response.message
+            : (context.l10n.isArabic
+                  ? 'تم التحقق من OTP بنجاح'
+                  : 'OTP verified successfully'),
+      );
       Navigator.of(context).pushAndRemoveUntil(
         MaterialPageRoute(
           builder: (_) => HomeScreen(

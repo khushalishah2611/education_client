@@ -127,7 +127,7 @@ class AuthApiService {
     return StudentLoginResponse.fromJson(_extractResponsePayload(decoded));
   }
 
-  Future<String> verifyStudentOtp({
+  Future<StudentLoginResponse> verifyStudentOtp({
     required String studentId,
     required String otp,
   }) async {
@@ -156,7 +156,7 @@ class AuthApiService {
       );
     }
 
-    return decoded['message'] as String? ?? 'OTP verified successfully.';
+    return StudentLoginResponse.fromJson(_extractResponsePayload(decoded));
   }
 }
 
