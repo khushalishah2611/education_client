@@ -30,12 +30,20 @@ class _UniversityDetailScreenState extends State<UniversityDetailScreen> {
 
   AdminUniversity get data => widget.data;
 
-  Map<String, List<AcademicList>> get _academicProgramGroups {
-    final Map<String, List<AcademicList>> grouped = <String, List<AcademicList>>{};
+  Map<String, Map<String, List<AcademicList>>> get _academicProgramGroups {
+    final Map<String, Map<String, List<AcademicList>>> grouped =
+        <String, Map<String, List<AcademicList>>>{};
+
     for (final AcademicList entry in data.academicList ?? <AcademicList>[]) {
       final String programName = entry.program?.academicProgram?.trim() ?? '';
-      grouped.putIfAbsent(programName, () => <AcademicList>[]).add(entry);
+      final String collegeName = entry.college?.trim() ?? '';
+
+      grouped
+          .putIfAbsent(programName, () => <String, List<AcademicList>>{})
+          .putIfAbsent(collegeName, () => <AcademicList>[])
+          .add(entry);
     }
+
     return grouped;
   }
   String get _universityKey => data.id?.trim().isNotEmpty == true
@@ -408,32 +416,50 @@ class _UniversityDetailScreenState extends State<UniversityDetailScreen> {
                                           ),
                                         ),
                                       ),
-                                      ...groupEntry.value.map((entry) {
-                                        final String collegeName =
-                                            (entry.college?.trim().isNotEmpty ?? false)
-                                            ? entry.college!.trim()
-                                            : '';
-                                        final String expandedKey =
-                                            '${groupEntry.key}-$collegeName-${entry.academicname ?? ''}';
-                                        final bool isExpanded =
-                                            _expandedColleges.contains(expandedKey);
+                                      ...groupEntry.value.entries.map((collegeGroup) {
+                                        final String collegeName = collegeGroup.key;
+                                        return Column(
+                                          crossAxisAlignment: CrossAxisAlignment.start,
+                                          children: [
+                                            if (collegeName.isNotEmpty)
+                                              Padding(
+                                                padding: const EdgeInsets.fromLTRB(4, 0, 4, 10),
+                                                child: Text(
+                                                  collegeName,
+                                                  style: const TextStyle(
+                                                    fontSize: 13,
+                                                    fontWeight: FontWeight.w700,
+                                                    color: AppColors.text,
+                                                  ),
+                                                ),
+                                              ),
+                                            ...collegeGroup.value.asMap().entries.map((entry) {
+                                              final int entryIndex = entry.key;
+                                              final AcademicList academicEntry = entry.value;
+                                              final String expandedKey =
+                                                  '${groupEntry.key}-$collegeName-${academicEntry.academicname ?? ''}-$entryIndex';
+                                              final bool isExpanded =
+                                                  _expandedColleges.contains(expandedKey);
 
-                                        return _CollegeAccordion(
-                                          collegeName: collegeName,
-                                          academicEntry: entry,
-                                          isExpanded: isExpanded,
-                                          selectedCourses: _selectedCourses,
-                                          onToggleExpand: () {
-                                            setState(() {
-                                              if (isExpanded) {
-                                                _expandedColleges.remove(expandedKey);
-                                              } else {
-                                                _expandedColleges.add(expandedKey);
-                                              }
-                                            });
-                                          },
-                                          onToggleCourse: _toggleCourseSelection,
-                                          adminUniversity: data,
+                                              return _CollegeAccordion(
+                                                collegeName: collegeName,
+                                                academicEntry: academicEntry,
+                                                isExpanded: isExpanded,
+                                                selectedCourses: _selectedCourses,
+                                                onToggleExpand: () {
+                                                  setState(() {
+                                                    if (isExpanded) {
+                                                      _expandedColleges.remove(expandedKey);
+                                                    } else {
+                                                      _expandedColleges.add(expandedKey);
+                                                    }
+                                                  });
+                                                },
+                                                onToggleCourse: _toggleCourseSelection,
+                                                adminUniversity: data,
+                                              );
+                                            }),
+                                          ],
                                         );
                                       }),
                                     ],
