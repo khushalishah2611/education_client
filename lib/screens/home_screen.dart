@@ -1156,6 +1156,7 @@ class _UniversityCardShimmer extends StatelessWidget {
         border: Border.all(color: const Color(0xFFE8E3DB)),
       ),
       child: const Column(
+        mainAxisSize: MainAxisSize.min,
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           _ShimmerBlock(height: 84, borderRadius: 8),
@@ -1163,7 +1164,7 @@ class _UniversityCardShimmer extends StatelessWidget {
           _ShimmerBlock(height: 14, borderRadius: 4),
           SizedBox(height: 6),
           _ShimmerBlock(height: 12, width: 90, borderRadius: 4),
-          Spacer(),
+          SizedBox(height: 24),
           _ShimmerBlock(height: 32, borderRadius: 8),
         ],
       ),
