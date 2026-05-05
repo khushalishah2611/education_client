@@ -552,7 +552,7 @@ class _CollegeAccordionState extends State<_CollegeAccordion> {
                 children: [
                   Expanded(
                     child: Text(
-                      widget.collegeName.toUpperCase(),
+                      widget.academicEntry.academicname.toString().toUpperCase(),
                       style: TextStyle(
                         fontSize: isSmallMobile ? 12.5 : 14,
                         fontWeight: FontWeight.bold,

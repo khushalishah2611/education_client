@@ -1045,95 +1045,114 @@ class _UniversityCard extends StatelessWidget {
         border: Border.all(color: const Color(0xFFE8E3DB)),
       ),
       child: Column(
-        mainAxisSize: MainAxisSize.min,
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          Column(
+          /// IMAGE
+          Container(
+            height: 84,
+            width: double.infinity,
+            decoration: BoxDecoration(
+              color: const Color(0xFFF5F5F5),
+              borderRadius: BorderRadius.circular(8),
+            ),
+            child: ClipRRect(
+              borderRadius: BorderRadius.circular(8),
+              child: Image.network(
+                ImageUrlHelper.resolveUploadUrl(data.logoPath),
+                errorBuilder: (_, __, ___) {
+                  return Center(
+                    child: Image.asset(
+                      'assets/images/logo.webp',
+                      fit: BoxFit.contain,
+                    ),
+                  );
+                },
+              ),
+            ),
+          ),
+
+          const SizedBox(height: 10),
+
+          /// NAME
+          Text(
+            data.name ?? "",
+            maxLines: 2,
+            overflow: TextOverflow.ellipsis,
+            style: const TextStyle(
+              fontWeight: FontWeight.w700,
+              fontSize: 14,
+            ),
+          ),
+
+          const SizedBox(height: 6),
+
+          /// LOCATION + RATING
+          Row(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-                /// IMAGE
-                Container(
-                  height: 84,
-                  width: double.infinity,
-                  decoration: BoxDecoration(
-                    color: const Color(0xFFF5F5F5),
-                    borderRadius: BorderRadius.circular(8),
-                  ),
-                  child: ClipRRect(
-                    borderRadius: BorderRadius.circular(8),
-                    child: Image.network(
-                      ImageUrlHelper.resolveUploadUrl(data.logoPath),
-                      fit: BoxFit.cover,
-                      errorBuilder: (_, __, ___) =>
-                          Center(child: Image.asset('assets/images/logo.webp')),
+              /// LOCATION
+              Expanded(
+                child: Row(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    const Padding(
+                      padding: EdgeInsets.only(top: 1),
+                      child: Icon(
+                        Icons.location_on_outlined,
+                        size: 14,
+                      ),
                     ),
-                  ),
-                ),
 
-                const SizedBox(height: 10),
+                    const SizedBox(width: 4),
 
-                /// NAME
-                Text(
-                  data.name ?? "",
-                  maxLines: 2,
-                  overflow: TextOverflow.ellipsis,
-                  style: const TextStyle(fontWeight: FontWeight.w700),
-                ),
-
-                const SizedBox(height: 6),
-
-                /// LOCATION + RATING
-                Expanded(
-                  child: Row(
-                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      /// LEFT SIDE (Location)
-                      Expanded(
-                        child: Row(
-                          crossAxisAlignment: CrossAxisAlignment.start,
-                          children: [
-                            const Icon(Icons.location_on_outlined, size: 14),
-                            const SizedBox(width: 4),
-                            Expanded(
-                              child: Text(
-                                data.country ?? "",
-                                maxLines: 2,
-                                overflow: TextOverflow.ellipsis,
-                                style: const TextStyle(fontSize: 11),
-                              ),
-                            ),
-                          ],
+                    Expanded(
+                      child: Text(
+                        data.country ?? "",
+                        maxLines: 2,
+                        overflow: TextOverflow.ellipsis,
+                        style: const TextStyle(
+                          fontSize: 11,
                         ),
                       ),
+                    ),
+                  ],
+                ),
+              ),
 
-                      /// RIGHT SIDE (Rating)
-                      Row(
-                        mainAxisSize: MainAxisSize.min,
-                        children: [
-                          const Icon(
-                            Icons.star,
-                            color: Color(0xFFFFB300),
-                            size: 16,
-                          ),
-                          const SizedBox(width: 4),
-                          Text(
-                            (data.rating ?? 0).toStringAsFixed(1),
-                            style: const TextStyle(fontWeight: FontWeight.w700),
-                          ),
-                        ],
-                      ),
-                    ],
+              const SizedBox(width: 6),
+
+              /// RATING
+              Row(
+                mainAxisSize: MainAxisSize.min,
+                children: [
+                  const Icon(
+                    Icons.star,
+                    color: Color(0xFFFFB300),
+                    size: 16,
                   ),
-                ),
-                SizedBox(
-                  width: double.infinity,
-                  child: AppPrimaryButton(
-                    label: context.l10n.text('viewDetails'),
-                    onPressed: onTap,
+
+                  const SizedBox(width: 4),
+
+                  Text(
+                    (data.rating ?? 0).toStringAsFixed(1),
+                    style: const TextStyle(
+                      fontWeight: FontWeight.w700,
+                      fontSize: 12,
+                    ),
                   ),
-                ),
-              ],
+                ],
+              ),
+            ],
+          ),
+
+          const SizedBox(height: 12),
+
+          /// BUTTON
+          SizedBox(
+            width: double.infinity,
+            child: AppPrimaryButton(
+              label: context.l10n.text('viewDetails'),
+              onPressed: onTap,
             ),
           ),
         ],
