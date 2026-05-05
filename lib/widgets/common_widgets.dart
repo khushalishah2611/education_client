@@ -275,70 +275,73 @@ class AuthScaffold extends StatelessWidget {
       child: Scaffold(
         body: Stack(
           children: [
-            Container(
-              color: const Color(0xFFF8EFE6),
-              child: SafeArea(
-                child: Stack(
-                  children: [
-                    /// 🔥 BACKGROUND IMAGE (FIXED)
-                    Image.asset(
-                      'assets/images/img.png',
-                      width: double.infinity,
-                      fit: BoxFit.cover,
-                    ),
+            SafeArea(
+              child: SingleChildScrollView(
+                child:Container(
+                  color: const Color(0xFFF8EFE6),
+                  height:  MediaQuery.of(context).size.height,
+                  child:  Stack(
+                    children: [
+                      /// 🔥 BACKGROUND IMAGE (FIXED)
+                      Image.asset(
+                        'assets/images/img.png',
+                        width: double.infinity,
+                        fit: BoxFit.cover,
+                      ),
 
-                    /// 🔥 MAIN CONTENT
-                    Column(
-                      children: [
-                        /// 🔝 TOP BAR
-                        Padding(
-                          padding: EdgeInsets.symmetric(
-                            horizontal: horizontalPadding,
-                            vertical: context.isSmallMobile ? 10 : 12,
-                          ),
-                          child: Row(
-                            mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                            children: const [
-                              HelpPillButton(),
-                              LanguageDropdownChip(),
-                            ],
-                          ),
-                        ),
-
-                        const SizedBox(height: 20),
-
-                        /// ✅ CENTER LOGO (PERFECT POSITION)
-                        Expanded(
-                          child: Center(
-                            child: Image.asset('assets/images/logo.webp'),
-                          ),
-                        ),
-
-                        /// ⬇️ BOTTOM CARD (LOGIN AREA)
-                        Container(
-                          width: double.infinity,
-                          padding: EdgeInsets.fromLTRB(
-                            horizontalPadding,
-                            topPadding,
-                            horizontalPadding,
-                            bottomPadding,
-                          ),
-                          decoration: BoxDecoration(
-                            color: bottomCardColor,
-                            borderRadius: const BorderRadius.vertical(
-                              top: Radius.circular(30),
+                      /// 🔥 MAIN CONTENT
+                      Column(
+                        children: [
+                          /// 🔝 TOP BAR
+                          Padding(
+                            padding: EdgeInsets.symmetric(
+                              horizontal: horizontalPadding,
+                              vertical: context.isSmallMobile ? 10 : 12,
+                            ),
+                            child: Row(
+                              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                              children: const [
+                                HelpPillButton(),
+                                LanguageDropdownChip(),
+                              ],
                             ),
                           ),
-                          child: Center(
-                            child: ConstrainedBox(
-                              constraints: const BoxConstraints(maxWidth: 520),
-                              child: child,
+
+                          const SizedBox(height: 20),
+
+                          /// ✅ CENTER LOGO (PERFECT POSITION)
+                          Expanded(
+                            child: Center(
+                              child: Image.asset('assets/images/logo.webp'),
                             ),
                           ),
-                        ),
-                      ],
-                    ),
-                  ],
+
+                          /// ⬇️ BOTTOM CARD (LOGIN AREA)
+                          Container(
+                            width: double.infinity,
+                            padding: EdgeInsets.fromLTRB(
+                              horizontalPadding,
+                              topPadding,
+                              horizontalPadding,
+                              bottomPadding,
+                            ),
+                            decoration: BoxDecoration(
+                              color: bottomCardColor,
+                              borderRadius: const BorderRadius.vertical(
+                                top: Radius.circular(30),
+                              ),
+                            ),
+                            child: Center(
+                              child: ConstrainedBox(
+                                constraints: const BoxConstraints(maxWidth: 520),
+                                child: child,
+                              ),
+                            ),
+                          ),
+                        ],
+                      ),
+                    ],
+                  ),
                 ),
               ),
             ),
