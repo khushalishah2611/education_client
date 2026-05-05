@@ -30,6 +30,7 @@ class UploadDocumentsScreen extends StatefulWidget {
 }
 
 class _UploadDocumentsScreenState extends State<UploadDocumentsScreen> {
+  static const int _maxUploadBytes = 5 * 1024 * 1024;
   late final Map<String, PlatformFile?> _selectedFiles = {};
   final ApplicationApiService _applicationApiService = const ApplicationApiService();
   bool _isUploading = false;
@@ -97,6 +98,16 @@ class _UploadDocumentsScreenState extends State<UploadDocumentsScreen> {
     final file = result.files.first;
     final filePath = file.path;
     if (filePath == null || filePath.isEmpty) {
+      return;
+    }
+
+    if (file.size > _maxUploadBytes) {
+      if (!mounted) return;
+      showAppSnackBar(
+        context,
+        type: AppSnackBarType.error,
+        message: 'File too large. Maximum allowed size is 5 MB.',
+      );
       return;
     }
 

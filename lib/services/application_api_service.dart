@@ -111,6 +111,9 @@ extension ApplicationApiDocuments on ApplicationApiService {
     );
 
     if (!ApiStatus.isSuccess(response.statusCode)) {
+      if (response.statusCode == 413) {
+        throw Exception('Selected file is too large. Please upload a smaller file.');
+      }
       throw Exception(decoded['message']?.toString() ?? 'Failed to upload document');
     }
 
