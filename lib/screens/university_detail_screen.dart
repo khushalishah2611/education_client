@@ -30,18 +30,12 @@ class _UniversityDetailScreenState extends State<UniversityDetailScreen> {
 
   AdminUniversity get data => widget.data;
 
-  Map<String, Map<String, List<AcademicList>>> get _academicProgramGroups {
-    final Map<String, Map<String, List<AcademicList>>> grouped =
-        <String, Map<String, List<AcademicList>>>{};
+  Map<String, List<AcademicList>> get _academicGroups {
+    final Map<String, List<AcademicList>> grouped = <String, List<AcademicList>>{};
 
     for (final AcademicList entry in data.academicList ?? <AcademicList>[]) {
-      final String programName = entry.program?.academicProgram?.trim() ?? '';
-      final String collegeName = entry.college?.trim() ?? '';
-
-      grouped
-          .putIfAbsent(programName, () => <String, List<AcademicList>>{})
-          .putIfAbsent(collegeName, () => <AcademicList>[])
-          .add(entry);
+      final String academicName = entry.academicname?.trim() ?? '';
+      grouped.putIfAbsent(academicName, () => <AcademicList>[]).add(entry);
     }
 
     return grouped;
@@ -401,56 +395,26 @@ class _UniversityDetailScreenState extends State<UniversityDetailScreen> {
                           ),
                           child: Column(
                             crossAxisAlignment: CrossAxisAlignment.start,
-                            children: _academicProgramGroups.entries
-                                .map((groupEntry) {
-                              return Column(
-                                crossAxisAlignment: CrossAxisAlignment.start,
-                                children: [
-                                  ...groupEntry.value.entries
-                                      .map((collegeGroup) {
-                                    final String collegeName = collegeGroup.key;
-                                    return Column(
-                                      crossAxisAlignment:
-                                          CrossAxisAlignment.start,
-                                      children: [
-                                        ...collegeGroup.value
-                                            .asMap()
-                                            .entries
-                                            .map((entry) {
-                                          final int entryIndex = entry.key;
-                                          final AcademicList academicEntry =
-                                              entry.value;
-                                          final String expandedKey =
-                                              '${groupEntry.key}-$collegeName-${academicEntry.academicname ?? ''}-$entryIndex';
-                                          final bool isExpanded =
-                                              _expandedColleges
-                                                  .contains(expandedKey);
+                            children: _academicGroups.entries.map((groupEntry) {
+                              final String academicName = groupEntry.key;
+                              final bool isExpanded = _expandedColleges.contains(academicName);
 
-                                          return _CollegeAccordion(
-                                            collegeName: collegeName,
-                                            academicEntry: academicEntry,
-                                            isExpanded: isExpanded,
-                                            selectedCourses: _selectedCourses,
-                                            onToggleExpand: () {
-                                              setState(() {
-                                                if (isExpanded) {
-                                                  _expandedColleges
-                                                      .remove(expandedKey);
-                                                } else {
-                                                  _expandedColleges
-                                                      .add(expandedKey);
-                                                }
-                                              });
-                                            },
-                                            onToggleCourse:
-                                                _toggleCourseSelection,
-                                            adminUniversity: data,
-                                          );
-                                        }),
-                                      ],
-                                    );
-                                  }),
-                                ],
+                              return _CollegeAccordion(
+                                academicName: academicName,
+                                academicEntries: groupEntry.value,
+                                isExpanded: isExpanded,
+                                selectedCourses: _selectedCourses,
+                                onToggleExpand: () {
+                                  setState(() {
+                                    if (isExpanded) {
+                                      _expandedColleges.remove(academicName);
+                                    } else {
+                                      _expandedColleges.add(academicName);
+                                    }
+                                  });
+                                },
+                                onToggleCourse: _toggleCourseSelection,
+                                adminUniversity: data,
                               );
                             }).toList(),
                           ),
@@ -530,8 +494,8 @@ class _UniversityDetailScreenState extends State<UniversityDetailScreen> {
 class _CollegeAccordion extends StatefulWidget {
   const _CollegeAccordion({
     super.key,
-    required this.collegeName,
-    required this.academicEntry,
+    required this.academicName,
+    required this.academicEntries,
     required this.isExpanded,
     required this.selectedCourses,
     required this.onToggleExpand,
@@ -539,8 +503,8 @@ class _CollegeAccordion extends StatefulWidget {
     required this.adminUniversity,
   });
 
-  final String collegeName;
-  final AcademicList academicEntry;
+  final String academicName;
+  final List<AcademicList> academicEntries;
   final bool isExpanded;
   final Set<String> selectedCourses;
   final AdminUniversity adminUniversity;
@@ -556,15 +520,9 @@ class _CollegeAccordionState extends State<_CollegeAccordion> {
 
   @override
   Widget build(BuildContext context) {
-    final List<CourseDetails> courseDetailsList =
-        widget.academicEntry.program?.courseDetails ?? <CourseDetails>[];
     final double screenWidth = MediaQuery.sizeOf(context).width;
     final bool isSmallMobile = _isSmallMobile(screenWidth);
     final double tableWidth = screenWidth;
-
-    final bool isEmpty = courseDetailsList.every(
-      (e) => (e.track ?? '').trim().isEmpty,
-    );
 
     return Container(
       margin: const EdgeInsets.only(bottom: 10),
@@ -588,9 +546,7 @@ class _CollegeAccordionState extends State<_CollegeAccordion> {
                 children: [
                   Expanded(
                     child: Text(
-                      widget.academicEntry.academicname
-                          .toString()
-                          .toUpperCase(),
+                      widget.academicName.toUpperCase(),
                       style: TextStyle(
                         fontSize: isSmallMobile ? 12.5 : 14,
                         fontWeight: FontWeight.bold,
@@ -609,41 +565,49 @@ class _CollegeAccordionState extends State<_CollegeAccordion> {
           ),
           if (widget.isExpanded)
             Column(
-              children: [
-                _buildTableHeader(context,
-                    isSmallMobile: isSmallMobile,
-                    tableWidth: tableWidth,
-                    isEmpty: isEmpty,
-                    collegeName: widget.collegeName),
-                if (courseDetailsList.isNotEmpty) ...[
-                  ...courseDetailsList.asMap().entries.map((entry) {
-                    final int index = entry.key;
-                    final details = entry.value;
+              children: widget.academicEntries.map((academicEntry) {
+                final List<CourseDetails> entryCourseDetailsList =
+                    academicEntry.program?.courseDetails ?? <CourseDetails>[];
+                final bool entryIsEmpty = entryCourseDetailsList.every(
+                  (e) => (e.track ?? '').trim().isEmpty,
+                );
+                final String collegeName = academicEntry.college?.trim() ?? '';
 
-                    final String courseKey =
-                        '${widget.collegeName}-${details.name ?? ''}';
-                    final bool isSelected = widget.selectedCourses.contains(
-                      courseKey,
-                    );
+                return Column(
+                  children: [
+                    _buildTableHeader(context,
+                        isSmallMobile: isSmallMobile,
+                        tableWidth: tableWidth,
+                        isEmpty: entryIsEmpty,
+                        collegeName: collegeName),
+                    if (entryCourseDetailsList.isNotEmpty)
+                      ...entryCourseDetailsList.asMap().entries.map((entry) {
+                        final int index = entry.key;
+                        final details = entry.value;
+                        final String courseKey =
+                            '$collegeName-${details.name ?? ''}';
+                        final bool isSelected =
+                            widget.selectedCourses.contains(courseKey);
 
-                    return _buildCourseRow(
-                      index: index,
-                      details: details,
-                      isSelected: isSelected,
-                      onTap: () => widget.onToggleCourse(courseKey),
-                      context: context,
-                      adminUniversity: widget.adminUniversity,
-                      isSmallMobile: isSmallMobile,
-                      tableWidth: tableWidth,
-                    );
-                  }).toList(),
-                ] else ...[
-                  Padding(
-                    padding: const EdgeInsets.all(12),
-                    child: Text(context.l10n.text('No data available')),
-                  ),
-                ],
-              ],
+                        return _buildCourseRow(
+                          index: index,
+                          details: details,
+                          isSelected: isSelected,
+                          onTap: () => widget.onToggleCourse(courseKey),
+                          context: context,
+                          adminUniversity: widget.adminUniversity,
+                          isSmallMobile: isSmallMobile,
+                          tableWidth: tableWidth,
+                        );
+                      })
+                    else
+                      Padding(
+                        padding: const EdgeInsets.all(12),
+                        child: Text(context.l10n.text('No data available')),
+                      ),
+                  ],
+                );
+              }).toList(),
             ),
         ],
       ),
