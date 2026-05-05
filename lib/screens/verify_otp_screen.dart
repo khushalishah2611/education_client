@@ -181,6 +181,9 @@ class _VerifyOtpScreenState extends State<VerifyOtpScreen> {
       if (widget.loginCountry.trim().isNotEmpty) {
         await prefs.setString('loginCountry', widget.loginCountry.trim());
       }
+      if (response.accessToken.isNotEmpty) {
+        await prefs.setString('authToken', response.accessToken);
+      }
       if (widget.loginDialCode.trim().isNotEmpty) {
         await prefs.setString('loginDialCode', widget.loginDialCode.trim());
       }

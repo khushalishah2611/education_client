@@ -9,6 +9,7 @@ class StudentLoginResponse {
     required this.existingUser,
     required this.country,
     required this.dialCode,
+    required this.accessToken,
   });
 
   final String id;
@@ -20,6 +21,7 @@ class StudentLoginResponse {
   final bool existingUser;
   final String country;
   final String dialCode;
+  final String accessToken;
 
   factory StudentLoginResponse.fromJson(Map<String, dynamic> json) {
     final profile = json['profile'];
@@ -54,6 +56,12 @@ class StudentLoginResponse {
       dialCode: dialCode.isNotEmpty
           ? dialCode
           : _readString(profileMap, const ['dialCode', 'countryCode']),
+      accessToken: _readString(json, const [
+        'accessToken',
+        'access_token',
+        'token',
+        'jwt',
+      ]),
     );
   }
 }

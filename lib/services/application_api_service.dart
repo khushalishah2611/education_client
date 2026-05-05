@@ -1,6 +1,7 @@
 import 'dart:convert';
 
 import 'package:http/http.dart' as http;
+import 'package:shared_preferences/shared_preferences.dart';
 
 import '../core/api_config.dart';
 import '../core/api_logger.dart';
@@ -23,7 +24,7 @@ class ApplicationApiService {
 
     final response = await http.post(
       uri,
-      headers: const <String, String>{'Content-Type': 'application/json'},
+      headers: await _jsonHeaders(),
       body: jsonEncode(body),
     );
 
@@ -47,7 +48,7 @@ class ApplicationApiService {
 extension ApplicationApiDocumentTypes on ApplicationApiService {
   Future<List<DocumentTypeItem>> fetchDocumentTypes() async {
     final Uri uri = ApiConfig.uri('/api/student/document-types');
-    final response = await http.get(uri);
+    final response = await http.get(uri, headers: await _authHeaders());
     final decoded = _decodeMap(response.body);
     logApiCall(
       method: 'GET',
@@ -85,6 +86,7 @@ extension ApplicationApiDocuments on ApplicationApiService {
     );
 
     final request = http.MultipartRequest('POST', uri)
+      ..headers.addAll(await _authHeaders())
       ..fields['type'] = type
       ..files.add(
         await http.MultipartFile.fromPath(
@@ -126,7 +128,7 @@ extension ApplicationApiDocuments on ApplicationApiService {
     final Uri uri = ApiConfig.uri('/api/student/documents').replace(
       queryParameters: <String, String>{'studentUserId': studentUserId},
     );
-    final response = await http.get(uri);
+    final response = await http.get(uri, headers: await _authHeaders());
     final decoded = _decodeMap(response.body);
 
     logApiCall(
@@ -160,4 +162,17 @@ Map<String, dynamic> _decodeMap(String body) {
     }
   } catch (_) {}
   return <String, dynamic>{};
+}
+
+Future<Map<String, String>> _authHeaders() async {
+  final SharedPreferences prefs = await SharedPreferences.getInstance();
+  final String token = prefs.getString('authToken')?.trim() ?? '';
+  if (token.isEmpty) return const <String, String>{};
+  return <String, String>{'Authorization': 'Bearer $token'};
+}
+
+Future<Map<String, String>> _jsonHeaders() async {
+  final Map<String, String> headers = <String, String>{'Content-Type': 'application/json'};
+  headers.addAll(await _authHeaders());
+  return headers;
 }
