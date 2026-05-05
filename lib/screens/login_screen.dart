@@ -321,21 +321,24 @@ class _LoginScreenState extends State<LoginScreen> {
             onPressed: _isLoadingMeta || _isSubmitting ? null : _onSendOtpTap,
           ),
           const SizedBox(height: 14),
-          CheckboxListTile(
-            value: _isChecked,
-            onChanged: agreement == null
-                ? null
-                : (value) => setState(() => _isChecked = value ?? false),
-            title: GestureDetector(
-              onTap: agreement == null ? null : _openTermsBottomSheet,
-              child: Text(
-                agreement?.title ?? context.l10n.text('termsPrivacy'),
-                style: const TextStyle(color: Colors.blue, fontSize: 14),
+          Material(
+            type: MaterialType.transparency,
+            child: CheckboxListTile(
+              value: _isChecked,
+              onChanged: agreement == null
+                  ? null
+                  : (value) => setState(() => _isChecked = value ?? false),
+              title: GestureDetector(
+                onTap: agreement == null ? null : _openTermsBottomSheet,
+                child: Text(
+                  agreement?.title ?? context.l10n.text('termsPrivacy'),
+                  style: const TextStyle(color: Colors.blue, fontSize: 14),
+                ),
               ),
+              controlAffinity: ListTileControlAffinity.leading,
+              contentPadding: EdgeInsets.zero,
+              activeColor: AppColors.primary,
             ),
-            controlAffinity: ListTileControlAffinity.leading,
-            contentPadding: EdgeInsets.zero,
-            activeColor: AppColors.primary,
           ),
         ],
       ),
