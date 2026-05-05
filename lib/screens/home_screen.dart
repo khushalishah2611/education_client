@@ -1045,13 +1045,12 @@ class _UniversityCard extends StatelessWidget {
         border: Border.all(color: const Color(0xFFE8E3DB)),
       ),
       child: Column(
+        mainAxisSize: MainAxisSize.min,
         crossAxisAlignment: CrossAxisAlignment.start,
-        mainAxisAlignment: MainAxisAlignment.spaceBetween,
         children: [
-          Expanded(
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
+          Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
                 /// IMAGE
                 Container(
                   height: 84,
