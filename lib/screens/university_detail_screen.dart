@@ -46,6 +46,7 @@ class _UniversityDetailScreenState extends State<UniversityDetailScreen> {
 
     return grouped;
   }
+
   String get _universityKey => data.id?.trim().isNotEmpty == true
       ? data.id!.trim()
       : (data.name ?? '').trim().toLowerCase();
@@ -402,70 +403,56 @@ class _UniversityDetailScreenState extends State<UniversityDetailScreen> {
                             crossAxisAlignment: CrossAxisAlignment.start,
                             children: _academicProgramGroups.entries
                                 .map((groupEntry) {
-                                  return Column(
-                                    crossAxisAlignment: CrossAxisAlignment.start,
-                                    children: [
-                                      Padding(
-                                        padding: const EdgeInsets.fromLTRB(4, 8, 4, 10),
-                                        child: Text(
-                                          groupEntry.key.toUpperCase(),
-                                          style: const TextStyle(
-                                            fontSize: 14,
-                                            fontWeight: FontWeight.w700,
-                                            color: AppColors.primaryDark,
-                                          ),
-                                        ),
-                                      ),
-                                      ...groupEntry.value.entries.map((collegeGroup) {
-                                        final String collegeName = collegeGroup.key;
-                                        return Column(
-                                          crossAxisAlignment: CrossAxisAlignment.start,
-                                          children: [
-                                            if (collegeName.isNotEmpty)
-                                              Padding(
-                                                padding: const EdgeInsets.fromLTRB(4, 0, 4, 10),
-                                                child: Text(
-                                                  collegeName,
-                                                  style: const TextStyle(
-                                                    fontSize: 13,
-                                                    fontWeight: FontWeight.w700,
-                                                    color: AppColors.text,
-                                                  ),
-                                                ),
-                                              ),
-                                            ...collegeGroup.value.asMap().entries.map((entry) {
-                                              final int entryIndex = entry.key;
-                                              final AcademicList academicEntry = entry.value;
-                                              final String expandedKey =
-                                                  '${groupEntry.key}-$collegeName-${academicEntry.academicname ?? ''}-$entryIndex';
-                                              final bool isExpanded =
-                                                  _expandedColleges.contains(expandedKey);
+                              return Column(
+                                crossAxisAlignment: CrossAxisAlignment.start,
+                                children: [
+                                  ...groupEntry.value.entries
+                                      .map((collegeGroup) {
+                                    final String collegeName = collegeGroup.key;
+                                    return Column(
+                                      crossAxisAlignment:
+                                          CrossAxisAlignment.start,
+                                      children: [
+                                        ...collegeGroup.value
+                                            .asMap()
+                                            .entries
+                                            .map((entry) {
+                                          final int entryIndex = entry.key;
+                                          final AcademicList academicEntry =
+                                              entry.value;
+                                          final String expandedKey =
+                                              '${groupEntry.key}-$collegeName-${academicEntry.academicname ?? ''}-$entryIndex';
+                                          final bool isExpanded =
+                                              _expandedColleges
+                                                  .contains(expandedKey);
 
-                                              return _CollegeAccordion(
-                                                collegeName: collegeName,
-                                                academicEntry: academicEntry,
-                                                isExpanded: isExpanded,
-                                                selectedCourses: _selectedCourses,
-                                                onToggleExpand: () {
-                                                  setState(() {
-                                                    if (isExpanded) {
-                                                      _expandedColleges.remove(expandedKey);
-                                                    } else {
-                                                      _expandedColleges.add(expandedKey);
-                                                    }
-                                                  });
-                                                },
-                                                onToggleCourse: _toggleCourseSelection,
-                                                adminUniversity: data,
-                                              );
-                                            }),
-                                          ],
-                                        );
-                                      }),
-                                    ],
-                                  );
-                                })
-                                .toList(),
+                                          return _CollegeAccordion(
+                                            collegeName: collegeName,
+                                            academicEntry: academicEntry,
+                                            isExpanded: isExpanded,
+                                            selectedCourses: _selectedCourses,
+                                            onToggleExpand: () {
+                                              setState(() {
+                                                if (isExpanded) {
+                                                  _expandedColleges
+                                                      .remove(expandedKey);
+                                                } else {
+                                                  _expandedColleges
+                                                      .add(expandedKey);
+                                                }
+                                              });
+                                            },
+                                            onToggleCourse:
+                                                _toggleCourseSelection,
+                                            adminUniversity: data,
+                                          );
+                                        }),
+                                      ],
+                                    );
+                                  }),
+                                ],
+                              );
+                            }).toList(),
                           ),
                         )
                       else
