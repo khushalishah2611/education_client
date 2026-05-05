@@ -654,21 +654,24 @@ class _CountrySelectionDialogState extends State<_CountrySelectionDialog> {
                         itemBuilder: (_, index) {
                           final country = _filteredCountries[index];
 
-                          return ListTile(
-                            dense: true,
-                            contentPadding: EdgeInsets.zero,
-                            leading: _CountryFlag(country: country),
-                            title: Text(
-                              country.name,
-                              style: TextStyle(
-                                fontWeight: widget.selected == country.name
-                                    ? FontWeight.w700
-                                    : FontWeight.w500,
+                          return Material(
+                            color: Colors.transparent,
+                            child: ListTile(
+                              dense: true,
+                              contentPadding: EdgeInsets.zero,
+                              leading: _CountryFlag(country: country),
+                              title: Text(
+                                country.name,
+                                style: TextStyle(
+                                  fontWeight: widget.selected == country.name
+                                      ? FontWeight.w700
+                                      : FontWeight.w500,
+                                ),
                               ),
+                              onTap: () {
+                                Navigator.of(context).pop(country);
+                              },
                             ),
-                            onTap: () {
-                              Navigator.of(context).pop(country);
-                            },
                           );
                         },
                       ),
