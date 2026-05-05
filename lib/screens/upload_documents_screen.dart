@@ -5,6 +5,7 @@ import 'package:shared_preferences/shared_preferences.dart';
 import '../core/app_localizations.dart';
 import '../core/app_theme.dart';
 import '../core/responsive_helper.dart';
+import '../models/document_type.dart';
 import '../services/application_api_service.dart';
 import '../widgets/common_widgets.dart';
 import '../widgets/flow_widgets.dart';
@@ -32,29 +33,28 @@ class _UploadDocumentsScreenState extends State<UploadDocumentsScreen> {
   late final Map<String, PlatformFile?> _selectedFiles = {};
   final ApplicationApiService _applicationApiService = const ApplicationApiService();
   bool _isUploading = false;
+  late final Future<List<({String type, String title, String subtitle})>> _docsFuture;
 
-  List<({String type, String title, String subtitle})> _docs(BuildContext context) => [
-    (
-      type: 'PASSPORT',
-      title: context.l10n.text('docPassport'),
-      subtitle: context.l10n.text('docPassportSubtitle'),
-    ),
-    (
-      type: 'SOP',
-      title: context.l10n.text('docSop'),
-      subtitle: context.l10n.text('docSopSubtitle'),
-    ),
-    (
-      type: 'LOR',
-      title: context.l10n.text('docLor'),
-      subtitle: context.l10n.text('docLorSubtitle'),
-    ),
-    (
-      type: 'RESUME',
-      title: context.l10n.text('docResume'),
-      subtitle: context.l10n.text('docResumeSubtitle'),
-    ),
-  ];
+  @override
+  void initState() {
+    super.initState();
+    _docsFuture = _loadDocs();
+  }
+
+  Future<List<({String type, String title, String subtitle})>> _loadDocs() async {
+    final List<DocumentTypeItem> items = await _applicationApiService.fetchDocumentTypes();
+    final bool isArabic = (WidgetsBinding.instance.platformDispatcher.locale.languageCode) == 'ar';
+
+    return items
+        .map(
+          (item) => (
+            type: item.value,
+            title: isArabic ? item.labelAr : item.labelEn,
+            subtitle: item.value,
+          ),
+        )
+        .toList(growable: false);
+  }
 
   Future<void> _pickDocument(({String type, String title, String subtitle}) doc) async {
     final result = await FilePicker.platform.pickFiles(
@@ -139,14 +139,6 @@ class _UploadDocumentsScreenState extends State<UploadDocumentsScreen> {
   Widget build(BuildContext context) {
     final bool isSmallMobile = context.isSmallMobile;
     final double horizontalPadding = context.responsiveHorizontalPadding;
-    final docs = _docs(context);
-
-    if (_selectedFiles.isEmpty) {
-      for (final doc in docs) {
-        _selectedFiles[doc.title] = null;
-      }
-    }
-
     return Scaffold(
       body: AppBackground(
         child: AppPageEntrance(
@@ -158,7 +150,32 @@ class _UploadDocumentsScreenState extends State<UploadDocumentsScreen> {
                 title: context.l10n.text('uploadDocuments'),
               ),
               Expanded(
-                child: ListView(
+                child: FutureBuilder<List<({String type, String title, String subtitle})>>(
+                  future: _docsFuture,
+                  builder: (context, snapshot) {
+                    if (snapshot.connectionState == ConnectionState.waiting) {
+                      return const Center(child: CircularProgressIndicator());
+                    }
+
+                    if (snapshot.hasError) {
+                      return Center(
+                        child: Text(
+                          snapshot.error.toString(),
+                          style: const TextStyle(color: AppColors.error),
+                        ),
+                      );
+                    }
+
+                    final docs = snapshot.data ?? const <({String type, String title, String subtitle})>[];
+                    if (docs.isEmpty) {
+                      return const Center(child: Text('No document types found'));
+                    }
+
+                    for (final doc in docs) {
+                      _selectedFiles.putIfAbsent(doc.title, () => null);
+                    }
+
+                    return ListView(
                   padding: EdgeInsets.fromLTRB(
                     horizontalPadding,
                     isSmallMobile ? 14 : 20,
@@ -198,6 +215,8 @@ class _UploadDocumentsScreenState extends State<UploadDocumentsScreen> {
                       onPressed: _isUploading ? null : _onContinue,
                     ),
                   ],
+                );
+                  },
                 ),
               ),
             ],
