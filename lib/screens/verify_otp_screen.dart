@@ -174,6 +174,7 @@ class _VerifyOtpScreenState extends State<VerifyOtpScreen> {
       );
       final prefs = await SharedPreferences.getInstance();
       await prefs.setBool('isLoggedIn', true);
+      await prefs.setString('studentUserId', widget.studentId);
       if (widget.loginCountry.trim().isNotEmpty) {
         await prefs.setString('loginCountry', widget.loginCountry.trim());
       }

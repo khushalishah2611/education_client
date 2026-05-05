@@ -8,7 +8,7 @@ import '../core/app_theme.dart';
 import '../widgets/common_widgets.dart';
 import '../widgets/flow_widgets.dart';
 import 'course_detail_screen.dart';
-// import 'upload_documents_screen.dart' show UploadDocumentsScreen;
+import 'upload_documents_screen.dart' show UploadDocumentsScreen;
 
 class UniversityDetailScreen extends StatefulWidget {
   const UniversityDetailScreen({
@@ -182,7 +182,9 @@ class _UniversityDetailScreenState extends State<UniversityDetailScreen> {
       if (_selectedCourses.contains(courseKey)) {
         _selectedCourses.remove(courseKey);
       } else {
-        _selectedCourses.add(courseKey);
+        _selectedCourses
+          ..clear()
+          ..add(courseKey);
       }
     });
     await _syncSelectedCourses();
@@ -466,19 +468,19 @@ class _UniversityDetailScreenState extends State<UniversityDetailScreen> {
                         : () {
                             final String selectedCourseTitle =
                                 _selectedCourses.first.split('-').last.trim();
-                            // Navigator.push(
-                            //   context,
-                            //   MaterialPageRoute(
-                            //     builder: (_) => UploadDocumentsScreen(
-                            //       universityName: data.name,
-                            //       universityHeroImage:
-                            //           ImageUrlHelper.resolveUploadUrl(
-                            //             data.coverImagePath,
-                            //           ),
-                            //       courseTitle: selectedCourseTitle,
-                            //     ),
-                            //   ),
-                            // );
+                            Navigator.push(
+                              context,
+                              MaterialPageRoute(
+                                builder: (_) => UploadDocumentsScreen(
+                                  universityName: data.name,
+                                  universityHeroImage:
+                                      ImageUrlHelper.resolveUploadUrl(
+                                        data.coverImagePath,
+                                      ),
+                                  courseTitle: selectedCourseTitle,
+                                ),
+                              ),
+                            );
                           },
                   ),
                 ),

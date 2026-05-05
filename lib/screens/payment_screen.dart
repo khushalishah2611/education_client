@@ -1,8 +1,10 @@
 import 'package:flutter/material.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 
 import '../core/app_localizations.dart';
 import '../core/responsive_helper.dart';
 import '../core/app_theme.dart';
+import '../services/application_api_service.dart';
 import '../widgets/common_widgets.dart';
 import '../widgets/flow_widgets.dart';
 import 'payment_confirmation_screen.dart';
@@ -13,11 +15,13 @@ class PaymentScreen extends StatefulWidget {
     this.universityName,
     this.universityHeroImage,
     this.courseTitle,
+    this.applicationsPayload = const <Map<String, dynamic>>[],
   });
 
   final String? universityName;
   final String? universityHeroImage;
   final String? courseTitle;
+  final List<Map<String, dynamic>> applicationsPayload;
 
   @override
   State<PaymentScreen> createState() => _PaymentScreenState();
@@ -25,6 +29,39 @@ class PaymentScreen extends StatefulWidget {
 
 class _PaymentScreenState extends State<PaymentScreen> {
   int selected = 1;
+  bool _isSubmitting = false;
+  final ApplicationApiService _applicationApiService = const ApplicationApiService();
+
+  Future<void> _submitApplicationsAndContinue() async {
+    if (_isSubmitting) return;
+    setState(() => _isSubmitting = true);
+    try {
+      if (widget.applicationsPayload.isNotEmpty) {
+        final SharedPreferences prefs = await SharedPreferences.getInstance();
+        final String studentUserId = prefs.getString('studentUserId')?.trim() ?? '';
+        if (studentUserId.isNotEmpty) {
+          await _applicationApiService.createBulkApplications(
+            studentUserId: studentUserId,
+            applications: widget.applicationsPayload,
+          );
+        }
+      }
+      if (!mounted) return;
+      Navigator.of(context).push(
+        MaterialPageRoute(
+          builder: (_) => PaymentConfirmationScreen(
+            universityName: widget.universityName,
+            universityHeroImage: widget.universityHeroImage,
+            courseTitle: widget.courseTitle,
+          ),
+        ),
+      );
+    } finally {
+      if (mounted) {
+        setState(() => _isSubmitting = false);
+      }
+    }
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -139,15 +176,7 @@ class _PaymentScreenState extends State<PaymentScreen> {
                     const SizedBox(height: 30),
                     AppPrimaryButton(
                       label: context.l10n.text('payNow'),
-                      onPressed: () => Navigator.of(context).push(
-                        MaterialPageRoute(
-                          builder: (_) => PaymentConfirmationScreen(
-                            universityName: widget.universityName,
-                            universityHeroImage: widget.universityHeroImage,
-                            courseTitle: widget.courseTitle,
-                          ),
-                        ),
-                      ),
+                      onPressed: _isSubmitting ? null : _submitApplicationsAndContinue,
                     ),
                   ],
                 ),
