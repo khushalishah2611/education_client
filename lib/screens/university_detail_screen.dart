@@ -569,14 +569,9 @@ class _CollegeAccordionState extends State<_CollegeAccordion> {
             Column(
               children: _groupByCollege().entries.map((collegeGroup) {
                 final String collegeName = collegeGroup.key;
-                final List<AcademicList> collegeEntries = collegeGroup.value;
-                final List<CourseDetails> courseRows = collegeEntries
-                    .expand(_courseDetailsForAcademicEntry)
-                    .toList();
-                final bool groupIsEmpty = courseRows.every(
-                  (CourseDetails details) =>
-                      (details.track ?? '').trim().isEmpty,
-                );
+
+                final List<Map<String, dynamic>> collegeCourses =
+                    collegeGroup.value;
 
                 return Column(
                   children: [
@@ -584,46 +579,44 @@ class _CollegeAccordionState extends State<_CollegeAccordion> {
                       context,
                       isSmallMobile: isSmallMobile,
                       tableWidth: tableWidth,
-                      isEmpty: groupIsEmpty,
+                      isEmpty: false,
                       collegeName: collegeName,
                     ),
-                    ...collegeEntries.expand((AcademicList academicEntry) {
-                      final List<CourseDetails> entryCourseDetailsList =
-                          _courseDetailsForAcademicEntry(academicEntry);
 
-                      return entryCourseDetailsList.asMap().entries.map((entry) {
-                        final int index = entry.key;
-                        final CourseDetails details = entry.value;
-                        final String courseKey = [
-                          widget.academicName,
-                          collegeName,
-                          academicEntry.program?.id ??
-                              academicEntry.program?.name ??
-                              '',
-                          details.name ?? '',
-                        ].map((String value) => value.trim()).join('-');
-                        final bool isSelected =
-                            widget.selectedCourses.contains(courseKey);
+                    ...collegeCourses.asMap().entries.map((entry) {
+                      final int index = entry.key;
 
-                        return _buildCourseRow(
-                          index: index,
-                          details: details,
-                          isSelected: isSelected,
-                          onTap: () => widget.onToggleCourse(courseKey),
-                          context: context,
-                          adminUniversity: widget.adminUniversity,
-                          academicEntry: academicEntry,
-                          collegeName: collegeName,
-                          isSmallMobile: isSmallMobile,
-                          tableWidth: tableWidth,
-                        );
-                      });
+                      final AcademicList academicEntry =
+                      entry.value['academicEntry'];
+
+                      final CourseDetails details =
+                      entry.value['details'];
+
+                      final String courseKey = [
+                        widget.academicName,
+                        collegeName,
+                        academicEntry.program?.id ??
+                            academicEntry.program?.name ??
+                            '',
+                        details.name ?? '',
+                      ].map((e) => e.trim()).join('-');
+
+                      final bool isSelected =
+                      widget.selectedCourses.contains(courseKey);
+
+                      return _buildCourseRow(
+                        index: index,
+                        details: details,
+                        isSelected: isSelected,
+                        onTap: () => widget.onToggleCourse(courseKey),
+                        context: context,
+                        adminUniversity: widget.adminUniversity,
+                        academicEntry: academicEntry,
+                        collegeName: collegeName,
+                        isSmallMobile: isSmallMobile,
+                        tableWidth: tableWidth,
+                      );
                     }),
-                    if (courseRows.isEmpty)
-                      Padding(
-                        padding: const EdgeInsets.all(12),
-                        child: Text(context.l10n.text('No data available')),
-                      ),
                   ],
                 );
               }).toList(),
@@ -632,24 +625,48 @@ class _CollegeAccordionState extends State<_CollegeAccordion> {
       ),
     );
   }
+  Map<String, List<Map<String, dynamic>>> _groupByCollege() {
+    final Map<String, List<Map<String, dynamic>>> grouped =
+    <String, List<Map<String, dynamic>>>{};
 
-  Map<String, List<AcademicList>> _groupByCollege() {
-    final Map<String, List<AcademicList>> grouped =
-        <String, List<AcademicList>>{};
+    for (final AcademicList academicEntry in widget.academicEntries) {
+      final String rawCollege =
+      (academicEntry.college ?? 'Other').trim();
 
-    for (final AcademicList entry in widget.academicEntries) {
-      final String college = (entry.college ?? 'Other').trim();
-      grouped
-          .putIfAbsent(
-            college.isEmpty ? 'Other' : college,
-            () => <AcademicList>[],
-          )
-          .add(entry);
+      final String collegeName =
+      rawCollege.split('-').first.trim();
+
+      final List<CourseDetails> courseDetails =
+      _courseDetailsForAcademicEntry(academicEntry);
+
+      grouped.putIfAbsent(
+        collegeName,
+            () => <Map<String, dynamic>>[],
+      );
+
+      for (final CourseDetails details in courseDetails) {
+        final String normalizedName =
+        _normalizeCourseName(details.name);
+
+        final bool alreadyExists = grouped[collegeName]!.any(
+              (item) =>
+          _normalizeCourseName(
+            (item['details'] as CourseDetails).name,
+          ) ==
+              normalizedName,
+        );
+
+        if (!alreadyExists) {
+          grouped[collegeName]!.add({
+            'academicEntry': academicEntry,
+            'details': details,
+          });
+        }
+      }
     }
 
     return grouped;
   }
-
   List<CourseDetails> _courseDetailsForAcademicEntry(
     AcademicList academicEntry,
   ) {
