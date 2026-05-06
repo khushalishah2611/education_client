@@ -1,3 +1,26 @@
+double? _toDouble(dynamic value) {
+  if (value == null) {
+    return null;
+  }
+  if (value is num) {
+    return value.toDouble();
+  }
+  if (value is String) {
+    return double.tryParse(value);
+  }
+  return null;
+}
+
+List<String>? _toStringList(dynamic value) {
+  if (value == null) {
+    return null;
+  }
+  if (value is List) {
+    return value.map((item) => item.toString()).toList();
+  }
+  return null;
+}
+
 class AdminUniversity {
   String? id;
   String? name;
@@ -56,7 +79,7 @@ class AdminUniversity {
     city = json['city'];
     email = json['email'];
     mobile = json['mobile'];
-    rating = json['rating'];
+    rating = _toDouble(json['rating']);
     if (json['academicList'] != null) {
       academicList = <AcademicList>[];
       json['academicList'].forEach((v) {
@@ -84,8 +107,8 @@ class AdminUniversity {
         ratings!.add(new Ratings.fromJson(v));
       });
     }
-    averageRating = json['averageRating'];
-    ratingCount = json['ratingCount'];
+    averageRating = _toDouble(json['averageRating']);
+    ratingCount = _toDouble(json['ratingCount']);
     if (json['academicPrograms'] != null) {
       academicPrograms = <AcademicPrograms>[];
       json['academicPrograms'].forEach((v) {
@@ -164,18 +187,18 @@ class Program {
   String? courseNames;
   List<CourseDetails>? courseDetails;
   String? track;
-  Null? description;
-  Null? durationMonths;
+  dynamic description;
+  dynamic durationMonths;
   double? minAdmissionRate;
   String? minBaGpa;
-  Null? requiredScore;
-  Null? discountedScore;
+  dynamic requiredScore;
+  dynamic discountedScore;
   String? status;
   bool? isEnabled;
   double? basePrice;
   String? currency;
   double? commissionPercent;
-  Null? coverImagePath;
+  dynamic coverImagePath;
   List<String>? eligibilityTitle;
   List<String>? scholarshipInfoTitle;
   String? createdAt;
@@ -225,18 +248,18 @@ class Program {
     track = json['track'];
     description = json['description'];
     durationMonths = json['durationMonths'];
-    minAdmissionRate = json['minAdmissionRate'];
+    minAdmissionRate = _toDouble(json['minAdmissionRate']);
     minBaGpa = json['minBaGpa'];
     requiredScore = json['requiredScore'];
     discountedScore = json['discountedScore'];
     status = json['status'];
     isEnabled = json['isEnabled'];
-    basePrice = json['basePrice'];
+    basePrice = _toDouble(json['basePrice']);
     currency = json['currency'];
-    commissionPercent = json['commissionPercent'];
+    commissionPercent = _toDouble(json['commissionPercent']);
     coverImagePath = json['coverImagePath'];
-    eligibilityTitle = json['eligibilityTitle'].cast<String>();
-    scholarshipInfoTitle = json['scholarshipInfoTitle'].cast<String>();
+    eligibilityTitle = _toStringList(json['eligibilityTitle']);
+    scholarshipInfoTitle = _toStringList(json['scholarshipInfoTitle']);
     createdAt = json['createdAt'];
     updatedAt = json['updatedAt'];
     if (json['universityLinks'] != null) {
@@ -246,7 +269,7 @@ class Program {
       });
     }
     educationInstitute = json['educationInstitute'];
-    courses = json['courses'].cast<String>();
+    courses = _toStringList(json['courses']);
   }
 
   Map<String, dynamic> toJson() {
@@ -333,19 +356,19 @@ class CourseDetails {
     isBooked = json['isBooked'];
     track = json['track'];
     duration = json['duration'];
-    creditHours = json['creditHours'];
-    totalFees = json['totalFees'];
-    semesters = json['semesters'];
-    totalSemesters = json['totalSemesters'];
-    feePerCredit = json['feePerCredit'];
-    semesterFee = json['semesterFee'];
-    annualFee = json['annualFee'];
-    basePrice = json['basePrice'];
-    minAdmissionRate = json['minAdmissionRate'];
-    eligibility = json['eligibility'].cast<String>();
-    otherRequirements = json['otherRequirements'].cast<String>();
+    creditHours = _toDouble(json['creditHours']);
+    totalFees = _toDouble(json['totalFees']);
+    semesters = _toDouble(json['semesters']);
+    totalSemesters = _toDouble(json['totalSemesters']);
+    feePerCredit = _toDouble(json['feePerCredit']);
+    semesterFee = _toDouble(json['semesterFee']);
+    annualFee = _toDouble(json['annualFee']);
+    basePrice = _toDouble(json['basePrice']);
+    minAdmissionRate = _toDouble(json['minAdmissionRate']);
+    eligibility = _toStringList(json['eligibility']);
+    otherRequirements = _toStringList(json['otherRequirements']);
     currency = json['currency'];
-    applicationFee = json['applicationFee'];
+    applicationFee = _toDouble(json['applicationFee']);
     status = json['status'];
     minBaGpa = json['minBaGpa'];
   }
@@ -383,7 +406,7 @@ class UniversityLinks {
   UniversityLinks({this.applicationFee, this.currency, this.university});
 
   UniversityLinks.fromJson(Map<String, dynamic> json) {
-    applicationFee = json['applicationFee'];
+    applicationFee = _toDouble(json['applicationFee']);
     currency = json['currency'];
     university = json['university'] != null
         ? new University.fromJson(json['university'])
@@ -448,8 +471,8 @@ class ProgramLinks {
     id = json['id'];
     universityId = json['universityId'];
     programId = json['programId'];
-    applicationFee = json['applicationFee'];
-    taxes = json['taxes'];
+    applicationFee = _toDouble(json['applicationFee']);
+    taxes = _toDouble(json['taxes']);
     currency = json['currency'];
     isEnabled = json['isEnabled'];
     createdAt = json['createdAt'];
@@ -482,7 +505,7 @@ class Ratings {
   String? universityId;
   double? rating;
   String? remark;
-  Null? imagePath;
+  dynamic imagePath;
   String? createdAt;
   String? updatedAt;
   Student? student;
@@ -502,7 +525,7 @@ class Ratings {
     id = json['id'];
     studentId = json['studentId'];
     universityId = json['universityId'];
-    rating = json['rating'];
+    rating = _toDouble(json['rating']);
     remark = json['remark'];
     imagePath = json['imagePath'];
     createdAt = json['createdAt'];
@@ -660,21 +683,21 @@ class Courses {
     isBooked = json['isBooked'];
     track = json['track'];
     duration = json['duration'];
-    creditHours = json['creditHours'];
-    totalFees = json['totalFees'];
-    semesters = json['semesters'];
-    totalSemesters = json['totalSemesters'];
-    feePerCredit = json['feePerCredit'];
-    semesterFee = json['semesterFee'];
-    annualFee = json['annualFee'];
-    basePrice = json['basePrice'];
-    minAdmissionRate = json['minAdmissionRate'];
-    eligibility = json['eligibility'].cast<String>();
-    otherRequirements = json['otherRequirements'].cast<String>();
+    creditHours = _toDouble(json['creditHours']);
+    totalFees = _toDouble(json['totalFees']);
+    semesters = _toDouble(json['semesters']);
+    totalSemesters = _toDouble(json['totalSemesters']);
+    feePerCredit = _toDouble(json['feePerCredit']);
+    semesterFee = _toDouble(json['semesterFee']);
+    annualFee = _toDouble(json['annualFee']);
+    basePrice = _toDouble(json['basePrice']);
+    minAdmissionRate = _toDouble(json['minAdmissionRate']);
+    eligibility = _toStringList(json['eligibility']);
+    otherRequirements = _toStringList(json['otherRequirements']);
     currency = json['currency'];
-    applicationFee = json['applicationFee'];
+    applicationFee = _toDouble(json['applicationFee']);
     status = json['status'];
-    commissionPercent = json['commissionPercent'];
+    commissionPercent = _toDouble(json['commissionPercent']);
     minBaGpa = json['minBaGpa'];
   }
 
