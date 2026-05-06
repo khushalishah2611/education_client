@@ -2,7 +2,7 @@
     package="com.arab.education">
 
         <application
-            android:label="education_client"
+            android:label="Arab"
             android:name="${applicationName}"
             android:icon="@mipmap/ic_launcher">
             <activity
