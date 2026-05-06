@@ -567,10 +567,14 @@ class _CollegeAccordionState extends State<_CollegeAccordion> {
           ),
           if (widget.isExpanded)
             Column(
-              children:
-              (widget.adminUniversity.academicPrograms ?? []).map((academicProgram) {
-                final String academicName =
-                    academicProgram.academicname ?? '';
+              children: (widget.adminUniversity.academicPrograms ?? [])
+                  .where(
+                    (academicProgram) =>
+                        (academicProgram.academicname ?? '').trim() ==
+                        widget.academicName.trim(),
+                  )
+                  .map((academicProgram) {
+                final String academicName = academicProgram.academicname ?? '';
 
                 return Column(
                   crossAxisAlignment: CrossAxisAlignment.start,

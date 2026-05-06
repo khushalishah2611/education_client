@@ -21,6 +21,113 @@ List<String>? _toStringList(dynamic value) {
   return null;
 }
 
+String? _toTrimmedString(dynamic value) {
+  if (value == null) {
+    return null;
+  }
+  final text = value.toString().trim();
+  return text.isEmpty ? null : text;
+}
+
+List<String> _splitCourseNames(dynamic value) {
+  if (value == null) {
+    return <String>[];
+  }
+  if (value is List) {
+    return value
+        .map(_toTrimmedString)
+        .whereType<String>()
+        .toList(growable: false);
+  }
+  return value
+      .toString()
+      .split(RegExp(r'[\n,]'))
+      .map((item) => item.trim())
+      .where((item) => item.isNotEmpty)
+      .toList(growable: false);
+}
+
+List<AcademicPrograms>? _academicProgramsFromAcademicList(
+  List<AcademicList>? academicList,
+) {
+  if (academicList == null || academicList.isEmpty) {
+    return null;
+  }
+
+  final Map<String, AcademicPrograms> groupedPrograms =
+      <String, AcademicPrograms>{};
+
+  for (final AcademicList entry in academicList) {
+    final Program? program = entry.program;
+    final String academicName = _toTrimmedString(entry.academicname) ??
+        _toTrimmedString(program?.academicProgram) ??
+        _toTrimmedString(program?.name) ??
+        '';
+    final String collegeName = _toTrimmedString(entry.college) ??
+        _toTrimmedString(program?.educationInstitute) ??
+        '';
+
+    if (academicName.isEmpty && collegeName.isEmpty && program == null) {
+      continue;
+    }
+
+    final AcademicPrograms academicProgram = groupedPrograms.putIfAbsent(
+      academicName,
+      () => AcademicPrograms(
+        academicname: academicName,
+        colleges: <Colleges>[],
+      ),
+    );
+
+    final List<Colleges> colleges = academicProgram.colleges ?? <Colleges>[];
+    academicProgram.colleges = colleges;
+
+    final Colleges college = colleges.firstWhere(
+      (item) => (item.college ?? '') == collegeName,
+      orElse: () {
+        final created = Colleges(college: collegeName, courses: <Courses>[]);
+        colleges.add(created);
+        return created;
+      },
+    );
+
+    final List<Courses> courses = college.courses ?? <Courses>[];
+    college.courses = courses;
+
+    final List<CourseDetails> details =
+        program?.courseDetails ?? <CourseDetails>[];
+    if (details.isNotEmpty) {
+      courses.addAll(
+        details.map(
+          (course) => Courses.fromCourseDetails(
+            course,
+            program: program,
+            academicName: academicName,
+            collegeName: collegeName,
+          ),
+        ),
+      );
+      continue;
+    }
+
+    final dynamic courseNames = program?.courses?.isNotEmpty == true
+        ? program?.courses
+        : program?.courseNames;
+    for (final String courseName in _splitCourseNames(courseNames)) {
+      courses.add(
+        Courses.fromCourseDetails(
+          CourseDetails(name: courseName),
+          program: program,
+          academicName: academicName,
+          collegeName: collegeName,
+        ),
+      );
+    }
+  }
+
+  return groupedPrograms.values.toList(growable: false);
+}
+
 class AdminUniversity {
   String? id;
   String? name;
@@ -114,6 +221,9 @@ class AdminUniversity {
       json['academicPrograms'].forEach((v) {
         academicPrograms!.add(new AcademicPrograms.fromJson(v));
       });
+    }
+    if (academicPrograms == null || academicPrograms!.isEmpty) {
+      academicPrograms = _academicProgramsFromAcademicList(academicList);
     }
   }
 
@@ -673,6 +783,41 @@ class Courses {
         this.status,
         this.commissionPercent,
         this.minBaGpa});
+
+  factory Courses.fromCourseDetails(
+    CourseDetails details, {
+    Program? program,
+    String? academicName,
+    String? collegeName,
+  }) {
+    return Courses(
+      programId: program?.id,
+      programName: program?.name,
+      academicProgram: program?.academicProgram ?? academicName,
+      educationInstitute: program?.educationInstitute ?? collegeName,
+      name: details.name,
+      isBooked: details.isBooked,
+      track: details.track ?? program?.track,
+      duration: details.duration,
+      creditHours: details.creditHours,
+      totalFees: details.totalFees,
+      semesters: details.semesters,
+      totalSemesters: details.totalSemesters,
+      feePerCredit: details.feePerCredit,
+      semesterFee: details.semesterFee,
+      annualFee: details.annualFee,
+      basePrice: details.basePrice ?? program?.basePrice,
+      minAdmissionRate: details.minAdmissionRate ?? program?.minAdmissionRate,
+      eligibility: details.eligibility ?? program?.eligibilityTitle,
+      otherRequirements:
+          details.otherRequirements ?? program?.scholarshipInfoTitle,
+      currency: details.currency ?? program?.currency,
+      applicationFee: details.applicationFee,
+      status: details.status ?? program?.status,
+      commissionPercent: program?.commissionPercent,
+      minBaGpa: details.minBaGpa ?? program?.minBaGpa,
+    );
+  }
 
   Courses.fromJson(Map<String, dynamic> json) {
     programId = json['programId'];
