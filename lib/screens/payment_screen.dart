@@ -28,7 +28,7 @@ class PaymentScreen extends StatefulWidget {
 }
 
 class _PaymentScreenState extends State<PaymentScreen> {
-  int selected = 1;
+  int selected = 0;
   bool _isSubmitting = false;
   final ApplicationApiService _applicationApiService = const ApplicationApiService();
 
@@ -154,25 +154,25 @@ class _PaymentScreenState extends State<PaymentScreen> {
                     ),
                     const SizedBox(height: 12),
                     _PaymentMethodTile(
-                      label: context.l10n.text('creditCard'),
-                      iconText: 'VISA',
+                      label: context.l10n.text('COD'),
+                      iconText: 'COD',
                       selected: selected == 0,
                       onTap: () => setState(() => selected = 0),
                     ),
                     const SizedBox(height: 10),
-                    _PaymentMethodTile(
-                      label: context.l10n.text('upiPay'),
-                      iconText: 'UPI',
-                      selected: selected == 1,
-                      onTap: () => setState(() => selected = 1),
-                    ),
-                    const SizedBox(height: 10),
-                    _PaymentMethodTile(
-                      label: context.l10n.text('netBanking'),
-                      iconText: 'BANK',
-                      selected: selected == 2,
-                      onTap: () => setState(() => selected = 2),
-                    ),
+                    // _PaymentMethodTile(
+                    //   label: context.l10n.text('upiPay'),
+                    //   iconText: 'UPI',
+                    //   selected: selected == 1,
+                    //   onTap: () => setState(() => selected = 1),
+                    // ),
+                    // const SizedBox(height: 10),
+                    // _PaymentMethodTile(
+                    //   label: context.l10n.text('netBanking'),
+                    //   iconText: 'BANK',
+                    //   selected: selected == 2,
+                    //   onTap: () => setState(() => selected = 2),
+                    // ),
                     const SizedBox(height: 30),
                     AppPrimaryButton(
                       label: context.l10n.text('payNow'),

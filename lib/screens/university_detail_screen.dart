@@ -826,6 +826,7 @@ class _CollegeAccordionState extends State<_CollegeAccordion> {
                                     widget.adminUniversity.coverImagePath,
                                   ),
                               courseTitle: details.name,
+
                             ),
                           ),
                         );
