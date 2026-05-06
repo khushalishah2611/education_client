@@ -1,3 +1,5 @@
+import 'dart:convert';
+
 double? _toDouble(dynamic value) {
   if (value == null) {
     return null;
@@ -11,14 +13,66 @@ double? _toDouble(dynamic value) {
   return null;
 }
 
-List<String>? _toStringList(dynamic value) {
-  if (value == null) {
-    return null;
+dynamic _decodeJsonString(dynamic value) {
+  if (value is! String) {
+    return value;
   }
-  if (value is List) {
-    return value.map((item) => item.toString()).toList();
+
+  final trimmed = value.trim();
+  if (trimmed.isEmpty) {
+    return value;
+  }
+
+  final startsLikeJson = trimmed.startsWith('[') || trimmed.startsWith('{');
+  if (!startsLikeJson) {
+    return value;
+  }
+
+  try {
+    return jsonDecode(trimmed);
+  } catch (_) {
+    return value;
+  }
+}
+
+List<dynamic>? _toDynamicList(dynamic value) {
+  final decoded = _decodeJsonString(value);
+  return decoded is List ? decoded : null;
+}
+
+Map<String, dynamic>? _toStringDynamicMap(dynamic value) {
+  final decoded = _decodeJsonString(value);
+  if (decoded is Map<String, dynamic>) {
+    return decoded;
+  }
+  if (decoded is Map) {
+    return decoded.map(
+      (key, value) => MapEntry(key.toString(), value),
+    );
   }
   return null;
+}
+
+List<String>? _toStringList(dynamic value) {
+  final decoded = _decodeJsonString(value);
+  if (decoded == null) {
+    return null;
+  }
+  if (decoded is List) {
+    return decoded
+        .map(_toTrimmedString)
+        .whereType<String>()
+        .toList(growable: false);
+  }
+  final text = _toTrimmedString(decoded);
+  if (text == null) {
+    return null;
+  }
+  return text
+      .split(RegExp(r'[\n;,]'))
+      .map((item) => item.trim())
+      .where((item) => item.isNotEmpty)
+      .toList(growable: false);
 }
 
 String? _toTrimmedString(dynamic value) {
@@ -187,11 +241,15 @@ class AdminUniversity {
     email = json['email'];
     mobile = json['mobile'];
     rating = _toDouble(json['rating']);
-    if (json['academicList'] != null) {
+    final academicListJson = _toDynamicList(json['academicList']);
+    if (academicListJson != null) {
       academicList = <AcademicList>[];
-      json['academicList'].forEach((v) {
-        academicList!.add(new AcademicList.fromJson(v));
-      });
+      for (final item in academicListJson) {
+        final itemJson = _toStringDynamicMap(item);
+        if (itemJson != null) {
+          academicList!.add(AcademicList.fromJson(itemJson));
+        }
+      }
     }
     logoPath = json['logoPath'];
     coverImagePath = json['coverImagePath'];
@@ -202,25 +260,37 @@ class AdminUniversity {
     isEnabled = json['isEnabled'];
     createdAt = json['createdAt'];
     updatedAt = json['updatedAt'];
-    if (json['programLinks'] != null) {
+    final programLinksJson = _toDynamicList(json['programLinks']);
+    if (programLinksJson != null) {
       programLinks = <ProgramLinks>[];
-      json['programLinks'].forEach((v) {
-        programLinks!.add(new ProgramLinks.fromJson(v));
-      });
+      for (final item in programLinksJson) {
+        final itemJson = _toStringDynamicMap(item);
+        if (itemJson != null) {
+          programLinks!.add(ProgramLinks.fromJson(itemJson));
+        }
+      }
     }
-    if (json['ratings'] != null) {
+    final ratingsJson = _toDynamicList(json['ratings']);
+    if (ratingsJson != null) {
       ratings = <Ratings>[];
-      json['ratings'].forEach((v) {
-        ratings!.add(new Ratings.fromJson(v));
-      });
+      for (final item in ratingsJson) {
+        final itemJson = _toStringDynamicMap(item);
+        if (itemJson != null) {
+          ratings!.add(Ratings.fromJson(itemJson));
+        }
+      }
     }
     averageRating = _toDouble(json['averageRating']);
     ratingCount = _toDouble(json['ratingCount']);
-    if (json['academicPrograms'] != null) {
+    final academicProgramsJson = _toDynamicList(json['academicPrograms']);
+    if (academicProgramsJson != null) {
       academicPrograms = <AcademicPrograms>[];
-      json['academicPrograms'].forEach((v) {
-        academicPrograms!.add(new AcademicPrograms.fromJson(v));
-      });
+      for (final item in academicProgramsJson) {
+        final itemJson = _toStringDynamicMap(item);
+        if (itemJson != null) {
+          academicPrograms!.add(AcademicPrograms.fromJson(itemJson));
+        }
+      }
     }
     if (academicPrograms == null || academicPrograms!.isEmpty) {
       academicPrograms = _academicProgramsFromAcademicList(academicList);
@@ -275,8 +345,8 @@ class AcademicList {
   AcademicList.fromJson(Map<String, dynamic> json) {
     academicname = json['academicname'];
     college = json['college'];
-    program =
-    json['program'] != null ? new Program.fromJson(json['program']) : null;
+    final programJson = _toStringDynamicMap(json['program']);
+    program = programJson != null ? Program.fromJson(programJson) : null;
   }
 
   Map<String, dynamic> toJson() {
@@ -349,11 +419,15 @@ class Program {
     name = json['name'];
     academicProgram = json['academicProgram'];
     courseNames = json['courseNames'];
-    if (json['courseDetails'] != null) {
+    final courseDetailsJson = _toDynamicList(json['courseDetails']);
+    if (courseDetailsJson != null) {
       courseDetails = <CourseDetails>[];
-      json['courseDetails'].forEach((v) {
-        courseDetails!.add(new CourseDetails.fromJson(v));
-      });
+      for (final item in courseDetailsJson) {
+        final itemJson = _toStringDynamicMap(item);
+        if (itemJson != null) {
+          courseDetails!.add(CourseDetails.fromJson(itemJson));
+        }
+      }
     }
     track = json['track'];
     description = json['description'];
@@ -372,11 +446,15 @@ class Program {
     scholarshipInfoTitle = _toStringList(json['scholarshipInfoTitle']);
     createdAt = json['createdAt'];
     updatedAt = json['updatedAt'];
-    if (json['universityLinks'] != null) {
+    final universityLinksJson = _toDynamicList(json['universityLinks']);
+    if (universityLinksJson != null) {
       universityLinks = <UniversityLinks>[];
-      json['universityLinks'].forEach((v) {
-        universityLinks!.add(new UniversityLinks.fromJson(v));
-      });
+      for (final item in universityLinksJson) {
+        final itemJson = _toStringDynamicMap(item);
+        if (itemJson != null) {
+          universityLinks!.add(UniversityLinks.fromJson(itemJson));
+        }
+      }
     }
     educationInstitute = json['educationInstitute'];
     courses = _toStringList(json['courses']);
@@ -518,9 +596,8 @@ class UniversityLinks {
   UniversityLinks.fromJson(Map<String, dynamic> json) {
     applicationFee = _toDouble(json['applicationFee']);
     currency = json['currency'];
-    university = json['university'] != null
-        ? new University.fromJson(json['university'])
-        : null;
+    final universityJson = _toStringDynamicMap(json['university']);
+    university = universityJson != null ? University.fromJson(universityJson) : null;
   }
 
   Map<String, dynamic> toJson() {
@@ -587,8 +664,8 @@ class ProgramLinks {
     isEnabled = json['isEnabled'];
     createdAt = json['createdAt'];
     updatedAt = json['updatedAt'];
-    program =
-    json['program'] != null ? new Program.fromJson(json['program']) : null;
+    final programJson = _toStringDynamicMap(json['program']);
+    program = programJson != null ? Program.fromJson(programJson) : null;
   }
 
   Map<String, dynamic> toJson() {
@@ -640,8 +717,8 @@ class Ratings {
     imagePath = json['imagePath'];
     createdAt = json['createdAt'];
     updatedAt = json['updatedAt'];
-    student =
-    json['student'] != null ? new Student.fromJson(json['student']) : null;
+    final studentJson = _toStringDynamicMap(json['student']);
+    student = studentJson != null ? Student.fromJson(studentJson) : null;
   }
 
   Map<String, dynamic> toJson() {
@@ -688,11 +765,15 @@ class AcademicPrograms {
 
   AcademicPrograms.fromJson(Map<String, dynamic> json) {
     academicname = json['academicname'];
-    if (json['colleges'] != null) {
+    final collegesJson = _toDynamicList(json['colleges']);
+    if (collegesJson != null) {
       colleges = <Colleges>[];
-      json['colleges'].forEach((v) {
-        colleges!.add(new Colleges.fromJson(v));
-      });
+      for (final item in collegesJson) {
+        final itemJson = _toStringDynamicMap(item);
+        if (itemJson != null) {
+          colleges!.add(Colleges.fromJson(itemJson));
+        }
+      }
     }
   }
 
@@ -714,11 +795,15 @@ class Colleges {
 
   Colleges.fromJson(Map<String, dynamic> json) {
     college = json['college'];
-    if (json['courses'] != null) {
+    final coursesJson = _toDynamicList(json['courses']);
+    if (coursesJson != null) {
       courses = <Courses>[];
-      json['courses'].forEach((v) {
-        courses!.add(new Courses.fromJson(v));
-      });
+      for (final item in coursesJson) {
+        final itemJson = _toStringDynamicMap(item);
+        if (itemJson != null) {
+          courses!.add(Courses.fromJson(itemJson));
+        }
+      }
     }
   }
 
