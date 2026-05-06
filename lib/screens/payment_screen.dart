@@ -4,6 +4,7 @@ import 'package:shared_preferences/shared_preferences.dart';
 import '../core/app_localizations.dart';
 import '../core/responsive_helper.dart';
 import '../core/app_theme.dart';
+import '../core/selected_course_storage.dart';
 import '../services/application_api_service.dart';
 import '../widgets/common_widgets.dart';
 import '../widgets/flow_widgets.dart';
@@ -30,7 +31,8 @@ class PaymentScreen extends StatefulWidget {
 class _PaymentScreenState extends State<PaymentScreen> {
   int selected = 0;
   bool _isSubmitting = false;
-  final ApplicationApiService _applicationApiService = const ApplicationApiService();
+  final ApplicationApiService _applicationApiService =
+      const ApplicationApiService();
 
   Future<void> _submitApplicationsAndContinue() async {
     if (_isSubmitting) return;
@@ -38,7 +40,8 @@ class _PaymentScreenState extends State<PaymentScreen> {
     try {
       if (widget.applicationsPayload.isNotEmpty) {
         final SharedPreferences prefs = await SharedPreferences.getInstance();
-        final String studentUserId = prefs.getString('studentUserId')?.trim() ?? '';
+        final String studentUserId =
+            prefs.getString('studentUserId')?.trim() ?? '';
         if (studentUserId.isNotEmpty) {
           await _applicationApiService.createBulkApplications(
             studentUserId: studentUserId,
@@ -46,6 +49,9 @@ class _PaymentScreenState extends State<PaymentScreen> {
           );
         }
       }
+
+      await SelectedCourseStorage.clear();
+
       if (!mounted) return;
       Navigator.of(context).push(
         MaterialPageRoute(
@@ -55,6 +61,23 @@ class _PaymentScreenState extends State<PaymentScreen> {
             courseTitle: widget.courseTitle,
           ),
         ),
+      );
+    } on ApplicationApiException catch (e) {
+      if (e.statusCode == 409) {
+        await SelectedCourseStorage.clear();
+      }
+      if (!mounted) return;
+      showAppSnackBar(
+        context,
+        type: AppSnackBarType.error,
+        message: e.message,
+      );
+    } catch (e) {
+      if (!mounted) return;
+      showAppSnackBar(
+        context,
+        type: AppSnackBarType.error,
+        message: e.toString(),
       );
     } finally {
       if (mounted) {
@@ -176,7 +199,8 @@ class _PaymentScreenState extends State<PaymentScreen> {
                     const SizedBox(height: 30),
                     AppPrimaryButton(
                       label: context.l10n.text('payNow'),
-                      onPressed: _isSubmitting ? null : _submitApplicationsAndContinue,
+                      onPressed:
+                          _isSubmitting ? null : _submitApplicationsAndContinue,
                     ),
                   ],
                 ),

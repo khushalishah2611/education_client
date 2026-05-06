@@ -8,6 +8,19 @@ import '../core/api_logger.dart';
 import '../core/api_status.dart';
 import '../models/document_type.dart';
 
+class ApplicationApiException implements Exception {
+  const ApplicationApiException({
+    required this.statusCode,
+    required this.message,
+  });
+
+  final int statusCode;
+  final String message;
+
+  @override
+  String toString() => message;
+}
+
 class ApplicationApiService {
   const ApplicationApiService();
 
@@ -38,7 +51,10 @@ class ApplicationApiService {
     );
 
     if (!ApiStatus.isSuccess(response.statusCode)) {
-      throw Exception(decoded['message']?.toString() ?? 'Bulk create failed');
+      throw ApplicationApiException(
+        statusCode: response.statusCode,
+        message: decoded['message']?.toString() ?? 'Bulk create failed',
+      );
     }
 
     return decoded;
