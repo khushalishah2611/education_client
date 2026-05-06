@@ -32,7 +32,9 @@ class UploadDocumentsScreen extends StatefulWidget {
 class _UploadDocumentsScreenState extends State<UploadDocumentsScreen> {
   static const int _maxUploadBytes = 5 * 1024 * 1024;
   late final Map<String, PlatformFile?> _selectedFiles = {};
-  final ApplicationApiService _applicationApiService = const ApplicationApiService();
+  final Set<String> _uploadedDocumentTypes = <String>{};
+  final ApplicationApiService _applicationApiService =
+      const ApplicationApiService();
   bool _isUploading = false;
   List<({String type, String title, String subtitle})> _docs = const [];
   String? _loadError;
@@ -57,24 +59,35 @@ class _UploadDocumentsScreenState extends State<UploadDocumentsScreen> {
         throw Exception('studentUserId not found');
       }
 
-      final List<DocumentTypeItem> types = await _applicationApiService
-          .fetchDocumentTypes();
+      final List<DocumentTypeItem> types =
+          await _applicationApiService.fetchDocumentTypes();
+      final List<Map<String, dynamic>> uploaded =
+          await _applicationApiService.fetchStudentDocuments(
+        studentUserId: studentUserId,
+      );
       final bool isArabic = (WidgetsBinding.instance.platformDispatcher.locale
           .languageCode) == 'ar';
 
       final docs = types
           .map(
-            (item) =>
-        (
-        type: item.value,
-        title: isArabic ? item.labelAr : item.labelEn,
-        subtitle: item.value,
-        ),
-      )
+            (item) => (
+              type: item.value,
+              title: isArabic ? item.labelAr : item.labelEn,
+              subtitle: item.value,
+            ),
+          )
           .toList(growable: false);
+      final Set<String> uploadedTypes = uploaded
+          .map(_documentTypeFromApiItem)
+          .where((type) => type.isNotEmpty)
+          .toSet();
+
       if (!mounted) return;
       setState(() {
         _docs = docs;
+        _uploadedDocumentTypes
+          ..clear()
+          ..addAll(uploadedTypes);
       });
     } catch (e) {
       if (!mounted) return;
@@ -89,7 +102,8 @@ class _UploadDocumentsScreenState extends State<UploadDocumentsScreen> {
   }
 
   Future<void> _pickDocument(
-      ({String type, String title, String subtitle}) doc) async {
+    ({String type, String title, String subtitle}) doc,
+  ) async {
     final result = await FilePicker.platform.pickFiles(
       type: FileType.custom,
       allowedExtensions: ['pdf'],
@@ -134,6 +148,7 @@ class _UploadDocumentsScreenState extends State<UploadDocumentsScreen> {
 
       setState(() {
         _selectedFiles[doc.type] = file;
+        _uploadedDocumentTypes.add(doc.type);
       });
       if (!mounted) return;
       showAppSnackBar(
@@ -155,35 +170,101 @@ class _UploadDocumentsScreenState extends State<UploadDocumentsScreen> {
     }
   }
 
-  bool get _allDocumentsSelected =>
+  bool get _hasAllRequiredDocuments =>
       _docs.isNotEmpty &&
-          _docs.every((doc) => _selectedFiles[doc.type] != null);
+      _docs.every(
+        (doc) =>
+            _selectedFiles[doc.type] != null ||
+            _uploadedDocumentTypes.contains(doc.type),
+      );
+
+  String _documentTypeFromApiItem(Map<String, dynamic> item) {
+    final Object? documentType = item['documentType'];
+    if (documentType is Map) {
+      final Object? value = documentType['value'] ?? documentType['type'];
+      if (value != null) return value.toString().trim();
+    }
+
+    final Object? type =
+        item['type'] ?? item['documentTypeValue'] ?? item['document_type'];
+    return type?.toString().trim() ?? '';
+  }
+
+  Future<bool> _refreshUploadedDocuments() async {
+    final SharedPreferences prefs = await SharedPreferences.getInstance();
+    final String studentUserId = prefs.getString('studentUserId')?.trim() ?? '';
+    if (studentUserId.isEmpty) {
+      throw Exception('studentUserId not found');
+    }
+
+    final List<Map<String, dynamic>> uploaded =
+        await _applicationApiService.fetchStudentDocuments(
+      studentUserId: studentUserId,
+    );
+    final Set<String> uploadedTypes = uploaded
+        .map(_documentTypeFromApiItem)
+        .where((type) => type.isNotEmpty)
+        .toSet();
+
+    if (mounted) {
+      setState(() {
+        _uploadedDocumentTypes
+          ..clear()
+          ..addAll(uploadedTypes);
+      });
+    }
+
+    return _docs.every(
+      (doc) =>
+          _selectedFiles[doc.type] != null || uploadedTypes.contains(doc.type),
+    );
+  }
 
   Future<void> _onContinue() async {
-    if (!_allDocumentsSelected) {
+    setState(() => _isUploading = true);
+
+    try {
+      final bool hasAllRequiredFromApi =
+          _hasAllRequiredDocuments || await _refreshUploadedDocuments();
+
+      if (!hasAllRequiredFromApi) {
+        if (!mounted) return;
+        showAppSnackBar(
+          context,
+          type: AppSnackBarType.error,
+          message: context.l10n.text('uploadAllRequiredDocs'),
+        );
+        return;
+      }
+
+      if (!mounted) return;
+      Navigator.of(context).push(
+        MaterialPageRoute(
+          builder: (_) => PaymentScreen(
+            universityName: widget.universityName,
+            universityHeroImage: widget.universityHeroImage,
+            courseTitle: widget.courseTitle,
+            applicationsPayload: widget.applicationsPayload,
+          ),
+        ),
+      );
+    } catch (e) {
+      if (!mounted) return;
       showAppSnackBar(
         context,
         type: AppSnackBarType.error,
-        message: context.l10n.text('uploadAllRequiredDocs'),
+        message: e.toString(),
       );
-      return;
+    } finally {
+      if (mounted) {
+        setState(() => _isUploading = false);
+      }
     }
+  }
 
-    setState(() => _isUploading = true);
-
-    if (!mounted) return;
-    Navigator.of(context).push(
-      MaterialPageRoute(
-        builder: (_) =>
-            PaymentScreen(
-              universityName: widget.universityName,
-              universityHeroImage: widget.universityHeroImage,
-              courseTitle: widget.courseTitle,
-              applicationsPayload: widget.applicationsPayload,
-            ),
-      ),
-    );
-
+  String? _selectedFileLabel(String type) {
+    return _selectedFiles[type]?.name ??
+        (_uploadedDocumentTypes.contains(type) ? 'Already uploaded' : null);
   }
 
   @override
@@ -215,7 +296,9 @@ class _UploadDocumentsScreenState extends State<UploadDocumentsScreen> {
                         }
 
                         if (_docs.isEmpty) {
-                          return const Center(child: Text('No document types found'));
+                          return const Center(
+                            child: Text('No document types found'),
+                          );
                         }
 
                         return ListView(
@@ -237,8 +320,11 @@ class _UploadDocumentsScreenState extends State<UploadDocumentsScreen> {
                             _UploadDropZone(
                               title: _docs.first.title,
                               subtitle: _docs.first.subtitle,
-                              selectedFileName: _selectedFiles[_docs.first.type]?.name,
-                              onTap: _isUploading ? () {} : () => _pickDocument(_docs.first),
+                              selectedFileName:
+                                  _selectedFileLabel(_docs.first.type),
+                              onTap: _isUploading
+                                  ? () {}
+                                  : () => _pickDocument(_docs.first),
                             ),
                             const SizedBox(height: 10),
                             ..._docs.skip(1).map(
@@ -247,15 +333,19 @@ class _UploadDocumentsScreenState extends State<UploadDocumentsScreen> {
                                 child: _UploadListTile(
                                   title: doc.title,
                                   subtitle: doc.subtitle,
-                                  selectedFileName: _selectedFiles[doc.type]?.name,
-                                  onTap: _isUploading ? () {} : () => _pickDocument(doc),
+                                  selectedFileName:
+                                      _selectedFileLabel(doc.type),
+                                  onTap: _isUploading
+                                      ? () {}
+                                      : () => _pickDocument(doc),
                                 ),
                               ),
                             ),
                             const SizedBox(height: 18),
                             AppPrimaryButton(
                               label: context.l10n.text('saveContinue'),
-                              onPressed: _isUploading ? null : () => _onContinue(),
+                              onPressed:
+                                  _isUploading ? null : () => _onContinue(),
                             ),
                           ],
                         );
@@ -266,7 +356,9 @@ class _UploadDocumentsScreenState extends State<UploadDocumentsScreen> {
                         child: ColoredBox(
                           color: Color.fromRGBO(0, 0, 0, 0.25),
                           child: Center(
-                            child: CircularProgressIndicator(color: AppColors.primary),
+                            child: CircularProgressIndicator(
+                              color: AppColors.primary,
+                            ),
                           ),
                         ),
                       ),

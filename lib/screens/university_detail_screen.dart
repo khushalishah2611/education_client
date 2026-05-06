@@ -598,6 +598,8 @@ class _CollegeAccordionState extends State<_CollegeAccordion> {
                           onTap: () => widget.onToggleCourse(courseKey),
                           context: context,
                           adminUniversity: widget.adminUniversity,
+                          academicEntry: academicEntry,
+                          collegeName: collegeName,
                           isSmallMobile: isSmallMobile,
                           tableWidth: tableWidth,
                         );
@@ -706,6 +708,32 @@ class _CollegeAccordionState extends State<_CollegeAccordion> {
     );
   }
 
+  Map<String, dynamic> _buildApplicationPayload({
+    required AdminUniversity adminUniversity,
+    required AcademicList academicEntry,
+    required String collegeName,
+    required CourseDetails courseDetails,
+  }) {
+    final Map<String, dynamic> payload = <String, dynamic>{
+      'universityId': adminUniversity.id,
+      'universityName': adminUniversity.name,
+      'academicName': academicEntry.academicname,
+      'college': collegeName,
+      'programId': academicEntry.program?.id,
+      'programName': academicEntry.program?.name,
+      'courseName': courseDetails.name,
+      'courseDetails': courseDetails.toJson(),
+    };
+
+    payload.removeWhere((_, value) {
+      if (value == null) return true;
+      if (value is String) return value.trim().isEmpty;
+      if (value is Map) return value.isEmpty;
+      return false;
+    });
+    return payload;
+  }
+
   Widget _buildCourseRow({
     required int index,
     required CourseDetails details,
@@ -713,6 +741,8 @@ class _CollegeAccordionState extends State<_CollegeAccordion> {
     required VoidCallback onTap,
     required BuildContext context,
     required AdminUniversity adminUniversity,
+    required AcademicList academicEntry,
+    required String collegeName,
     required bool isSmallMobile,
     required double tableWidth,
   }) {
@@ -826,7 +856,14 @@ class _CollegeAccordionState extends State<_CollegeAccordion> {
                                     widget.adminUniversity.coverImagePath,
                                   ),
                               courseTitle: details.name,
-
+                              applicationsPayload: <Map<String, dynamic>>[
+                                _buildApplicationPayload(
+                                  adminUniversity: adminUniversity,
+                                  academicEntry: academicEntry,
+                                  collegeName: collegeName,
+                                  courseDetails: details,
+                                ),
+                              ],
                             ),
                           ),
                         );
