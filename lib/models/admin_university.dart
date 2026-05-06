@@ -1,20 +1,13 @@
-import 'dart:convert';
-
 class AdminUniversity {
   String? id;
   String? name;
-  String? academicProgram;
-  String? courseNames;
-  String? track;
   String? country;
   String? state;
   String? city;
   String? email;
   String? mobile;
-  String? institute;
-  int? rating;
+  double? rating;
   List<AcademicList>? academicList;
-  int? cutoffPercentage;
   String? logoPath;
   String? coverImagePath;
   String? address;
@@ -22,132 +15,121 @@ class AdminUniversity {
   bool? accredited;
   String? status;
   bool? isEnabled;
-  String? contractStart;
-  String? contractEnd;
   String? createdAt;
   String? updatedAt;
-  List<dynamic>? services;
+  List<Null>? services;
   List<ProgramLinks>? programLinks;
   List<Ratings>? ratings;
   double? averageRating;
   int? ratingCount;
+  List<AcademicPrograms>? academicPrograms;
 
-  AdminUniversity({
-    this.id,
-    this.name,
-    this.academicProgram,
-    this.courseNames,
-    this.track,
-    this.country,
-    this.state,
-    this.city,
-    this.email,
-    this.mobile,
-    this.institute,
-    this.rating,
-    this.academicList,
-    this.cutoffPercentage,
-    this.logoPath,
-    this.coverImagePath,
-    this.address,
-    this.aboutUs,
-    this.accredited,
-    this.status,
-    this.isEnabled,
-    this.contractStart,
-    this.contractEnd,
-    this.createdAt,
-    this.updatedAt,
-    this.services,
-    this.programLinks,
-    this.ratings,
-    this.averageRating,
-    this.ratingCount,
-  });
+  AdminUniversity(
+      {this.id,
+        this.name,
+        this.country,
+        this.state,
+        this.city,
+        this.email,
+        this.mobile,
+        this.rating,
+        this.academicList,
+        this.logoPath,
+        this.coverImagePath,
+        this.address,
+        this.aboutUs,
+        this.accredited,
+        this.status,
+        this.isEnabled,
+        this.createdAt,
+        this.updatedAt,
+        this.services,
+        this.programLinks,
+        this.ratings,
+        this.averageRating,
+        this.ratingCount,
+        this.academicPrograms});
 
   AdminUniversity.fromJson(Map<String, dynamic> json) {
-    id = json['id']?.toString();
-    name = json['name']?.toString();
-    academicProgram = json['academicProgram']?.toString();
-    courseNames = json['courseNames']?.toString();
-    track = json['track']?.toString();
-    country = json['country']?.toString();
-    state = json['state']?.toString();
-    city = json['city']?.toString();
-    email = json['email']?.toString();
-    mobile = json['mobile']?.toString();
-    institute = json['institute']?.toString();
-    rating = _asInt(json['rating']);
-    academicList = _parseAcademicList(json['academicList']);
-    cutoffPercentage = _asInt(json['cutoffPercentage']);
-    logoPath = json['logoPath']?.toString();
-    coverImagePath = json['coverImagePath']?.toString();
-    address = json['address']?.toString();
-    aboutUs = json['aboutUs']?.toString();
-    accredited = json['accredited'] as bool?;
-    status = json['status']?.toString();
-    isEnabled = json['isEnabled'] as bool?;
-    contractStart = json['contractStart']?.toString();
-    contractEnd = json['contractEnd']?.toString();
-    createdAt = json['createdAt']?.toString();
-    updatedAt = json['updatedAt']?.toString();
-    if (json['services'] is List) {
-      services = List<dynamic>.from(json['services'] as List);
+    id = json['id'];
+    name = json['name'];
+    country = json['country'];
+    state = json['state'];
+    city = json['city'];
+    email = json['email'];
+    mobile = json['mobile'];
+    rating = json['rating'];
+    if (json['academicList'] != null) {
+      academicList = <AcademicList>[];
+      json['academicList'].forEach((v) {
+        academicList!.add(new AcademicList.fromJson(v));
+      });
     }
-    if (json['programLinks'] is List) {
-      programLinks = (json['programLinks'] as List)
-          .whereType<Map<String, dynamic>>()
-          .map(ProgramLinks.fromJson)
-          .toList();
+    logoPath = json['logoPath'];
+    coverImagePath = json['coverImagePath'];
+    address = json['address'];
+    aboutUs = json['aboutUs'];
+    accredited = json['accredited'];
+    status = json['status'];
+    isEnabled = json['isEnabled'];
+    createdAt = json['createdAt'];
+    updatedAt = json['updatedAt'];
+    if (json['programLinks'] != null) {
+      programLinks = <ProgramLinks>[];
+      json['programLinks'].forEach((v) {
+        programLinks!.add(new ProgramLinks.fromJson(v));
+      });
     }
-    if (json['ratings'] is List) {
-      ratings = (json['ratings'] as List)
-          .whereType<Map<String, dynamic>>()
-          .map(Ratings.fromJson)
-          .toList();
+    if (json['ratings'] != null) {
+      ratings = <Ratings>[];
+      json['ratings'].forEach((v) {
+        ratings!.add(new Ratings.fromJson(v));
+      });
     }
-    averageRating = _asDouble(json['averageRating']);
-    ratingCount = _asInt(json['ratingCount']);
+    averageRating = json['averageRating'];
+    ratingCount = json['ratingCount'];
+    if (json['academicPrograms'] != null) {
+      academicPrograms = <AcademicPrograms>[];
+      json['academicPrograms'].forEach((v) {
+        academicPrograms!.add(new AcademicPrograms.fromJson(v));
+      });
+    }
   }
 
   Map<String, dynamic> toJson() {
-    final Map<String, dynamic> data = <String, dynamic>{};
-    _addIfNotNull(data, 'id', id);
-    _addIfNotNull(data, 'name', name);
-    _addIfNotNull(data, 'academicProgram', academicProgram);
-    _addIfNotNull(data, 'courseNames', courseNames);
-    _addIfNotNull(data, 'track', track);
-    _addIfNotNull(data, 'country', country);
-    _addIfNotNull(data, 'state', state);
-    _addIfNotNull(data, 'city', city);
-    _addIfNotNull(data, 'email', email);
-    _addIfNotNull(data, 'mobile', mobile);
-    _addIfNotNull(data, 'institute', institute);
-    _addIfNotNull(data, 'rating', rating);
-    if (academicList != null) {
-      data['academicList'] = academicList!.map((v) => v.toJson()).toList();
+    final Map<String, dynamic> data = new Map<String, dynamic>();
+    data['id'] = this.id;
+    data['name'] = this.name;
+    data['country'] = this.country;
+    data['state'] = this.state;
+    data['city'] = this.city;
+    data['email'] = this.email;
+    data['mobile'] = this.mobile;
+    data['rating'] = this.rating;
+    if (this.academicList != null) {
+      data['academicList'] = this.academicList!.map((v) => v.toJson()).toList();
     }
-    _addIfNotNull(data, 'cutoffPercentage', cutoffPercentage);
-    _addIfNotNull(data, 'logoPath', logoPath);
-    _addIfNotNull(data, 'coverImagePath', coverImagePath);
-    _addIfNotNull(data, 'address', address);
-    _addIfNotNull(data, 'aboutUs', aboutUs);
-    _addIfNotNull(data, 'accredited', accredited);
-    _addIfNotNull(data, 'status', status);
-    _addIfNotNull(data, 'isEnabled', isEnabled);
-    _addIfNotNull(data, 'contractStart', contractStart);
-    _addIfNotNull(data, 'contractEnd', contractEnd);
-    _addIfNotNull(data, 'createdAt', createdAt);
-    _addIfNotNull(data, 'updatedAt', updatedAt);
-    _addIfNotNull(data, 'services', services);
-    if (programLinks != null) {
-      data['programLinks'] = programLinks!.map((v) => v.toJson()).toList();
+    data['logoPath'] = this.logoPath;
+    data['coverImagePath'] = this.coverImagePath;
+    data['address'] = this.address;
+    data['aboutUs'] = this.aboutUs;
+    data['accredited'] = this.accredited;
+    data['status'] = this.status;
+    data['isEnabled'] = this.isEnabled;
+    data['createdAt'] = this.createdAt;
+    data['updatedAt'] = this.updatedAt;
+    if (this.programLinks != null) {
+      data['programLinks'] = this.programLinks!.map((v) => v.toJson()).toList();
     }
-    if (ratings != null) {
-      data['ratings'] = ratings!.map((v) => v.toJson()).toList();
+    if (this.ratings != null) {
+      data['ratings'] = this.ratings!.map((v) => v.toJson()).toList();
     }
-    _addIfNotNull(data, 'averageRating', averageRating);
-    _addIfNotNull(data, 'ratingCount', ratingCount);
+    data['averageRating'] = this.averageRating;
+    data['ratingCount'] = this.ratingCount;
+    if (this.academicPrograms != null) {
+      data['academicPrograms'] =
+          this.academicPrograms!.map((v) => v.toJson()).toList();
+    }
     return data;
   }
 }
@@ -155,56 +137,289 @@ class AdminUniversity {
 class AcademicList {
   String? academicname;
   String? college;
-  ProgramData? program;
-  List<AcademicCollege>? colleges;
+  Program? program;
 
-  AcademicList({this.academicname, this.college, this.program, this.colleges});
+  AcademicList({this.academicname, this.college, this.program});
 
   AcademicList.fromJson(Map<String, dynamic> json) {
-    academicname = json['academicname']?.toString();
-    college = json['college']?.toString();
-    if (json['program'] is Map<String, dynamic>) {
-      program = ProgramData.fromJson(json['program'] as Map<String, dynamic>);
-    }
-    if (json['colleges'] is List) {
-      colleges = (json['colleges'] as List)
-          .whereType<Map<String, dynamic>>()
-          .map(AcademicCollege.fromJson)
-          .toList();
-    }
+    academicname = json['academicname'];
+    college = json['college'];
+    program =
+    json['program'] != null ? new Program.fromJson(json['program']) : null;
   }
 
   Map<String, dynamic> toJson() {
-    final Map<String, dynamic> data = <String, dynamic>{};
-    _addIfNotNull(data, 'academicname', academicname);
-    _addIfNotNull(data, 'college', college);
-    if (program != null) {
-      data['program'] = program!.toJson();
-    }
-    if (colleges != null) {
-      data['colleges'] = colleges!.map((v) => v.toJson()).toList();
+    final Map<String, dynamic> data = new Map<String, dynamic>();
+    data['academicname'] = this.academicname;
+    data['college'] = this.college;
+    if (this.program != null) {
+      data['program'] = this.program!.toJson();
     }
     return data;
   }
 }
 
-class AcademicCollege {
-  String? college;
-  List<CourseDetails>? courses;
+class Program {
+  String? id;
+  String? name;
+  String? academicProgram;
+  String? courseNames;
+  List<CourseDetails>? courseDetails;
+  String? track;
+  Null? description;
+  Null? durationMonths;
+  int? minAdmissionRate;
+  String? minBaGpa;
+  Null? requiredScore;
+  Null? discountedScore;
+  String? status;
+  bool? isEnabled;
+  int? basePrice;
+  String? currency;
+  int? commissionPercent;
+  Null? coverImagePath;
+  List<String>? eligibilityTitle;
+  List<String>? scholarshipInfoTitle;
+  String? createdAt;
+  String? updatedAt;
+  List<Null>? intakes;
+  List<UniversityLinks>? universityLinks;
+  String? educationInstitute;
+  List<String>? courses;
 
-  AcademicCollege({this.college, this.courses});
+  Program(
+      {this.id,
+        this.name,
+        this.academicProgram,
+        this.courseNames,
+        this.courseDetails,
+        this.track,
+        this.description,
+        this.durationMonths,
+        this.minAdmissionRate,
+        this.minBaGpa,
+        this.requiredScore,
+        this.discountedScore,
+        this.status,
+        this.isEnabled,
+        this.basePrice,
+        this.currency,
+        this.commissionPercent,
+        this.coverImagePath,
+        this.eligibilityTitle,
+        this.scholarshipInfoTitle,
+        this.createdAt,
+        this.updatedAt,
+        this.intakes,
+        this.universityLinks,
+        this.educationInstitute,
+        this.courses});
 
-  AcademicCollege.fromJson(Map<String, dynamic> json) {
-    college = json['college']?.toString();
-    courses = _parseCourseDetails(json['courses']);
+  Program.fromJson(Map<String, dynamic> json) {
+    id = json['id'];
+    name = json['name'];
+    academicProgram = json['academicProgram'];
+    courseNames = json['courseNames'];
+    if (json['courseDetails'] != null) {
+      courseDetails = <CourseDetails>[];
+      json['courseDetails'].forEach((v) {
+        courseDetails!.add(new CourseDetails.fromJson(v));
+      });
+    }
+    track = json['track'];
+    description = json['description'];
+    durationMonths = json['durationMonths'];
+    minAdmissionRate = json['minAdmissionRate'];
+    minBaGpa = json['minBaGpa'];
+    requiredScore = json['requiredScore'];
+    discountedScore = json['discountedScore'];
+    status = json['status'];
+    isEnabled = json['isEnabled'];
+    basePrice = json['basePrice'];
+    currency = json['currency'];
+    commissionPercent = json['commissionPercent'];
+    coverImagePath = json['coverImagePath'];
+    eligibilityTitle = json['eligibilityTitle'].cast<String>();
+    scholarshipInfoTitle = json['scholarshipInfoTitle'].cast<String>();
+    createdAt = json['createdAt'];
+    updatedAt = json['updatedAt'];
+    if (json['universityLinks'] != null) {
+      universityLinks = <UniversityLinks>[];
+      json['universityLinks'].forEach((v) {
+        universityLinks!.add(new UniversityLinks.fromJson(v));
+      });
+    }
+    educationInstitute = json['educationInstitute'];
+    courses = json['courses'].cast<String>();
   }
 
   Map<String, dynamic> toJson() {
-    final Map<String, dynamic> data = <String, dynamic>{};
-    _addIfNotNull(data, 'college', college);
-    if (courses != null) {
-      data['courses'] = courses!.map((v) => v.toJson()).toList();
+    final Map<String, dynamic> data = new Map<String, dynamic>();
+    data['id'] = this.id;
+    data['name'] = this.name;
+    data['academicProgram'] = this.academicProgram;
+    data['courseNames'] = this.courseNames;
+    if (this.courseDetails != null) {
+      data['courseDetails'] =
+          this.courseDetails!.map((v) => v.toJson()).toList();
     }
+    data['track'] = this.track;
+    data['description'] = this.description;
+    data['durationMonths'] = this.durationMonths;
+    data['minAdmissionRate'] = this.minAdmissionRate;
+    data['minBaGpa'] = this.minBaGpa;
+    data['requiredScore'] = this.requiredScore;
+    data['discountedScore'] = this.discountedScore;
+    data['status'] = this.status;
+    data['isEnabled'] = this.isEnabled;
+    data['basePrice'] = this.basePrice;
+    data['currency'] = this.currency;
+    data['commissionPercent'] = this.commissionPercent;
+    data['coverImagePath'] = this.coverImagePath;
+    data['eligibilityTitle'] = this.eligibilityTitle;
+    data['scholarshipInfoTitle'] = this.scholarshipInfoTitle;
+    data['createdAt'] = this.createdAt;
+    data['updatedAt'] = this.updatedAt;
+    if (this.universityLinks != null) {
+      data['universityLinks'] =
+          this.universityLinks!.map((v) => v.toJson()).toList();
+    }
+    data['educationInstitute'] = this.educationInstitute;
+    data['courses'] = this.courses;
+    return data;
+  }
+}
+
+class CourseDetails {
+  String? name;
+  bool? isBooked;
+  String? track;
+  String? duration;
+  int? creditHours;
+  int? totalFees;
+  int? semesters;
+  int? totalSemesters;
+  int? feePerCredit;
+  int? semesterFee;
+  int? annualFee;
+  int? basePrice;
+  int? minAdmissionRate;
+  List<String>? eligibility;
+  List<String>? otherRequirements;
+  String? currency;
+  int? applicationFee;
+  String? status;
+  String? minBaGpa;
+
+  CourseDetails(
+      {this.name,
+        this.isBooked,
+        this.track,
+        this.duration,
+        this.creditHours,
+        this.totalFees,
+        this.semesters,
+        this.totalSemesters,
+        this.feePerCredit,
+        this.semesterFee,
+        this.annualFee,
+        this.basePrice,
+        this.minAdmissionRate,
+        this.eligibility,
+        this.otherRequirements,
+        this.currency,
+        this.applicationFee,
+        this.status,
+        this.minBaGpa});
+
+  CourseDetails.fromJson(Map<String, dynamic> json) {
+    name = json['name'];
+    isBooked = json['isBooked'];
+    track = json['track'];
+    duration = json['duration'];
+    creditHours = json['creditHours'];
+    totalFees = json['totalFees'];
+    semesters = json['semesters'];
+    totalSemesters = json['totalSemesters'];
+    feePerCredit = json['feePerCredit'];
+    semesterFee = json['semesterFee'];
+    annualFee = json['annualFee'];
+    basePrice = json['basePrice'];
+    minAdmissionRate = json['minAdmissionRate'];
+    eligibility = json['eligibility'].cast<String>();
+    otherRequirements = json['otherRequirements'].cast<String>();
+    currency = json['currency'];
+    applicationFee = json['applicationFee'];
+    status = json['status'];
+    minBaGpa = json['minBaGpa'];
+  }
+
+  Map<String, dynamic> toJson() {
+    final Map<String, dynamic> data = new Map<String, dynamic>();
+    data['name'] = this.name;
+    data['isBooked'] = this.isBooked;
+    data['track'] = this.track;
+    data['duration'] = this.duration;
+    data['creditHours'] = this.creditHours;
+    data['totalFees'] = this.totalFees;
+    data['semesters'] = this.semesters;
+    data['totalSemesters'] = this.totalSemesters;
+    data['feePerCredit'] = this.feePerCredit;
+    data['semesterFee'] = this.semesterFee;
+    data['annualFee'] = this.annualFee;
+    data['basePrice'] = this.basePrice;
+    data['minAdmissionRate'] = this.minAdmissionRate;
+    data['eligibility'] = this.eligibility;
+    data['otherRequirements'] = this.otherRequirements;
+    data['currency'] = this.currency;
+    data['applicationFee'] = this.applicationFee;
+    data['status'] = this.status;
+    data['minBaGpa'] = this.minBaGpa;
+    return data;
+  }
+}
+
+class UniversityLinks {
+  int? applicationFee;
+  String? currency;
+  University? university;
+
+  UniversityLinks({this.applicationFee, this.currency, this.university});
+
+  UniversityLinks.fromJson(Map<String, dynamic> json) {
+    applicationFee = json['applicationFee'];
+    currency = json['currency'];
+    university = json['university'] != null
+        ? new University.fromJson(json['university'])
+        : null;
+  }
+
+  Map<String, dynamic> toJson() {
+    final Map<String, dynamic> data = new Map<String, dynamic>();
+    data['applicationFee'] = this.applicationFee;
+    data['currency'] = this.currency;
+    if (this.university != null) {
+      data['university'] = this.university!.toJson();
+    }
+    return data;
+  }
+}
+
+class University {
+  String? id;
+  String? name;
+
+  University({this.id, this.name});
+
+  University.fromJson(Map<String, dynamic> json) {
+    id = json['id'];
+    name = json['name'];
+  }
+
+  Map<String, dynamic> toJson() {
+    final Map<String, dynamic> data = new Map<String, dynamic>();
+    data['id'] = this.id;
+    data['name'] = this.name;
     return data;
   }
 }
@@ -221,216 +436,46 @@ class ProgramLinks {
   String? updatedAt;
   Program? program;
 
-  ProgramLinks({
-    this.id,
-    this.universityId,
-    this.programId,
-    this.applicationFee,
-    this.taxes,
-    this.currency,
-    this.isEnabled,
-    this.createdAt,
-    this.updatedAt,
-    this.program,
-  });
+  ProgramLinks(
+      {this.id,
+        this.universityId,
+        this.programId,
+        this.applicationFee,
+        this.taxes,
+        this.currency,
+        this.isEnabled,
+        this.createdAt,
+        this.updatedAt,
+        this.program});
 
   ProgramLinks.fromJson(Map<String, dynamic> json) {
-    id = json['id']?.toString();
-    universityId = json['universityId']?.toString();
-    programId = json['programId']?.toString();
-    applicationFee = _asInt(json['applicationFee']);
-    taxes = _asInt(json['taxes']);
-    currency = json['currency']?.toString();
-    isEnabled = json['isEnabled'] as bool?;
-    createdAt = json['createdAt']?.toString();
-    updatedAt = json['updatedAt']?.toString();
-    if (json['program'] is Map<String, dynamic>) {
-      program = Program.fromJson(json['program'] as Map<String, dynamic>);
-    }
+    id = json['id'];
+    universityId = json['universityId'];
+    programId = json['programId'];
+    applicationFee = json['applicationFee'];
+    taxes = json['taxes'];
+    currency = json['currency'];
+    isEnabled = json['isEnabled'];
+    createdAt = json['createdAt'];
+    updatedAt = json['updatedAt'];
+    program =
+    json['program'] != null ? new Program.fromJson(json['program']) : null;
   }
 
   Map<String, dynamic> toJson() {
-    final Map<String, dynamic> data = <String, dynamic>{};
-    _addIfNotNull(data, 'id', id);
-    _addIfNotNull(data, 'universityId', universityId);
-    _addIfNotNull(data, 'programId', programId);
-    _addIfNotNull(data, 'applicationFee', applicationFee);
-    _addIfNotNull(data, 'taxes', taxes);
-    _addIfNotNull(data, 'currency', currency);
-    _addIfNotNull(data, 'isEnabled', isEnabled);
-    _addIfNotNull(data, 'createdAt', createdAt);
-    _addIfNotNull(data, 'updatedAt', updatedAt);
-    if (program != null) {
-      data['program'] = program!.toJson();
+    final Map<String, dynamic> data = new Map<String, dynamic>();
+    data['id'] = this.id;
+    data['universityId'] = this.universityId;
+    data['programId'] = this.programId;
+    data['applicationFee'] = this.applicationFee;
+    data['taxes'] = this.taxes;
+    data['currency'] = this.currency;
+    data['isEnabled'] = this.isEnabled;
+    data['createdAt'] = this.createdAt;
+    data['updatedAt'] = this.updatedAt;
+    if (this.program != null) {
+      data['program'] = this.program!.toJson();
     }
-    return data;
-  }
-}
-
-class Program {
-  String? id;
-  String? name;
-  String? academicProgram;
-  String? courseNames;
-  List<CourseDetails>? courseDetails;
-  String? track;
-  int? minAdmissionRate;
-  String? minBaGpa;
-  int? requiredScore;
-  int? discountedScore;
-  String? status;
-  bool? isEnabled;
-  int? basePrice;
-  String? currency;
-  int? commissionPercent;
-  String? coverImagePath;
-  List<String>? eligibilityTitle;
-  List<dynamic>? scholarshipInfoTitle;
-  String? createdAt;
-  String? updatedAt;
-  List<dynamic>? intakes;
-  List<UniversityLinks>? universityLinks;
-  String? educationInstitute;
-  List<String>? courses;
-
-  Program({
-    this.id,
-    this.name,
-    this.academicProgram,
-    this.courseNames,
-    this.courseDetails,
-    this.track,
-    this.minAdmissionRate,
-    this.minBaGpa,
-    this.requiredScore,
-    this.discountedScore,
-    this.status,
-    this.isEnabled,
-    this.basePrice,
-    this.currency,
-    this.commissionPercent,
-    this.coverImagePath,
-    this.eligibilityTitle,
-    this.scholarshipInfoTitle,
-    this.createdAt,
-    this.updatedAt,
-    this.intakes,
-    this.universityLinks,
-    this.educationInstitute,
-    this.courses,
-  });
-
-  Program.fromJson(Map<String, dynamic> json) {
-    id = json['id']?.toString();
-    name = json['name']?.toString();
-    academicProgram = json['academicProgram']?.toString();
-    courseNames = json['courseNames']?.toString();
-    courseDetails = _parseCourseDetails(json['courseDetails']);
-    track = json['track']?.toString();
-    minAdmissionRate = _asInt(json['minAdmissionRate']);
-    minBaGpa = json['minBaGpa']?.toString();
-    requiredScore = _asInt(json['requiredScore']);
-    discountedScore = _asInt(json['discountedScore']);
-    status = json['status']?.toString();
-    isEnabled = json['isEnabled'] as bool?;
-    basePrice = _asInt(json['basePrice']);
-    currency = json['currency']?.toString();
-    commissionPercent = _asInt(json['commissionPercent']);
-    coverImagePath = json['coverImagePath']?.toString();
-    eligibilityTitle = _toStringList(json['eligibilityTitle']);
-    scholarshipInfoTitle = _toDynamicList(json['scholarshipInfoTitle']);
-    createdAt = json['createdAt']?.toString();
-    updatedAt = json['updatedAt']?.toString();
-    intakes = _toDynamicList(json['intakes']);
-    if (json['universityLinks'] is List) {
-      universityLinks = (json['universityLinks'] as List)
-          .whereType<Map<String, dynamic>>()
-          .map(UniversityLinks.fromJson)
-          .toList();
-    }
-    educationInstitute = json['educationInstitute']?.toString();
-    courses = _toStringList(json['courses']);
-  }
-
-  Map<String, dynamic> toJson() {
-    final Map<String, dynamic> data = <String, dynamic>{};
-    _addIfNotNull(data, 'id', id);
-    _addIfNotNull(data, 'name', name);
-    _addIfNotNull(data, 'academicProgram', academicProgram);
-    _addIfNotNull(data, 'courseNames', courseNames);
-    if (courseDetails != null) {
-      data['courseDetails'] = courseDetails!.map((v) => v.toJson()).toList();
-    }
-    _addIfNotNull(data, 'track', track);
-    _addIfNotNull(data, 'minAdmissionRate', minAdmissionRate);
-    _addIfNotNull(data, 'minBaGpa', minBaGpa);
-    _addIfNotNull(data, 'requiredScore', requiredScore);
-    _addIfNotNull(data, 'discountedScore', discountedScore);
-    _addIfNotNull(data, 'status', status);
-    _addIfNotNull(data, 'isEnabled', isEnabled);
-    _addIfNotNull(data, 'basePrice', basePrice);
-    _addIfNotNull(data, 'currency', currency);
-    _addIfNotNull(data, 'commissionPercent', commissionPercent);
-    _addIfNotNull(data, 'coverImagePath', coverImagePath);
-    _addIfNotNull(data, 'eligibilityTitle', eligibilityTitle);
-    _addIfNotNull(data, 'scholarshipInfoTitle', scholarshipInfoTitle);
-    _addIfNotNull(data, 'createdAt', createdAt);
-    _addIfNotNull(data, 'updatedAt', updatedAt);
-    _addIfNotNull(data, 'intakes', intakes);
-    if (universityLinks != null) {
-      data['universityLinks'] = universityLinks!
-          .map((v) => v.toJson())
-          .toList();
-    }
-    _addIfNotNull(data, 'educationInstitute', educationInstitute);
-    _addIfNotNull(data, 'courses', courses);
-    return data;
-  }
-}
-
-class UniversityLinks {
-  int? applicationFee;
-  String? currency;
-  University? university;
-
-  UniversityLinks({this.applicationFee, this.currency, this.university});
-
-  UniversityLinks.fromJson(Map<String, dynamic> json) {
-    applicationFee = _asInt(json['applicationFee']);
-    currency = json['currency']?.toString();
-    if (json['university'] is Map<String, dynamic>) {
-      university = University.fromJson(
-        json['university'] as Map<String, dynamic>,
-      );
-    }
-  }
-
-  Map<String, dynamic> toJson() {
-    final Map<String, dynamic> data = <String, dynamic>{};
-    _addIfNotNull(data, 'applicationFee', applicationFee);
-    _addIfNotNull(data, 'currency', currency);
-    if (university != null) {
-      data['university'] = university!.toJson();
-    }
-    return data;
-  }
-}
-
-class University {
-  String? id;
-  String? name;
-
-  University({this.id, this.name});
-
-  University.fromJson(Map<String, dynamic> json) {
-    id = json['id']?.toString();
-    name = json['name']?.toString();
-  }
-
-  Map<String, dynamic> toJson() {
-    final Map<String, dynamic> data = <String, dynamic>{};
-    _addIfNotNull(data, 'id', id);
-    _addIfNotNull(data, 'name', name);
     return data;
   }
 }
@@ -439,51 +484,49 @@ class Ratings {
   String? id;
   String? studentId;
   String? universityId;
-  int? rating;
+  double? rating;
   String? remark;
-  String? imagePath;
+  Null? imagePath;
   String? createdAt;
   String? updatedAt;
   Student? student;
 
-  Ratings({
-    this.id,
-    this.studentId,
-    this.universityId,
-    this.rating,
-    this.remark,
-    this.imagePath,
-    this.createdAt,
-    this.updatedAt,
-    this.student,
-  });
+  Ratings(
+      {this.id,
+        this.studentId,
+        this.universityId,
+        this.rating,
+        this.remark,
+        this.imagePath,
+        this.createdAt,
+        this.updatedAt,
+        this.student});
 
   Ratings.fromJson(Map<String, dynamic> json) {
-    id = json['id']?.toString();
-    studentId = json['studentId']?.toString();
-    universityId = json['universityId']?.toString();
-    rating = _asInt(json['rating']);
-    remark = json['remark']?.toString();
-    imagePath = json['imagePath']?.toString();
-    createdAt = json['createdAt']?.toString();
-    updatedAt = json['updatedAt']?.toString();
-    if (json['student'] is Map<String, dynamic>) {
-      student = Student.fromJson(json['student'] as Map<String, dynamic>);
-    }
+    id = json['id'];
+    studentId = json['studentId'];
+    universityId = json['universityId'];
+    rating = json['rating'];
+    remark = json['remark'];
+    imagePath = json['imagePath'];
+    createdAt = json['createdAt'];
+    updatedAt = json['updatedAt'];
+    student =
+    json['student'] != null ? new Student.fromJson(json['student']) : null;
   }
 
   Map<String, dynamic> toJson() {
-    final Map<String, dynamic> data = <String, dynamic>{};
-    _addIfNotNull(data, 'id', id);
-    _addIfNotNull(data, 'studentId', studentId);
-    _addIfNotNull(data, 'universityId', universityId);
-    _addIfNotNull(data, 'rating', rating);
-    _addIfNotNull(data, 'remark', remark);
-    _addIfNotNull(data, 'imagePath', imagePath);
-    _addIfNotNull(data, 'createdAt', createdAt);
-    _addIfNotNull(data, 'updatedAt', updatedAt);
-    if (student != null) {
-      data['student'] = student!.toJson();
+    final Map<String, dynamic> data = new Map<String, dynamic>();
+    data['id'] = this.id;
+    data['studentId'] = this.studentId;
+    data['universityId'] = this.universityId;
+    data['rating'] = this.rating;
+    data['remark'] = this.remark;
+    data['imagePath'] = this.imagePath;
+    data['createdAt'] = this.createdAt;
+    data['updatedAt'] = this.updatedAt;
+    if (this.student != null) {
+      data['student'] = this.student!.toJson();
     }
     return data;
   }
@@ -496,148 +539,71 @@ class Student {
   Student({this.firstName, this.lastName});
 
   Student.fromJson(Map<String, dynamic> json) {
-    firstName = json['firstName']?.toString();
-    lastName = json['lastName']?.toString();
+    firstName = json['firstName'];
+    lastName = json['lastName'];
   }
 
   Map<String, dynamic> toJson() {
-    final Map<String, dynamic> data = <String, dynamic>{};
-    _addIfNotNull(data, 'firstName', firstName);
-    _addIfNotNull(data, 'lastName', lastName);
+    final Map<String, dynamic> data = new Map<String, dynamic>();
+    data['firstName'] = this.firstName;
+    data['lastName'] = this.lastName;
     return data;
   }
 }
 
-class ProgramData {
-  String? id;
-  String? name;
-  String? academicProgram;
-  String? courseNames;
-  List<CourseDetails>? courseDetails;
-  String? track;
-  dynamic description;
-  dynamic durationMonths;
-  int? minAdmissionRate;
-  String? minBaGpa;
-  int? requiredScore;
-  int? discountedScore;
-  String? status;
-  bool? isEnabled;
-  int? basePrice;
-  String? currency;
-  int? commissionPercent;
-  String? coverImagePath;
-  List<String>? eligibilityTitle;
-  List<dynamic>? scholarshipInfoTitle;
-  String? createdAt;
-  String? updatedAt;
-  List<dynamic>? intakes;
-  List<UniversityLinks>? universityLinks;
-  String? educationInstitute;
-  List<String>? courses;
+class AcademicPrograms {
+  String? academicname;
+  List<Colleges>? colleges;
 
-  ProgramData({
-    this.id,
-    this.name,
-    this.academicProgram,
-    this.courseNames,
-    this.courseDetails,
-    this.track,
-    this.description,
-    this.durationMonths,
-    this.minAdmissionRate,
-    this.minBaGpa,
-    this.requiredScore,
-    this.discountedScore,
-    this.status,
-    this.isEnabled,
-    this.basePrice,
-    this.currency,
-    this.commissionPercent,
-    this.coverImagePath,
-    this.eligibilityTitle,
-    this.scholarshipInfoTitle,
-    this.createdAt,
-    this.updatedAt,
-    this.intakes,
-    this.universityLinks,
-    this.educationInstitute,
-    this.courses,
-  });
+  AcademicPrograms({this.academicname, this.colleges});
 
-  ProgramData.fromJson(Map<String, dynamic> json) {
-    id = json['id']?.toString();
-    name = json['name']?.toString();
-    academicProgram = json['academicProgram']?.toString();
-    courseNames = json['courseNames']?.toString();
-    courseDetails = _parseCourseDetails(json['courseDetails']);
-    track = json['track']?.toString();
-    description = json['description'];
-    durationMonths = json['durationMonths'];
-    minAdmissionRate = _asInt(json['minAdmissionRate']);
-    minBaGpa = json['minBaGpa']?.toString();
-    requiredScore = _asInt(json['requiredScore']);
-    discountedScore = _asInt(json['discountedScore']);
-    status = json['status']?.toString();
-    isEnabled = json['isEnabled'] as bool?;
-    basePrice = _asInt(json['basePrice']);
-    currency = json['currency']?.toString();
-    commissionPercent = _asInt(json['commissionPercent']);
-    coverImagePath = json['coverImagePath']?.toString();
-    eligibilityTitle = _toStringList(json['eligibilityTitle']);
-    scholarshipInfoTitle = _toDynamicList(json['scholarshipInfoTitle']);
-    createdAt = json['createdAt']?.toString();
-    updatedAt = json['updatedAt']?.toString();
-    intakes = _toDynamicList(json['intakes']);
-    if (json['universityLinks'] is List) {
-      universityLinks = (json['universityLinks'] as List)
-          .whereType<Map<String, dynamic>>()
-          .map(UniversityLinks.fromJson)
-          .toList();
+  AcademicPrograms.fromJson(Map<String, dynamic> json) {
+    academicname = json['academicname'];
+    if (json['colleges'] != null) {
+      colleges = <Colleges>[];
+      json['colleges'].forEach((v) {
+        colleges!.add(new Colleges.fromJson(v));
+      });
     }
-    educationInstitute = json['educationInstitute']?.toString();
-    courses = _toStringList(json['courses']);
   }
 
   Map<String, dynamic> toJson() {
-    final Map<String, dynamic> data = <String, dynamic>{};
-    _addIfNotNull(data, 'id', id);
-    _addIfNotNull(data, 'name', name);
-    _addIfNotNull(data, 'academicProgram', academicProgram);
-    _addIfNotNull(data, 'courseNames', courseNames);
-    if (courseDetails != null) {
-      data['courseDetails'] = courseDetails!.map((v) => v.toJson()).toList();
+    final Map<String, dynamic> data = new Map<String, dynamic>();
+    data['academicname'] = this.academicname;
+    if (this.colleges != null) {
+      data['colleges'] = this.colleges!.map((v) => v.toJson()).toList();
     }
-    _addIfNotNull(data, 'track', track);
-    _addIfNotNull(data, 'description', description);
-    _addIfNotNull(data, 'durationMonths', durationMonths);
-    _addIfNotNull(data, 'minAdmissionRate', minAdmissionRate);
-    _addIfNotNull(data, 'minBaGpa', minBaGpa);
-    _addIfNotNull(data, 'requiredScore', requiredScore);
-    _addIfNotNull(data, 'discountedScore', discountedScore);
-    _addIfNotNull(data, 'status', status);
-    _addIfNotNull(data, 'isEnabled', isEnabled);
-    _addIfNotNull(data, 'basePrice', basePrice);
-    _addIfNotNull(data, 'currency', currency);
-    _addIfNotNull(data, 'commissionPercent', commissionPercent);
-    _addIfNotNull(data, 'coverImagePath', coverImagePath);
-    _addIfNotNull(data, 'eligibilityTitle', eligibilityTitle);
-    _addIfNotNull(data, 'scholarshipInfoTitle', scholarshipInfoTitle);
-    _addIfNotNull(data, 'createdAt', createdAt);
-    _addIfNotNull(data, 'updatedAt', updatedAt);
-    _addIfNotNull(data, 'intakes', intakes);
-    if (universityLinks != null) {
-      data['universityLinks'] = universityLinks!
-          .map((v) => v.toJson())
-          .toList();
-    }
-    _addIfNotNull(data, 'educationInstitute', educationInstitute);
-    _addIfNotNull(data, 'courses', courses);
     return data;
   }
 }
 
-class CourseDetails {
+class Colleges {
+  String? college;
+  List<Courses>? courses;
+
+  Colleges({this.college, this.courses});
+
+  Colleges.fromJson(Map<String, dynamic> json) {
+    college = json['college'];
+    if (json['courses'] != null) {
+      courses = <Courses>[];
+      json['courses'].forEach((v) {
+        courses!.add(new Courses.fromJson(v));
+      });
+    }
+  }
+
+  Map<String, dynamic> toJson() {
+    final Map<String, dynamic> data = new Map<String, dynamic>();
+    data['college'] = this.college;
+    if (this.courses != null) {
+      data['courses'] = this.courses!.map((v) => v.toJson()).toList();
+    }
+    return data;
+  }
+}
+
+class Courses {
   String? programId;
   String? programName;
   String? academicProgram;
@@ -655,281 +621,95 @@ class CourseDetails {
   int? annualFee;
   int? basePrice;
   int? minAdmissionRate;
-  String? minBaGpa;
-  int? requiredScore;
-  int? discountedScore;
   List<String>? eligibility;
   List<String>? otherRequirements;
   String? currency;
   int? applicationFee;
-  String? coverImagePath;
   String? status;
   int? commissionPercent;
-  List<dynamic>? intakes;
+  List<Null>? intakes;
+  String? minBaGpa;
 
-  CourseDetails({
-    this.programId,
-    this.programName,
-    this.academicProgram,
-    this.educationInstitute,
-    this.name,
-    this.isBooked,
-    this.track,
-    this.duration,
-    this.creditHours,
-    this.totalFees,
-    this.semesters,
-    this.totalSemesters,
-    this.feePerCredit,
-    this.semesterFee,
-    this.annualFee,
-    this.basePrice,
-    this.minAdmissionRate,
-    this.minBaGpa,
-    this.requiredScore,
-    this.discountedScore,
-    this.eligibility,
-    this.otherRequirements,
-    this.currency,
-    this.applicationFee,
-    this.coverImagePath,
-    this.status,
-    this.commissionPercent,
-    this.intakes,
-  });
+  Courses(
+      {this.programId,
+        this.programName,
+        this.academicProgram,
+        this.educationInstitute,
+        this.name,
+        this.isBooked,
+        this.track,
+        this.duration,
+        this.creditHours,
+        this.totalFees,
+        this.semesters,
+        this.totalSemesters,
+        this.feePerCredit,
+        this.semesterFee,
+        this.annualFee,
+        this.basePrice,
+        this.minAdmissionRate,
+        this.eligibility,
+        this.otherRequirements,
+        this.currency,
+        this.applicationFee,
+        this.status,
+        this.commissionPercent,
+        this.intakes,
+        this.minBaGpa});
 
-  CourseDetails.fromJson(Map<String, dynamic> json) {
-    programId = json['programId']?.toString();
-    programName = json['programName']?.toString();
-    academicProgram = json['academicProgram']?.toString();
-    educationInstitute = json['educationInstitute']?.toString();
-    name = json['name']?.toString();
-    isBooked = _asBool(json['isBooked']);
-    track = json['track']?.toString();
-    duration = json['duration']?.toString();
-    creditHours = _asInt(json['creditHours']);
-    totalFees = _asInt(json['totalFees']);
-    semesters = _asInt(json['semesters']);
-    totalSemesters = _asInt(json['totalSemesters']);
-    feePerCredit = _asInt(json['feePerCredit']);
-    semesterFee = _asInt(json['semesterFee']);
-    annualFee = _asInt(json['annualFee']);
-    basePrice = _asInt(json['basePrice']);
-    minAdmissionRate = _asInt(json['minAdmissionRate']);
-    minBaGpa = json['minBaGpa']?.toString();
-    requiredScore = _asInt(json['requiredScore']);
-    discountedScore = _asInt(json['discountedScore']);
-    eligibility = _toStringList(json['eligibility']);
-    otherRequirements = _toStringList(json['otherRequirements']);
-    currency = json['currency']?.toString();
-    applicationFee = _asInt(json['applicationFee']);
-    coverImagePath = json['coverImagePath']?.toString();
-    status = json['status']?.toString();
-    commissionPercent = _asInt(json['commissionPercent']);
-    intakes = _toDynamicList(json['intakes']);
+  Courses.fromJson(Map<String, dynamic> json) {
+    programId = json['programId'];
+    programName = json['programName'];
+    academicProgram = json['academicProgram'];
+    educationInstitute = json['educationInstitute'];
+    name = json['name'];
+    isBooked = json['isBooked'];
+    track = json['track'];
+    duration = json['duration'];
+    creditHours = json['creditHours'];
+    totalFees = json['totalFees'];
+    semesters = json['semesters'];
+    totalSemesters = json['totalSemesters'];
+    feePerCredit = json['feePerCredit'];
+    semesterFee = json['semesterFee'];
+    annualFee = json['annualFee'];
+    basePrice = json['basePrice'];
+    minAdmissionRate = json['minAdmissionRate'];
+    eligibility = json['eligibility'].cast<String>();
+    otherRequirements = json['otherRequirements'].cast<String>();
+    currency = json['currency'];
+    applicationFee = json['applicationFee'];
+    status = json['status'];
+    commissionPercent = json['commissionPercent'];
+    minBaGpa = json['minBaGpa'];
   }
 
   Map<String, dynamic> toJson() {
-    final Map<String, dynamic> data = <String, dynamic>{};
-    _addIfNotNull(data, 'programId', programId);
-    _addIfNotNull(data, 'programName', programName);
-    _addIfNotNull(data, 'academicProgram', academicProgram);
-    _addIfNotNull(data, 'educationInstitute', educationInstitute);
-    _addIfNotNull(data, 'name', name);
-    _addIfNotNull(data, 'isBooked', isBooked);
-    _addIfNotNull(data, 'track', track);
-    _addIfNotNull(data, 'duration', duration);
-    _addIfNotNull(data, 'creditHours', creditHours);
-    _addIfNotNull(data, 'totalFees', totalFees);
-    _addIfNotNull(data, 'semesters', semesters);
-    _addIfNotNull(data, 'totalSemesters', totalSemesters);
-    _addIfNotNull(data, 'feePerCredit', feePerCredit);
-    _addIfNotNull(data, 'semesterFee', semesterFee);
-    _addIfNotNull(data, 'annualFee', annualFee);
-    _addIfNotNull(data, 'basePrice', basePrice);
-    _addIfNotNull(data, 'minAdmissionRate', minAdmissionRate);
-    _addIfNotNull(data, 'minBaGpa', minBaGpa);
-    _addIfNotNull(data, 'requiredScore', requiredScore);
-    _addIfNotNull(data, 'discountedScore', discountedScore);
-    _addIfNotNull(data, 'eligibility', eligibility);
-    _addIfNotNull(data, 'otherRequirements', otherRequirements);
-    _addIfNotNull(data, 'currency', currency);
-    _addIfNotNull(data, 'applicationFee', applicationFee);
-    _addIfNotNull(data, 'coverImagePath', coverImagePath);
-    _addIfNotNull(data, 'status', status);
-    _addIfNotNull(data, 'commissionPercent', commissionPercent);
-    _addIfNotNull(data, 'intakes', intakes);
+    final Map<String, dynamic> data = new Map<String, dynamic>();
+    data['programId'] = this.programId;
+    data['programName'] = this.programName;
+    data['academicProgram'] = this.academicProgram;
+    data['educationInstitute'] = this.educationInstitute;
+    data['name'] = this.name;
+    data['isBooked'] = this.isBooked;
+    data['track'] = this.track;
+    data['duration'] = this.duration;
+    data['creditHours'] = this.creditHours;
+    data['totalFees'] = this.totalFees;
+    data['semesters'] = this.semesters;
+    data['totalSemesters'] = this.totalSemesters;
+    data['feePerCredit'] = this.feePerCredit;
+    data['semesterFee'] = this.semesterFee;
+    data['annualFee'] = this.annualFee;
+    data['basePrice'] = this.basePrice;
+    data['minAdmissionRate'] = this.minAdmissionRate;
+    data['eligibility'] = this.eligibility;
+    data['otherRequirements'] = this.otherRequirements;
+    data['currency'] = this.currency;
+    data['applicationFee'] = this.applicationFee;
+    data['status'] = this.status;
+    data['commissionPercent'] = this.commissionPercent;
+    data['minBaGpa'] = this.minBaGpa;
     return data;
   }
-}
-
-List<AcademicList>? _parseAcademicList(dynamic value) {
-  if (value == null) return null;
-  if (value is! List) return null;
-
-  final entries = <AcademicList>[];
-  for (final item in value.whereType<Map<String, dynamic>>()) {
-    final academicEntry = AcademicList.fromJson(item);
-    final groupedColleges = academicEntry.colleges;
-
-    if (groupedColleges == null || groupedColleges.isEmpty) {
-      entries.add(academicEntry);
-      continue;
-    }
-
-    for (final college in groupedColleges) {
-      final courseDetails = college.courses ?? <CourseDetails>[];
-      entries.add(
-        AcademicList(
-          academicname: academicEntry.academicname,
-          college: college.college,
-          program: ProgramData(
-            name: academicEntry.academicname,
-            academicProgram: academicEntry.academicname,
-            courseNames: courseDetails
-                .map((course) => course.name)
-                .whereType<String>()
-                .join('\n'),
-            courseDetails: courseDetails,
-            track: _firstNonEmpty(courseDetails.map((course) => course.track)),
-            minAdmissionRate: _minimumInt(
-              courseDetails.map((course) => course.minAdmissionRate),
-            ),
-            minBaGpa: _firstNonEmpty(
-              courseDetails.map((course) => course.minBaGpa),
-            ),
-            status: _firstNonEmpty(
-              courseDetails.map((course) => course.status),
-            ),
-            basePrice: _minimumInt(
-              courseDetails.map((course) => course.basePrice),
-            ),
-            currency: _firstNonEmpty(
-              courseDetails.map((course) => course.currency),
-            ),
-            commissionPercent: _firstInt(
-              courseDetails.map((course) => course.commissionPercent),
-            ),
-            intakes: courseDetails
-                .expand((course) => course.intakes ?? const <dynamic>[])
-                .toList(),
-            educationInstitute: _firstNonEmpty(
-              courseDetails.map((course) => course.educationInstitute),
-            ) ??
-                college.college,
-            courses: courseDetails
-                .map((course) => course.name)
-                .whereType<String>()
-                .toList(),
-          ),
-          colleges: <AcademicCollege>[college],
-        ),
-      );
-    }
-  }
-
-  return entries;
-}
-
-void _addIfNotNull(Map<String, dynamic> map, String key, dynamic value) {
-  if (value != null) {
-    map[key] = value;
-  }
-}
-
-int? _asInt(dynamic value) {
-  if (value == null) return null;
-  if (value is int) return value;
-  if (value is double) return value.toInt();
-  return int.tryParse(value.toString());
-}
-
-double? _asDouble(dynamic value) {
-  if (value == null) return null;
-  if (value is double) return value;
-  if (value is int) return value.toDouble();
-  return double.tryParse(value.toString());
-}
-
-bool? _asBool(dynamic value) {
-  if (value == null) return null;
-  if (value is bool) return value;
-  final normalized = value.toString().trim().toLowerCase();
-  if (normalized == 'true' || normalized == '1') return true;
-  if (normalized == 'false' || normalized == '0') return false;
-  return null;
-}
-
-String? _firstNonEmpty(Iterable<String?> values) {
-  for (final value in values) {
-    final trimmed = value?.trim();
-    if (trimmed != null && trimmed.isNotEmpty) {
-      return trimmed;
-    }
-  }
-  return null;
-}
-
-int? _firstInt(Iterable<int?> values) {
-  for (final value in values) {
-    if (value != null) return value;
-  }
-  return null;
-}
-
-int? _minimumInt(Iterable<int?> values) {
-  int? minimum;
-  for (final value in values) {
-    if (value == null) continue;
-    minimum = minimum == null || value < minimum ? value : minimum;
-  }
-  return minimum;
-}
-
-List<String>? _toStringList(dynamic value) {
-  if (value == null) return null;
-  if (value is List) {
-    return value.map((item) => item.toString()).toList();
-  }
-  if (value is String) {
-    final trimmed = value.trim();
-    if (trimmed.isEmpty) return <String>[];
-    return <String>[trimmed];
-  }
-  return null;
-}
-
-List<dynamic>? _toDynamicList(dynamic value) {
-  if (value == null) return null;
-  if (value is List) {
-    return List<dynamic>.from(value);
-  }
-  return null;
-}
-
-List<CourseDetails>? _parseCourseDetails(dynamic value) {
-  if (value == null) return null;
-
-  final list = <dynamic>[];
-  if (value is List) {
-    list.addAll(value);
-  } else if (value is String && value.trim().isNotEmpty) {
-    try {
-      final decoded = jsonDecode(value);
-      if (decoded is List) {
-        list.addAll(decoded);
-      }
-    } catch (_) {
-      // Ignore invalid JSON payloads.
-    }
-  }
-
-  if (list.isEmpty) {
-    return <CourseDetails>[];
-  }
-
-  return list
-      .whereType<Map<String, dynamic>>()
-      .map(CourseDetails.fromJson)
-      .toList();
 }
