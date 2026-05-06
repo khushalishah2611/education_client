@@ -830,6 +830,8 @@ class _CollegeAccordionState extends State<_CollegeAccordion> {
                             builder: (_) => CourseDetailScreen(
                               university: adminUniversity,
                               course: details,
+                              academicEntry: academicEntry,
+                              collegeName: collegeName,
                             ),
                           ),
                         );
