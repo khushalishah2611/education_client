@@ -628,10 +628,19 @@ class _CollegeAccordionState extends State<_CollegeAccordion> {
     );
   }
 
-  List<CourseDetails> _courseDetailsForAcademicEntry(AcademicList academicEntry) {
+  List<CourseDetails> _courseDetailsForAcademicEntry(
+    AcademicList academicEntry,
+  ) {
+    final ProgramData? program = academicEntry.program;
+    if (!_programBelongsToCollege(academicEntry)) {
+      return <CourseDetails>[];
+    }
+
     final List<CourseDetails> courseDetails =
-        academicEntry.program?.courseDetails ?? <CourseDetails>[];
-    final List<String> courseNames = _courseNamesForAcademicEntry(academicEntry);
+        program?.courseDetails ?? <CourseDetails>[];
+    final List<String> courseNames = _courseNamesForAcademicEntry(
+      academicEntry,
+    );
 
     if (courseNames.isEmpty) {
       return _dedupeCourseDetails(courseDetails);
@@ -659,6 +668,41 @@ class _CollegeAccordionState extends State<_CollegeAccordion> {
     }
 
     return filteredDetails;
+  }
+
+  bool _programBelongsToCollege(AcademicList academicEntry) {
+    final String collegeName = _normalizeCollegeName(academicEntry.college);
+    final String programInstitute = _normalizeCollegeName(
+      academicEntry.program?.educationInstitute,
+    );
+
+    if (collegeName.isEmpty || programInstitute.isEmpty) {
+      return true;
+    }
+
+    return collegeName == programInstitute;
+  }
+
+  String _normalizeCollegeName(String? value) {
+    String normalized = (value ?? '')
+        .split('-')
+        .first
+        .trim()
+        .replaceAll(RegExp(r'\s+'), ' ')
+        .toLowerCase();
+
+    for (final String prefix in const <String>[
+      'faculty of ',
+      'college of ',
+      'school of ',
+    ]) {
+      if (normalized.startsWith(prefix)) {
+        normalized = normalized.substring(prefix.length).trim();
+        break;
+      }
+    }
+
+    return normalized;
   }
 
   List<String> _courseNamesForAcademicEntry(AcademicList academicEntry) {
