@@ -16,6 +16,7 @@ class HomeController extends ChangeNotifier {
     _selectedCountry = initialCountry?.trim().isNotEmpty == true
         ? initialCountry!.trim()
         : null;
+
     _loginDialCode = initialDialCode?.trim().isNotEmpty == true
         ? initialDialCode!.trim()
         : null;
@@ -42,16 +43,25 @@ class HomeController extends ChangeNotifier {
   final TextEditingController resultController = TextEditingController();
 
   String? get selectedCountry => _selectedCountry;
+
   String? get selectedAcademic => _selectedAcademic;
+
   String? get selectedTrack => _selectedTrack;
 
   Future<void> initialize() async {
     await _loadSessionDefaults();
-    await Future.wait([loadBanners(), loadUniversities()]);
+
+    await Future.wait([
+      loadBanners(),
+      loadUniversities(),
+    ]);
   }
 
   Future<void> refreshHomeData() async {
-    await Future.wait([loadBanners(), loadUniversities()]);
+    await Future.wait([
+      loadBanners(),
+      loadUniversities(),
+    ]);
   }
 
   Future<void> loadBanners() async {
@@ -59,7 +69,10 @@ class HomeController extends ChangeNotifier {
     notifyListeners();
 
     try {
-      banners = await _homeApiService.fetchBanners(page: 1, limit: 10);
+      banners = await _homeApiService.fetchBanners(
+        page: 1,
+        limit: 10,
+      );
     } catch (_) {
       banners = [];
     }
@@ -76,52 +89,80 @@ class HomeController extends ChangeNotifier {
       final responses = await Future.wait<Object>([
         _homeApiService
             .fetchUniversities(
-              country: _selectedCountry,
-              academic: _selectedAcademic,
-              track: _selectedTrack,
-              search: resultController.text,
-            )
+          country: _selectedCountry,
+          academic: _selectedAcademic,
+          track: _selectedTrack,
+          search: resultController.text.trim(),
+        )
             .catchError((_) => <AdminUniversity>[]),
-        _homeApiService.fetchTrackMasters().catchError((_) => <String>[]),
-        _homeApiService.fetchAcademicMasters().catchError((_) => <String>[]),
-        _homeApiService.fetchCountries().catchError((_) => <CountryMaster>[]),
+
+        _homeApiService.fetchTrackMasters()
+            .catchError((_) => <String>[]),
+
+        _homeApiService.fetchAcademicMasters()
+            .catchError((_) => <String>[]),
+
+        _homeApiService.fetchCountries()
+            .catchError((_) => <CountryMaster>[]),
       ]);
 
-      final universitiesResponse = responses[0] as List<AdminUniversity>;
+      final universitiesResponse =
+      responses[0] as List<AdminUniversity>;
+
       final tracks = responses[1] as List<String>;
+
       final academics = responses[2] as List<String>;
+
       final countries = responses[3] as List<CountryMaster>;
 
-      /// ✅ Force Oman if +968
-      _selectedCountry = _resolveAutoCountry(countries) ?? _selectedCountry;
+      /// Auto Oman selection
+      _selectedCountry =
+          _resolveAutoCountry(countries) ?? _selectedCountry;
 
-      /// ✅ Apply university filter
+      /// Apply local filters
       universities = _filterUniversities(universitiesResponse);
 
+      /// Track options
       trackOptions = tracks
           .map((e) => e.trim())
-          .where((e) => e.isNotEmpty && !_isScientificAndLiterary(e))
+          .where(
+            (e) =>
+        e.isNotEmpty &&
+            !_isScientificAndLiterary(e),
+      )
           .toList();
 
-      academicOptions = academics;
+      /// Academic options
+      academicOptions = academics
+          .map((e) => e.trim())
+          .where((e) => e.isNotEmpty)
+          .toList();
 
+      /// Country options
       countryOptions = countries
           .where((c) {
-            final name = (c.nameEn.isNotEmpty ? c.nameEn : c.value)
-                .toLowerCase()
-                .trim();
-            return name.isNotEmpty;
-          })
+        final name = (c.nameEn.isNotEmpty
+            ? c.nameEn
+            : c.value)
+            .trim();
+
+        return name.isNotEmpty;
+      })
           .map(
             (c) => CountryOption(
-              name: c.nameEn.isNotEmpty ? c.nameEn : c.value,
-              flagEmoji: c.flagEmoji,
-              flagImageUrl: _resolveCountryFlag(c),
-              dialCode: c.dialCode,
-            ),
-          )
+          name: c.nameEn.isNotEmpty
+              ? c.nameEn
+              : c.value,
+          flagEmoji: c.flagEmoji,
+          flagImageUrl: _resolveCountryFlag(c),
+          dialCode: c.dialCode,
+        ),
+      )
           .toList();
-    } catch (_) {
+
+    } catch (e) {
+      debugPrint("LOAD UNIVERSITY ERROR: $e");
+
       universities = [];
       trackOptions = [];
       academicOptions = [];
@@ -132,24 +173,23 @@ class HomeController extends ChangeNotifier {
     notifyListeners();
   }
 
+  /// MAIN FILTER APPLY
   Future<void> applyFilters() async {
-    universities = _filterUniversities(universities);
-    notifyListeners();
-    loadUniversities();
+    await loadUniversities();
   }
 
   void updateCountry(String? value) {
-    _selectedCountry = value;
+    _selectedCountry = value?.trim();
     notifyListeners();
   }
 
   void updateAcademic(String? value) {
-    _selectedAcademic = value;
+    _selectedAcademic = value?.trim();
     notifyListeners();
   }
 
   void updateTrack(String? value) {
-    _selectedTrack = value;
+    _selectedTrack = value?.trim();
     notifyListeners();
   }
 
@@ -157,32 +197,61 @@ class HomeController extends ChangeNotifier {
     _selectedCountry = null;
     _selectedAcademic = null;
     _selectedTrack = null;
+
     resultController.clear();
+
     notifyListeners();
+
     loadUniversities();
   }
 
-  List<AdminUniversity> _filterUniversities(List<AdminUniversity> source) {
-    final enteredResult = double.tryParse(resultController.text.trim());
+  List<AdminUniversity> _filterUniversities(
+      List<AdminUniversity> source,
+      ) {
+    final enteredResult =
+    double.tryParse(resultController.text.trim());
 
     return source.where((u) {
-      if (u.accredited != true) return false;
-      if ((u.status ?? '').trim().toLowerCase() != 'active') return false;
+
+      /// Accredited check
+      if (u.accredited != true) {
+        return false;
+      }
+
+      /// Active status check
+      if ((u.status ?? '')
+          .trim()
+          .toLowerCase() !=
+          'active') {
+        return false;
+      }
+
+      /// Country filter
       final effectiveCountry = _selectedCountry;
 
       if (effectiveCountry != null &&
           effectiveCountry.isNotEmpty &&
-          (u.country ?? '').toLowerCase() != effectiveCountry.toLowerCase()) {
+          _normalizeValue(u.country) !=
+              _normalizeValue(effectiveCountry)) {
         return false;
       }
 
-      if (!_matchesAcademic(u)) return false;
+      /// Academic filter
+      if (!_matchesAcademic(u)) {
+        return false;
+      }
 
-      if (!_matchesTrack(u)) return false;
+      /// Track filter
+      if (!_matchesTrack(u)) {
+        return false;
+      }
 
+      /// Result filter
       if (enteredResult != null) {
         final minRate = _minimumAdmissionRate(u);
-        if (minRate != null && enteredResult < minRate) {
+
+        if (minRate != null &&
+            enteredResult < minRate) {
           return false;
         }
       }
@@ -192,10 +261,16 @@ class HomeController extends ChangeNotifier {
   }
 
   bool _matchesAcademic(AdminUniversity u) {
-    if (_selectedAcademic == null || _selectedAcademic!.isEmpty) return true;
+    if (_selectedAcademic == null ||
+        _selectedAcademic!.isEmpty) {
+      return true;
+    }
 
-    final selectedAcademic = _normalizeValue(_selectedAcademic);
-    return _academicValues(u).contains(selectedAcademic);
+    final selectedAcademic =
+    _normalizeValue(_selectedAcademic);
+
+    return _academicValues(u)
+        .contains(selectedAcademic);
   }
 
   Set<String> _academicValues(AdminUniversity u) {
@@ -205,19 +280,40 @@ class HomeController extends ChangeNotifier {
       values.addAll(_splitCsvValues(value));
     }
 
-    for (final academic in u.academicList ?? const <AcademicList>[]) {
+    for (final academic
+    in u.academicList ??
+        const <AcademicList>[]) {
+
       addValue(academic.academicname);
-      addValue(academic.program?.academicProgram);
+
+      addValue(
+        academic.program?.academicProgram,
+      );
     }
 
-    for (final link in u.programLinks ?? const <ProgramLinks>[]) {
-      addValue(link.program?.academicProgram);
+    for (final link
+    in u.programLinks ??
+        const <ProgramLinks>[]) {
+
+      addValue(
+        link.program?.academicProgram,
+      );
     }
 
-    for (final academic in u.academicPrograms ?? const <AcademicPrograms>[]) {
+    for (final academic
+    in u.academicPrograms ??
+        const <AcademicPrograms>[]) {
+
       addValue(academic.academicname);
-      for (final college in academic.colleges ?? const <Colleges>[]) {
-        for (final course in college.courses ?? const <Courses>[]) {
+
+      for (final college
+      in academic.colleges ??
+          const <Colleges>[]) {
+
+        for (final course
+        in college.courses ??
+            const <Courses>[]) {
+
           addValue(course.academicProgram);
         }
       }
@@ -227,48 +323,87 @@ class HomeController extends ChangeNotifier {
   }
 
   bool _matchesTrack(AdminUniversity u) {
-    if (_selectedTrack == null || _selectedTrack!.isEmpty) return true;
+    if (_selectedTrack == null ||
+        _selectedTrack!.isEmpty) {
+      return true;
+    }
 
     final tracks = _trackTypes(u);
-    return tracks.contains(_normalizeValue(_selectedTrack));
+
+    return tracks.contains(
+      _normalizeValue(_selectedTrack),
+    );
   }
 
   Future<void> _loadSessionDefaults() async {
     try {
-      final prefs = await SharedPreferences.getInstance();
-      _selectedCountry ??= prefs.getString('loginCountry');
-      _loginDialCode ??= prefs.getString('loginDialCode');
+      final prefs =
+      await SharedPreferences.getInstance();
+
+      _selectedCountry ??=
+          prefs.getString('loginCountry');
+
+      _loginDialCode ??=
+          prefs.getString('loginDialCode');
+
     } catch (_) {}
   }
 
-  String? _resolveAutoCountry(List<CountryMaster> countries) {
-    if ((_loginDialCode ?? '').trim() == '+968') {
+  String? _resolveAutoCountry(
+      List<CountryMaster> countries,
+      ) {
+    if ((_loginDialCode ?? '').trim() ==
+        '+968') {
       return _selectedCountry ?? 'Oman';
     }
+
     return null;
   }
 
   Set<String> _trackTypes(AdminUniversity u) {
     final tracks = <String>{};
 
-    for (final link in u.programLinks ?? const <ProgramLinks>[]) {
-      final value = _normalizeValue(link.program?.track);
+    for (final link
+    in u.programLinks ??
+        const <ProgramLinks>[]) {
+
+      final value = _normalizeValue(
+        link.program?.track,
+      );
+
       if (value.isNotEmpty) {
         tracks.add(value);
       }
     }
 
-    for (final academic in u.academicList ?? const <AcademicList>[]) {
-      final value = _normalizeValue(academic.program?.track);
+    for (final academic
+    in u.academicList ??
+        const <AcademicList>[]) {
+
+      final value = _normalizeValue(
+        academic.program?.track,
+      );
+
       if (value.isNotEmpty) {
         tracks.add(value);
       }
     }
 
-    for (final academic in u.academicPrograms ?? const <AcademicPrograms>[]) {
-      for (final college in academic.colleges ?? const <Colleges>[]) {
-        for (final course in college.courses ?? const <Courses>[]) {
-          final value = _normalizeValue(course.track);
+    for (final academic
+    in u.academicPrograms ??
+        const <AcademicPrograms>[]) {
+
+      for (final college
+      in academic.colleges ??
+          const <Colleges>[]) {
+
+        for (final course
+        in college.courses ??
+            const <Courses>[]) {
+
+          final value =
+          _normalizeValue(course.track);
+
           if (value.isNotEmpty) {
             tracks.add(value);
           }
@@ -279,42 +414,79 @@ class HomeController extends ChangeNotifier {
     return tracks;
   }
 
-  double? _minimumAdmissionRate(AdminUniversity u) {
+  double? _minimumAdmissionRate(
+      AdminUniversity u,
+      ) {
     final rates = <double>[];
 
     rates.addAll(
-      (u.programLinks ?? const <ProgramLinks>[])
-          .map((e) => e.program?.minAdmissionRate?.toDouble())
+      (u.programLinks ??
+          const <ProgramLinks>[])
+          .map(
+            (e) => e.program
+            ?.minAdmissionRate
+            ?.toDouble(),
+      )
           .whereType<double>(),
     );
 
     rates.addAll(
-      (u.academicList ?? const <AcademicList>[])
-          .map((e) => e.program?.minAdmissionRate?.toDouble())
+      (u.academicList ??
+          const <AcademicList>[])
+          .map(
+            (e) => e.program
+            ?.minAdmissionRate
+            ?.toDouble(),
+      )
           .whereType<double>(),
     );
 
-    for (final academic in u.academicPrograms ?? const <AcademicPrograms>[]) {
-      for (final college in academic.colleges ?? const <Colleges>[]) {
+    for (final academic
+    in u.academicPrograms ??
+        const <AcademicPrograms>[]) {
+
+      for (final college
+      in academic.colleges ??
+          const <Colleges>[]) {
+
         rates.addAll(
-          (college.courses ?? const <Courses>[])
-              .map((e) => e.minAdmissionRate?.toDouble())
+          (college.courses ??
+              const <Courses>[])
+              .map(
+                (e) => e.minAdmissionRate
+                ?.toDouble(),
+          )
               .whereType<double>(),
         );
       }
     }
 
-    if (rates.isEmpty) return null;
+    if (rates.isEmpty) {
+      return null;
+    }
 
-    return rates.reduce((a, b) => a < b ? a : b);
+    return rates.reduce(
+          (a, b) => a < b ? a : b,
+    );
   }
 
-  bool _isScientificAndLiterary(String v) {
-    return v.replaceAll(' ', '').toUpperCase() == 'SCIENTIFICANDLITERARY';
+  bool _isScientificAndLiterary(
+      String value,
+      ) {
+    return value
+        .replaceAll(' ', '')
+        .toUpperCase() ==
+        'SCIENTIFICANDLITERARY';
   }
 
-  List<String> _splitCsvValues(String? csv) {
-    if (csv == null || csv.trim().isEmpty) return const [];
+  List<String> _splitCsvValues(
+      String? csv,
+      ) {
+    if (csv == null ||
+        csv.trim().isEmpty) {
+      return const [];
+    }
+
     return csv
         .split(',')
         .map(_normalizeValue)
@@ -323,13 +495,23 @@ class HomeController extends ChangeNotifier {
   }
 
   String _normalizeValue(String? value) {
-    return (value ?? '').trim().toUpperCase();
+    return (value ?? '')
+        .trim()
+        .toUpperCase();
   }
 
-  String _resolveCountryFlag(CountryMaster c) {
-    if (c.value.startsWith('http')) return c.value;
+  String _resolveCountryFlag(
+      CountryMaster c,
+      ) {
+    if (c.value.startsWith('http')) {
+      return c.value;
+    }
+
     final code = c.value.toLowerCase();
-    return code.length == 2 ? 'https://flagcdn.com/w40/$code.png' : '';
+
+    return code.length == 2
+        ? 'https://flagcdn.com/w40/$code.png'
+        : '';
   }
 
   @override

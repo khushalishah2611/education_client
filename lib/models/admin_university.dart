@@ -17,11 +17,10 @@ class AdminUniversity {
   bool? isEnabled;
   String? createdAt;
   String? updatedAt;
-  List<Null>? services;
   List<ProgramLinks>? programLinks;
   List<Ratings>? ratings;
   double? averageRating;
-  int? ratingCount;
+  double? ratingCount;
   List<AcademicPrograms>? academicPrograms;
 
   AdminUniversity(
@@ -43,7 +42,6 @@ class AdminUniversity {
         this.isEnabled,
         this.createdAt,
         this.updatedAt,
-        this.services,
         this.programLinks,
         this.ratings,
         this.averageRating,
@@ -168,21 +166,20 @@ class Program {
   String? track;
   Null? description;
   Null? durationMonths;
-  int? minAdmissionRate;
+  double? minAdmissionRate;
   String? minBaGpa;
   Null? requiredScore;
   Null? discountedScore;
   String? status;
   bool? isEnabled;
-  int? basePrice;
+  double? basePrice;
   String? currency;
-  int? commissionPercent;
+  double? commissionPercent;
   Null? coverImagePath;
   List<String>? eligibilityTitle;
   List<String>? scholarshipInfoTitle;
   String? createdAt;
   String? updatedAt;
-  List<Null>? intakes;
   List<UniversityLinks>? universityLinks;
   String? educationInstitute;
   List<String>? courses;
@@ -210,7 +207,6 @@ class Program {
         this.scholarshipInfoTitle,
         this.createdAt,
         this.updatedAt,
-        this.intakes,
         this.universityLinks,
         this.educationInstitute,
         this.courses});
@@ -295,19 +291,19 @@ class CourseDetails {
   bool? isBooked;
   String? track;
   String? duration;
-  int? creditHours;
-  int? totalFees;
-  int? semesters;
-  int? totalSemesters;
-  int? feePerCredit;
-  int? semesterFee;
-  int? annualFee;
-  int? basePrice;
-  int? minAdmissionRate;
+  double? creditHours;
+  double? totalFees;
+  double? semesters;
+  double? totalSemesters;
+  double? feePerCredit;
+  double? semesterFee;
+  double? annualFee;
+  double? basePrice;
+  double? minAdmissionRate;
   List<String>? eligibility;
   List<String>? otherRequirements;
   String? currency;
-  int? applicationFee;
+  double? applicationFee;
   String? status;
   String? minBaGpa;
 
@@ -380,7 +376,7 @@ class CourseDetails {
 }
 
 class UniversityLinks {
-  int? applicationFee;
+  double? applicationFee;
   String? currency;
   University? university;
 
@@ -428,8 +424,8 @@ class ProgramLinks {
   String? id;
   String? universityId;
   String? programId;
-  int? applicationFee;
-  int? taxes;
+  double? applicationFee;
+  double? taxes;
   String? currency;
   bool? isEnabled;
   String? createdAt;
@@ -612,22 +608,21 @@ class Courses {
   bool? isBooked;
   String? track;
   String? duration;
-  int? creditHours;
-  int? totalFees;
-  int? semesters;
-  int? totalSemesters;
-  int? feePerCredit;
-  int? semesterFee;
-  int? annualFee;
-  int? basePrice;
-  int? minAdmissionRate;
+  double? creditHours;
+  double? totalFees;
+  double? semesters;
+  double? totalSemesters;
+  double? feePerCredit;
+  double? semesterFee;
+  double? annualFee;
+  double? basePrice;
+  double? minAdmissionRate;
   List<String>? eligibility;
   List<String>? otherRequirements;
   String? currency;
-  int? applicationFee;
+  double? applicationFee;
   String? status;
-  int? commissionPercent;
-  List<Null>? intakes;
+  double? commissionPercent;
   String? minBaGpa;
 
   Courses(
@@ -654,7 +649,6 @@ class Courses {
         this.applicationFee,
         this.status,
         this.commissionPercent,
-        this.intakes,
         this.minBaGpa});
 
   Courses.fromJson(Map<String, dynamic> json) {
