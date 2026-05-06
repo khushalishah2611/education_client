@@ -7,16 +7,19 @@ import '../core/app_theme.dart';
 import '../widgets/common_widgets.dart';
 import '../widgets/flow_widgets.dart';
 
-
 class CourseDetailScreen extends StatefulWidget {
   const CourseDetailScreen({
     super.key,
     required this.university,
     required this.course,
+    this.academicEntry,
+    this.collegeName,
   });
 
   final AdminUniversity university;
   final CourseDetails course;
+  final AcademicList? academicEntry;
+  final String? collegeName;
 
   @override
   State<CourseDetailScreen> createState() => _CourseDetailScreenState();
@@ -24,30 +27,83 @@ class CourseDetailScreen extends StatefulWidget {
 
 class _CourseDetailScreenState extends State<CourseDetailScreen> {
   AdminUniversity get data => widget.university;
+
+  ProgramData? get _program => widget.academicEntry?.program;
+
+  CourseDetails get _course => CourseDetails(
+    name: _firstNotEmpty(widget.course.name, _program?.name),
+    isBooked: widget.course.isBooked,
+    track: _firstNotEmpty(widget.course.track, _program?.track),
+    duration: widget.course.duration,
+    creditHours: widget.course.creditHours,
+    totalFees: widget.course.totalFees,
+    semesters: widget.course.semesters,
+    feePerCredit: widget.course.feePerCredit,
+    semesterFee: widget.course.semesterFee,
+    annualFee: widget.course.annualFee,
+    basePrice: widget.course.basePrice ?? _program?.basePrice,
+    minAdmissionRate:
+        widget.course.minAdmissionRate ?? _program?.minAdmissionRate,
+    requiredScore: widget.course.requiredScore ?? _program?.requiredScore,
+    discountedScore:
+        widget.course.discountedScore ?? _program?.discountedScore,
+    eligibility: _nonEmptyList(widget.course.eligibility) ??
+        _nonEmptyList(_program?.eligibilityTitle),
+    otherRequirements: widget.course.otherRequirements,
+    currency: _firstNotEmpty(widget.course.currency, _program?.currency),
+    applicationFee:
+        widget.course.applicationFee ?? _firstProgramApplicationFee(),
+    coverImagePath:
+        _firstNotEmpty(widget.course.coverImagePath, _program?.coverImagePath),
+    status: _firstNotEmpty(widget.course.status, _program?.status),
+    minBaGpa: widget.course.minBaGpa,
+  );
+
   String get selectedCourseTitle =>
-      widget.course.name?.trim().isNotEmpty == true
-      ? widget.course.name!.trim()
+      _course.name?.trim().isNotEmpty == true
+      ? _course.name!.trim()
       : 'Course Details';
 
+  String get selectedCollegeName => widget.collegeName?.trim() ?? '';
+
   List<String> get eligibilityList =>
-      widget.course.eligibility
-          ?.where((item) => item.trim().isNotEmpty)
-          .toList() ??
+      _course.eligibility?.where((item) => item.trim().isNotEmpty).toList() ??
       const [];
 
   List<String> get otherRequirementList =>
-      widget.course.otherRequirements
+      _course.otherRequirements
           ?.where((item) => item.trim().isNotEmpty)
           .toList() ??
       const [];
-  List<String> get admissionRequirementList =>
-      widget.course.eligibility
-          ?.where((item) => item.trim().isNotEmpty)
-          .toList() ??
-      [];
+  List<String> get admissionRequirementList => eligibilityList;
+
+  String? _firstNotEmpty(String? primary, String? fallback) {
+    final String primaryValue = primary?.trim() ?? '';
+    if (primaryValue.isNotEmpty) return primaryValue;
+
+    final String fallbackValue = fallback?.trim() ?? '';
+    return fallbackValue.isEmpty ? null : fallbackValue;
+  }
+
+  List<String>? _nonEmptyList(List<String>? values) {
+    final List<String> cleaned = values
+            ?.map((value) => value.trim())
+            .where((value) => value.isNotEmpty)
+            .toList() ??
+        <String>[];
+    return cleaned.isEmpty ? null : cleaned;
+  }
+
+  int? _firstProgramApplicationFee() {
+    for (final UniversityLinks link
+        in _program?.universityLinks ?? const <UniversityLinks>[]) {
+      if (link.applicationFee != null) return link.applicationFee;
+    }
+    return null;
+  }
 
   String _priceWithCurrency(num? amount) {
-    final currency = widget.course.currency?.trim() ?? '';
+    final currency = _course.currency?.trim() ?? '';
     if (amount == null) return '-';
     return currency.isEmpty ? amount.toString() : '$currency $amount';
   }
@@ -220,6 +276,20 @@ class _CourseDetailScreenState extends State<CourseDetailScreen> {
               child: ListView(
                 padding: EdgeInsets.only(bottom: isSmallMobile ? 10 : 14),
                 children: [
+                  if (selectedCollegeName.isNotEmpty)
+                    Padding(
+                      padding: EdgeInsets.fromLTRB(
+                        horizontalPadding,
+                        0,
+                        horizontalPadding,
+                        12,
+                      ),
+                      child: _ContextDetailsCard(
+                        collegeName: selectedCollegeName,
+                        academicName: widget.academicEntry?.academicname,
+                        programName: _program?.name,
+                      ),
+                    ),
                   Padding(
                     padding: EdgeInsets.fromLTRB(
                       horizontalPadding,
@@ -228,7 +298,7 @@ class _CourseDetailScreenState extends State<CourseDetailScreen> {
                       0,
                     ),
                     child: _InfoDetailsCard(
-                      course: widget.course,
+                      course: _course,
                       priceWithCurrency: _priceWithCurrency,
                     ),
                   ),
@@ -280,6 +350,72 @@ class _CourseDetailScreenState extends State<CourseDetailScreen> {
       ),
     );
   }
+}
+
+class _ContextDetailsCard extends StatelessWidget {
+  const _ContextDetailsCard({
+    required this.collegeName,
+    this.academicName,
+    this.programName,
+  });
+
+  final String collegeName;
+  final String? academicName;
+  final String? programName;
+
+  @override
+  Widget build(BuildContext context) {
+    final List<_ContextItem> items = <_ContextItem>[
+      _ContextItem(label: 'College', value: collegeName),
+      _ContextItem(label: 'Academic', value: academicName),
+      _ContextItem(label: 'Program', value: programName),
+    ].where((item) => item.value?.trim().isNotEmpty == true).toList();
+
+    return Container(
+      width: double.infinity,
+      padding: const EdgeInsets.all(12),
+      decoration: BoxDecoration(
+        color: Colors.white,
+        borderRadius: BorderRadius.circular(10),
+        border: Border.all(color: const Color(0xFFE7E2DA)),
+      ),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: items
+            .map(
+              (item) => Padding(
+                padding: const EdgeInsets.only(bottom: 6),
+                child: RichText(
+                  text: TextSpan(
+                    style: const TextStyle(
+                      color: AppColors.textMuted,
+                      fontSize: 13,
+                    ),
+                    children: [
+                      TextSpan(
+                        text: '${item.label}: ',
+                        style: const TextStyle(
+                          color: AppColors.text,
+                          fontWeight: FontWeight.w700,
+                        ),
+                      ),
+                      TextSpan(text: item.value!.trim()),
+                    ],
+                  ),
+                ),
+              ),
+            )
+            .toList(),
+      ),
+    );
+  }
+}
+
+class _ContextItem {
+  const _ContextItem({required this.label, required this.value});
+
+  final String label;
+  final String? value;
 }
 
 class _InfoDetailsCard extends StatelessWidget {
