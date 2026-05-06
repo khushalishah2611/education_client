@@ -569,7 +569,7 @@ class _CollegeAccordionState extends State<_CollegeAccordion> {
             Column(
               children: widget.academicEntries.map((academicEntry) {
                 final List<CourseDetails> entryCourseDetailsList =
-                    academicEntry.program?.courseDetails ?? <CourseDetails>[];
+                    _courseDetailsForAcademicEntry(academicEntry);
                 final bool entryIsEmpty = entryCourseDetailsList.every(
                   (e) => (e.track ?? '').trim().isEmpty,
                 );
@@ -577,17 +577,25 @@ class _CollegeAccordionState extends State<_CollegeAccordion> {
 
                 return Column(
                   children: [
-                    _buildTableHeader(context,
-                        isSmallMobile: isSmallMobile,
-                        tableWidth: tableWidth,
-                        isEmpty: entryIsEmpty,
-                        collegeName: collegeName),
+                    _buildTableHeader(
+                      context,
+                      isSmallMobile: isSmallMobile,
+                      tableWidth: tableWidth,
+                      isEmpty: entryIsEmpty,
+                      collegeName: collegeName,
+                    ),
                     if (entryCourseDetailsList.isNotEmpty)
                       ...entryCourseDetailsList.asMap().entries.map((entry) {
                         final int index = entry.key;
                         final details = entry.value;
-                        final String courseKey =
-                            '$collegeName-${details.name ?? ''}';
+                        final String courseKey = [
+                          widget.academicName,
+                          collegeName,
+                          academicEntry.program?.id ??
+                              academicEntry.program?.name ??
+                              '',
+                          details.name ?? '',
+                        ].map((String value) => value.trim()).join('-');
                         final bool isSelected =
                             widget.selectedCourses.contains(courseKey);
 
@@ -616,6 +624,68 @@ class _CollegeAccordionState extends State<_CollegeAccordion> {
         ],
       ),
     );
+  }
+
+  List<CourseDetails> _courseDetailsForAcademicEntry(AcademicList academicEntry) {
+    final List<CourseDetails> courseDetails =
+        academicEntry.program?.courseDetails ?? <CourseDetails>[];
+    final List<String> courseNames = _courseNamesForAcademicEntry(academicEntry);
+
+    if (courseNames.isEmpty) {
+      return _dedupeCourseDetails(courseDetails);
+    }
+
+    final Map<String, CourseDetails> detailsByName = <String, CourseDetails>{};
+    for (final CourseDetails details in courseDetails) {
+      final String normalizedName = _normalizeCourseName(details.name);
+      if (normalizedName.isNotEmpty) {
+        detailsByName.putIfAbsent(normalizedName, () => details);
+      }
+    }
+
+    final List<CourseDetails> filteredDetails = <CourseDetails>[];
+    final Set<String> addedCourseNames = <String>{};
+    for (final String courseName in courseNames) {
+      final String normalizedName = _normalizeCourseName(courseName);
+      if (normalizedName.isEmpty || !addedCourseNames.add(normalizedName)) {
+        continue;
+      }
+
+      filteredDetails.add(
+        detailsByName[normalizedName] ?? CourseDetails(name: courseName),
+      );
+    }
+
+    return filteredDetails;
+  }
+
+  List<String> _courseNamesForAcademicEntry(AcademicList academicEntry) {
+    final List<String> rawCourseNames =
+        academicEntry.program?.courses ?? <String>[];
+
+    return rawCourseNames
+        .expand((String value) => value.split(','))
+        .map((String value) => value.trim())
+        .where((String value) => value.isNotEmpty)
+        .toList();
+  }
+
+  List<CourseDetails> _dedupeCourseDetails(List<CourseDetails> courseDetails) {
+    final Set<String> addedCourseNames = <String>{};
+    final List<CourseDetails> uniqueDetails = <CourseDetails>[];
+
+    for (final CourseDetails details in courseDetails) {
+      final String normalizedName = _normalizeCourseName(details.name);
+      if (normalizedName.isEmpty || addedCourseNames.add(normalizedName)) {
+        uniqueDetails.add(details);
+      }
+    }
+
+    return uniqueDetails;
+  }
+
+  String _normalizeCourseName(String? value) {
+    return (value ?? '').trim().toLowerCase();
   }
 
   Widget _buildTableHeader(
