@@ -176,22 +176,7 @@ class HomeController extends ChangeNotifier {
         return false;
       }
 
-      if (_selectedAcademic != null && _selectedAcademic!.isNotEmpty) {
-        final selectedAcademic = _normalizeValue(_selectedAcademic);
-        final matchesLegacyAcademic =
-            u.academicList?.any((a) {
-              final academicValues = _splitCsvValues(a.academicname);
-              return academicValues.contains(selectedAcademic);
-            }) ??
-            false;
-        final matchesGroupedAcademic =
-            u.academicPrograms?.any((a) {
-              final academicValues = _splitCsvValues(a.academicname);
-              return academicValues.contains(selectedAcademic);
-            }) ??
-            false;
-        if (!matchesLegacyAcademic && !matchesGroupedAcademic) return false;
-      }
+      if (!_matchesAcademic(u)) return false;
 
       if (!_matchesTrack(u)) return false;
 
@@ -204,6 +189,41 @@ class HomeController extends ChangeNotifier {
 
       return true;
     }).toList();
+  }
+
+  bool _matchesAcademic(AdminUniversity u) {
+    if (_selectedAcademic == null || _selectedAcademic!.isEmpty) return true;
+
+    final selectedAcademic = _normalizeValue(_selectedAcademic);
+    return _academicValues(u).contains(selectedAcademic);
+  }
+
+  Set<String> _academicValues(AdminUniversity u) {
+    final values = <String>{};
+
+    void addValue(String? value) {
+      values.addAll(_splitCsvValues(value));
+    }
+
+    for (final academic in u.academicList ?? const <AcademicList>[]) {
+      addValue(academic.academicname);
+      addValue(academic.program?.academicProgram);
+    }
+
+    for (final link in u.programLinks ?? const <ProgramLinks>[]) {
+      addValue(link.program?.academicProgram);
+    }
+
+    for (final academic in u.academicPrograms ?? const <AcademicPrograms>[]) {
+      addValue(academic.academicname);
+      for (final college in academic.colleges ?? const <Colleges>[]) {
+        for (final course in college.courses ?? const <Courses>[]) {
+          addValue(course.academicProgram);
+        }
+      }
+    }
+
+    return values;
   }
 
   bool _matchesTrack(AdminUniversity u) {
