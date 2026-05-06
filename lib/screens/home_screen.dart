@@ -113,7 +113,7 @@ class _HomeScreenState extends State<HomeScreen> {
   Widget build(BuildContext context) {
     final double horizontalPadding = context.responsiveHorizontalPadding;
     final int gridColumns = context.responsiveGridColumns;
-    final double gridAspectRatio = context.isSmallMobile ? 0.92 : 0.25;
+    final double gridAspectRatio = context.isSmallMobile ? 0.92 : 0.8;
 
     return Directionality(
       textDirection: context.l10n.textDirection,
