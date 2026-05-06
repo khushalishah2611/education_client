@@ -337,14 +337,14 @@ class _InfoDetailsCard extends StatelessWidget {
             label: 'Annual Fee',
             value: priceWithCurrency(course.annualFee),
           ),
-          // _InfoRow(
-          //   label: 'Total Cost',
-          //   valueWidget: _PriceValue(
-          //     basePrice: course.basePrice.toString(),
-          //     discountedPrice: course.minAdmissionRate,
-          //     priceWithCurrency: priceWithCurrency,
-          //   ),
-          // ),
+          _InfoRow(
+            label: 'Total Cost',
+            valueWidget: _PriceValue(
+              basePrice: course.basePrice,
+              discountedPrice: course.minAdmissionRate,
+              priceWithCurrency: priceWithCurrency,
+            ),
+          ),
           _InfoRow(
             label: 'Application Fee',
             value: priceWithCurrency(course.applicationFee),
@@ -363,8 +363,8 @@ class _PriceValue extends StatelessWidget {
     required this.priceWithCurrency,
   });
 
-  final int? basePrice;
-  final int? discountedPrice;
+  final double? basePrice;
+  final double? discountedPrice;
   final String Function(num? amount) priceWithCurrency;
 
   @override
