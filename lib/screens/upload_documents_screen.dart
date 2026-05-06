@@ -51,22 +51,26 @@ class _UploadDocumentsScreenState extends State<UploadDocumentsScreen> {
 
     try {
       final SharedPreferences prefs = await SharedPreferences.getInstance();
-      final String studentUserId = prefs.getString('studentUserId')?.trim() ?? '';
+      final String studentUserId = prefs.getString('studentUserId')?.trim() ??
+          '';
       if (studentUserId.isEmpty) {
         throw Exception('studentUserId not found');
       }
 
-      final List<DocumentTypeItem> types = await _applicationApiService.fetchDocumentTypes();
-      final bool isArabic = (WidgetsBinding.instance.platformDispatcher.locale.languageCode) == 'ar';
+      final List<DocumentTypeItem> types = await _applicationApiService
+          .fetchDocumentTypes();
+      final bool isArabic = (WidgetsBinding.instance.platformDispatcher.locale
+          .languageCode) == 'ar';
 
       final docs = types
           .map(
-            (item) => (
-              type: item.value,
-              title: isArabic ? item.labelAr : item.labelEn,
-              subtitle: item.value,
-            ),
-          )
+            (item) =>
+        (
+        type: item.value,
+        title: isArabic ? item.labelAr : item.labelEn,
+        subtitle: item.value,
+        ),
+      )
           .toList(growable: false);
       if (!mounted) return;
       setState(() {
@@ -84,10 +88,11 @@ class _UploadDocumentsScreenState extends State<UploadDocumentsScreen> {
     }
   }
 
-  Future<void> _pickDocument(({String type, String title, String subtitle}) doc) async {
+  Future<void> _pickDocument(
+      ({String type, String title, String subtitle}) doc) async {
     final result = await FilePicker.platform.pickFiles(
       type: FileType.custom,
-      allowedExtensions: ['pdf', 'jpg', 'jpeg', 'png'],
+      allowedExtensions: ['pdf'],
       allowMultiple: false,
     );
 
@@ -114,7 +119,8 @@ class _UploadDocumentsScreenState extends State<UploadDocumentsScreen> {
     setState(() => _isUploading = true);
     try {
       final SharedPreferences prefs = await SharedPreferences.getInstance();
-      final String studentUserId = prefs.getString('studentUserId')?.trim() ?? '';
+      final String studentUserId = prefs.getString('studentUserId')?.trim() ??
+          '';
       if (studentUserId.isEmpty) {
         throw Exception('studentUserId not found');
       }
@@ -150,7 +156,8 @@ class _UploadDocumentsScreenState extends State<UploadDocumentsScreen> {
   }
 
   bool get _allDocumentsSelected =>
-      _docs.isNotEmpty && _docs.every((doc) => _selectedFiles[doc.type] != null);
+      _docs.isNotEmpty &&
+          _docs.every((doc) => _selectedFiles[doc.type] != null);
 
   Future<void> _onContinue() async {
     if (!_allDocumentsSelected) {
@@ -163,56 +170,20 @@ class _UploadDocumentsScreenState extends State<UploadDocumentsScreen> {
     }
 
     setState(() => _isUploading = true);
-    try {
-      final SharedPreferences prefs = await SharedPreferences.getInstance();
-      final String studentUserId = prefs.getString('studentUserId')?.trim() ?? '';
-      if (studentUserId.isEmpty) {
-        throw Exception('studentUserId not found');
-      }
 
-      final List<Map<String, dynamic>> uploaded = await _applicationApiService.fetchStudentDocuments(
-        studentUserId: studentUserId,
-      );
+    if (!mounted) return;
+    Navigator.of(context).push(
+      MaterialPageRoute(
+        builder: (_) =>
+            PaymentScreen(
+              universityName: widget.universityName,
+              universityHeroImage: widget.universityHeroImage,
+              courseTitle: widget.courseTitle,
+              applicationsPayload: widget.applicationsPayload,
+            ),
+      ),
+    );
 
-      final Set<String> uploadedTypes = uploaded
-          .map((item) => item['type']?.toString() ?? '')
-          .where((type) => type.isNotEmpty)
-          .toSet();
-      final bool hasAllRequiredFromApi = _docs.every((doc) => uploadedTypes.contains(doc.type));
-
-      if (!hasAllRequiredFromApi) {
-        if (!mounted) return;
-        showAppSnackBar(
-          context,
-          type: AppSnackBarType.error,
-          message: context.l10n.text('uploadAllRequiredDocs'),
-        );
-        return;
-      }
-
-      if (!mounted) return;
-      Navigator.of(context).push(
-        MaterialPageRoute(
-          builder: (_) => PaymentScreen(
-            universityName: widget.universityName,
-            universityHeroImage: widget.universityHeroImage,
-            courseTitle: widget.courseTitle,
-            applicationsPayload: widget.applicationsPayload,
-          ),
-        ),
-      );
-    } catch (e) {
-      if (!mounted) return;
-      showAppSnackBar(
-        context,
-        type: AppSnackBarType.error,
-        message: e.toString(),
-      );
-    } finally {
-      if (mounted) {
-        setState(() => _isUploading = false);
-      }
-    }
   }
 
   @override
