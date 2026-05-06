@@ -16,7 +16,7 @@ class CourseDetailScreen extends StatefulWidget {
   });
 
   final AdminUniversity university;
-  final CourseDetails course;
+  final Courses course;
 
   @override
   State<CourseDetailScreen> createState() => _CourseDetailScreenState();
@@ -288,7 +288,7 @@ class _InfoDetailsCard extends StatelessWidget {
     required this.priceWithCurrency,
   });
 
-  final CourseDetails course;
+  final Courses course;
   final String Function(num? amount) priceWithCurrency;
 
   @override
@@ -341,7 +341,7 @@ class _InfoDetailsCard extends StatelessWidget {
             label: 'Total Cost',
             valueWidget: _PriceValue(
               basePrice: course.basePrice,
-              discountedPrice: course.discountedScore,
+              discountedPrice: course.minAdmissionRate,
               priceWithCurrency: priceWithCurrency,
             ),
           ),

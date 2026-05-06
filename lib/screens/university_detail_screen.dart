@@ -723,17 +723,17 @@ class _CollegeAccordionState extends State<_CollegeAccordion> {
 
   Map<String, dynamic> _buildApplicationPayload({
     required AdminUniversity adminUniversity,
-    required AcademicList academicEntry,
+    required AcademicPrograms academicProgram,
     required String collegeName,
-    required CourseDetails courseDetails,
+    required Courses courseDetails,
   }) {
     final Map<String, dynamic> payload = <String, dynamic>{
       'universityId': adminUniversity.id,
       'universityName': adminUniversity.name,
-      'academicName': academicEntry.academicname,
+      'academicName': academicProgram.academicname,
       'college': collegeName,
-      'programId': academicEntry.program?.id,
-      'programName': academicEntry.program?.name,
+      'programId': courseDetails.programId,
+      'programName': courseDetails.programName,
       'courseName': courseDetails.name,
       'courseDetails': courseDetails.toJson(),
     };

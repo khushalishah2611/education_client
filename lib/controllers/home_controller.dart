@@ -178,13 +178,19 @@ class HomeController extends ChangeNotifier {
 
       if (_selectedAcademic != null && _selectedAcademic!.isNotEmpty) {
         final selectedAcademic = _normalizeValue(_selectedAcademic);
-        final match =
+        final matchesLegacyAcademic =
             u.academicList?.any((a) {
               final academicValues = _splitCsvValues(a.academicname);
               return academicValues.contains(selectedAcademic);
             }) ??
             false;
-        if (!match) return false;
+        final matchesGroupedAcademic =
+            u.academicPrograms?.any((a) {
+              final academicValues = _splitCsvValues(a.academicname);
+              return academicValues.contains(selectedAcademic);
+            }) ??
+            false;
+        if (!matchesLegacyAcademic && !matchesGroupedAcademic) return false;
       }
 
       if (!_matchesTrack(u)) return false;
@@ -225,11 +231,6 @@ class HomeController extends ChangeNotifier {
   Set<String> _trackTypes(AdminUniversity u) {
     final tracks = <String>{};
 
-    final topLevelTrack = _normalizeValue(u.track);
-    if (topLevelTrack.isNotEmpty) {
-      tracks.add(topLevelTrack);
-    }
-
     for (final link in u.programLinks ?? const <ProgramLinks>[]) {
       final value = _normalizeValue(link.program?.track);
       if (value.isNotEmpty) {
@@ -241,6 +242,17 @@ class HomeController extends ChangeNotifier {
       final value = _normalizeValue(academic.program?.track);
       if (value.isNotEmpty) {
         tracks.add(value);
+      }
+    }
+
+    for (final academic in u.academicPrograms ?? const <AcademicPrograms>[]) {
+      for (final college in academic.colleges ?? const <Colleges>[]) {
+        for (final course in college.courses ?? const <Courses>[]) {
+          final value = _normalizeValue(course.track);
+          if (value.isNotEmpty) {
+            tracks.add(value);
+          }
+        }
       }
     }
 
@@ -261,6 +273,16 @@ class HomeController extends ChangeNotifier {
           .map((e) => e.program?.minAdmissionRate?.toDouble())
           .whereType<double>(),
     );
+
+    for (final academic in u.academicPrograms ?? const <AcademicPrograms>[]) {
+      for (final college in academic.colleges ?? const <Colleges>[]) {
+        rates.addAll(
+          (college.courses ?? const <Courses>[])
+              .map((e) => e.minAdmissionRate?.toDouble())
+              .whereType<double>(),
+        );
+      }
+    }
 
     if (rates.isEmpty) return null;
 
