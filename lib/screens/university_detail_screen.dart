@@ -493,6 +493,28 @@ class _UniversityDetailScreenState extends State<UniversityDetailScreen> {
   }
 }
 
+class _CollegeCourseGroup {
+  _CollegeCourseGroup({
+    required this.displayName,
+    required this.entries,
+  });
+
+  final String displayName;
+  final List<AcademicList> entries;
+}
+
+class _CourseRowData {
+  _CourseRowData({
+    required this.academicEntry,
+    required this.collegeName,
+    required this.details,
+  });
+
+  final AcademicList academicEntry;
+  final String collegeName;
+  final CourseDetails details;
+}
+
 class _CollegeAccordion extends StatefulWidget {
   const _CollegeAccordion({
     super.key,
@@ -567,13 +589,12 @@ class _CollegeAccordionState extends State<_CollegeAccordion> {
           ),
           if (widget.isExpanded)
             Column(
-              children: widget.academicEntries.map((academicEntry) {
-                final List<CourseDetails> entryCourseDetailsList =
-                    _courseDetailsForAcademicEntry(academicEntry);
-                final bool entryIsEmpty = entryCourseDetailsList.every(
-                  (e) => (e.track ?? '').trim().isEmpty,
+              children: _collegeGroupsForAcademicEntries().map((collegeGroup) {
+                final List<_CourseRowData> courseRows =
+                    _courseRowsForCollegeGroup(collegeGroup);
+                final bool groupIsEmpty = courseRows.every(
+                  (row) => (row.details.track ?? '').trim().isEmpty,
                 );
-                final String collegeName = academicEntry.college?.trim() ?? '';
 
                 return Column(
                   children: [
@@ -581,18 +602,19 @@ class _CollegeAccordionState extends State<_CollegeAccordion> {
                       context,
                       isSmallMobile: isSmallMobile,
                       tableWidth: tableWidth,
-                      isEmpty: entryIsEmpty,
-                      collegeName: collegeName,
+                      isEmpty: groupIsEmpty,
+                      collegeName: collegeGroup.displayName,
                     ),
-                    if (entryCourseDetailsList.isNotEmpty)
-                      ...entryCourseDetailsList.asMap().entries.map((entry) {
+                    if (courseRows.isNotEmpty)
+                      ...courseRows.asMap().entries.map((entry) {
                         final int index = entry.key;
-                        final details = entry.value;
+                        final _CourseRowData rowData = entry.value;
+                        final CourseDetails details = rowData.details;
                         final String courseKey = [
                           widget.academicName,
-                          collegeName,
-                          academicEntry.program?.id ??
-                              academicEntry.program?.name ??
+                          rowData.collegeName,
+                          rowData.academicEntry.program?.id ??
+                              rowData.academicEntry.program?.name ??
                               '',
                           details.name ?? '',
                         ].map((String value) => value.trim()).join('-');
@@ -606,8 +628,8 @@ class _CollegeAccordionState extends State<_CollegeAccordion> {
                           onTap: () => widget.onToggleCourse(courseKey),
                           context: context,
                           adminUniversity: widget.adminUniversity,
-                          academicEntry: academicEntry,
-                          collegeName: collegeName,
+                          academicEntry: rowData.academicEntry,
+                          collegeName: rowData.collegeName,
                           isSmallMobile: isSmallMobile,
                           tableWidth: tableWidth,
                         );
@@ -626,7 +648,61 @@ class _CollegeAccordionState extends State<_CollegeAccordion> {
     );
   }
 
-  List<CourseDetails> _courseDetailsForAcademicEntry(AcademicList academicEntry) {
+  List<_CollegeCourseGroup> _collegeGroupsForAcademicEntries() {
+    final Map<String, _CollegeCourseGroup> groupedEntries =
+        <String, _CollegeCourseGroup>{};
+
+    for (final AcademicList academicEntry in widget.academicEntries) {
+      final String collegeName = academicEntry.college?.trim() ?? '';
+      final String displayName = _formatCollegeName(collegeName);
+      final String groupKey = displayName.toLowerCase();
+
+      groupedEntries
+          .putIfAbsent(
+            groupKey,
+            () => _CollegeCourseGroup(
+              displayName: displayName.isEmpty ? '-' : displayName,
+              entries: <AcademicList>[],
+            ),
+          )
+          .entries
+          .add(academicEntry);
+    }
+
+    return groupedEntries.values.toList();
+  }
+
+  List<_CourseRowData> _courseRowsForCollegeGroup(
+    _CollegeCourseGroup collegeGroup,
+  ) {
+    final List<_CourseRowData> courseRows = <_CourseRowData>[];
+
+    for (final AcademicList academicEntry in collegeGroup.entries) {
+      final String collegeName = academicEntry.college?.trim() ?? '';
+      final List<CourseDetails> courseDetailsList =
+          _courseDetailsForAcademicEntry(academicEntry);
+
+      courseRows.addAll(
+        courseDetailsList.map(
+          (CourseDetails details) => _CourseRowData(
+            academicEntry: academicEntry,
+            collegeName: collegeName,
+            details: details,
+          ),
+        ),
+      );
+    }
+
+    return courseRows;
+  }
+
+  String _formatCollegeName(String collegeName) {
+    return collegeName.split('-').first.trim();
+  }
+
+  List<CourseDetails> _courseDetailsForAcademicEntry(
+    AcademicList academicEntry,
+  ) {
     final List<CourseDetails> courseDetails =
         academicEntry.program?.courseDetails ?? <CourseDetails>[];
     final List<String> courseNames = _courseNamesForAcademicEntry(academicEntry);
