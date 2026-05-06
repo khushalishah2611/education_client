@@ -720,14 +720,43 @@ double? _asDouble(dynamic value) {
 List<String>? _toStringList(dynamic value) {
   if (value == null) return null;
   if (value is List) {
-    return value.map((item) => item.toString()).toList();
+    return value
+        .map(_toReadableString)
+        .where((item) => item.isNotEmpty)
+        .toList();
   }
   if (value is String) {
     final trimmed = value.trim();
     if (trimmed.isEmpty) return <String>[];
+    if (trimmed.startsWith('[')) {
+      try {
+        final decoded = jsonDecode(trimmed);
+        if (decoded is List) {
+          return decoded
+              .map(_toReadableString)
+              .where((item) => item.isNotEmpty)
+              .toList();
+        }
+      } catch (_) {
+        // Keep the original string below when it is not a JSON list.
+      }
+    }
     return <String>[trimmed];
   }
   return null;
+}
+
+String _toReadableString(dynamic value) {
+  if (value == null) return '';
+  if (value is Map<String, dynamic>) {
+    for (final key in const ['name', 'courseName', 'title', 'value', 'label']) {
+      final dynamic mapValue = value[key];
+      if (mapValue != null && mapValue.toString().trim().isNotEmpty) {
+        return mapValue.toString().trim();
+      }
+    }
+  }
+  return value.toString().trim();
 }
 
 List<dynamic>? _toDynamicList(dynamic value) {

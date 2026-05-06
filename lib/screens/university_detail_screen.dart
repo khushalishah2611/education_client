@@ -1,3 +1,5 @@
+import 'dart:convert';
+
 import 'package:education/core/app_localizations.dart';
 import 'package:education/core/image_url_helper.dart';
 import 'package:education/core/selected_course_storage.dart';
@@ -626,10 +628,19 @@ class _CollegeAccordionState extends State<_CollegeAccordion> {
     );
   }
 
-  List<CourseDetails> _courseDetailsForAcademicEntry(AcademicList academicEntry) {
+  List<CourseDetails> _courseDetailsForAcademicEntry(
+    AcademicList academicEntry,
+  ) {
+    final ProgramData? program = academicEntry.program;
+    if (!_programBelongsToCollege(academicEntry)) {
+      return <CourseDetails>[];
+    }
+
     final List<CourseDetails> courseDetails =
-        academicEntry.program?.courseDetails ?? <CourseDetails>[];
-    final List<String> courseNames = _courseNamesForAcademicEntry(academicEntry);
+        program?.courseDetails ?? <CourseDetails>[];
+    final List<String> courseNames = _courseNamesForAcademicEntry(
+      academicEntry,
+    );
 
     if (courseNames.isEmpty) {
       return _dedupeCourseDetails(courseDetails);
@@ -659,15 +670,105 @@ class _CollegeAccordionState extends State<_CollegeAccordion> {
     return filteredDetails;
   }
 
-  List<String> _courseNamesForAcademicEntry(AcademicList academicEntry) {
-    final List<String> rawCourseNames =
-        academicEntry.program?.courses ?? <String>[];
+  bool _programBelongsToCollege(AcademicList academicEntry) {
+    final String collegeName = _normalizeCollegeName(academicEntry.college);
+    final String programInstitute = _normalizeCollegeName(
+      academicEntry.program?.educationInstitute,
+    );
 
-    return rawCourseNames
-        .expand((String value) => value.split(','))
-        .map((String value) => value.trim())
-        .where((String value) => value.isNotEmpty)
-        .toList();
+    if (collegeName.isEmpty || programInstitute.isEmpty) {
+      return true;
+    }
+
+    return collegeName == programInstitute;
+  }
+
+  String _normalizeCollegeName(String? value) {
+    String normalized = (value ?? '')
+        .split('-')
+        .first
+        .trim()
+        .replaceAll(RegExp(r'\s+'), ' ')
+        .toLowerCase();
+
+    for (final String prefix in const <String>[
+      'faculty of ',
+      'college of ',
+      'school of ',
+    ]) {
+      if (normalized.startsWith(prefix)) {
+        normalized = normalized.substring(prefix.length).trim();
+        break;
+      }
+    }
+
+    return normalized;
+  }
+
+  List<String> _courseNamesForAcademicEntry(AcademicList academicEntry) {
+    final ProgramData? program = academicEntry.program;
+    final List<String> rawCourseNames = <String>[
+      ...?program?.courses,
+      if ((program?.courseNames ?? '').trim().isNotEmpty)
+        program!.courseNames!.trim(),
+    ];
+
+    final Set<String> addedCourseNames = <String>{};
+    final List<String> courseNames = <String>[];
+    for (final String rawCourseName in rawCourseNames) {
+      for (final String courseName in _splitCourseNameValue(rawCourseName)) {
+        final String normalizedName = _normalizeCourseName(courseName);
+        if (normalizedName.isNotEmpty && addedCourseNames.add(normalizedName)) {
+          courseNames.add(courseName.trim());
+        }
+      }
+    }
+
+    return courseNames;
+  }
+
+  List<String> _splitCourseNameValue(String value) {
+    final String trimmedValue = value.trim();
+    if (trimmedValue.isEmpty) return const <String>[];
+
+    if (trimmedValue.startsWith('[')) {
+      try {
+        final dynamic decoded = jsonDecode(trimmedValue);
+        if (decoded is List<dynamic>) {
+          return decoded
+              .expand(
+                (dynamic item) => _splitCourseNameValue(_courseNameText(item)),
+              )
+              .toList(growable: false);
+        }
+      } catch (_) {
+        // Fall back to comma splitting below for non-JSON course name payloads.
+      }
+    }
+
+    return trimmedValue
+        .split(',')
+        .map((String courseName) => courseName.trim())
+        .where((String courseName) => courseName.isNotEmpty)
+        .toList(growable: false);
+  }
+
+  String _courseNameText(dynamic value) {
+    if (value is Map) {
+      for (final String key in const <String>[
+        'name',
+        'courseName',
+        'title',
+        'value',
+        'label',
+      ]) {
+        final dynamic mapValue = value[key];
+        if (mapValue != null && mapValue.toString().trim().isNotEmpty) {
+          return mapValue.toString().trim();
+        }
+      }
+    }
+    return value.toString();
   }
 
   List<CourseDetails> _dedupeCourseDetails(List<CourseDetails> courseDetails) {
