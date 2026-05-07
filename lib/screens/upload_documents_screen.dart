@@ -1,8 +1,6 @@
 import 'package:file_picker/file_picker.dart';
 import 'package:flutter/material.dart';
 import 'package:shared_preferences/shared_preferences.dart';
-import 'package:url_launcher/url_launcher.dart';
-
 import '../core/app_localizations.dart';
 import '../core/api_config.dart';
 import '../core/app_theme.dart';
@@ -277,35 +275,6 @@ class _UploadDocumentsScreenState extends State<UploadDocumentsScreen> {
     if (uploadedDocument == null) {
       await _pickDocument(doc);
       return;
-    }
-
-    await _openUploadedDocument(uploadedDocument);
-  }
-
-  Future<void> _openUploadedDocument(
-    _UploadedDocumentInfo uploadedDocument,
-  ) async {
-    final Uri? uri = uploadedDocument.openUri;
-    if (uri == null) {
-      if (!mounted) return;
-      showAppSnackBar(
-        context,
-        type: AppSnackBarType.error,
-        message: context.l10n.text('documentLinkUnavailable'),
-      );
-      return;
-    }
-
-    final bool didOpen = await launchUrl(
-      uri,
-      mode: LaunchMode.externalApplication,
-    );
-    if (!didOpen && mounted) {
-      showAppSnackBar(
-        context,
-        type: AppSnackBarType.error,
-        message: context.l10n.text('documentLinkUnavailable'),
-      );
     }
   }
 
