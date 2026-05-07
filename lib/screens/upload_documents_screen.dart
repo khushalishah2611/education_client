@@ -11,6 +11,8 @@ import '../widgets/common_widgets.dart';
 import '../widgets/flow_widgets.dart';
 import 'payment_screen.dart';
 
+typedef _DocumentDefinition = ({String type, String title, String subtitle});
+
 class UploadDocumentsScreen extends StatefulWidget {
   const UploadDocumentsScreen({
     super.key,
@@ -37,7 +39,8 @@ class _UploadDocumentsScreenState extends State<UploadDocumentsScreen> {
   final ApplicationApiService _applicationApiService =
       const ApplicationApiService();
   bool _isUploading = false;
-  List<({String type, String title, String subtitle})> _docs = const [];
+  List<_DocumentDefinition> _docs = const [];
+  Map<String, String> _documentTypeAliases = const <String, String>{};
 
   @override
   void initState() {
@@ -64,21 +67,20 @@ class _UploadDocumentsScreenState extends State<UploadDocumentsScreen> {
           (WidgetsBinding.instance.platformDispatcher.locale.languageCode) ==
               'ar';
 
-      final docs = types
-          .map(
-            (item) => (
-              type: item.value,
-              title: isArabic ? item.labelAr : item.labelEn,
-              subtitle: item.value,
-            ),
-          )
-          .toList(growable: false);
+      final List<_DocumentDefinition> docs =
+          _documentDefinitionsFromTypes(types, isArabic: isArabic);
+      final Map<String, String> documentTypeAliases =
+          _documentTypeAliasesFromTypes(types);
       final Map<String, _UploadedDocumentInfo> uploadedDocs =
-          _uploadedDocumentsFromApiItems(uploaded);
+          _uploadedDocumentsFromApiItems(
+        uploaded,
+        documentTypeAliases: documentTypeAliases,
+      );
 
       if (!mounted) return;
       setState(() {
         _docs = docs;
+        _documentTypeAliases = documentTypeAliases;
         _uploadedDocuments
           ..clear()
           ..addAll(uploadedDocs);
@@ -92,7 +94,7 @@ class _UploadDocumentsScreenState extends State<UploadDocumentsScreen> {
   }
 
   Future<void> _pickDocument(
-    ({String type, String title, String subtitle}) doc,
+    _DocumentDefinition doc,
   ) async {
     final result = await FilePicker.platform.pickFiles(
       type: FileType.custom,
@@ -144,9 +146,10 @@ class _UploadDocumentsScreenState extends State<UploadDocumentsScreen> {
         fallbackFilePath: filePath,
       );
 
+      final String documentKey = _resolveDocumentKey(doc.type);
       setState(() {
-        _selectedFiles[doc.type] = file;
-        _uploadedDocuments[doc.type] = uploadedDocument;
+        _selectedFiles[documentKey] = file;
+        _uploadedDocuments[documentKey] = uploadedDocument;
       });
       if (!mounted) return;
       showAppSnackBar(
@@ -171,9 +174,11 @@ class _UploadDocumentsScreenState extends State<UploadDocumentsScreen> {
   bool get _hasAllRequiredDocuments =>
       _docs.isNotEmpty &&
       _docs.every(
-        (doc) =>
-            _selectedFiles[doc.type] != null ||
-            _uploadedDocuments.containsKey(doc.type),
+        (doc) {
+          final String documentKey = _resolveDocumentKey(doc.type);
+          return _selectedFiles[documentKey] != null ||
+              _uploadedDocuments.containsKey(documentKey);
+        },
       );
 
   Future<bool> _refreshUploadedDocuments() async {
@@ -196,9 +201,11 @@ class _UploadDocumentsScreenState extends State<UploadDocumentsScreen> {
     }
 
     return _docs.every(
-      (doc) =>
-          _selectedFiles[doc.type] != null ||
-          uploadedDocs.containsKey(doc.type),
+      (doc) {
+        final String documentKey = _resolveDocumentKey(doc.type);
+        return _selectedFiles[documentKey] != null ||
+            uploadedDocs.containsKey(documentKey);
+      },
     );
   }
 
@@ -244,7 +251,8 @@ class _UploadDocumentsScreenState extends State<UploadDocumentsScreen> {
   }
 
   _UploadedDocumentInfo? _uploadedDocument(String type) {
-    final PlatformFile? selectedFile = _selectedFiles[type];
+    final String documentKey = _resolveDocumentKey(type);
+    final PlatformFile? selectedFile = _selectedFiles[documentKey];
     if (selectedFile != null) {
       return _UploadedDocumentInfo(
         type: type,
@@ -252,19 +260,19 @@ class _UploadDocumentsScreenState extends State<UploadDocumentsScreen> {
         openUri: _uriFromFilePath(selectedFile.path),
       );
     }
-    return _uploadedDocuments[type];
+    return _uploadedDocuments[documentKey];
   }
 
   String? _selectedFileLabel(String type) {
     final _UploadedDocumentInfo? uploadedDocument = _uploadedDocument(type);
     return uploadedDocument?.displayName ??
-        (_uploadedDocuments.containsKey(type)
+        (_uploadedDocuments.containsKey(_resolveDocumentKey(type))
             ? context.l10n.text('alreadyUploaded')
             : null);
   }
 
   Future<void> _handleDocumentTap(
-    ({String type, String title, String subtitle}) doc,
+    _DocumentDefinition doc,
   ) async {
     final _UploadedDocumentInfo? uploadedDocument = _uploadedDocument(doc.type);
     if (uploadedDocument == null) {
@@ -274,15 +282,22 @@ class _UploadDocumentsScreenState extends State<UploadDocumentsScreen> {
   }
 
   Map<String, _UploadedDocumentInfo> _uploadedDocumentsFromApiItems(
-    List<Map<String, dynamic>> items,
-  ) {
+    List<Map<String, dynamic>> items, {
+    Map<String, String>? documentTypeAliases,
+  }) {
     final Map<String, _UploadedDocumentInfo> uploadedDocs =
         <String, _UploadedDocumentInfo>{};
     for (final Map<String, dynamic> item in items) {
       final _UploadedDocumentInfo? uploadedDocument =
           _uploadedDocumentInfoFromApiItem(item);
       if (uploadedDocument != null) {
-        uploadedDocs[uploadedDocument.type] = uploadedDocument;
+        final String documentKey = _resolveDocumentKey(
+          uploadedDocument.type,
+          aliases: documentTypeAliases,
+        );
+        if (documentKey.isNotEmpty) {
+          uploadedDocs[documentKey] = uploadedDocument;
+        }
       }
     }
     return uploadedDocs;
@@ -327,15 +342,99 @@ class _UploadDocumentsScreenState extends State<UploadDocumentsScreen> {
     );
   }
 
+  List<_DocumentDefinition> _documentDefinitionsFromTypes(
+    List<DocumentTypeItem> types, {
+    required bool isArabic,
+  }) {
+    final Set<String> seenDocumentKeys = <String>{};
+    final List<_DocumentDefinition> docs = <_DocumentDefinition>[];
+
+    for (final DocumentTypeItem item in types) {
+      final String type = item.value.trim();
+      final String documentKey = _documentKey(type);
+      if (documentKey.isEmpty || !seenDocumentKeys.add(documentKey)) {
+        continue;
+      }
+
+      final String localizedTitle =
+          (isArabic ? item.labelAr : item.labelEn).trim();
+      final String fallbackTitle =
+          item.labelEn.trim().ifEmpty(item.labelAr.trim());
+      docs.add(
+        (
+          type: type,
+          title: localizedTitle.ifEmpty(fallbackTitle).ifEmpty(type),
+          subtitle: type,
+        ),
+      );
+    }
+
+    return docs;
+  }
+
+  Map<String, String> _documentTypeAliasesFromTypes(
+    List<DocumentTypeItem> types,
+  ) {
+    final Map<String, String> aliases = <String, String>{};
+    for (final DocumentTypeItem item in types) {
+      final String canonicalKey = _documentKey(item.value);
+      if (canonicalKey.isEmpty) continue;
+
+      for (final String alias in <String>[
+        item.value,
+        item.id,
+        item.labelEn,
+        item.labelAr,
+      ]) {
+        final String aliasKey = _documentKey(alias);
+        if (aliasKey.isNotEmpty) {
+          aliases[aliasKey] = canonicalKey;
+        }
+      }
+    }
+    return aliases;
+  }
+
+  String _resolveDocumentKey(
+    String type, {
+    Map<String, String>? aliases,
+  }) {
+    final String key = _documentKey(type);
+    return aliases?[key] ?? _documentTypeAliases[key] ?? key;
+  }
+
+  String _documentKey(String type) {
+    return type
+        .trim()
+        .toLowerCase()
+        .replaceAll(RegExp(r'[\s\-/]+'), '_')
+        .replaceAll(RegExp(r'_+'), '_')
+        .replaceAll(RegExp(r'^_|_$'), '');
+  }
+
   String _documentTypeFromApiItem(Map<String, dynamic> item) {
     final Object? documentType = item['documentType'];
     if (documentType is Map) {
-      final Object? value = documentType['value'] ?? documentType['type'];
+      final Object? value = documentType['value'] ??
+          documentType['type'] ??
+          documentType['documentTypeValue'] ??
+          documentType['document_type_value'] ??
+          documentType['id'] ??
+          documentType['documentTypeId'] ??
+          documentType['document_type_id'] ??
+          documentType['labelEn'] ??
+          documentType['labelAr'] ??
+          documentType['name'];
       if (value != null) return value.toString().trim();
     }
 
-    final Object? type =
-        item['type'] ?? item['documentTypeValue'] ?? item['document_type'];
+    final Object? type = item['type'] ??
+        item['documentTypeValue'] ??
+        item['document_type_value'] ??
+        item['document_type'] ??
+        item['documentTypeId'] ??
+        item['document_type_id'] ??
+        item['documentType'];
     return type?.toString().trim() ?? '';
   }
 
