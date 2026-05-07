@@ -144,7 +144,7 @@ extension ApplicationApiDocuments on ApplicationApiService {
   Future<List<Map<String, dynamic>>> fetchStudentDocuments({
     required String studentUserId,
   }) async {
-    final Uri uri = ApiConfig.uri('/api/student/documents').replace(
+    final Uri uri = ApiConfig.uri('/api/student/document-types').replace(
       queryParameters: <String, String>{'studentUserId': studentUserId},
     );
     final response = await http.get(uri, headers: await _authHeaders());

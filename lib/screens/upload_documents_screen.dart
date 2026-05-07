@@ -287,14 +287,16 @@ class _UploadDocumentsScreenState extends State<UploadDocumentsScreen> {
   }
 
   Map<String, _UploadedDocumentInfo> _uploadedDocumentsFromApiItems(
-    List<Map<String, dynamic>> items, {
-    Map<String, String>? documentTypeAliases,
-  }) {
+      List<Map<String, dynamic>> items, {
+        Map<String, String>? documentTypeAliases,
+      }) {
     final Map<String, _UploadedDocumentInfo> uploadedDocs =
-        <String, _UploadedDocumentInfo>{};
+    <String, _UploadedDocumentInfo>{};
+
     for (int i = 0; i < items.length; i++) {
       final _UploadedDocumentInfo? uploadedDocument =
-          _uploadedDocumentInfoFromApiItem(items[i]);
+      _uploadedDocumentInfoFromApiItem(items[i]);
+
       if (uploadedDocument == null) {
         debugPrint('Skipped null document at index => $i');
         continue;
@@ -304,22 +306,30 @@ class _UploadDocumentsScreenState extends State<UploadDocumentsScreen> {
         uploadedDocument.type,
         aliases: documentTypeAliases,
       );
+
       if (documentKey.isEmpty) {
         documentKey = 'document_$i';
       }
 
-      if (uploadedDocs.containsKey(documentKey)) {
-        documentKey = '${documentKey}_$i';
+      // FIX: Always create unique key
+      String uniqueKey = documentKey;
+      int duplicateIndex = 1;
+
+      while (uploadedDocs.containsKey(uniqueKey)) {
+        uniqueKey = '${documentKey}_$duplicateIndex';
+        duplicateIndex++;
       }
 
-      uploadedDocs[documentKey] = uploadedDocument;
+      uploadedDocs[uniqueKey] = uploadedDocument;
+
       debugPrint(
-        'Added Document => $documentKey => ${uploadedDocument.fileName}',
+        'Added Document => $uniqueKey => ${uploadedDocument.fileName}',
       );
     }
 
     debugPrint('API Count => ${items.length}');
     debugPrint('Uploaded Count => ${uploadedDocs.length}');
+    debugPrint('FINAL MAP KEYS => ${uploadedDocs.keys.toList()}');
 
     return uploadedDocs;
   }
@@ -435,22 +445,31 @@ class _UploadDocumentsScreenState extends State<UploadDocumentsScreen> {
       null;
 
   String? _uploadedDocumentKeyFor(
-    String documentKey, {
-    Map<String, _UploadedDocumentInfo>? uploadedDocuments,
-  }) {
+      String documentKey, {
+        Map<String, _UploadedDocumentInfo>? uploadedDocuments,
+      }) {
     final Map<String, _UploadedDocumentInfo> documents =
         uploadedDocuments ?? _uploadedDocuments;
+
+    // Exact match
     if (documents.containsKey(documentKey)) {
       return documentKey;
     }
 
-    for (final String key in documents.keys) {
-      if (key.startsWith('${documentKey}_')) {
-        return key;
-      }
+    // Match duplicate keys
+    final List<String> matchingKeys = documents.keys
+        .where(
+          (key) =>
+      key == documentKey ||
+          key.startsWith('${documentKey}_'),
+    )
+        .toList();
+
+    if (matchingKeys.isEmpty) {
+      return null;
     }
 
-    return null;
+    return matchingKeys.first;
   }
 
   String _documentKey(String type) {
