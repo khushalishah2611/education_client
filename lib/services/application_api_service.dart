@@ -80,8 +80,9 @@ extension ApplicationApiDocumentTypes on ApplicationApiService {
       );
     }
 
-    final List<dynamic> items =
-        decoded['items'] is List<dynamic> ? decoded['items'] as List<dynamic> : <dynamic>[];
+    final List<dynamic> items = decoded['items'] is List<dynamic>
+        ? decoded['items'] as List<dynamic>
+        : <dynamic>[];
     return items
         .whereType<Map<String, dynamic>>()
         .map(DocumentTypeItem.fromJson)
@@ -130,9 +131,11 @@ extension ApplicationApiDocuments on ApplicationApiService {
 
     if (!ApiStatus.isSuccess(response.statusCode)) {
       if (response.statusCode == 413) {
-        throw Exception('Selected file is too large. Please upload a smaller file.');
+        throw Exception(
+            'Selected file is too large. Please upload a smaller file.');
       }
-      throw Exception(decoded['message']?.toString() ?? 'Failed to upload document');
+      throw Exception(
+          decoded['message']?.toString() ?? 'Failed to upload document');
     }
 
     return decoded;
@@ -156,14 +159,17 @@ extension ApplicationApiDocuments on ApplicationApiService {
     );
 
     if (!ApiStatus.isSuccess(response.statusCode)) {
-      throw Exception(decoded['message']?.toString() ?? 'Failed to fetch student documents');
+      throw Exception(decoded['message']?.toString() ??
+          'Failed to fetch student documents');
     }
 
-    final Object? items = decoded['items'] ?? decoded['data'] ?? decoded['documents'] ?? decoded;
+    final Object? items =
+        decoded['items'] ?? decoded['data'] ?? decoded['documents'] ?? decoded;
     if (items is List) {
       return items
           .whereType<Map>()
-          .map((item) => item.map((key, value) => MapEntry(key.toString(), value)))
+          .map((item) =>
+              item.map((key, value) => MapEntry(key.toString(), value)))
           .toList(growable: false);
     }
     return const <Map<String, dynamic>>[];
@@ -184,11 +190,16 @@ Future<Map<String, String>> _authHeaders() async {
   final SharedPreferences prefs = await SharedPreferences.getInstance();
   final String token = prefs.getString('authToken')?.trim() ?? '';
   // if (token.isEmpty) return const <String, String>{};
-  return <String, String>{'Authorization': 'Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6ImNtbXVnYzA5ODAwMDBmZG0xNml4aDB1amQiLCJlbWFpbCI6ImFkbWluQGFyYWJ1bml2ZXJzaXR5LmNvbSIsInJvbGUiOiJBRE1JTiIsImlhdCI6MTc3Nzk3NDE0OCwiZXhwIjoxNzc4NTc4OTQ4fQ.Xk287IHUAhFXHqf43IQ_KC2ElX67IPMV8_Z8yjcMBdU'};
+  return <String, String>{
+    'Authorization':
+        'Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6ImNtbXVnYzA5ODAwMDBmZG0xNml4aDB1amQiLCJlbWFpbCI6ImFkbWluQGFyYWJ1bml2ZXJzaXR5LmNvbSIsInJvbGUiOiJBRE1JTiIsImlhdCI6MTc3Nzk3NDE0OCwiZXhwIjoxNzc4NTc4OTQ4fQ.Xk287IHUAhFXHqf43IQ_KC2ElX67IPMV8_Z8yjcMBdU'
+  };
 }
 
 Future<Map<String, String>> _jsonHeaders() async {
-  final Map<String, String> headers = <String, String>{'Content-Type': 'application/json'};
+  final Map<String, String> headers = <String, String>{
+    'Content-Type': 'application/json'
+  };
   headers.addAll(await _authHeaders());
   return headers;
 }

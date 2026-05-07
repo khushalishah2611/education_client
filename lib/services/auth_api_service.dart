@@ -31,7 +31,7 @@ class AuthApiService {
     final List<dynamic> items = decoded is List<dynamic>
         ? decoded
         : (decoded as Map<String, dynamic>)['data'] as List<dynamic>? ??
-              const <dynamic>[];
+            const <dynamic>[];
 
     return items
         .map((item) => CountryMaster.fromJson(item as Map<String, dynamic>))
@@ -58,7 +58,7 @@ class AuthApiService {
     final List<dynamic> items = decoded is List<dynamic>
         ? decoded
         : (decoded as Map<String, dynamic>)['data'] as List<dynamic>? ??
-              const <dynamic>[];
+            const <dynamic>[];
 
     return items
         .map((item) => AgreementTemplate.fromJson(item as Map<String, dynamic>))

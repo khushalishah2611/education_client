@@ -90,12 +90,12 @@ class HomeApiService {
     }
 
     return _asList(
-          decoded['data'] ??
-              decoded['items'] ??
-              decoded['results'] ??
-              decoded['universities'] ??
-              decoded,
-        )
+      decoded['data'] ??
+          decoded['items'] ??
+          decoded['results'] ??
+          decoded['universities'] ??
+          decoded,
+    )
         .whereType<Map<String, dynamic>>()
         .map((item) {
           return AdminUniversity.fromJson(<String, dynamic>{
@@ -162,8 +162,8 @@ class HomeApiService {
     }
 
     return _asList(
-          decoded['data'] ?? decoded['items'] ?? decoded['results'] ?? decoded,
-        )
+      decoded['data'] ?? decoded['items'] ?? decoded['results'] ?? decoded,
+    )
         .whereType<Map<String, dynamic>>()
         .map(CountryMaster.fromJson)
         .where((item) => item.nameEn.isNotEmpty && item.isActive)

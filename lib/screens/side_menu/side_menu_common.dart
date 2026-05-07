@@ -26,8 +26,8 @@ class SideMenuScaffold extends StatelessWidget {
     final double headerHeight = isSmallMobile
         ? 70
         : isMediumMobile
-        ? 76
-        : 80;
+            ? 76
+            : 80;
     final double contentPadding = context.responsiveHorizontalPadding;
     final double titleFontSize = isSmallMobile ? 16 : 18;
 

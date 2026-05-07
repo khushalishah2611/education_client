@@ -17,9 +17,8 @@ void showAddressBottomSheet({
       borderRadius: BorderRadius.vertical(top: Radius.circular(20)),
     ),
     builder: (sheetContext) {
-      final String value = address?.trim().isNotEmpty == true
-          ? address!.trim()
-          : '-';
+      final String value =
+          address?.trim().isNotEmpty == true ? address!.trim() : '-';
       final double screenHeight = MediaQuery.of(sheetContext).size.height;
       final double sheetHeight = (screenHeight * 0.3).clamp(210.0, 320.0);
       return SafeArea(
@@ -29,7 +28,6 @@ void showAddressBottomSheet({
             padding: const EdgeInsets.fromLTRB(18, 14, 18, 26),
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
-
               children: [
                 Align(
                   alignment: Alignment.center,
@@ -101,8 +99,8 @@ class TopRoundedHeader extends StatelessWidget {
     final double headerHeight = isSmallMobile
         ? 70
         : isMediumMobile
-        ? 76
-        : 80;
+            ? 76
+            : 80;
     final double leftPadding = isSmallMobile ? 12 : 16;
     final double horizontalTitlePadding = isSmallMobile ? 42 : 50;
     final double titleFontSize = isSmallMobile ? 16 : 18;
@@ -212,9 +210,8 @@ class FlowStepHeader extends StatelessWidget {
                     height: 24,
                     alignment: Alignment.center,
                     decoration: BoxDecoration(
-                      color: isActive
-                          ? AppColors.accent
-                          : const Color(0xFFF0F0F0),
+                      color:
+                          isActive ? AppColors.accent : const Color(0xFFF0F0F0),
                       shape: BoxShape.circle,
                     ),
                     child: Text(
@@ -312,9 +309,8 @@ class BottomTabBarCard extends StatelessWidget {
                         style: TextStyle(
                           fontSize: 11.5,
                           color: isActive ? Colors.black : AppColors.textMuted,
-                          fontWeight: isActive
-                              ? FontWeight.w600
-                              : FontWeight.normal,
+                          fontWeight:
+                              isActive ? FontWeight.w600 : FontWeight.normal,
                         ),
                       ),
                     ],

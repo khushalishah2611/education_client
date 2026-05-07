@@ -73,9 +73,8 @@ class _LoginScreenState extends State<LoginScreen> {
       showAppSnackBar(
         context,
         type: AppSnackBarType.error,
-        message: context.l10n.isArabic
-            ? 'أدخل رقم الجوال'
-            : 'Enter mobile number',
+        message:
+            context.l10n.isArabic ? 'أدخل رقم الجوال' : 'Enter mobile number',
       );
       return;
     }
@@ -104,11 +103,11 @@ class _LoginScreenState extends State<LoginScreen> {
 
     setState(() => _isSubmitting = true);
     try {
-      final StudentLoginResponse response = await _authApiService
-          .createStudentForOtp(
-            country: _selectedCountry!.nameEn,
-            phone: _mobileController.text.trim(),
-          );
+      final StudentLoginResponse response =
+          await _authApiService.createStudentForOtp(
+        country: _selectedCountry!.nameEn,
+        phone: _mobileController.text.trim(),
+      );
       if (response.whatsappOtpLink.trim().isNotEmpty) {
         await openExternalLink(response.whatsappOtpLink);
       }
@@ -161,9 +160,8 @@ class _LoginScreenState extends State<LoginScreen> {
   }
 
   void _openTermsBottomSheet() {
-    final AgreementTemplate? agreement = _agreementTemplates.isEmpty
-        ? null
-        : _agreementTemplates.first;
+    final AgreementTemplate? agreement =
+        _agreementTemplates.isEmpty ? null : _agreementTemplates.first;
 
     if (agreement == null) {
       return;
@@ -239,9 +237,8 @@ class _LoginScreenState extends State<LoginScreen> {
 
   @override
   Widget build(BuildContext context) {
-    final AgreementTemplate? agreement = _agreementTemplates.isEmpty
-        ? null
-        : _agreementTemplates.first;
+    final AgreementTemplate? agreement =
+        _agreementTemplates.isEmpty ? null : _agreementTemplates.first;
 
     return AuthScaffold(
       isLoading: _isLoadingMeta || _isSubmitting,

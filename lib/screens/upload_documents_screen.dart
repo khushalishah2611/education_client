@@ -183,8 +183,7 @@ class _UploadDocumentsScreenState extends State<UploadDocumentsScreen> {
 
   Future<bool> _refreshUploadedDocuments() async {
     final SharedPreferences prefs = await SharedPreferences.getInstance();
-    final String studentUserId =
-        prefs.getString('studentUserId')?.trim() ?? '';
+    final String studentUserId = prefs.getString('studentUserId')?.trim() ?? '';
     final List<Map<String, dynamic>> uploaded =
         await _applicationApiService.fetchStudentDocuments(
       studentUserId: studentUserId,
@@ -313,11 +312,11 @@ class _UploadDocumentsScreenState extends State<UploadDocumentsScreen> {
         _uploadedDocumentInfoFromApiItem(response, fallbackType: fallbackType);
     if (uploadedDocument != null) {
       return uploadedDocument.copyWith(
-        type:
-            uploadedDocument.type.isEmpty ? fallbackType : uploadedDocument.type,
+        type: uploadedDocument.type.isEmpty
+            ? fallbackType
+            : uploadedDocument.type,
         fileName: uploadedDocument.fileName ?? fallbackFileName,
-        openUri:
-            uploadedDocument.openUri ?? _uriFromFilePath(fallbackFilePath),
+        openUri: uploadedDocument.openUri ?? _uriFromFilePath(fallbackFilePath),
       );
     }
 
@@ -735,8 +734,7 @@ class _UploadDropZone extends StatelessWidget {
                   ? Icons.check_circle_outline
                   : Icons.cloud_upload_outlined,
               size: 54,
-              color:
-                  isUploaded ? AppColors.accent : const Color(0xFFB8B8B8),
+              color: isUploaded ? AppColors.accent : const Color(0xFFB8B8B8),
             ),
             const SizedBox(height: 10),
             Text.rich(

@@ -44,11 +44,11 @@ class HelpScreen extends StatelessWidget {
                       const SizedBox(width: 10),
                       Text(
                         context.l10n.text('help'),
-                        style: Theme.of(context).textTheme.headlineSmall
-                            ?.copyWith(
-                              fontWeight: FontWeight.w700,
-                              fontSize: 16,
-                            ),
+                        style:
+                            Theme.of(context).textTheme.headlineSmall?.copyWith(
+                                  fontWeight: FontWeight.w700,
+                                  fontSize: 16,
+                                ),
                       ),
                       const Spacer(),
                       const _LanguageDropdownChip(),

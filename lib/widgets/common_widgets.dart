@@ -139,9 +139,8 @@ class AppLogo extends StatelessWidget {
 
     final content = Column(
       mainAxisSize: MainAxisSize.min,
-      crossAxisAlignment: center
-          ? CrossAxisAlignment.center
-          : CrossAxisAlignment.start,
+      crossAxisAlignment:
+          center ? CrossAxisAlignment.center : CrossAxisAlignment.start,
       children: [logo],
     );
 
@@ -263,12 +262,10 @@ class AuthScaffold extends StatelessWidget {
   Widget build(BuildContext context) {
     final size = MediaQuery.sizeOf(context);
     final horizontalPadding = context.responsiveHorizontalPadding;
-    final topPadding = size.height < 760
-        ? 28.0
-        : (context.isSmallMobile ? 32.0 : 52.0);
-    final bottomPadding = size.height < 760
-        ? 28.0
-        : (context.isSmallMobile ? 32.0 : 52.0);
+    final topPadding =
+        size.height < 760 ? 28.0 : (context.isSmallMobile ? 32.0 : 52.0);
+    final bottomPadding =
+        size.height < 760 ? 28.0 : (context.isSmallMobile ? 32.0 : 52.0);
 
     return Directionality(
       textDirection: context.l10n.textDirection,
@@ -277,10 +274,10 @@ class AuthScaffold extends StatelessWidget {
           children: [
             SafeArea(
               child: SingleChildScrollView(
-                child:Container(
+                child: Container(
                   color: const Color(0xFFF8EFE6),
-                  height:  MediaQuery.of(context).size.height,
-                  child:  Stack(
+                  height: MediaQuery.of(context).size.height,
+                  child: Stack(
                     children: [
                       /// 🔥 BACKGROUND IMAGE (FIXED)
                       Image.asset(
@@ -333,7 +330,8 @@ class AuthScaffold extends StatelessWidget {
                             ),
                             child: Center(
                               child: ConstrainedBox(
-                                constraints: const BoxConstraints(maxWidth: 520),
+                                constraints:
+                                    const BoxConstraints(maxWidth: 520),
                                 child: child,
                               ),
                             ),
@@ -597,9 +595,9 @@ class AppTextLink extends StatelessWidget {
           child: Text(
             link,
             style: Theme.of(context).textTheme.bodyMedium?.copyWith(
-              color: AppColors.text,
-              fontWeight: FontWeight.w600,
-            ),
+                  color: AppColors.text,
+                  fontWeight: FontWeight.w600,
+                ),
           ),
         ),
       ],

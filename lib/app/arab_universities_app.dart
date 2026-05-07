@@ -42,8 +42,8 @@ class _ArabUniversitiesAppState extends State<ArabUniversitiesApp> {
               final double widthScale = width <= 360
                   ? 0.92
                   : width <= 420
-                  ? 1.0
-                  : 1.06;
+                      ? 1.0
+                      : 1.06;
               final double baseScale = media.textScaler.scale(1.0);
               final clampedScale = TextScaler.linear(
                 (baseScale * widthScale).clamp(0.88, 1.16),

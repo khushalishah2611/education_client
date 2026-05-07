@@ -52,8 +52,8 @@ class AppLocalizationScope extends InheritedWidget {
   final ValueChanged<Locale> changeLanguage;
 
   static AppLocalizationScope of(BuildContext context) {
-    final result = context
-        .dependOnInheritedWidgetOfExactType<AppLocalizationScope>();
+    final result =
+        context.dependOnInheritedWidgetOfExactType<AppLocalizationScope>();
     assert(result != null, 'No AppLocalizationScope found in context');
     return result!;
   }

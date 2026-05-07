@@ -7,10 +7,10 @@ class DevHttpOverrides extends HttpOverrides {
   HttpClient createHttpClient(SecurityContext? context) {
     final client = super.createHttpClient(context);
     client.badCertificateCallback = (
-        X509Certificate cert,
-        String host,
-        int port,
-        ) {
+      X509Certificate cert,
+      String host,
+      int port,
+    ) {
       if (kReleaseMode) {
         return false;
       }

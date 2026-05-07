@@ -18,7 +18,6 @@ class _SplashScreenState extends State<SplashScreen>
   Timer? _timer;
   late final AnimationController _logoController;
 
-
   @override
   void initState() {
     super.initState();

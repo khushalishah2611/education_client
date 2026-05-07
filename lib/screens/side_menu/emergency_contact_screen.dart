@@ -42,21 +42,18 @@ class EmergencyContactCard extends StatelessWidget {
             icon: Icons.person_outline_rounded,
           ),
           Divider(height: 1),
-
           ContactInfoField(
             label: 'Relationship',
             value: 'Brother',
             icon: Icons.person_outline_rounded,
           ),
           Divider(height: 1),
-
           ContactInfoField(
             label: 'Mobile Number',
             value: '+91 89788 54588',
             icon: Icons.call_outlined,
           ),
           Divider(height: 1),
-
           ContactInfoField(
             label: 'Email Address',
             value: 'theabc@gmail.com',

@@ -25,9 +25,8 @@ class StudentLoginResponse {
 
   factory StudentLoginResponse.fromJson(Map<String, dynamic> json) {
     final profile = json['profile'];
-    final profileMap = profile is Map<String, dynamic>
-        ? profile
-        : const <String, dynamic>{};
+    final profileMap =
+        profile is Map<String, dynamic> ? profile : const <String, dynamic>{};
     final country = _readString(json, const [
       'country',
       'countryName',

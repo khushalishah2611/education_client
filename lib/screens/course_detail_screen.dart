@@ -33,19 +33,19 @@ class _CourseDetailScreenState extends State<CourseDetailScreen> {
       widget.course.eligibility
           ?.where((item) => item.trim().isNotEmpty)
           .toList() ??
-          const [];
+      const [];
 
   List<String> get otherRequirementList =>
       widget.course.otherRequirements
           ?.where((item) => item.trim().isNotEmpty)
           .toList() ??
-          const [];
+      const [];
 
   List<String> get admissionRequirementList =>
       widget.course.eligibility
           ?.where((item) => item.trim().isNotEmpty)
           .toList() ??
-          [];
+      [];
 
   /// 🔷 PRICE FORMAT
   /// 155.5 => 156
@@ -78,8 +78,8 @@ class _CourseDetailScreenState extends State<CourseDetailScreen> {
     final double headerHeight = isSmallMobile
         ? 220
         : isMediumMobile
-        ? 245
-        : 280;
+            ? 245
+            : 280;
 
     final double topGap = isSmallMobile ? 52 : 60;
 
@@ -161,13 +161,10 @@ class _CourseDetailScreenState extends State<CourseDetailScreen> {
                               },
                             ),
                           ),
-
                           const SizedBox(width: 12),
-
                           Expanded(
                             child: Column(
-                              crossAxisAlignment:
-                              CrossAxisAlignment.start,
+                              crossAxisAlignment: CrossAxisAlignment.start,
                               children: [
                                 Row(
                                   children: [
@@ -177,19 +174,16 @@ class _CourseDetailScreenState extends State<CourseDetailScreen> {
                                       size: 16,
                                     ),
                                     const SizedBox(width: 4),
-
                                     Text(
                                       widget.university.averageRating
-                                          ?.toDouble()
-                                          .toStringAsFixed(1) ??
+                                              ?.toDouble()
+                                              .toStringAsFixed(1) ??
                                           '0.0',
                                       style: const TextStyle(
                                         fontWeight: FontWeight.w700,
                                       ),
                                     ),
-
                                     const SizedBox(width: 4),
-
                                     Text(
                                       '(${widget.university.averageRating?.round() ?? 0} reviews)',
                                       style: const TextStyle(
@@ -199,9 +193,7 @@ class _CourseDetailScreenState extends State<CourseDetailScreen> {
                                     ),
                                   ],
                                 ),
-
                                 const SizedBox(height: 8),
-
                                 Text(
                                   widget.university.name ?? "",
                                   style: const TextStyle(
@@ -209,21 +201,16 @@ class _CourseDetailScreenState extends State<CourseDetailScreen> {
                                     fontWeight: FontWeight.w700,
                                   ),
                                 ),
-
                                 const SizedBox(height: 4),
-
                                 Row(
-                                  crossAxisAlignment:
-                                  CrossAxisAlignment.start,
+                                  crossAxisAlignment: CrossAxisAlignment.start,
                                   children: [
                                     const Icon(
                                       Icons.location_on_outlined,
                                       size: 15,
                                       color: AppColors.textMuted,
                                     ),
-
                                     const SizedBox(width: 4),
-
                                     Expanded(
                                       child: Text(
                                         widget.university.address ?? "",
@@ -267,9 +254,7 @@ class _CourseDetailScreenState extends State<CourseDetailScreen> {
                       priceWithCurrency: _priceWithCurrency,
                     ),
                   ),
-
                   const SizedBox(height: 20),
-
                   Padding(
                     padding: EdgeInsets.symmetric(
                       horizontal: horizontalPadding,
@@ -279,9 +264,7 @@ class _CourseDetailScreenState extends State<CourseDetailScreen> {
                       items: admissionRequirementList,
                     ),
                   ),
-
                   const SizedBox(height: 20),
-
                   Padding(
                     padding: EdgeInsets.symmetric(
                       horizontal: horizontalPadding,
@@ -371,27 +354,22 @@ class _InfoDetailsCard extends StatelessWidget {
               ],
             ),
           ),
-
           _InfoRow(
             label: 'No of Credit',
             value: '${course.creditHours?.round() ?? 0}',
           ),
-
           _InfoRow(
             label: 'Credit Fee',
             value: priceWithCurrency(course.feePerCredit),
           ),
-
           _InfoRow(
             label: 'Min Admission Rate',
             value: '${course.minAdmissionRate?.round() ?? 0}%',
           ),
-
           _InfoRow(
             label: 'Annual Fee',
             value: priceWithCurrency(course.annualFee),
           ),
-
           _InfoRow(
             label: 'Total Cost',
             valueWidget: _PriceValue(
@@ -400,7 +378,6 @@ class _InfoDetailsCard extends StatelessWidget {
               priceWithCurrency: priceWithCurrency,
             ),
           ),
-
           _InfoRow(
             label: 'Application Fee',
             value: course.applicationFee != null
@@ -429,11 +406,9 @@ class _PriceValue extends StatelessWidget {
   Widget build(BuildContext context) {
     final double base = (basePrice ?? 0).toDouble();
 
-    final double discountPercent =
-    (discountedPrice ?? 0).toDouble();
+    final double discountPercent = (discountedPrice ?? 0).toDouble();
 
-    final double finalPrice =
-        base - (base * discountPercent / 100);
+    final double finalPrice = base - (base * discountPercent / 100);
 
     if (basePrice != null &&
         discountedPrice != null &&
@@ -482,8 +457,8 @@ class _InfoRow extends StatelessWidget {
           bottom: isLast
               ? BorderSide.none
               : const BorderSide(
-            color: Color(0xFFF1ECE4),
-          ),
+                  color: Color(0xFFF1ECE4),
+                ),
         ),
       ),
       child: Row(
@@ -494,7 +469,6 @@ class _InfoRow extends StatelessWidget {
               style: const TextStyle(fontSize: 13),
             ),
           ),
-
           Expanded(
             child: Align(
               alignment: Alignment.centerRight,
@@ -526,8 +500,7 @@ class _RequirementSection extends StatelessWidget {
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
         Padding(
-          padding:
-          const EdgeInsets.symmetric(horizontal: 10),
+          padding: const EdgeInsets.symmetric(horizontal: 10),
           child: Text(
             title,
             style: const TextStyle(
@@ -536,9 +509,7 @@ class _RequirementSection extends StatelessWidget {
             ),
           ),
         ),
-
         const SizedBox(height: 10),
-
         Card(
           color: AppColors.white,
           child: Padding(
@@ -550,12 +521,11 @@ class _RequirementSection extends StatelessWidget {
             ),
             child: items.isEmpty
                 ? const _BulletLine(
-              'No requirements available',
-            )
+                    'No requirements available',
+                  )
                 : Column(
-              children:
-              items.map(_BulletLine.new).toList(),
-            ),
+                    children: items.map(_BulletLine.new).toList(),
+                  ),
           ),
         ),
       ],
@@ -573,8 +543,7 @@ class _BulletLine extends StatelessWidget {
     return Padding(
       padding: const EdgeInsets.only(bottom: 8),
       child: Row(
-        crossAxisAlignment:
-        CrossAxisAlignment.start,
+        crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           const Padding(
             padding: EdgeInsets.only(top: 2),
@@ -584,9 +553,7 @@ class _BulletLine extends StatelessWidget {
               size: 18,
             ),
           ),
-
           const SizedBox(width: 8),
-
           Expanded(
             child: Text(
               text,

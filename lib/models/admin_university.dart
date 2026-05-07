@@ -209,28 +209,28 @@ class AdminUniversity {
 
   AdminUniversity(
       {this.id,
-        this.name,
-        this.country,
-        this.state,
-        this.city,
-        this.email,
-        this.mobile,
-        this.rating,
-        this.academicList,
-        this.logoPath,
-        this.coverImagePath,
-        this.address,
-        this.aboutUs,
-        this.accredited,
-        this.status,
-        this.isEnabled,
-        this.createdAt,
-        this.updatedAt,
-        this.programLinks,
-        this.ratings,
-        this.averageRating,
-        this.ratingCount,
-        this.academicPrograms});
+      this.name,
+      this.country,
+      this.state,
+      this.city,
+      this.email,
+      this.mobile,
+      this.rating,
+      this.academicList,
+      this.logoPath,
+      this.coverImagePath,
+      this.address,
+      this.aboutUs,
+      this.accredited,
+      this.status,
+      this.isEnabled,
+      this.createdAt,
+      this.updatedAt,
+      this.programLinks,
+      this.ratings,
+      this.averageRating,
+      this.ratingCount,
+      this.academicPrograms});
 
   AdminUniversity.fromJson(Map<String, dynamic> json) {
     id = json['id'];
@@ -389,30 +389,30 @@ class Program {
 
   Program(
       {this.id,
-        this.name,
-        this.academicProgram,
-        this.courseNames,
-        this.courseDetails,
-        this.track,
-        this.description,
-        this.durationMonths,
-        this.minAdmissionRate,
-        this.minBaGpa,
-        this.requiredScore,
-        this.discountedScore,
-        this.status,
-        this.isEnabled,
-        this.basePrice,
-        this.currency,
-        this.commissionPercent,
-        this.coverImagePath,
-        this.eligibilityTitle,
-        this.scholarshipInfoTitle,
-        this.createdAt,
-        this.updatedAt,
-        this.universityLinks,
-        this.educationInstitute,
-        this.courses});
+      this.name,
+      this.academicProgram,
+      this.courseNames,
+      this.courseDetails,
+      this.track,
+      this.description,
+      this.durationMonths,
+      this.minAdmissionRate,
+      this.minBaGpa,
+      this.requiredScore,
+      this.discountedScore,
+      this.status,
+      this.isEnabled,
+      this.basePrice,
+      this.currency,
+      this.commissionPercent,
+      this.coverImagePath,
+      this.eligibilityTitle,
+      this.scholarshipInfoTitle,
+      this.createdAt,
+      this.updatedAt,
+      this.universityLinks,
+      this.educationInstitute,
+      this.courses});
 
   Program.fromJson(Map<String, dynamic> json) {
     id = json['id'];
@@ -520,24 +520,24 @@ class CourseDetails {
 
   CourseDetails(
       {this.name,
-        this.isBooked,
-        this.track,
-        this.duration,
-        this.creditHours,
-        this.totalFees,
-        this.semesters,
-        this.totalSemesters,
-        this.feePerCredit,
-        this.semesterFee,
-        this.annualFee,
-        this.basePrice,
-        this.minAdmissionRate,
-        this.eligibility,
-        this.otherRequirements,
-        this.currency,
-        this.applicationFee,
-        this.status,
-        this.minBaGpa});
+      this.isBooked,
+      this.track,
+      this.duration,
+      this.creditHours,
+      this.totalFees,
+      this.semesters,
+      this.totalSemesters,
+      this.feePerCredit,
+      this.semesterFee,
+      this.annualFee,
+      this.basePrice,
+      this.minAdmissionRate,
+      this.eligibility,
+      this.otherRequirements,
+      this.currency,
+      this.applicationFee,
+      this.status,
+      this.minBaGpa});
 
   CourseDetails.fromJson(Map<String, dynamic> json) {
     name = json['name'];
@@ -597,7 +597,8 @@ class UniversityLinks {
     applicationFee = _toDouble(json['applicationFee']);
     currency = json['currency'];
     final universityJson = _toStringDynamicMap(json['university']);
-    university = universityJson != null ? University.fromJson(universityJson) : null;
+    university =
+        universityJson != null ? University.fromJson(universityJson) : null;
   }
 
   Map<String, dynamic> toJson() {
@@ -644,15 +645,15 @@ class ProgramLinks {
 
   ProgramLinks(
       {this.id,
-        this.universityId,
-        this.programId,
-        this.applicationFee,
-        this.taxes,
-        this.currency,
-        this.isEnabled,
-        this.createdAt,
-        this.updatedAt,
-        this.program});
+      this.universityId,
+      this.programId,
+      this.applicationFee,
+      this.taxes,
+      this.currency,
+      this.isEnabled,
+      this.createdAt,
+      this.updatedAt,
+      this.program});
 
   ProgramLinks.fromJson(Map<String, dynamic> json) {
     id = json['id'];
@@ -699,14 +700,14 @@ class Ratings {
 
   Ratings(
       {this.id,
-        this.studentId,
-        this.universityId,
-        this.rating,
-        this.remark,
-        this.imagePath,
-        this.createdAt,
-        this.updatedAt,
-        this.student});
+      this.studentId,
+      this.universityId,
+      this.rating,
+      this.remark,
+      this.imagePath,
+      this.createdAt,
+      this.updatedAt,
+      this.student});
 
   Ratings.fromJson(Map<String, dynamic> json) {
     id = json['id'];
@@ -845,29 +846,29 @@ class Courses {
 
   Courses(
       {this.programId,
-        this.programName,
-        this.academicProgram,
-        this.educationInstitute,
-        this.name,
-        this.isBooked,
-        this.track,
-        this.duration,
-        this.creditHours,
-        this.totalFees,
-        this.semesters,
-        this.totalSemesters,
-        this.feePerCredit,
-        this.semesterFee,
-        this.annualFee,
-        this.basePrice,
-        this.minAdmissionRate,
-        this.eligibility,
-        this.otherRequirements,
-        this.currency,
-        this.applicationFee,
-        this.status,
-        this.commissionPercent,
-        this.minBaGpa});
+      this.programName,
+      this.academicProgram,
+      this.educationInstitute,
+      this.name,
+      this.isBooked,
+      this.track,
+      this.duration,
+      this.creditHours,
+      this.totalFees,
+      this.semesters,
+      this.totalSemesters,
+      this.feePerCredit,
+      this.semesterFee,
+      this.annualFee,
+      this.basePrice,
+      this.minAdmissionRate,
+      this.eligibility,
+      this.otherRequirements,
+      this.currency,
+      this.applicationFee,
+      this.status,
+      this.commissionPercent,
+      this.minBaGpa});
 
   factory Courses.fromCourseDetails(
     CourseDetails details, {

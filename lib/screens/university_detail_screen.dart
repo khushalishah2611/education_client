@@ -748,6 +748,7 @@ class _CollegeAccordionState extends State<_CollegeAccordion> {
     });
     return payload;
   }
+
   Widget _buildCourseRow({
     required int index,
     required Courses details,
@@ -883,7 +884,7 @@ class _CollegeAccordionState extends State<_CollegeAccordion> {
                             builder: (_) => UploadDocumentsScreen(
                               universityName: adminUniversity.name,
                               universityHeroImage:
-                              ImageUrlHelper.resolveUploadUrl(
+                                  ImageUrlHelper.resolveUploadUrl(
                                 adminUniversity.coverImagePath,
                               ),
                               courseTitle: details.name,

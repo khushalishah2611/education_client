@@ -207,9 +207,8 @@ class ProfileInput extends StatelessWidget {
         border: Border.all(color: const Color(0xFFD7D5D3)),
       ),
       child: Row(
-        crossAxisAlignment: multiLine
-            ? CrossAxisAlignment.start
-            : CrossAxisAlignment.center,
+        crossAxisAlignment:
+            multiLine ? CrossAxisAlignment.start : CrossAxisAlignment.center,
         children: [
           Padding(
             padding: EdgeInsets.only(top: multiLine ? 12 : 0),

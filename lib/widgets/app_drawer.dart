@@ -11,67 +11,67 @@ class CommonSideMenu extends StatelessWidget {
   Widget build(BuildContext context) {
     final items =
         <({IconData icon, String label, bool danger, Widget? screen})>[
-          (
-            icon: Icons.home_outlined,
-            label: context.l10n.text('dashboard'),
-            danger: false,
-            screen: null,
-          ),
-          (
-            icon: Icons.assignment_outlined,
-            label: context.l10n.text('trackApplications'),
-            danger: false,
-            screen: const TrackMyApplicationsScreen(activeTab: true),
-          ),
-          (
-            icon: Icons.person_outline,
-            label: context.l10n.text('myProfile'),
-            danger: false,
-            screen: const ProfileScreen(),
-          ),
-          (
-            icon: Icons.description_outlined,
-            label: context.l10n.text('manageDocuments'),
-            danger: false,
-            screen: const UploadedDocumentsScreen(activeTab: true),
-          ),
-          (
-            icon: Icons.payments_outlined,
-            label: context.l10n.text('payments'),
-            danger: false,
-            screen: const PaymentsScreen(),
-          ),
-          (
-            icon: Icons.notifications_none_rounded,
-            label: context.l10n.text('notifications'),
-            danger: false,
-            screen: const NotificationsScreen(),
-          ),
-          (
-            icon: Icons.verified_user_outlined,
-            label: context.l10n.text('termsAndConditions'),
-            danger: false,
-            screen: const TermsConditionsScreen(),
-          ),
-          (
-            icon: Icons.support_agent_outlined,
-            label: context.l10n.text('help'),
-            danger: false,
-            screen: const EmergencyContactScreen(),
-          ),
-          (
-            icon: Icons.translate_outlined,
-            label: context.l10n.text('changeLanguage'),
-            danger: false,
-            screen: const ChangeLanguageScreen(),
-          ),
-          (
-            icon: Icons.logout,
-            label: context.l10n.text('logout'),
-            danger: true,
-            screen: null,
-          ),
-        ];
+      (
+        icon: Icons.home_outlined,
+        label: context.l10n.text('dashboard'),
+        danger: false,
+        screen: null,
+      ),
+      (
+        icon: Icons.assignment_outlined,
+        label: context.l10n.text('trackApplications'),
+        danger: false,
+        screen: const TrackMyApplicationsScreen(activeTab: true),
+      ),
+      (
+        icon: Icons.person_outline,
+        label: context.l10n.text('myProfile'),
+        danger: false,
+        screen: const ProfileScreen(),
+      ),
+      (
+        icon: Icons.description_outlined,
+        label: context.l10n.text('manageDocuments'),
+        danger: false,
+        screen: const UploadedDocumentsScreen(activeTab: true),
+      ),
+      (
+        icon: Icons.payments_outlined,
+        label: context.l10n.text('payments'),
+        danger: false,
+        screen: const PaymentsScreen(),
+      ),
+      (
+        icon: Icons.notifications_none_rounded,
+        label: context.l10n.text('notifications'),
+        danger: false,
+        screen: const NotificationsScreen(),
+      ),
+      (
+        icon: Icons.verified_user_outlined,
+        label: context.l10n.text('termsAndConditions'),
+        danger: false,
+        screen: const TermsConditionsScreen(),
+      ),
+      (
+        icon: Icons.support_agent_outlined,
+        label: context.l10n.text('help'),
+        danger: false,
+        screen: const EmergencyContactScreen(),
+      ),
+      (
+        icon: Icons.translate_outlined,
+        label: context.l10n.text('changeLanguage'),
+        danger: false,
+        screen: const ChangeLanguageScreen(),
+      ),
+      (
+        icon: Icons.logout,
+        label: context.l10n.text('logout'),
+        danger: true,
+        screen: null,
+      ),
+    ];
 
     return Drawer(
       width: MediaQuery.of(context).size.width * 0.88,

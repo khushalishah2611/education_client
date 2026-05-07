@@ -194,8 +194,8 @@ class _VerifyOtpScreenState extends State<VerifyOtpScreen> {
         message: response.message.isNotEmpty
             ? response.message
             : (context.l10n.isArabic
-                  ? 'تم التحقق من OTP بنجاح'
-                  : 'OTP verified successfully'),
+                ? 'تم التحقق من OTP بنجاح'
+                : 'OTP verified successfully'),
       );
       Navigator.of(context).pushAndRemoveUntil(
         MaterialPageRoute(

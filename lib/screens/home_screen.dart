@@ -137,7 +137,6 @@ class _HomeScreenState extends State<HomeScreen> {
                             height: double.infinity,
                             fit: BoxFit.cover,
                           ),
-
                           Positioned(
                             top: MediaQuery.of(context).padding.top,
                             left: horizontalPadding,
@@ -178,8 +177,9 @@ class _HomeScreenState extends State<HomeScreen> {
                               ],
                             ),
                           ),
-                          SizedBox(height: 10,),
-
+                          SizedBox(
+                            height: 10,
+                          ),
                           Positioned(
                             top: MediaQuery.of(context).size.height * 0.12,
                             left: horizontalPadding,
@@ -296,9 +296,7 @@ class _HomeScreenState extends State<HomeScreen> {
                               SectionTitle(
                                 context.l10n.text('popularUniversities'),
                               ),
-
                               const SizedBox(height: 12),
-
                               if (!_controller.isLoadingUniversities &&
                                   _controller.universities.isEmpty)
                                 Container(
@@ -329,12 +327,10 @@ class _HomeScreenState extends State<HomeScreen> {
                                 Expanded(
                                   child: context.isSmallMobile
                                       ? ListView.separated(
-                                          itemCount:
-                                              _controller.isLoadingUniversities
+                                          itemCount: _controller
+                                                  .isLoadingUniversities
                                               ? 4
-                                              : _controller
-                                                    .universities
-                                                    .length,
+                                              : _controller.universities.length,
                                           separatorBuilder: (_, __) =>
                                               const SizedBox(height: 8),
                                           itemBuilder: (context, index) {
@@ -348,31 +344,28 @@ class _HomeScreenState extends State<HomeScreen> {
                                               data: item,
                                               onTap: () =>
                                                   Navigator.of(context).push(
-                                                    MaterialPageRoute(
-                                                      builder: (_) =>
-                                                          UniversityDetailScreen(
-                                                            data: item,
-                                                          ),
-                                                    ),
+                                                MaterialPageRoute(
+                                                  builder: (_) =>
+                                                      UniversityDetailScreen(
+                                                    data: item,
                                                   ),
+                                                ),
+                                              ),
                                             );
                                           },
                                         )
                                       : GridView.builder(
-                                          itemCount:
-                                              _controller.isLoadingUniversities
+                                          itemCount: _controller
+                                                  .isLoadingUniversities
                                               ? 4
-                                              : _controller
-                                                    .universities
-                                                    .length,
+                                              : _controller.universities.length,
                                           gridDelegate:
                                               SliverGridDelegateWithFixedCrossAxisCount(
-                                                crossAxisCount: gridColumns,
-                                                mainAxisSpacing: 8,
-                                                crossAxisSpacing: 8,
-                                                childAspectRatio:
-                                                    gridAspectRatio,
-                                              ),
+                                            crossAxisCount: gridColumns,
+                                            mainAxisSpacing: 8,
+                                            crossAxisSpacing: 8,
+                                            childAspectRatio: gridAspectRatio,
+                                          ),
                                           itemBuilder: (context, index) {
                                             if (_controller
                                                 .isLoadingUniversities) {
@@ -384,13 +377,13 @@ class _HomeScreenState extends State<HomeScreen> {
                                               data: item,
                                               onTap: () =>
                                                   Navigator.of(context).push(
-                                                    MaterialPageRoute(
-                                                      builder: (_) =>
-                                                          UniversityDetailScreen(
-                                                            data: item,
-                                                          ),
-                                                    ),
+                                                MaterialPageRoute(
+                                                  builder: (_) =>
+                                                      UniversityDetailScreen(
+                                                    data: item,
                                                   ),
+                                                ),
+                                              ),
                                             );
                                           },
                                         ),
@@ -409,7 +402,6 @@ class _HomeScreenState extends State<HomeScreen> {
                   ] else ...[
                     Expanded(child: LatestUpdatesScreen(activeTab: false)),
                   ],
-
                   BottomTabBarCard(
                     activeIndex: _activeTab,
                     onTap: (index) {
@@ -669,9 +661,7 @@ class _CountrySelectionDialogState extends State<_CountrySelectionDialog> {
                   ),
                 ),
               ),
-
               const SizedBox(height: 8),
-
               ConstrainedBox(
                 constraints: const BoxConstraints(maxHeight: 320),
                 child: _filteredCountries.isEmpty
@@ -827,7 +817,6 @@ class _AdvanceSearchDialogState extends State<_AdvanceSearchDialog> {
                   Icons.keyboard_arrow_down_rounded,
                   color: Color(0xFF757575),
                 ),
-
                 hint: Text(
                   options.isEmpty ? 'No options found' : 'Select $title',
                   style: const TextStyle(
@@ -835,7 +824,6 @@ class _AdvanceSearchDialogState extends State<_AdvanceSearchDialog> {
                     fontSize: 14,
                   ),
                 ),
-
                 items: options.map((option) {
                   return DropdownMenuItem<String>(
                     value: option,
@@ -856,7 +844,6 @@ class _AdvanceSearchDialogState extends State<_AdvanceSearchDialog> {
                     ),
                   );
                 }).toList(),
-
                 onChanged: !enabled || options.isEmpty ? null : onChanged,
               ),
             ),
@@ -880,7 +867,6 @@ class _AdvanceSearchDialogState extends State<_AdvanceSearchDialog> {
           padding: const EdgeInsets.fromLTRB(12, 14, 12, 12),
           child: Column(
             mainAxisSize: MainAxisSize.min,
-
             children: [
               Container(
                 width: 44,
@@ -934,7 +920,6 @@ class _AdvanceSearchDialogState extends State<_AdvanceSearchDialog> {
                 }),
                 icon: Icons.school_outlined,
               ),
-
               Opacity(
                 opacity: shouldDisableDetails ? 0.55 : 1,
                 child: dropdownTile(
@@ -961,7 +946,6 @@ class _AdvanceSearchDialogState extends State<_AdvanceSearchDialog> {
                   ),
                 ),
               ),
-
               const SizedBox(height: 10),
               Row(
                 children: [
@@ -1009,8 +993,7 @@ class _CountryFlag extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final hasImage =
-        country.flagImageUrl.startsWith('http://') ||
+    final hasImage = country.flagImageUrl.startsWith('http://') ||
         country.flagImageUrl.startsWith('https://');
     if (!hasImage) {
       return Text(country.flagEmoji, style: const TextStyle(fontSize: 18));
@@ -1102,9 +1085,7 @@ class _UniversityCard extends StatelessWidget {
                         size: 14,
                       ),
                     ),
-
                     const SizedBox(width: 4),
-
                     Expanded(
                       child: Text(
                         data.country ?? "",
@@ -1130,9 +1111,7 @@ class _UniversityCard extends StatelessWidget {
                     color: Color(0xFFFFB300),
                     size: 16,
                   ),
-
                   const SizedBox(width: 4),
-
                   Text(
                     (data.rating ?? 0).toStringAsFixed(1),
                     style: const TextStyle(
