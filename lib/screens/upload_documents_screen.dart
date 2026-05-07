@@ -484,27 +484,49 @@ class _UploadDocumentsScreenState extends State<UploadDocumentsScreen> {
   String _documentTypeFromApiItem(Map<String, dynamic> item) {
     final Object? documentType = item['documentType'];
     if (documentType is Map) {
-      final Object? value = documentType['value'] ??
-          documentType['type'] ??
-          documentType['documentTypeValue'] ??
-          documentType['document_type_value'] ??
-          documentType['id'] ??
-          documentType['documentTypeId'] ??
-          documentType['document_type_id'] ??
-          documentType['labelEn'] ??
-          documentType['labelAr'] ??
-          documentType['name'];
-      if (value != null) return value.toString().trim();
+      final String nestedType = _firstNonEmptyValue(documentType, const <String>[
+        'value',
+        'type',
+        'documentTypeValue',
+        'document_type_value',
+        'id',
+        'documentTypeId',
+        'document_type_id',
+        'labelEn',
+        'labelAr',
+        'name',
+      ]);
+      if (nestedType.isNotEmpty) return nestedType;
+    } else if (documentType != null) {
+      final String type = documentType.toString().trim();
+      if (type.isNotEmpty) return type;
     }
 
-    final Object? type = item['type'] ??
-        item['documentTypeValue'] ??
-        item['document_type_value'] ??
-        item['document_type'] ??
-        item['documentTypeId'] ??
-        item['document_type_id'] ??
-        item['documentType'];
-    return type?.toString().trim() ?? '';
+    return _firstNonEmptyValue(item, const <String>[
+      'type',
+      'value',
+      'documentTypeValue',
+      'document_type_value',
+      'document_type',
+      'documentTypeId',
+      'document_type_id',
+      'documentType',
+      'id',
+      'labelEn',
+      'labelAr',
+      'name',
+    ]);
+  }
+
+  String _firstNonEmptyValue(Map<dynamic, dynamic> item, List<String> keys) {
+    for (final String key in keys) {
+      final Object? value = item[key];
+      if (value == null || value is Map || value is List) continue;
+
+      final String text = value.toString().trim();
+      if (text.isNotEmpty) return text;
+    }
+    return '';
   }
 
   String? _firstDocumentString(
