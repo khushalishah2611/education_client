@@ -725,44 +725,39 @@ class _CollegeAccordionState extends State<_CollegeAccordion> {
 
   Map<String, dynamic> _buildApplicationPayload({
     required AdminUniversity adminUniversity,
-    required AcademicPrograms academicProgram,
     required String collegeName,
     required Courses courseDetails,
     required String courseKey,
   }) {
-    final Map<String, dynamic> courseJson = courseDetails.toJson();
     final double applicationFee = courseDetails.applicationFee ?? 0;
+    final double basePrice = courseDetails.basePrice ?? 0;
+    const int discountedScore = 0;
     final String currency = (courseDetails.currency ?? '').trim();
+    final Map<String, dynamic> selectedCourse = <String, dynamic>{
+      'key': courseKey,
+      'name': courseDetails.name,
+      'track': courseDetails.track,
+      'college': collegeName,
+      'educationInstitute': courseDetails.educationInstitute ?? collegeName,
+      'totalSemesters': courseDetails.totalSemesters,
+      'applicationFee': applicationFee,
+      'basePrice': basePrice,
+      'discountedPrice': basePrice,
+      'discountedScore': discountedScore,
+      'currency': currency,
+    }..removeWhere((_, value) {
+        if (value == null) return true;
+        if (value is String) return value.trim().isEmpty;
+        return false;
+      });
+
     final Map<String, dynamic> payload = <String, dynamic>{
       'universityId': adminUniversity.id,
-      'universityName': adminUniversity.name,
-      'academicName': academicProgram.academicname,
-      'college': collegeName,
       'programId': courseDetails.programId,
-      'programName': courseDetails.programName,
-      'courseName': courseDetails.name,
-      'courseDetails': courseJson,
-      'applicationFee': applicationFee,
-      'applicationFeeCurrency': currency,
-      'notes': <String, dynamic>{
-        'kind': 'PROGRAM_SELECTION_V1',
-        'note': '',
-        'selectedCourseKeys': <String>[courseKey],
-        'selectedApplicationFeeTotal': applicationFee,
-        'selectedCourses': <Map<String, dynamic>>[
-          <String, dynamic>{
-            'courseKey': courseKey,
-            'courseName': courseDetails.name,
-            'track': courseDetails.track,
-            'applicationFee': applicationFee,
-            'currency': currency,
-          }..removeWhere((_, value) {
-              if (value == null) return true;
-              if (value is String) return value.trim().isEmpty;
-              return false;
-            }),
-        ],
-      },
+      'selectedCourseKeys': <String>[courseKey],
+      'selectedCollege': collegeName,
+      'selectedCourses': <Map<String, dynamic>>[selectedCourse],
+      'selectedApplicationFeeTotal': applicationFee,
     };
 
     payload.removeWhere((_, value) {
@@ -915,7 +910,6 @@ class _CollegeAccordionState extends State<_CollegeAccordion> {
                               applicationsPayload: <Map<String, dynamic>>[
                                 _buildApplicationPayload(
                                   adminUniversity: adminUniversity,
-                                  academicProgram: academicProgram,
                                   collegeName: collegeName,
                                   courseDetails: details,
                                   courseKey: courseKey,

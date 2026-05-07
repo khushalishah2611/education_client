@@ -42,6 +42,17 @@ class _PaymentScreenState extends State<PaymentScreen> {
         return directCurrency.toString().trim();
       }
 
+      final Object? selectedCourses = payload['selectedCourses'];
+      if (selectedCourses is List && selectedCourses.isNotEmpty) {
+        final Object? selectedCourse = selectedCourses.first;
+        if (selectedCourse is Map) {
+          final Object? currency = selectedCourse['currency'];
+          if (currency != null && currency.toString().trim().isNotEmpty) {
+            return currency.toString().trim();
+          }
+        }
+      }
+
       final Object? courseDetails = payload['courseDetails'];
       if (courseDetails is Map) {
         final Object? currency = courseDetails['currency'];
@@ -56,6 +67,12 @@ class _PaymentScreenState extends State<PaymentScreen> {
 
   double get _applicationFeeTotal {
     return widget.applicationsPayload.fold<double>(0, (total, payload) {
+      final Object? selectedApplicationFeeTotal =
+          payload['selectedApplicationFeeTotal'];
+      final double? selectedTotal =
+          _parseApplicationFee(selectedApplicationFeeTotal);
+      if (selectedTotal != null) return total + selectedTotal;
+
       final Object? directApplicationFee = payload['applicationFee'];
       final double? directFee = _parseApplicationFee(directApplicationFee);
       if (directFee != null) return total + directFee;

@@ -101,16 +101,15 @@ class PaymentConfirmationScreen extends StatelessWidget {
 
   String get _displayCourseTitle {
     final Map<String, dynamic>? application = _primaryApplication;
+    final Object? selectedCourses = application?['selectedCourses'];
+    final String selectedCourseName = _selectedCourseName(selectedCourses);
+    if (selectedCourseName.isNotEmpty) return selectedCourseName;
+
     final Object? notes = application?['notes'];
     if (notes is Map) {
-      final Object? selectedCourses = notes['selectedCourses'];
-      if (selectedCourses is List && selectedCourses.isNotEmpty) {
-        final Object? selectedCourse = selectedCourses.first;
-        if (selectedCourse is Map) {
-          final String selectedCourseName = _textFrom(selectedCourse['courseName']);
-          if (selectedCourseName.isNotEmpty) return selectedCourseName;
-        }
-      }
+      final String notesCourseName =
+          _selectedCourseName(notes['selectedCourses']);
+      if (notesCourseName.isNotEmpty) return notesCourseName;
     }
 
     final String courseName = _textFrom(application?['courseName']);
@@ -125,6 +124,18 @@ class PaymentConfirmationScreen extends StatelessWidget {
     return courseTitle ?? '';
   }
 
+  String _selectedCourseName(Object? selectedCourses) {
+    if (selectedCourses is! List || selectedCourses.isEmpty) return '';
+
+    final Object? selectedCourse = selectedCourses.first;
+    if (selectedCourse is! Map) return '';
+
+    final String name = _textFrom(selectedCourse['name']);
+    if (name.isNotEmpty) return name;
+
+    return _textFrom(selectedCourse['courseName']);
+  }
+
   String get _displayStatus {
     final String status = _textFrom(_primaryApplication?['status']);
     return status.isEmpty ? '-' : status;
@@ -133,10 +144,16 @@ class PaymentConfirmationScreen extends StatelessWidget {
   String get _displayApplicationFee {
     final Map<String, dynamic>? application = _primaryApplication;
     final Map<String, dynamic>? payload = _primaryPayload;
-    final double? responseFee = _parseAmount(application?['applicationFee']) ??
-        _parseAmount(_courseDetailsValue(application, 'applicationFee'));
-    final double? payloadFee = _parseAmount(payload?['applicationFee']) ??
-        _parseAmount(_courseDetailsValue(payload, 'applicationFee'));
+    final double? responseFee =
+        _parseAmount(application?['selectedApplicationFeeTotal']) ??
+            _parseAmount(application?['applicationFee']) ??
+            _parseAmount(_selectedCourseValue(application, 'applicationFee')) ??
+            _parseAmount(_courseDetailsValue(application, 'applicationFee'));
+    final double? payloadFee =
+        _parseAmount(payload?['selectedApplicationFeeTotal']) ??
+            _parseAmount(payload?['applicationFee']) ??
+            _parseAmount(_selectedCourseValue(payload, 'applicationFee')) ??
+            _parseAmount(_courseDetailsValue(payload, 'applicationFee'));
     final double? fee = responseFee == null || responseFee == 0
         ? payloadFee ?? responseFee
         : responseFee;
@@ -144,11 +161,15 @@ class PaymentConfirmationScreen extends StatelessWidget {
       application?['applicationFeeCurrency'],
     ).isNotEmpty
         ? _textFrom(application?['applicationFeeCurrency'])
-        : _textFrom(_courseDetailsValue(application, 'currency'));
+        : _textFrom(_selectedCourseValue(application, 'currency')).isNotEmpty
+            ? _textFrom(_selectedCourseValue(application, 'currency'))
+            : _textFrom(_courseDetailsValue(application, 'currency'));
     final String payloadCurrency = _textFrom(payload?['applicationFeeCurrency'])
             .isNotEmpty
         ? _textFrom(payload?['applicationFeeCurrency'])
-        : _textFrom(_courseDetailsValue(payload, 'currency'));
+        : _textFrom(_selectedCourseValue(payload, 'currency')).isNotEmpty
+            ? _textFrom(_selectedCourseValue(payload, 'currency'))
+            : _textFrom(_courseDetailsValue(payload, 'currency'));
     final String currency = responseCurrency.isNotEmpty
         ? responseCurrency
         : payloadCurrency;
@@ -195,6 +216,15 @@ class PaymentConfirmationScreen extends StatelessWidget {
         message: e.toString(),
       );
     }
+  }
+
+  Object? _selectedCourseValue(Map<String, dynamic>? application, String key) {
+    final Object? selectedCourses = application?['selectedCourses'];
+    if (selectedCourses is! List || selectedCourses.isEmpty) return null;
+
+    final Object? selectedCourse = selectedCourses.first;
+    if (selectedCourse is Map) return selectedCourse[key];
+    return null;
   }
 
   Object? _courseDetailsValue(Map<String, dynamic>? application, String key) {

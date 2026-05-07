@@ -156,6 +156,9 @@ class _TrackApplicationScreenState extends State<TrackApplicationScreen> {
     if (selectedCourses is List && selectedCourses.isNotEmpty) {
       final Object? selectedCourse = selectedCourses.first;
       if (selectedCourse is Map) {
+        final String name = _textFrom(selectedCourse['name']);
+        if (name.isNotEmpty) return name;
+
         final String courseName = _textFrom(selectedCourse['courseName']);
         if (courseName.isNotEmpty) return courseName;
       }
