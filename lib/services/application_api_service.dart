@@ -144,7 +144,7 @@ extension ApplicationApiDocuments on ApplicationApiService {
   Future<List<Map<String, dynamic>>> fetchStudentDocuments({
     required String studentUserId,
   }) async {
-    final Uri uri = ApiConfig.uri('/api/student/document-types').replace(
+    final Uri uri = ApiConfig.uri('/api/student/documents').replace(
       queryParameters: <String, String>{'studentUserId': studentUserId},
     );
     final response = await http.get(uri, headers: await _authHeaders());
@@ -189,10 +189,10 @@ Map<String, dynamic> _decodeMap(String body) {
 Future<Map<String, String>> _authHeaders() async {
   final SharedPreferences prefs = await SharedPreferences.getInstance();
   final String token = prefs.getString('authToken')?.trim() ?? '';
-  // if (token.isEmpty) return const <String, String>{};
+  if (token.isEmpty) return const <String, String>{};
+
   return <String, String>{
-    'Authorization':
-        'Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6ImNtbXVnYzA5ODAwMDBmZG0xNml4aDB1amQiLCJlbWFpbCI6ImFkbWluQGFyYWJ1bml2ZXJzaXR5LmNvbSIsInJvbGUiOiJBRE1JTiIsImlhdCI6MTc3Nzk3NDE0OCwiZXhwIjoxNzc4NTc4OTQ4fQ.Xk287IHUAhFXHqf43IQ_KC2ElX67IPMV8_Z8yjcMBdU'
+    'Authorization': 'Bearer $token',
   };
 }
 

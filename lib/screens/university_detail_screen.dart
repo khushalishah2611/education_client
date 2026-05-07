@@ -728,7 +728,11 @@ class _CollegeAccordionState extends State<_CollegeAccordion> {
     required AcademicPrograms academicProgram,
     required String collegeName,
     required Courses courseDetails,
+    required String courseKey,
   }) {
+    final Map<String, dynamic> courseJson = courseDetails.toJson();
+    final double applicationFee = courseDetails.applicationFee ?? 0;
+    final String currency = (courseDetails.currency ?? '').trim();
     final Map<String, dynamic> payload = <String, dynamic>{
       'universityId': adminUniversity.id,
       'universityName': adminUniversity.name,
@@ -737,7 +741,28 @@ class _CollegeAccordionState extends State<_CollegeAccordion> {
       'programId': courseDetails.programId,
       'programName': courseDetails.programName,
       'courseName': courseDetails.name,
-      'courseDetails': courseDetails.toJson(),
+      'courseDetails': courseJson,
+      'applicationFee': applicationFee,
+      'applicationFeeCurrency': currency,
+      'notes': <String, dynamic>{
+        'kind': 'PROGRAM_SELECTION_V1',
+        'note': '',
+        'selectedCourseKeys': <String>[courseKey],
+        'selectedApplicationFeeTotal': applicationFee,
+        'selectedCourses': <Map<String, dynamic>>[
+          <String, dynamic>{
+            'courseKey': courseKey,
+            'courseName': courseDetails.name,
+            'track': courseDetails.track,
+            'applicationFee': applicationFee,
+            'currency': currency,
+          }..removeWhere((_, value) {
+              if (value == null) return true;
+              if (value is String) return value.trim().isEmpty;
+              return false;
+            }),
+        ],
+      },
     };
 
     payload.removeWhere((_, value) {
@@ -896,6 +921,7 @@ class _CollegeAccordionState extends State<_CollegeAccordion> {
                                     academicProgram: academicProgram,
                                     collegeName: collegeName,
                                     courseDetails: details,
+                                    courseKey: courseKey,
                                   ),
                                 ],
                               ),

@@ -5,6 +5,7 @@ import '../core/app_localizations.dart';
 import '../core/api_config.dart';
 import '../core/app_theme.dart';
 import '../core/responsive_helper.dart';
+import '../core/url_launcher_helper.dart';
 import '../models/document_type.dart';
 import '../services/application_api_service.dart';
 import '../widgets/common_widgets.dart';
@@ -284,6 +285,19 @@ class _UploadDocumentsScreenState extends State<UploadDocumentsScreen> {
       await _pickDocument(doc);
       return;
     }
+
+    final Uri? openUri = uploadedDocument.openUri;
+    if (openUri == null) {
+      if (!mounted) return;
+      showAppSnackBar(
+        context,
+        type: AppSnackBarType.error,
+        message: 'Document link is not available. Please upload again.',
+      );
+      return;
+    }
+
+    await openExternalLink(openUri.toString());
   }
 
   Map<String, _UploadedDocumentInfo> _uploadedDocumentsFromApiItems(
@@ -574,11 +588,30 @@ class _UploadDocumentsScreenState extends State<UploadDocumentsScreen> {
     if (value == null || value.isEmpty) return null;
     final Uri? uri = Uri.tryParse(value);
     if (uri == null) return null;
-    if (uri.hasScheme) return uri;
+    if (uri.hasScheme) return _publicDocumentUri(uri);
     if (value.startsWith('/')) {
-      return Uri.tryParse('${ApiConfig.baseUrl}$value');
+      return _publicDocumentUri(Uri.tryParse('${ApiConfig.baseUrl}$value'));
     }
-    return Uri.tryParse('${ApiConfig.baseUrl}/$value');
+    return _publicDocumentUri(Uri.tryParse('${ApiConfig.baseUrl}/$value'));
+  }
+
+  Uri? _publicDocumentUri(Uri? uri) {
+    if (uri == null) return null;
+
+    final String path = uri.path;
+    final int uploadsIndex = path.indexOf('/uploads/');
+    if (uploadsIndex >= 0) {
+      return uri.replace(path: path.substring(uploadsIndex));
+    }
+
+    final int studentDocumentsIndex = path.indexOf('/student-documents/');
+    if (studentDocumentsIndex >= 0) {
+      return uri.replace(
+        path: '/uploads${path.substring(studentDocumentsIndex)}',
+      );
+    }
+
+    return uri;
   }
 
   Uri? _uriFromFilePath(String? filePath) {

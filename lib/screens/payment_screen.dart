@@ -34,10 +34,31 @@ class _PaymentScreenState extends State<PaymentScreen> {
   final ApplicationApiService _applicationApiService =
       const ApplicationApiService();
 
-  static const String _applicationFeeCurrency = 'Omani Rial';
+  String get _applicationFeeCurrency {
+    for (final Map<String, dynamic> payload in widget.applicationsPayload) {
+      final Object? directCurrency = payload['applicationFeeCurrency'];
+      if (directCurrency != null && directCurrency.toString().trim().isNotEmpty) {
+        return directCurrency.toString().trim();
+      }
+
+      final Object? courseDetails = payload['courseDetails'];
+      if (courseDetails is Map) {
+        final Object? currency = courseDetails['currency'];
+        if (currency != null && currency.toString().trim().isNotEmpty) {
+          return currency.toString().trim();
+        }
+      }
+    }
+
+    return 'Omani Rial';
+  }
 
   double get _applicationFeeTotal {
     return widget.applicationsPayload.fold<double>(0, (total, payload) {
+      final Object? directApplicationFee = payload['applicationFee'];
+      final double? directFee = _parseApplicationFee(directApplicationFee);
+      if (directFee != null) return total + directFee;
+
       final Object? courseDetails = payload['courseDetails'];
       if (courseDetails is! Map) return total;
 
@@ -64,13 +85,15 @@ class _PaymentScreenState extends State<PaymentScreen> {
   Future<void> _submitApplicationsAndContinue() async {
     if (_isSubmitting) return;
     setState(() => _isSubmitting = true);
+    Map<String, dynamic>? createdApplicationsResponse;
     try {
       if (widget.applicationsPayload.isNotEmpty) {
         final SharedPreferences prefs = await SharedPreferences.getInstance();
         final String studentUserId =
             prefs.getString('studentUserId')?.trim() ?? '';
         if (studentUserId.isNotEmpty) {
-          await _applicationApiService.createBulkApplications(
+          createdApplicationsResponse =
+              await _applicationApiService.createBulkApplications(
             studentUserId: studentUserId,
             applications: widget.applicationsPayload,
           );
@@ -86,6 +109,8 @@ class _PaymentScreenState extends State<PaymentScreen> {
             universityName: widget.universityName,
             universityHeroImage: widget.universityHeroImage,
             courseTitle: widget.courseTitle,
+            applicationsPayload: widget.applicationsPayload,
+            createdApplicationsResponse: createdApplicationsResponse,
           ),
         ),
       );

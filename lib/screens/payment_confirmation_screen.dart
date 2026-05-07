@@ -13,16 +13,138 @@ class PaymentConfirmationScreen extends StatelessWidget {
     this.universityName,
     this.universityHeroImage,
     this.courseTitle,
+    this.applicationsPayload = const <Map<String, dynamic>>[],
+    this.createdApplicationsResponse,
   });
 
   final String? universityName;
   final String? universityHeroImage;
   final String? courseTitle;
+  final List<Map<String, dynamic>> applicationsPayload;
+  final Map<String, dynamic>? createdApplicationsResponse;
+
+  List<Map<String, dynamic>> get _createdApplications {
+    final Object? applications = createdApplicationsResponse?['applications'];
+    if (applications is! List) return const <Map<String, dynamic>>[];
+
+    return applications
+        .whereType<Map>()
+        .map((item) => item.map((key, value) => MapEntry(key.toString(), value)))
+        .toList(growable: false);
+  }
+
+  Map<String, dynamic>? get _primaryApplication {
+    final List<Map<String, dynamic>> applications = _createdApplications;
+    if (applications.isNotEmpty) return applications.first;
+    if (applicationsPayload.isNotEmpty) return applicationsPayload.first;
+    return null;
+  }
+
+  Map<String, dynamic>? get _primaryPayload {
+    if (applicationsPayload.isNotEmpty) return applicationsPayload.first;
+    return null;
+  }
+
+  String get _applicationIdText {
+    final String id = _textFrom(_primaryApplication?['id']);
+    if (id.isEmpty) return 'Application ID: -';
+    return 'Application ID: ${id.length > 8 ? id.substring(0, 8) : id}';
+  }
+
+  String get _displayUniversityName {
+    final Map<String, dynamic>? application = _primaryApplication;
+    final Object? nestedUniversity = application?['university'];
+    if (nestedUniversity is Map) {
+      final String nestedName = _textFrom(nestedUniversity['name']);
+      if (nestedName.isNotEmpty) return nestedName;
+    }
+
+    return _textFrom(application?['universityName']).isNotEmpty
+        ? _textFrom(application?['universityName'])
+        : (universityName ?? '');
+  }
+
+  String get _displayCourseTitle {
+    final Map<String, dynamic>? application = _primaryApplication;
+    final Object? notes = application?['notes'];
+    if (notes is Map) {
+      final Object? selectedCourses = notes['selectedCourses'];
+      if (selectedCourses is List && selectedCourses.isNotEmpty) {
+        final Object? selectedCourse = selectedCourses.first;
+        if (selectedCourse is Map) {
+          final String selectedCourseName = _textFrom(selectedCourse['courseName']);
+          if (selectedCourseName.isNotEmpty) return selectedCourseName;
+        }
+      }
+    }
+
+    final String courseName = _textFrom(application?['courseName']);
+    if (courseName.isNotEmpty) return courseName;
+
+    final Object? courseDetails = application?['courseDetails'];
+    if (courseDetails is Map) {
+      final String detailsName = _textFrom(courseDetails['name']);
+      if (detailsName.isNotEmpty) return detailsName;
+    }
+
+    return courseTitle ?? '';
+  }
+
+  String get _displayStatus {
+    final String status = _textFrom(_primaryApplication?['status']);
+    return status.isEmpty ? '-' : status;
+  }
+
+  String get _displayApplicationFee {
+    final Map<String, dynamic>? application = _primaryApplication;
+    final Map<String, dynamic>? payload = _primaryPayload;
+    final double? responseFee = _parseAmount(application?['applicationFee']) ??
+        _parseAmount(_courseDetailsValue(application, 'applicationFee'));
+    final double? payloadFee = _parseAmount(payload?['applicationFee']) ??
+        _parseAmount(_courseDetailsValue(payload, 'applicationFee'));
+    final double? fee = responseFee == null || responseFee == 0
+        ? payloadFee ?? responseFee
+        : responseFee;
+    final String responseCurrency = _textFrom(
+      application?['applicationFeeCurrency'],
+    ).isNotEmpty
+        ? _textFrom(application?['applicationFeeCurrency'])
+        : _textFrom(_courseDetailsValue(application, 'currency'));
+    final String payloadCurrency = _textFrom(payload?['applicationFeeCurrency'])
+            .isNotEmpty
+        ? _textFrom(payload?['applicationFeeCurrency'])
+        : _textFrom(_courseDetailsValue(payload, 'currency'));
+    final String currency = responseCurrency.isNotEmpty
+        ? responseCurrency
+        : payloadCurrency;
+
+    if (fee == null) return currency.isEmpty ? '-' : currency;
+    final String amount = fee % 1 == 0
+        ? fee.toInt().toString()
+        : fee.toStringAsFixed(3).replaceFirst(RegExp(r'0+$'), '');
+    return currency.isEmpty ? amount : '$amount $currency';
+  }
+
+  Object? _courseDetailsValue(Map<String, dynamic>? application, String key) {
+    final Object? courseDetails = application?['courseDetails'];
+    if (courseDetails is Map) return courseDetails[key];
+    return null;
+  }
+
+  static String _textFrom(Object? value) => value?.toString().trim() ?? '';
+
+  static double? _parseAmount(Object? value) {
+    if (value is num) return value.toDouble();
+    if (value is String) return double.tryParse(value.trim());
+    return null;
+  }
 
   @override
   Widget build(BuildContext context) {
     final bool isSmallMobile = context.isSmallMobile;
     final double horizontalPadding = context.responsiveHorizontalPadding;
+    final String resolvedCourseTitle = _displayCourseTitle;
+    final String resolvedUniversityName = _displayUniversityName;
 
     return Scaffold(
       body: AppBackground(
@@ -78,9 +200,16 @@ class PaymentConfirmationScreen extends StatelessWidget {
                         borderRadius: BorderRadius.circular(8),
                       ),
                       child: Text(
-                        context.l10n.text('applicationIdValue'),
+                        _applicationIdText,
                         textAlign: TextAlign.center,
                       ),
+                    ),
+                    const SizedBox(height: 12),
+                    _ConfirmationDetailsCard(
+                      universityName: resolvedUniversityName,
+                      courseTitle: resolvedCourseTitle,
+                      status: _displayStatus,
+                      applicationFee: _displayApplicationFee,
                     ),
                     const SizedBox(height: 18),
                     ClipRRect(
@@ -99,7 +228,7 @@ class PaymentConfirmationScreen extends StatelessWidget {
                     ),
                     const SizedBox(height: 12),
                     Text(
-                      '${context.l10n.text('paymentProcessedPrefix')} ${courseTitle ?? context.l10n.text('courseOrProgram')} ${context.l10n.text('paymentProcessedSuffix')}',
+                      '${context.l10n.text('paymentProcessedPrefix')} ${resolvedCourseTitle.isEmpty ? context.l10n.text('courseOrProgram') : resolvedCourseTitle} ${context.l10n.text('paymentProcessedSuffix')}',
                       textAlign: TextAlign.center,
                       style: const TextStyle(
                         fontSize: 15,
@@ -113,9 +242,13 @@ class PaymentConfirmationScreen extends StatelessWidget {
                       onPressed: () => Navigator.of(context).push(
                         MaterialPageRoute(
                           builder: (_) => TrackApplicationScreen(
-                            universityName: universityName,
+                            universityName: resolvedUniversityName.isEmpty
+                                ? universityName
+                                : resolvedUniversityName,
                             universityHeroImage: universityHeroImage,
-                            courseTitle: courseTitle,
+                            courseTitle: resolvedCourseTitle.isEmpty
+                                ? courseTitle
+                                : resolvedCourseTitle,
                           ),
                         ),
                       ),
@@ -132,6 +265,74 @@ class PaymentConfirmationScreen extends StatelessWidget {
           ),
         ),
       ),
+    );
+  }
+}
+
+class _ConfirmationDetailsCard extends StatelessWidget {
+  const _ConfirmationDetailsCard({
+    required this.universityName,
+    required this.courseTitle,
+    required this.status,
+    required this.applicationFee,
+  });
+
+  final String universityName;
+  final String courseTitle;
+  final String status;
+  final String applicationFee;
+
+  @override
+  Widget build(BuildContext context) {
+    return Container(
+      padding: const EdgeInsets.all(12),
+      decoration: BoxDecoration(
+        color: Colors.white,
+        borderRadius: BorderRadius.circular(10),
+        border: Border.all(color: const Color(0xFFE8E2D9)),
+      ),
+      child: Column(
+        children: [
+          _DetailRow(label: 'University', value: universityName),
+          const Divider(height: 18),
+          _DetailRow(label: 'Course', value: courseTitle),
+          const Divider(height: 18),
+          _DetailRow(label: 'Status', value: status),
+          const Divider(height: 18),
+          _DetailRow(label: 'Application Fee', value: applicationFee),
+        ],
+      ),
+    );
+  }
+}
+
+class _DetailRow extends StatelessWidget {
+  const _DetailRow({required this.label, required this.value});
+
+  final String label;
+  final String value;
+
+  @override
+  Widget build(BuildContext context) {
+    return Row(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        SizedBox(
+          width: 110,
+          child: Text(
+            label,
+            style: const TextStyle(color: AppColors.textMuted),
+          ),
+        ),
+        const SizedBox(width: 8),
+        Expanded(
+          child: Text(
+            value.trim().isEmpty ? '-' : value,
+            textAlign: TextAlign.end,
+            style: const TextStyle(fontWeight: FontWeight.w700),
+          ),
+        ),
+      ],
     );
   }
 }
