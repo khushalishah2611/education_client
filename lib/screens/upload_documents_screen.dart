@@ -1,8 +1,10 @@
 import 'package:file_picker/file_picker.dart';
 import 'package:flutter/material.dart';
 import 'package:shared_preferences/shared_preferences.dart';
+import 'package:url_launcher/url_launcher.dart';
 
 import '../core/app_localizations.dart';
+import '../core/api_config.dart';
 import '../core/app_theme.dart';
 import '../core/responsive_helper.dart';
 import '../models/document_type.dart';
@@ -32,7 +34,8 @@ class UploadDocumentsScreen extends StatefulWidget {
 class _UploadDocumentsScreenState extends State<UploadDocumentsScreen> {
   static const int _maxUploadBytes = 5 * 1024 * 1024;
   late final Map<String, PlatformFile?> _selectedFiles = {};
-  final Set<String> _uploadedDocumentTypes = <String>{};
+  final Map<String, _UploadedDocumentInfo> _uploadedDocuments =
+      <String, _UploadedDocumentInfo>{};
   final ApplicationApiService _applicationApiService =
       const ApplicationApiService();
   bool _isUploading = false;
@@ -72,17 +75,15 @@ class _UploadDocumentsScreenState extends State<UploadDocumentsScreen> {
             ),
           )
           .toList(growable: false);
-      final Set<String> uploadedTypes = uploaded
-          .map(_documentTypeFromApiItem)
-          .where((type) => type.isNotEmpty)
-          .toSet();
+      final Map<String, _UploadedDocumentInfo> uploadedDocs =
+          _uploadedDocumentsFromApiItems(uploaded);
 
       if (!mounted) return;
       setState(() {
         _docs = docs;
-        _uploadedDocumentTypes
+        _uploadedDocuments
           ..clear()
-          ..addAll(uploadedTypes);
+          ..addAll(uploadedDocs);
       });
     } catch (e) {
     } finally {
@@ -130,16 +131,24 @@ class _UploadDocumentsScreenState extends State<UploadDocumentsScreen> {
         throw Exception('studentUserId not found');
       }
 
-      await _applicationApiService.uploadStudentDocument(
+      final Map<String, dynamic> response =
+          await _applicationApiService.uploadStudentDocument(
         studentUserId: studentUserId,
         type: doc.type,
         filePath: filePath,
         fileName: file.name,
       );
+      final _UploadedDocumentInfo uploadedDocument =
+          _uploadedDocumentFromUploadResponse(
+        response,
+        fallbackType: doc.type,
+        fallbackFileName: file.name,
+        fallbackFilePath: filePath,
+      );
 
       setState(() {
         _selectedFiles[doc.type] = file;
-        _uploadedDocumentTypes.add(doc.type);
+        _uploadedDocuments[doc.type] = uploadedDocument;
       });
       if (!mounted) return;
       showAppSnackBar(
@@ -166,24 +175,13 @@ class _UploadDocumentsScreenState extends State<UploadDocumentsScreen> {
       _docs.every(
         (doc) =>
             _selectedFiles[doc.type] != null ||
-            _uploadedDocumentTypes.contains(doc.type),
+            _uploadedDocuments.containsKey(doc.type),
       );
-
-  String _documentTypeFromApiItem(Map<String, dynamic> item) {
-    final Object? documentType = item['documentType'];
-    if (documentType is Map) {
-      final Object? value = documentType['value'] ?? documentType['type'];
-      if (value != null) return value.toString().trim();
-    }
-
-    final Object? type =
-        item['type'] ?? item['documentTypeValue'] ?? item['document_type'];
-    return type?.toString().trim() ?? '';
-  }
 
   Future<bool> _refreshUploadedDocuments() async {
     final SharedPreferences prefs = await SharedPreferences.getInstance();
-    final String studentUserId = prefs.getString('studentUserId')?.trim() ?? '';
+    final String studentUserId =
+        prefs.getString('studentUserId')?.trim() ?? '';
     if (studentUserId.isEmpty) {
       throw Exception('studentUserId not found');
     }
@@ -192,22 +190,21 @@ class _UploadDocumentsScreenState extends State<UploadDocumentsScreen> {
         await _applicationApiService.fetchStudentDocuments(
       studentUserId: studentUserId,
     );
-    final Set<String> uploadedTypes = uploaded
-        .map(_documentTypeFromApiItem)
-        .where((type) => type.isNotEmpty)
-        .toSet();
+    final Map<String, _UploadedDocumentInfo> uploadedDocs =
+        _uploadedDocumentsFromApiItems(uploaded);
 
     if (mounted) {
       setState(() {
-        _uploadedDocumentTypes
+        _uploadedDocuments
           ..clear()
-          ..addAll(uploadedTypes);
+          ..addAll(uploadedDocs);
       });
     }
 
     return _docs.every(
       (doc) =>
-          _selectedFiles[doc.type] != null || uploadedTypes.contains(doc.type),
+          _selectedFiles[doc.type] != null ||
+          uploadedDocs.containsKey(doc.type),
     );
   }
 
@@ -253,9 +250,186 @@ class _UploadDocumentsScreenState extends State<UploadDocumentsScreen> {
     }
   }
 
+  _UploadedDocumentInfo? _uploadedDocument(String type) {
+    final PlatformFile? selectedFile = _selectedFiles[type];
+    if (selectedFile != null) {
+      return _UploadedDocumentInfo(
+        type: type,
+        fileName: selectedFile.name,
+        openUri: _uriFromFilePath(selectedFile.path),
+      );
+    }
+    return _uploadedDocuments[type];
+  }
+
   String? _selectedFileLabel(String type) {
-    return _selectedFiles[type]?.name ??
-        (_uploadedDocumentTypes.contains(type) ? 'Already uploaded' : null);
+    final _UploadedDocumentInfo? uploadedDocument = _uploadedDocument(type);
+    return uploadedDocument?.displayName ??
+        (_uploadedDocuments.containsKey(type)
+            ? context.l10n.text('alreadyUploaded')
+            : null);
+  }
+
+  Future<void> _handleDocumentTap(
+    ({String type, String title, String subtitle}) doc,
+  ) async {
+    final _UploadedDocumentInfo? uploadedDocument = _uploadedDocument(doc.type);
+    if (uploadedDocument == null) {
+      await _pickDocument(doc);
+      return;
+    }
+
+    await _openUploadedDocument(uploadedDocument);
+  }
+
+  Future<void> _openUploadedDocument(
+    _UploadedDocumentInfo uploadedDocument,
+  ) async {
+    final Uri? uri = uploadedDocument.openUri;
+    if (uri == null) {
+      if (!mounted) return;
+      showAppSnackBar(
+        context,
+        type: AppSnackBarType.error,
+        message: context.l10n.text('documentLinkUnavailable'),
+      );
+      return;
+    }
+
+    final bool didOpen = await launchUrl(
+      uri,
+      mode: LaunchMode.externalApplication,
+    );
+    if (!didOpen && mounted) {
+      showAppSnackBar(
+        context,
+        type: AppSnackBarType.error,
+        message: context.l10n.text('documentLinkUnavailable'),
+      );
+    }
+  }
+
+  Map<String, _UploadedDocumentInfo> _uploadedDocumentsFromApiItems(
+    List<Map<String, dynamic>> items,
+  ) {
+    final Map<String, _UploadedDocumentInfo> uploadedDocs =
+        <String, _UploadedDocumentInfo>{};
+    for (final Map<String, dynamic> item in items) {
+      final _UploadedDocumentInfo? uploadedDocument =
+          _uploadedDocumentInfoFromApiItem(item);
+      if (uploadedDocument != null) {
+        uploadedDocs[uploadedDocument.type] = uploadedDocument;
+      }
+    }
+    return uploadedDocs;
+  }
+
+  _UploadedDocumentInfo _uploadedDocumentFromUploadResponse(
+    Map<String, dynamic> response, {
+    required String fallbackType,
+    required String fallbackFileName,
+    required String fallbackFilePath,
+  }) {
+    final _UploadedDocumentInfo? uploadedDocument =
+        _uploadedDocumentInfoFromApiItem(response, fallbackType: fallbackType);
+    if (uploadedDocument != null) {
+      return uploadedDocument.copyWith(
+        type:
+            uploadedDocument.type.isEmpty ? fallbackType : uploadedDocument.type,
+        fileName: uploadedDocument.fileName ?? fallbackFileName,
+        openUri:
+            uploadedDocument.openUri ?? _uriFromFilePath(fallbackFilePath),
+      );
+    }
+
+    return _UploadedDocumentInfo(
+      type: fallbackType,
+      fileName: fallbackFileName,
+      openUri: _uriFromFilePath(fallbackFilePath),
+    );
+  }
+
+  _UploadedDocumentInfo? _uploadedDocumentInfoFromApiItem(
+    Map<String, dynamic> item, {
+    String? fallbackType,
+  }) {
+    final String type = _documentTypeFromApiItem(item).ifEmpty(fallbackType);
+    if (type.isEmpty) return null;
+
+    return _UploadedDocumentInfo(
+      type: type,
+      fileName: _firstDocumentString(item, _fileNameKeys),
+      openUri: _uriFromApiValue(_firstDocumentString(item, _fileUrlKeys)),
+    );
+  }
+
+  String _documentTypeFromApiItem(Map<String, dynamic> item) {
+    final Object? documentType = item['documentType'];
+    if (documentType is Map) {
+      final Object? value = documentType['value'] ?? documentType['type'];
+      if (value != null) return value.toString().trim();
+    }
+
+    final Object? type =
+        item['type'] ?? item['documentTypeValue'] ?? item['document_type'];
+    return type?.toString().trim() ?? '';
+  }
+
+  String? _firstDocumentString(
+    Map<String, dynamic> item,
+    Set<String> keys, [
+    Set<Object?> visited = const <Object?>{},
+  ]) {
+    if (visited.contains(item)) return null;
+    final Set<Object?> nextVisited = <Object?>{...visited, item};
+
+    for (final MapEntry<String, dynamic> entry in item.entries) {
+      if (keys.contains(entry.key) && entry.value != null) {
+        final String value = entry.value.toString().trim();
+        if (value.isNotEmpty) return value;
+      }
+    }
+
+    for (final Object? value in item.values) {
+      if (value is Map) {
+        final Map<String, dynamic> nested = value.map(
+          (key, value) => MapEntry(key.toString(), value),
+        );
+        final String? nestedValue =
+            _firstDocumentString(nested, keys, nextVisited);
+        if (nestedValue != null) return nestedValue;
+      }
+      if (value is List) {
+        for (final Object? listItem in value) {
+          if (listItem is Map) {
+            final Map<String, dynamic> nested = listItem.map(
+              (key, value) => MapEntry(key.toString(), value),
+            );
+            final String? nestedValue =
+                _firstDocumentString(nested, keys, nextVisited);
+            if (nestedValue != null) return nestedValue;
+          }
+        }
+      }
+    }
+
+    return null;
+  }
+
+  Uri? _uriFromApiValue(String? value) {
+    if (value == null || value.isEmpty) return null;
+    final Uri? uri = Uri.tryParse(value);
+    if (uri == null) return null;
+    if (uri.hasScheme) return uri;
+    if (value.startsWith('/')) {
+      return Uri.tryParse('${ApiConfig.baseUrl}$value');
+    }
+    return Uri.tryParse('${ApiConfig.baseUrl}/$value');
+  }
+
+  Uri? _uriFromFilePath(String? filePath) {
+    if (filePath == null || filePath.isEmpty) return null;
+    return Uri.file(filePath);
   }
 
   @override
@@ -331,7 +505,7 @@ class _UploadDocumentsScreenState extends State<UploadDocumentsScreen> {
                                   _selectedFileLabel(_docs.first.type),
                               onTap: _isUploading
                                   ? () {}
-                                  : () => _pickDocument(_docs.first),
+                                  : () => _handleDocumentTap(_docs.first),
                             ),
                             const SizedBox(height: 10),
                             ..._docs.skip(1).map(
@@ -344,7 +518,7 @@ class _UploadDocumentsScreenState extends State<UploadDocumentsScreen> {
                                           _selectedFileLabel(doc.type),
                                       onTap: _isUploading
                                           ? () {}
-                                          : () => _pickDocument(doc),
+                                          : () => _handleDocumentTap(doc),
                                     ),
                                   ),
                                 ),
@@ -380,6 +554,66 @@ class _UploadDocumentsScreenState extends State<UploadDocumentsScreen> {
   }
 }
 
+const Set<String> _fileNameKeys = <String>{
+  'fileName',
+  'filename',
+  'file_name',
+  'originalName',
+  'originalname',
+  'original_file_name',
+  'name',
+  'title',
+};
+
+const Set<String> _fileUrlKeys = <String>{
+  'url',
+  'fileUrl',
+  'file_url',
+  'documentUrl',
+  'document_url',
+  'downloadUrl',
+  'download_url',
+  'secureUrl',
+  'secure_url',
+  'location',
+  'path',
+  'filePath',
+  'file_path',
+};
+
+class _UploadedDocumentInfo {
+  const _UploadedDocumentInfo({
+    required this.type,
+    this.fileName,
+    this.openUri,
+  });
+
+  final String type;
+  final String? fileName;
+  final Uri? openUri;
+
+  String? get displayName {
+    final String? trimmed = fileName?.trim();
+    return trimmed == null || trimmed.isEmpty ? null : trimmed;
+  }
+
+  _UploadedDocumentInfo copyWith({
+    String? type,
+    String? fileName,
+    Uri? openUri,
+  }) {
+    return _UploadedDocumentInfo(
+      type: type ?? this.type,
+      fileName: fileName ?? this.fileName,
+      openUri: openUri ?? this.openUri,
+    );
+  }
+}
+
+extension _StringFallback on String {
+  String ifEmpty(String? fallback) => isEmpty ? (fallback ?? '') : this;
+}
+
 class _UploadDropZone extends StatelessWidget {
   const _UploadDropZone({
     required this.title,
@@ -395,6 +629,7 @@ class _UploadDropZone extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final bool isUploaded = selectedFileName != null;
     return InkWell(
       borderRadius: BorderRadius.circular(10),
       onTap: onTap,
@@ -432,25 +667,31 @@ class _UploadDropZone extends StatelessWidget {
               ],
             ),
             const Divider(height: 26),
-            const Icon(
-              Icons.cloud_upload_outlined,
+            Icon(
+              isUploaded
+                  ? Icons.check_circle_outline
+                  : Icons.cloud_upload_outlined,
               size: 54,
-              color: Color(0xFFB8B8B8),
+              color:
+                  isUploaded ? AppColors.accent : const Color(0xFFB8B8B8),
             ),
             const SizedBox(height: 10),
             Text.rich(
               TextSpan(
-                text: context.l10n.text('tapToBrowse'),
+                text: isUploaded
+                    ? context.l10n.text('openDocument')
+                    : context.l10n.text('tapToBrowse'),
                 style: const TextStyle(
                   fontSize: 16,
                   fontWeight: FontWeight.w600,
                   color: AppColors.text,
                 ),
                 children: [
-                  TextSpan(
-                    text: context.l10n.text('uploadFormats'),
-                    style: const TextStyle(color: AppColors.accent),
-                  ),
+                  if (!isUploaded)
+                    TextSpan(
+                      text: context.l10n.text('uploadFormats'),
+                      style: const TextStyle(color: AppColors.accent),
+                    ),
                 ],
               ),
             ),
@@ -458,7 +699,7 @@ class _UploadDropZone extends StatelessWidget {
             Text(
               selectedFileName == null
                   ? '${context.l10n.text('supportedPrefix')}${context.l10n.text('uploadFormats')}'
-                  : '${context.l10n.text('selectedPrefix')}$selectedFileName',
+                  : selectedFileName!,
               style: TextStyle(
                 color: selectedFileName == null
                     ? AppColors.textMuted
@@ -542,7 +783,7 @@ class _UploadListTile extends StatelessWidget {
                 borderRadius: BorderRadius.circular(8),
               ),
               child: Icon(
-                isUploaded ? Icons.check : Icons.upload_outlined,
+                isUploaded ? Icons.open_in_new : Icons.upload_outlined,
                 size: 18,
                 color: Colors.black87,
               ),
