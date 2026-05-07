@@ -177,7 +177,7 @@ class _UploadDocumentsScreenState extends State<UploadDocumentsScreen> {
         (doc) {
           final String documentKey = _resolveDocumentKey(doc.type);
           return _selectedFiles[documentKey] != null ||
-              _uploadedDocuments.containsKey(documentKey);
+              _hasUploadedDocumentForKey(documentKey);
         },
       );
 
@@ -196,7 +196,9 @@ class _UploadDocumentsScreenState extends State<UploadDocumentsScreen> {
 
     if (mounted) {
       setState(() {
-        _uploadedDocuments.addAll(uploadedDocs);
+        _uploadedDocuments
+          ..clear()
+          ..addAll(uploadedDocs);
       });
     }
 
@@ -204,8 +206,10 @@ class _UploadDocumentsScreenState extends State<UploadDocumentsScreen> {
       (doc) {
         final String documentKey = _resolveDocumentKey(doc.type);
         return _selectedFiles[documentKey] != null ||
-            uploadedDocs.containsKey(documentKey) ||
-            _uploadedDocuments.containsKey(documentKey);
+            _hasUploadedDocumentForKey(
+              documentKey,
+              uploadedDocuments: uploadedDocs,
+            );
       },
     );
   }
@@ -261,13 +265,13 @@ class _UploadDocumentsScreenState extends State<UploadDocumentsScreen> {
         openUri: _uriFromFilePath(selectedFile.path),
       );
     }
-    return _uploadedDocuments[documentKey];
+    return _uploadedDocuments[_uploadedDocumentKeyFor(documentKey)];
   }
 
   String? _selectedFileLabel(String type) {
     final _UploadedDocumentInfo? uploadedDocument = _uploadedDocument(type);
     return uploadedDocument?.displayName ??
-        (_uploadedDocuments.containsKey(_resolveDocumentKey(type))
+        (uploadedDocument != null
             ? context.l10n.text('alreadyUploaded')
             : null);
   }
@@ -288,19 +292,35 @@ class _UploadDocumentsScreenState extends State<UploadDocumentsScreen> {
   }) {
     final Map<String, _UploadedDocumentInfo> uploadedDocs =
         <String, _UploadedDocumentInfo>{};
-    for (final Map<String, dynamic> item in items) {
+    for (int i = 0; i < items.length; i++) {
       final _UploadedDocumentInfo? uploadedDocument =
-          _uploadedDocumentInfoFromApiItem(item);
-      if (uploadedDocument != null) {
-        final String documentKey = _resolveDocumentKey(
-          uploadedDocument.type,
-          aliases: documentTypeAliases,
-        );
-        if (documentKey.isNotEmpty) {
-          uploadedDocs[documentKey] = uploadedDocument;
-        }
+          _uploadedDocumentInfoFromApiItem(items[i]);
+      if (uploadedDocument == null) {
+        debugPrint('Skipped null document at index => $i');
+        continue;
       }
+
+      String documentKey = _resolveDocumentKey(
+        uploadedDocument.type,
+        aliases: documentTypeAliases,
+      );
+      if (documentKey.isEmpty) {
+        documentKey = 'document_$i';
+      }
+
+      if (uploadedDocs.containsKey(documentKey)) {
+        documentKey = '${documentKey}_$i';
+      }
+
+      uploadedDocs[documentKey] = uploadedDocument;
+      debugPrint(
+        'Added Document => $documentKey => ${uploadedDocument.fileName}',
+      );
     }
+
+    debugPrint('API Count => ${items.length}');
+    debugPrint('Uploaded Count => ${uploadedDocs.length}');
+
     return uploadedDocs;
   }
 
@@ -402,6 +422,35 @@ class _UploadDocumentsScreenState extends State<UploadDocumentsScreen> {
   }) {
     final String key = _documentKey(type);
     return aliases?[key] ?? _documentTypeAliases[key] ?? key;
+  }
+
+  bool _hasUploadedDocumentForKey(
+    String documentKey, {
+    Map<String, _UploadedDocumentInfo>? uploadedDocuments,
+  }) =>
+      _uploadedDocumentKeyFor(
+        documentKey,
+        uploadedDocuments: uploadedDocuments,
+      ) !=
+      null;
+
+  String? _uploadedDocumentKeyFor(
+    String documentKey, {
+    Map<String, _UploadedDocumentInfo>? uploadedDocuments,
+  }) {
+    final Map<String, _UploadedDocumentInfo> documents =
+        uploadedDocuments ?? _uploadedDocuments;
+    if (documents.containsKey(documentKey)) {
+      return documentKey;
+    }
+
+    for (final String key in documents.keys) {
+      if (key.startsWith('${documentKey}_')) {
+        return key;
+      }
+    }
+
+    return null;
   }
 
   String _documentKey(String type) {
