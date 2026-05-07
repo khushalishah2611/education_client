@@ -37,7 +37,8 @@ class _PaymentScreenState extends State<PaymentScreen> {
   String get _applicationFeeCurrency {
     for (final Map<String, dynamic> payload in widget.applicationsPayload) {
       final Object? directCurrency = payload['applicationFeeCurrency'];
-      if (directCurrency != null && directCurrency.toString().trim().isNotEmpty) {
+      if (directCurrency != null &&
+          directCurrency.toString().trim().isNotEmpty) {
         return directCurrency.toString().trim();
       }
 
@@ -160,154 +161,131 @@ class _PaymentScreenState extends State<PaymentScreen> {
               Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-              FlowStepHeader(
-                currentStep: 2,
-                title: context.l10n.text('payment'),
-              ),
-              Expanded(
-                child: ListView(
-                  padding: EdgeInsets.fromLTRB(
-                    horizontalPadding,
-                    isSmallMobile ? 14 : 20,
-                    horizontalPadding,
-                    20,
+                  FlowStepHeader(
+                    currentStep: 2,
+                    title: context.l10n.text('payment'),
                   ),
-                  children: [
-                    Text(
-                      context.l10n.text('applicationFeeSummary'),
-                      style: TextStyle(
-                        fontSize: isSmallMobile ? 16 : 18,
-                        fontWeight: FontWeight.w700,
+                  Expanded(
+                    child: ListView(
+                      padding: EdgeInsets.fromLTRB(
+                        horizontalPadding,
+                        isSmallMobile ? 14 : 20,
+                        horizontalPadding,
+                        20,
                       ),
-                    ),
-                    const SizedBox(height: 12),
-                    Container(
-                      padding: const EdgeInsets.all(12),
-                      decoration: BoxDecoration(
-                        color: Colors.white,
-                        borderRadius: BorderRadius.circular(10),
-                        border: Border.all(color: const Color(0xFFE8E2D9)),
-                      ),
-                      child: Column(
-                        children: [
-                          Row(
+                      children: [
+                        Text(
+                          context.l10n.text('applicationFeeSummary'),
+                          style: TextStyle(
+                            fontSize: isSmallMobile ? 16 : 18,
+                            fontWeight: FontWeight.w700,
+                          ),
+                        ),
+                        const SizedBox(height: 12),
+                        Container(
+                          padding: const EdgeInsets.all(12),
+                          decoration: BoxDecoration(
+                            color: Colors.white,
+                            borderRadius: BorderRadius.circular(10),
+                            border: Border.all(color: const Color(0xFFE8E2D9)),
+                          ),
+                          child: Column(
                             children: [
-                              Text(
-                                context.l10n.text('applicationFee'),
-                                style: const TextStyle(
-                                  color: AppColors.textMuted,
-                                ),
+                              Row(
+                                children: [
+                                  Text(
+                                    context.l10n.text('applicationFee'),
+                                    style: const TextStyle(
+                                      color: AppColors.textMuted,
+                                    ),
+                                  ),
+                                  const Spacer(),
+                                  Text(
+                                    _applicationFeeText,
+                                    style: const TextStyle(
+                                      fontWeight: FontWeight.w700,
+                                    ),
+                                  ),
+                                ],
                               ),
-                              const Spacer(),
-                              Text(
-                                _applicationFeeText,
-                                style: const TextStyle(
-                                  fontWeight: FontWeight.w700,
-                                ),
+                              const Divider(height: 24),
+                              Row(
+                                children: [
+                                  Text(
+                                    context.l10n.text('totalAmount'),
+                                    style: const TextStyle(
+                                      fontWeight: FontWeight.w700,
+                                    ),
+                                  ),
+                                  const Spacer(),
+                                  Text(
+                                    _applicationFeeText,
+                                    style: const TextStyle(
+                                      fontSize: 18,
+                                      fontWeight: FontWeight.w700,
+                                      color: AppColors.accent,
+                                    ),
+                                  ),
+                                ],
                               ),
                             ],
                           ),
-                          const Divider(height: 24),
-                          Row(
-                            children: [
-                              Text(
-                                context.l10n.text('totalAmount'),
-                                style: const TextStyle(
-                                  fontWeight: FontWeight.w700,
-                                ),
-                              ),
-                              const Spacer(),
-                              Text(
-                                _applicationFeeText,
-                                style: const TextStyle(
-                                  fontSize: 18,
-                                  fontWeight: FontWeight.w700,
-                                  color: AppColors.accent,
-                                ),
-                              ),
-                            ],
+                        ),
+                        const SizedBox(height: 18),
+                        Text(
+                          context.l10n.text('paymentMethod'),
+                          style: TextStyle(
+                            fontSize: isSmallMobile ? 16 : 18,
+                            fontWeight: FontWeight.w700,
                           ),
-                        ],
-                      ),
+                        ),
+                        const SizedBox(height: 12),
+                        _PaymentMethodTile(
+                          label: context.l10n.text('COD'),
+                          iconText: 'COD',
+                          selected: selected == 0,
+                          onTap: () => setState(() => selected = 0),
+                        ),
+                        const SizedBox(height: 10),
+                        // _PaymentMethodTile(
+                        //   label: context.l10n.text('upiPay'),
+                        //   iconText: 'UPI',
+                        //   selected: selected == 1,
+                        //   onTap: () => setState(() => selected = 1),
+                        // ),
+                        // const SizedBox(height: 10),
+                        // _PaymentMethodTile(
+                        //   label: context.l10n.text('netBanking'),
+                        //   iconText: 'BANK',
+                        //   selected: selected == 2,
+                        //   onTap: () => setState(() => selected = 2),
+                        // ),
+                        const SizedBox(height: 30),
+                        AppPrimaryButton(
+                          label: context.l10n.text('payNow'),
+                          onPressed: _isSubmitting
+                              ? null
+                              : _submitApplicationsAndContinue,
+                        ),
+                      ],
                     ),
-                    const SizedBox(height: 18),
-                    Text(
-                      context.l10n.text('paymentMethod'),
-                      style: TextStyle(
-                        fontSize: isSmallMobile ? 16 : 18,
-                        fontWeight: FontWeight.w700,
-                      ),
-                    ),
-                    const SizedBox(height: 12),
-                    _PaymentMethodTile(
-                      label: context.l10n.text('COD'),
-                      iconText: 'COD',
-                      selected: selected == 0,
-                      onTap: () => setState(() => selected = 0),
-                    ),
-                    const SizedBox(height: 10),
-                    // _PaymentMethodTile(
-                    //   label: context.l10n.text('upiPay'),
-                    //   iconText: 'UPI',
-                    //   selected: selected == 1,
-                    //   onTap: () => setState(() => selected = 1),
-                    // ),
-                    // const SizedBox(height: 10),
-                    // _PaymentMethodTile(
-                    //   label: context.l10n.text('netBanking'),
-                    //   iconText: 'BANK',
-                    //   selected: selected == 2,
-                    //   onTap: () => setState(() => selected = 2),
-                    // ),
-                    const SizedBox(height: 30),
-                    AppPrimaryButton(
-                      label: context.l10n.text('payNow'),
-                      onPressed:
-                          _isSubmitting ? null : _submitApplicationsAndContinue,
-                    ),
-                  ],
-                ),
-              ),
+                  ),
                 ],
               ),
               if (_isSubmitting)
-                Positioned.fill(
-                  child: ColoredBox(
-                    color: const Color.fromRGBO(0, 0, 0, 0.18),
-                    child: Center(
-                      child: Container(
-                        width: double.infinity,
-                        margin: EdgeInsets.symmetric(
-                          horizontal: horizontalPadding,
-                        ),
-                        padding: const EdgeInsets.symmetric(
-                          vertical: 20,
-                          horizontal: 12,
-                        ),
-                        decoration: BoxDecoration(
-                          borderRadius: BorderRadius.circular(10),
-                          border: Border.all(
-                            color: const Color(0xFFE6E6E6),
-                          ),
-                          color: Colors.white,
-                        ),
-                        child: const Column(
-                          mainAxisSize: MainAxisSize.min,
-                          children: [
-                            CircularProgressIndicator(
-                              color: AppColors.primary,
-                            ),
-                            SizedBox(height: 12),
-                            Text(
-                              'Submitting application...',
-                              style: TextStyle(fontWeight: FontWeight.w700),
-                            ),
-                          ],
-                        ),
-                      ),
+                Container(
+                    width: double.infinity,
+                    padding: const EdgeInsets.symmetric(
+                      vertical: 20,
+                      horizontal: 12,
                     ),
-                  ),
-                ),
+                    decoration: BoxDecoration(
+                      borderRadius: BorderRadius.circular(10),
+                      border: Border.all(
+                        color: const Color(0xFFE6E6E6),
+                      ),
+                      color: Colors.white,
+                    ))
             ],
           ),
         ),

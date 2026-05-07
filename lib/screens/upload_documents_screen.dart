@@ -301,15 +301,15 @@ class _UploadDocumentsScreenState extends State<UploadDocumentsScreen> {
   }
 
   Map<String, _UploadedDocumentInfo> _uploadedDocumentsFromApiItems(
-      List<Map<String, dynamic>> items, {
-        Map<String, String>? documentTypeAliases,
-      }) {
+    List<Map<String, dynamic>> items, {
+    Map<String, String>? documentTypeAliases,
+  }) {
     final Map<String, _UploadedDocumentInfo> uploadedDocs =
-    <String, _UploadedDocumentInfo>{};
+        <String, _UploadedDocumentInfo>{};
 
     for (int i = 0; i < items.length; i++) {
       final _UploadedDocumentInfo? uploadedDocument =
-      _uploadedDocumentInfoFromApiItem(items[i]);
+          _uploadedDocumentInfoFromApiItem(items[i]);
 
       if (uploadedDocument == null) {
         debugPrint('Skipped null document at index => $i');
@@ -459,9 +459,9 @@ class _UploadDocumentsScreenState extends State<UploadDocumentsScreen> {
       null;
 
   String? _uploadedDocumentKeyFor(
-      String documentKey, {
-        Map<String, _UploadedDocumentInfo>? uploadedDocuments,
-      }) {
+    String documentKey, {
+    Map<String, _UploadedDocumentInfo>? uploadedDocuments,
+  }) {
     final Map<String, _UploadedDocumentInfo> documents =
         uploadedDocuments ?? _uploadedDocuments;
 
@@ -473,10 +473,8 @@ class _UploadDocumentsScreenState extends State<UploadDocumentsScreen> {
     // Match duplicate keys
     final List<String> matchingKeys = documents.keys
         .where(
-          (key) =>
-      key == documentKey ||
-          key.startsWith('${documentKey}_'),
-    )
+          (key) => key == documentKey || key.startsWith('${documentKey}_'),
+        )
         .toList();
 
     if (matchingKeys.isEmpty) {
@@ -498,7 +496,8 @@ class _UploadDocumentsScreenState extends State<UploadDocumentsScreen> {
   String _documentTypeFromApiItem(Map<String, dynamic> item) {
     final Object? documentType = item['documentType'];
     if (documentType is Map) {
-      final String nestedType = _firstNonEmptyValue(documentType, const <String>[
+      final String nestedType =
+          _firstNonEmptyValue(documentType, const <String>[
         'value',
         'type',
         'documentTypeValue',
@@ -709,12 +708,6 @@ class _UploadDocumentsScreenState extends State<UploadDocumentsScreen> {
                                     ),
                                   ),
                                 ),
-                            const SizedBox(height: 18),
-                            AppPrimaryButton(
-                              label: context.l10n.text('saveContinue'),
-                              onPressed:
-                                  _isUploading ? null : () => _onContinue(),
-                            ),
                           ],
                         );
                       },
@@ -731,6 +724,16 @@ class _UploadDocumentsScreenState extends State<UploadDocumentsScreen> {
                         ),
                       ),
                   ],
+                ),
+              ),
+              SafeArea(
+                top: false,
+                child: Padding(
+                  padding: const EdgeInsets.all(16),
+                  child: AppPrimaryButton(
+                    label: context.l10n.text('saveContinue'),
+                    onPressed: _isUploading ? null : () => _onContinue(),
+                  ),
                 ),
               ),
             ],

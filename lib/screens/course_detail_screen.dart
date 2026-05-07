@@ -360,15 +360,15 @@ class _InfoDetailsCard extends StatelessWidget {
           ),
           _InfoRow(
             label: 'Credit Fee',
-            value: priceWithCurrency(course.feePerCredit),
+            value: priceWithCurrency(course.annualFee),
+          ),
+          _InfoRow(
+            label: 'Number of Study Years',
+            value: '${course.totalSemesters?.round() ?? 0}',
           ),
           _InfoRow(
             label: 'Min Admission Rate',
             value: '${course.minAdmissionRate?.round() ?? 0}%',
-          ),
-          _InfoRow(
-            label: 'Annual Fee',
-            value: priceWithCurrency(course.annualFee),
           ),
           _InfoRow(
             label: 'Total Cost',
@@ -406,27 +406,28 @@ class _PriceValue extends StatelessWidget {
   Widget build(BuildContext context) {
     final double base = (basePrice ?? 0).toDouble();
 
-    final double discountPercent = (discountedPrice ?? 0).toDouble();
-
-    final double finalPrice = base - (base * discountPercent / 100);
-
-    if (basePrice != null &&
-        discountedPrice != null &&
-        discountPercent > 0 &&
-        discountPercent < 100) {
-      return Text(
-        priceWithCurrency(finalPrice.round()),
-        style: const TextStyle(
-          color: AppColors.primaryDark,
-          fontWeight: FontWeight.w700,
-        ),
-      );
-    }
+    // final double discountPercent = (discountedPrice ?? 0).toDouble();
+    //
+    // final double finalPrice = base - (base * discountPercent / 100);
+    //
+    // if (basePrice != null &&
+    //     discountedPrice != null &&
+    //     discountPercent > 0 &&
+    //     discountPercent < 100) {
+    //   return Text(
+    //     priceWithCurrency(finalPrice.round()),
+    //     style: const TextStyle(
+    //       color: AppColors.primaryDark,
+    //       fontWeight: FontWeight.w700,
+    //     ),
+    //   );
+    // }
 
     return Text(
       priceWithCurrency(base.round()),
       style: const TextStyle(
         fontWeight: FontWeight.w700,
+        color: AppColors.primaryDark,
       ),
     );
   }
