@@ -523,11 +523,11 @@ class _PaymentConfirmationScreenState extends State<PaymentConfirmationScreen> {
                                   ),
                                   const SizedBox(height: 12),
                                   AppOutlinedButton(
-                                    label:
-                                        context.l10n.text('downloadReceipt'),
-                                    onPressed: _isDownloadingReceipt
-                                        ? null
-                                        : () => _downloadReceipt(context),
+                                    label: context.l10n.text('downloadReceipt'),
+                                    onPressed: () {
+                                      if (_isDownloadingReceipt) return;
+                                      _downloadReceipt(context);
+                                    },
                                   ),
                                 ],
                               ),
