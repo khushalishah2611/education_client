@@ -39,7 +39,8 @@ class PaymentConfirmationScreen extends StatelessWidget {
 
     return applications
         .whereType<Map>()
-        .map((item) => item.map((key, value) => MapEntry(key.toString(), value)))
+        .map(
+            (item) => item.map((key, value) => MapEntry(key.toString(), value)))
         .toList(growable: false);
   }
 
@@ -49,7 +50,8 @@ class PaymentConfirmationScreen extends StatelessWidget {
 
     return payments
         .whereType<Map>()
-        .map((item) => item.map((key, value) => MapEntry(key.toString(), value)))
+        .map(
+            (item) => item.map((key, value) => MapEntry(key.toString(), value)))
         .toList(growable: false);
   }
 
@@ -136,46 +138,39 @@ class PaymentConfirmationScreen extends StatelessWidget {
     return _textFrom(selectedCourse['courseName']);
   }
 
-  String get _displayStatus {
-    final String status = _textFrom(_primaryApplication?['status']);
-    return status.isEmpty ? '-' : status;
-  }
-
   String get _displayApplicationFee {
     final Map<String, dynamic>? application = _primaryApplication;
     final Map<String, dynamic>? payload = _primaryPayload;
+
     final double? responseFee =
         _parseAmount(application?['selectedApplicationFeeTotal']) ??
             _parseAmount(application?['applicationFee']) ??
-            _parseAmount(_selectedCourseValue(application, 'applicationFee')) ??
-            _parseAmount(_courseDetailsValue(application, 'applicationFee'));
+            _parseAmount(
+              _selectedCourseValue(application, 'applicationFee'),
+            ) ??
+            _parseAmount(
+              _courseDetailsValue(application, 'applicationFee'),
+            );
+
     final double? payloadFee =
         _parseAmount(payload?['selectedApplicationFeeTotal']) ??
             _parseAmount(payload?['applicationFee']) ??
-            _parseAmount(_selectedCourseValue(payload, 'applicationFee')) ??
-            _parseAmount(_courseDetailsValue(payload, 'applicationFee'));
+            _parseAmount(
+              _selectedCourseValue(payload, 'applicationFee'),
+            ) ??
+            _parseAmount(
+              _courseDetailsValue(payload, 'applicationFee'),
+            );
+
     final double? fee = responseFee == null || responseFee == 0
         ? payloadFee ?? responseFee
         : responseFee;
-    final String responseCurrency = _textFrom(
-      application?['applicationFeeCurrency'],
-    ).isNotEmpty
-        ? _textFrom(application?['applicationFeeCurrency'])
-        : _textFrom(_selectedCourseValue(application, 'currency')).isNotEmpty
-            ? _textFrom(_selectedCourseValue(application, 'currency'))
-            : _textFrom(_courseDetailsValue(application, 'currency'));
-    final String payloadCurrency = _textFrom(payload?['applicationFeeCurrency'])
-            .isNotEmpty
-        ? _textFrom(payload?['applicationFeeCurrency'])
-        : _textFrom(_selectedCourseValue(payload, 'currency')).isNotEmpty
-            ? _textFrom(_selectedCourseValue(payload, 'currency'))
-            : _textFrom(_courseDetailsValue(payload, 'currency'));
-    final String currency = responseCurrency.isNotEmpty
-        ? responseCurrency
-        : payloadCurrency;
 
-    if (fee == null) return currency.isEmpty ? '-' : currency;
-    return '${_formatAmount(fee)}${currency.isEmpty ? '' : ' $currency'}';
+    const String currency = 'Omani Rial';
+
+    if (fee == null) return currency;
+
+    return '${_formatAmount(fee)} $currency';
   }
 
   void _goHome(BuildContext context) {
@@ -319,13 +314,13 @@ class PaymentConfirmationScreen extends StatelessWidget {
                         ),
                       ),
                       const SizedBox(height: 12),
-                      _ConfirmationDetailsCard(
-                        universityName: resolvedUniversityName,
-                        courseTitle: resolvedCourseTitle,
-                        status: _displayStatus,
-                        applicationFee: _displayApplicationFee,
-                      ),
-                      const SizedBox(height: 18),
+                      // _ConfirmationDetailsCard(
+                      //   universityName: resolvedUniversityName,
+                      //   courseTitle: resolvedCourseTitle,
+                      //   status: _displayStatus,
+                      //   applicationFee: _displayApplicationFee,
+                      // ),
+                      // const SizedBox(height: 18),
                       ClipRRect(
                         borderRadius: BorderRadius.circular(14),
                         child: Image.network(
@@ -342,7 +337,10 @@ class PaymentConfirmationScreen extends StatelessWidget {
                       ),
                       const SizedBox(height: 12),
                       Text(
-                        '${context.l10n.text('paymentProcessedPrefix')} ${resolvedCourseTitle.isEmpty ? context.l10n.text('courseOrProgram') : resolvedCourseTitle} ${context.l10n.text('paymentProcessedSuffix')}',
+                        '${context.l10n.text('paymentProcessedPrefix')} '
+                        '${_displayApplicationFee} '
+                        '${resolvedCourseTitle.isEmpty ? context.l10n.text('courseOrProgram') : resolvedCourseTitle} '
+                        '${context.l10n.text('paymentProcessedSuffix')}',
                         textAlign: TextAlign.center,
                         style: const TextStyle(
                           fontSize: 15,
@@ -350,30 +348,45 @@ class PaymentConfirmationScreen extends StatelessWidget {
                           height: 1.45,
                         ),
                       ),
-                      const SizedBox(height: 96),
-                      AppPrimaryButton(
-                        label: context.l10n.text('trackApplication'),
-                        onPressed: () => Navigator.of(context).push(
-                          MaterialPageRoute(
-                            builder: (_) => TrackApplicationScreen(
-                              universityName: resolvedUniversityName.isEmpty
-                                  ? universityName
-                                  : resolvedUniversityName,
-                              universityHeroImage: universityHeroImage,
-                              courseTitle: resolvedCourseTitle.isEmpty
-                                  ? courseTitle
-                                  : resolvedCourseTitle,
-                              applicationId: _applicationId,
-                              studentOverview: studentOverview,
-                            ),
+
+                      SafeArea(
+                        top: false,
+                        child: Padding(
+                          padding: const EdgeInsets.only(
+                            top: 16,
+                            bottom: 16,
+                          ),
+                          child: Column(
+                            mainAxisSize: MainAxisSize.min,
+                            children: [
+                              AppPrimaryButton(
+                                label: context.l10n.text('trackApplication'),
+                                onPressed: () => Navigator.of(context).push(
+                                  MaterialPageRoute(
+                                    builder: (_) => TrackApplicationScreen(
+                                      universityName:
+                                          resolvedUniversityName.isEmpty
+                                              ? universityName
+                                              : resolvedUniversityName,
+                                      universityHeroImage: universityHeroImage,
+                                      courseTitle: resolvedCourseTitle.isEmpty
+                                          ? courseTitle
+                                          : resolvedCourseTitle,
+                                      applicationId: _applicationId,
+                                      studentOverview: studentOverview,
+                                    ),
+                                  ),
+                                ),
+                              ),
+                              const SizedBox(height: 12),
+                              AppOutlinedButton(
+                                label: context.l10n.text('downloadReceipt'),
+                                onPressed: () => _downloadReceipt(context),
+                              ),
+                            ],
                           ),
                         ),
-                      ),
-                      const SizedBox(height: 12),
-                      AppOutlinedButton(
-                        label: context.l10n.text('downloadReceipt'),
-                        onPressed: () => _downloadReceipt(context),
-                      ),
+                      )
                     ],
                   ),
                 ),

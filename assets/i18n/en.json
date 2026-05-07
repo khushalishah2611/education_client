@@ -73,7 +73,7 @@
   "paymentConfirmation": "Payment Confirmation",
   "applicationSubmitted": "Application Submitted",
   "applicationIdValue": "Application ID : #12345",
-  "paymentProcessedPrefix": "Your payment of ₹1,500.00 for the Fall 2026",
+  "paymentProcessedPrefix": "Your payment of",
   "paymentProcessedSuffix": "program has been processed. Your application is now in the review queue.",
   "trackApplication": "Track Application",
   "downloadReceipt": "Download Receipt",

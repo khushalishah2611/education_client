@@ -220,71 +220,68 @@ class _TrackApplicationScreenState extends State<TrackApplicationScreen> {
                   onBack: _goHome,
                 ),
                 Expanded(
-                  child: RefreshIndicator(
-                    onRefresh: _fetchStudentOverview,
-                    child: ListView(
-                      padding: EdgeInsets.fromLTRB(
-                        horizontalPadding,
-                        isSmallMobile ? 14 : 18,
-                        horizontalPadding,
-                        20,
-                      ),
-                      children: [
-                        if (_isLoading)
-                          const _LoadingCard()
-                        else
-                          _ApplicationOverviewCard(
-                            applicationId: _applicationId,
-                            universityName: _universityName,
-                            courseTitle: _courseTitle,
-                            status: _status,
-                            applicationFee: _applicationFee,
-                            paymentStatus: _paymentStatus,
-                            documentsCount: _documents.length,
-                            universityHeroImage: _heroImage,
-                            isSmallMobile: isSmallMobile,
-                          ),
-                        const SizedBox(height: 14),
-                        Text(
-                          context.l10n.text('applicationProgress'),
-                          style: TextStyle(
-                            fontSize: isSmallMobile ? 16 : 18,
-                            fontWeight: FontWeight.w700,
-                          ),
-                        ),
-                        const SizedBox(height: 18),
-                        _ProgressStep(
-                          title: context.l10n.text('submitted'),
-                          subtitle: _submittedDate,
-                          state: _StepState.done,
-                          showLine: true,
-                        ),
-                        _ProgressStep(
-                          title: context.l10n.text('underReview'),
-                          subtitle: context.l10n.text('underReviewSubtitle'),
-                          state: _status == 'NEW'
-                              ? _StepState.active
-                              : _StepState.done,
-                          showLine: true,
-                        ),
-                        _ProgressStep(
-                          title: context.l10n.text('documentsVerified'),
-                          subtitle: _documents.isEmpty
-                              ? context.l10n.text('pendingReview')
-                              : '${_documents.length} document(s) uploaded',
-                          state: _documents.isEmpty
-                              ? _StepState.pending
-                              : _StepState.done,
-                          showLine: true,
-                        ),
-                        _ProgressStep(
-                          title: context.l10n.text('acceptedRejected'),
-                          subtitle: context.l10n.text('waitingDecision'),
-                          state: _StepState.pending,
-                          showLine: false,
-                        ),
-                      ],
+                  child: ListView(
+                    padding: EdgeInsets.fromLTRB(
+                      horizontalPadding,
+                      isSmallMobile ? 14 : 18,
+                      horizontalPadding,
+                      20,
                     ),
+                    children: [
+                      if (_isLoading)
+                        const _LoadingCard()
+                      else
+                        _ApplicationOverviewCard(
+                          applicationId: _applicationId,
+                          universityName: _universityName,
+                          courseTitle: _courseTitle,
+                          status: _status,
+                          applicationFee: _applicationFee,
+                          paymentStatus: _paymentStatus,
+                          documentsCount: _documents.length,
+                          universityHeroImage: _heroImage,
+                          isSmallMobile: isSmallMobile,
+                        ),
+                      const SizedBox(height: 14),
+                      Text(
+                        context.l10n.text('applicationProgress'),
+                        style: TextStyle(
+                          fontSize: isSmallMobile ? 16 : 18,
+                          fontWeight: FontWeight.w700,
+                        ),
+                      ),
+                      const SizedBox(height: 18),
+                      _ProgressStep(
+                        title: context.l10n.text('submitted'),
+                        subtitle: _submittedDate,
+                        state: _StepState.done,
+                        showLine: true,
+                      ),
+                      _ProgressStep(
+                        title: context.l10n.text('underReview'),
+                        subtitle: context.l10n.text('underReviewSubtitle'),
+                        state: _status == 'NEW'
+                            ? _StepState.active
+                            : _StepState.done,
+                        showLine: true,
+                      ),
+                      _ProgressStep(
+                        title: context.l10n.text('documentsVerified'),
+                        subtitle: _documents.isEmpty
+                            ? context.l10n.text('pendingReview')
+                            : '${_documents.length} document(s) uploaded',
+                        state: _documents.isEmpty
+                            ? _StepState.pending
+                            : _StepState.done,
+                        showLine: true,
+                      ),
+                      _ProgressStep(
+                        title: context.l10n.text('acceptedRejected'),
+                        subtitle: context.l10n.text('waitingDecision'),
+                        state: _StepState.pending,
+                        showLine: false,
+                      ),
+                    ],
                   ),
                 ),
               ],
@@ -407,15 +404,15 @@ class _ApplicationOverviewCard extends StatelessWidget {
             ],
           ),
           const SizedBox(height: 12),
-          _OverviewGrid(
-            rows: [
-              ('Status', status),
-              ('Application Fee', applicationFee),
-              ('Payment', paymentStatus),
-              ('Documents', '$documentsCount uploaded'),
-            ],
-          ),
-          const SizedBox(height: 14),
+          // _OverviewGrid(
+          //   rows: [
+          //     ('Status', status),
+          //     ('Application Fee', applicationFee),
+          //     ('Payment', paymentStatus),
+          //     ('Documents', '$documentsCount uploaded'),
+          //   ],
+          // ),
+          // const SizedBox(height: 14),
           ClipRRect(
             borderRadius: BorderRadius.circular(10),
             child: Image.network(
