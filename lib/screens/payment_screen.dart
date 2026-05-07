@@ -34,6 +34,33 @@ class _PaymentScreenState extends State<PaymentScreen> {
   final ApplicationApiService _applicationApiService =
       const ApplicationApiService();
 
+  static const String _applicationFeeCurrency = 'Omani Rial';
+
+  double get _applicationFeeTotal {
+    return widget.applicationsPayload.fold<double>(0, (total, payload) {
+      final Object? courseDetails = payload['courseDetails'];
+      if (courseDetails is! Map) return total;
+
+      final Object? applicationFee = courseDetails['applicationFee'];
+      return total + (_parseApplicationFee(applicationFee) ?? 0);
+    });
+  }
+
+  String get _applicationFeeText {
+    final double total = _applicationFeeTotal;
+    final String amount = total % 1 == 0
+        ? total.toInt().toString()
+        : total.toStringAsFixed(3).replaceFirst(RegExp(r'0+$'), '');
+
+    return '$amount $_applicationFeeCurrency';
+  }
+
+  double? _parseApplicationFee(Object? value) {
+    if (value is num) return value.toDouble();
+    if (value is String) return double.tryParse(value.trim());
+    return null;
+  }
+
   Future<void> _submitApplicationsAndContinue() async {
     if (_isSubmitting) return;
     setState(() => _isSubmitting = true);
@@ -137,7 +164,7 @@ class _PaymentScreenState extends State<PaymentScreen> {
                               ),
                               const Spacer(),
                               Text(
-                                context.l10n.text('feeAmount'),
+                                _applicationFeeText,
                                 style: const TextStyle(
                                   fontWeight: FontWeight.w700,
                                 ),
@@ -155,7 +182,7 @@ class _PaymentScreenState extends State<PaymentScreen> {
                               ),
                               const Spacer(),
                               Text(
-                                context.l10n.text('feeAmount'),
+                                _applicationFeeText,
                                 style: const TextStyle(
                                   fontSize: 18,
                                   fontWeight: FontWeight.w700,
