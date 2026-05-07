@@ -1,10 +1,16 @@
+import 'dart:typed_data';
+
 import 'package:flutter/material.dart';
+import 'package:pdf/pdf.dart';
+import 'package:printing/printing.dart';
 
 import '../core/app_localizations.dart';
 import '../core/responsive_helper.dart';
 import '../core/app_theme.dart';
+import '../services/application_api_service.dart';
 import '../widgets/common_widgets.dart';
 import '../widgets/flow_widgets.dart';
+import 'home_screen.dart';
 import 'track_application_screen.dart';
 
 class PaymentConfirmationScreen extends StatelessWidget {
@@ -15,6 +21,7 @@ class PaymentConfirmationScreen extends StatelessWidget {
     this.courseTitle,
     this.applicationsPayload = const <Map<String, dynamic>>[],
     this.createdApplicationsResponse,
+    this.studentOverview,
   });
 
   final String? universityName;
@@ -22,12 +29,25 @@ class PaymentConfirmationScreen extends StatelessWidget {
   final String? courseTitle;
   final List<Map<String, dynamic>> applicationsPayload;
   final Map<String, dynamic>? createdApplicationsResponse;
+  final Map<String, dynamic>? studentOverview;
+  final ApplicationApiService _applicationApiService =
+      const ApplicationApiService();
 
   List<Map<String, dynamic>> get _createdApplications {
     final Object? applications = createdApplicationsResponse?['applications'];
     if (applications is! List) return const <Map<String, dynamic>>[];
 
     return applications
+        .whereType<Map>()
+        .map((item) => item.map((key, value) => MapEntry(key.toString(), value)))
+        .toList(growable: false);
+  }
+
+  List<Map<String, dynamic>> get _overviewPayments {
+    final Object? payments = studentOverview?['payments'];
+    if (payments is! List) return const <Map<String, dynamic>>[];
+
+    return payments
         .whereType<Map>()
         .map((item) => item.map((key, value) => MapEntry(key.toString(), value)))
         .toList(growable: false);
@@ -45,11 +65,26 @@ class PaymentConfirmationScreen extends StatelessWidget {
     return null;
   }
 
-  String get _applicationIdText {
-    final String id = _textFrom(_primaryApplication?['id']);
-    if (id.isEmpty) return 'Application ID: -';
-    return 'Application ID: ${id.length > 8 ? id.substring(0, 8) : id}';
+  Map<String, dynamic>? get _primaryPayment {
+    final String applicationId = _textFrom(_primaryApplication?['id']);
+    for (final Map<String, dynamic> payment in _overviewPayments) {
+      if (applicationId.isNotEmpty &&
+          _textFrom(payment['applicationId']) == applicationId) {
+        return payment;
+      }
+    }
+
+    return _overviewPayments.isNotEmpty ? _overviewPayments.first : null;
   }
+
+  String get _applicationId => _textFrom(_primaryApplication?['id']);
+
+  String get _applicationIdText {
+    if (_applicationId.isEmpty) return 'Application ID: -';
+    return 'Application ID: ${_shortId(_applicationId)}';
+  }
+
+  String get _paymentId => _textFrom(_primaryPayment?['id']);
 
   String get _displayUniversityName {
     final Map<String, dynamic>? application = _primaryApplication;
@@ -119,10 +154,47 @@ class PaymentConfirmationScreen extends StatelessWidget {
         : payloadCurrency;
 
     if (fee == null) return currency.isEmpty ? '-' : currency;
-    final String amount = fee % 1 == 0
-        ? fee.toInt().toString()
-        : fee.toStringAsFixed(3).replaceFirst(RegExp(r'0+$'), '');
-    return currency.isEmpty ? amount : '$amount $currency';
+    return '${_formatAmount(fee)}${currency.isEmpty ? '' : ' $currency'}';
+  }
+
+  void _goHome(BuildContext context) {
+    Navigator.of(context).pushAndRemoveUntil(
+      MaterialPageRoute(builder: (_) => const HomeScreen()),
+      (route) => false,
+    );
+  }
+
+  Future<void> _downloadReceipt(BuildContext context) async {
+    final String paymentId = _paymentId;
+    if (paymentId.isEmpty) {
+      showAppSnackBar(
+        context,
+        type: AppSnackBarType.error,
+        message: 'Receipt is not available yet.',
+      );
+      return;
+    }
+
+    try {
+      final String receiptHtml =
+          await _applicationApiService.fetchPaymentReceiptHtml(
+        paymentId: paymentId,
+      );
+      final Uint8List receiptPdf = await Printing.convertHtml(
+        format: PdfPageFormat.a4,
+        html: receiptHtml,
+      );
+      await Printing.sharePdf(
+        bytes: receiptPdf,
+        filename: 'payment_receipt_$paymentId.pdf',
+      );
+    } catch (e) {
+      showAppSnackBar(
+        context,
+        type: AppSnackBarType.error,
+        message: e.toString(),
+      );
+    }
   }
 
   Object? _courseDetailsValue(Map<String, dynamic>? application, String key) {
@@ -139,6 +211,12 @@ class PaymentConfirmationScreen extends StatelessWidget {
     return null;
   }
 
+  static String _formatAmount(double amount) => amount % 1 == 0
+      ? amount.toInt().toString()
+      : amount.toStringAsFixed(3).replaceFirst(RegExp(r'0+$'), '');
+
+  static String _shortId(String id) => id.length > 8 ? id.substring(0, 8) : id;
+
   @override
   Widget build(BuildContext context) {
     final bool isSmallMobile = context.isSmallMobile;
@@ -146,122 +224,131 @@ class PaymentConfirmationScreen extends StatelessWidget {
     final String resolvedCourseTitle = _displayCourseTitle;
     final String resolvedUniversityName = _displayUniversityName;
 
-    return Scaffold(
-      body: AppBackground(
-        child: AppPageEntrance(
-          child: Column(
-            children: [
-              FlowStepHeader(
-                currentStep: 3,
-                title: context.l10n.text('paymentConfirmation'),
-              ),
-              Expanded(
-                child: ListView(
-                  padding: EdgeInsets.fromLTRB(
-                    horizontalPadding,
-                    isSmallMobile ? 14 : 18,
-                    horizontalPadding,
-                    20,
-                  ),
-                  children: [
-                    const Icon(
-                      Icons.celebration,
-                      color: AppColors.accent,
-                      size: 20,
+    return WillPopScope(
+      onWillPop: () async {
+        _goHome(context);
+        return false;
+      },
+      child: Scaffold(
+        body: AppBackground(
+          child: AppPageEntrance(
+            child: Column(
+              children: [
+                FlowStepHeader(
+                  currentStep: 3,
+                  title: context.l10n.text('paymentConfirmation'),
+                  onBack: () => _goHome(context),
+                ),
+                Expanded(
+                  child: ListView(
+                    padding: EdgeInsets.fromLTRB(
+                      horizontalPadding,
+                      isSmallMobile ? 14 : 18,
+                      horizontalPadding,
+                      20,
                     ),
-                    const SizedBox(height: 6),
-                    CircleAvatar(
-                      radius: isSmallMobile ? 38 : 44,
-                      backgroundColor: Color(0xFF0E9F58),
-                      child: Icon(
-                        Icons.check_rounded,
-                        size: isSmallMobile ? 44 : 54,
-                        color: Colors.white,
+                    children: [
+                      const Icon(
+                        Icons.celebration,
+                        color: AppColors.accent,
+                        size: 20,
                       ),
-                    ),
-                    const SizedBox(height: 16),
-                    Text(
-                      context.l10n.text('applicationSubmitted'),
-                      textAlign: TextAlign.center,
-                      style: TextStyle(
-                        fontSize: isSmallMobile ? 18 : 20,
-                        fontWeight: FontWeight.w700,
-                        color: const Color(0xFF0E9F58),
-                      ),
-                    ),
-                    const SizedBox(height: 10),
-                    Container(
-                      margin: EdgeInsets.symmetric(
-                        horizontal: isSmallMobile ? 30 : 70,
-                      ),
-                      padding: const EdgeInsets.symmetric(vertical: 10),
-                      decoration: BoxDecoration(
-                        color: const Color(0xFFE9F4E6),
-                        borderRadius: BorderRadius.circular(8),
-                      ),
-                      child: Text(
-                        _applicationIdText,
-                        textAlign: TextAlign.center,
-                      ),
-                    ),
-                    const SizedBox(height: 12),
-                    _ConfirmationDetailsCard(
-                      universityName: resolvedUniversityName,
-                      courseTitle: resolvedCourseTitle,
-                      status: _displayStatus,
-                      applicationFee: _displayApplicationFee,
-                    ),
-                    const SizedBox(height: 18),
-                    ClipRRect(
-                      borderRadius: BorderRadius.circular(14),
-                      child: Image.network(
-                        universityHeroImage ??
-                            'https://images.unsplash.com/photo-1523050854058-8df90110c9f1?auto=format&fit=crop&w=1200&q=80',
-                        height: 158,
-                        width: double.infinity,
-                        fit: BoxFit.cover,
-                        errorBuilder: (_, __, ___) => Container(
-                          height: 158,
-                          color: const Color(0xFFE3E3E3),
+                      const SizedBox(height: 6),
+                      CircleAvatar(
+                        radius: isSmallMobile ? 38 : 44,
+                        backgroundColor: Color(0xFF0E9F58),
+                        child: Icon(
+                          Icons.check_rounded,
+                          size: isSmallMobile ? 44 : 54,
+                          color: Colors.white,
                         ),
                       ),
-                    ),
-                    const SizedBox(height: 12),
-                    Text(
-                      '${context.l10n.text('paymentProcessedPrefix')} ${resolvedCourseTitle.isEmpty ? context.l10n.text('courseOrProgram') : resolvedCourseTitle} ${context.l10n.text('paymentProcessedSuffix')}',
-                      textAlign: TextAlign.center,
-                      style: const TextStyle(
-                        fontSize: 15,
-                        color: AppColors.textMuted,
-                        height: 1.45,
+                      const SizedBox(height: 16),
+                      Text(
+                        context.l10n.text('applicationSubmitted'),
+                        textAlign: TextAlign.center,
+                        style: TextStyle(
+                          fontSize: isSmallMobile ? 18 : 20,
+                          fontWeight: FontWeight.w700,
+                          color: const Color(0xFF0E9F58),
+                        ),
                       ),
-                    ),
-                    const SizedBox(height: 96),
-                    AppPrimaryButton(
-                      label: context.l10n.text('trackApplication'),
-                      onPressed: () => Navigator.of(context).push(
-                        MaterialPageRoute(
-                          builder: (_) => TrackApplicationScreen(
-                            universityName: resolvedUniversityName.isEmpty
-                                ? universityName
-                                : resolvedUniversityName,
-                            universityHeroImage: universityHeroImage,
-                            courseTitle: resolvedCourseTitle.isEmpty
-                                ? courseTitle
-                                : resolvedCourseTitle,
+                      const SizedBox(height: 10),
+                      Container(
+                        margin: EdgeInsets.symmetric(
+                          horizontal: isSmallMobile ? 30 : 70,
+                        ),
+                        padding: const EdgeInsets.symmetric(vertical: 10),
+                        decoration: BoxDecoration(
+                          color: const Color(0xFFE9F4E6),
+                          borderRadius: BorderRadius.circular(8),
+                        ),
+                        child: Text(
+                          _applicationIdText,
+                          textAlign: TextAlign.center,
+                        ),
+                      ),
+                      const SizedBox(height: 12),
+                      _ConfirmationDetailsCard(
+                        universityName: resolvedUniversityName,
+                        courseTitle: resolvedCourseTitle,
+                        status: _displayStatus,
+                        applicationFee: _displayApplicationFee,
+                      ),
+                      const SizedBox(height: 18),
+                      ClipRRect(
+                        borderRadius: BorderRadius.circular(14),
+                        child: Image.network(
+                          universityHeroImage ??
+                              'https://images.unsplash.com/photo-1523050854058-8df90110c9f1?auto=format&fit=crop&w=1200&q=80',
+                          height: 158,
+                          width: double.infinity,
+                          fit: BoxFit.cover,
+                          errorBuilder: (_, __, ___) => Container(
+                            height: 158,
+                            color: const Color(0xFFE3E3E3),
                           ),
                         ),
                       ),
-                    ),
-                    const SizedBox(height: 12),
-                    AppOutlinedButton(
-                      label: context.l10n.text('downloadReceipt'),
-                      onPressed: () {},
-                    ),
-                  ],
+                      const SizedBox(height: 12),
+                      Text(
+                        '${context.l10n.text('paymentProcessedPrefix')} ${resolvedCourseTitle.isEmpty ? context.l10n.text('courseOrProgram') : resolvedCourseTitle} ${context.l10n.text('paymentProcessedSuffix')}',
+                        textAlign: TextAlign.center,
+                        style: const TextStyle(
+                          fontSize: 15,
+                          color: AppColors.textMuted,
+                          height: 1.45,
+                        ),
+                      ),
+                      const SizedBox(height: 96),
+                      AppPrimaryButton(
+                        label: context.l10n.text('trackApplication'),
+                        onPressed: () => Navigator.of(context).push(
+                          MaterialPageRoute(
+                            builder: (_) => TrackApplicationScreen(
+                              universityName: resolvedUniversityName.isEmpty
+                                  ? universityName
+                                  : resolvedUniversityName,
+                              universityHeroImage: universityHeroImage,
+                              courseTitle: resolvedCourseTitle.isEmpty
+                                  ? courseTitle
+                                  : resolvedCourseTitle,
+                              applicationId: _applicationId,
+                              studentOverview: studentOverview,
+                            ),
+                          ),
+                        ),
+                      ),
+                      const SizedBox(height: 12),
+                      AppOutlinedButton(
+                        label: context.l10n.text('downloadReceipt'),
+                        onPressed: () => _downloadReceipt(context),
+                      ),
+                    ],
+                  ),
                 ),
-              ),
-            ],
+              ],
+            ),
           ),
         ),
       ),

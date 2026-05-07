@@ -59,6 +59,61 @@ class ApplicationApiService {
 
     return decoded;
   }
+
+  Future<Map<String, dynamic>> fetchStudentOverview({
+    required String studentUserId,
+  }) async {
+    final Uri uri = ApiConfig.uri(
+      '/api/admin/students/${Uri.encodeComponent(studentUserId)}/overview',
+    );
+    final response = await http.get(uri, headers: await _authHeaders());
+    final decoded = _decodeMap(response.body);
+
+    logApiCall(
+      method: 'GET',
+      url: uri.toString(),
+      statusCode: response.statusCode,
+      requestBody: null,
+      responseBody: decoded,
+    );
+
+    if (!ApiStatus.isSuccess(response.statusCode)) {
+      throw ApplicationApiException(
+        statusCode: response.statusCode,
+        message: decoded['message']?.toString() ?? 'Failed to fetch overview',
+      );
+    }
+
+    return decoded;
+  }
+
+  Future<String> fetchPaymentReceiptHtml({
+    required String paymentId,
+  }) async {
+    final Uri uri = ApiConfig.uri(
+      '/api/payments/${Uri.encodeComponent(paymentId)}/receipt',
+    );
+    final response = await http.get(uri, headers: await _authHeaders());
+
+    logApiCall(
+      method: 'GET',
+      url: uri.toString(),
+      statusCode: response.statusCode,
+      requestBody: null,
+      responseBody: response.body,
+    );
+
+    if (!ApiStatus.isSuccess(response.statusCode)) {
+      final Map<String, dynamic> decoded = _decodeMap(response.body);
+      throw ApplicationApiException(
+        statusCode: response.statusCode,
+        message: decoded['message']?.toString() ?? 'Failed to fetch receipt',
+      );
+    }
+
+    return response.body;
+  }
+
 }
 
 extension ApplicationApiDocumentTypes on ApplicationApiService {

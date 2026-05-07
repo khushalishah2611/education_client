@@ -166,10 +166,12 @@ class FlowStepHeader extends StatelessWidget {
     super.key,
     required this.currentStep,
     required this.title,
+    this.onBack,
   });
 
   final int currentStep;
   final String title;
+  final VoidCallback? onBack;
 
   @override
   Widget build(BuildContext context) {
@@ -182,7 +184,7 @@ class FlowStepHeader extends StatelessWidget {
     ];
     return Column(
       children: [
-        TopRoundedHeader(title: title),
+        TopRoundedHeader(title: title, onBack: onBack),
         Padding(
           padding: EdgeInsets.fromLTRB(
             context.responsiveHorizontalPadding,

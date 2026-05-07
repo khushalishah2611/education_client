@@ -86,6 +86,7 @@ class _PaymentScreenState extends State<PaymentScreen> {
     if (_isSubmitting) return;
     setState(() => _isSubmitting = true);
     Map<String, dynamic>? createdApplicationsResponse;
+    Map<String, dynamic>? studentOverview;
     try {
       if (widget.applicationsPayload.isNotEmpty) {
         final SharedPreferences prefs = await SharedPreferences.getInstance();
@@ -97,6 +98,13 @@ class _PaymentScreenState extends State<PaymentScreen> {
             studentUserId: studentUserId,
             applications: widget.applicationsPayload,
           );
+          try {
+            studentOverview = await _applicationApiService.fetchStudentOverview(
+              studentUserId: studentUserId,
+            );
+          } catch (_) {
+            studentOverview = null;
+          }
         }
       }
 
@@ -111,6 +119,7 @@ class _PaymentScreenState extends State<PaymentScreen> {
             courseTitle: widget.courseTitle,
             applicationsPayload: widget.applicationsPayload,
             createdApplicationsResponse: createdApplicationsResponse,
+            studentOverview: studentOverview,
           ),
         ),
       );
@@ -146,9 +155,11 @@ class _PaymentScreenState extends State<PaymentScreen> {
     return Scaffold(
       body: AppBackground(
         child: AppPageEntrance(
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
+          child: Stack(
             children: [
+              Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
               FlowStepHeader(
                 currentStep: 2,
                 title: context.l10n.text('payment'),
@@ -257,6 +268,46 @@ class _PaymentScreenState extends State<PaymentScreen> {
                   ],
                 ),
               ),
+                ],
+              ),
+              if (_isSubmitting)
+                Positioned.fill(
+                  child: ColoredBox(
+                    color: const Color.fromRGBO(0, 0, 0, 0.18),
+                    child: Center(
+                      child: Container(
+                        width: double.infinity,
+                        margin: EdgeInsets.symmetric(
+                          horizontal: horizontalPadding,
+                        ),
+                        padding: const EdgeInsets.symmetric(
+                          vertical: 20,
+                          horizontal: 12,
+                        ),
+                        decoration: BoxDecoration(
+                          borderRadius: BorderRadius.circular(10),
+                          border: Border.all(
+                            color: const Color(0xFFE6E6E6),
+                          ),
+                          color: Colors.white,
+                        ),
+                        child: const Column(
+                          mainAxisSize: MainAxisSize.min,
+                          children: [
+                            CircularProgressIndicator(
+                              color: AppColors.primary,
+                            ),
+                            SizedBox(height: 12),
+                            Text(
+                              'Submitting application...',
+                              style: TextStyle(fontWeight: FontWeight.w700),
+                            ),
+                          ],
+                        ),
+                      ),
+                    ),
+                  ),
+                ),
             ],
           ),
         ),
