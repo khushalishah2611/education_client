@@ -37,7 +37,6 @@ class _UploadDocumentsScreenState extends State<UploadDocumentsScreen> {
       const ApplicationApiService();
   bool _isUploading = false;
   List<({String type, String title, String subtitle})> _docs = const [];
-  String? _loadError;
 
   @override
   void initState() {
@@ -48,25 +47,21 @@ class _UploadDocumentsScreenState extends State<UploadDocumentsScreen> {
   Future<void> _initializeScreen() async {
     setState(() {
       _isUploading = true;
-      _loadError = null;
     });
 
     try {
       final SharedPreferences prefs = await SharedPreferences.getInstance();
-      final String studentUserId = prefs.getString('studentUserId')?.trim() ??
-          '';
-      if (studentUserId.isEmpty) {
-        throw Exception('studentUserId not found');
-      }
-
+      final String studentUserId =
+          prefs.getString('studentUserId')?.trim() ?? '';
       final List<DocumentTypeItem> types =
           await _applicationApiService.fetchDocumentTypes();
       final List<Map<String, dynamic>> uploaded =
           await _applicationApiService.fetchStudentDocuments(
         studentUserId: studentUserId,
       );
-      final bool isArabic = (WidgetsBinding.instance.platformDispatcher.locale
-          .languageCode) == 'ar';
+      final bool isArabic =
+          (WidgetsBinding.instance.platformDispatcher.locale.languageCode) ==
+              'ar';
 
       final docs = types
           .map(
@@ -90,10 +85,6 @@ class _UploadDocumentsScreenState extends State<UploadDocumentsScreen> {
           ..addAll(uploadedTypes);
       });
     } catch (e) {
-      if (!mounted) return;
-      setState(() {
-        _loadError = e.toString();
-      });
     } finally {
       if (mounted) {
         setState(() => _isUploading = false);
@@ -133,8 +124,8 @@ class _UploadDocumentsScreenState extends State<UploadDocumentsScreen> {
     setState(() => _isUploading = true);
     try {
       final SharedPreferences prefs = await SharedPreferences.getInstance();
-      final String studentUserId = prefs.getString('studentUserId')?.trim() ??
-          '';
+      final String studentUserId =
+          prefs.getString('studentUserId')?.trim() ?? '';
       if (studentUserId.isEmpty) {
         throw Exception('studentUserId not found');
       }
@@ -286,18 +277,34 @@ class _UploadDocumentsScreenState extends State<UploadDocumentsScreen> {
                   children: [
                     Builder(
                       builder: (context) {
-                        if (_loadError != null) {
-                          return Center(
-                            child: Text(
-                              _loadError!,
-                              style: const TextStyle(color: AppColors.accent),
-                            ),
-                          );
-                        }
-
                         if (_docs.isEmpty) {
-                          return const Center(
-                            child: Text('No document types found'),
+                          return Padding(
+                            padding: EdgeInsets.symmetric(
+                                horizontal: 16, vertical: 20),
+                            child: Container(
+                              width: double.infinity,
+                              padding: const EdgeInsets.symmetric(
+                                vertical: 20,
+                                horizontal: 12,
+                              ),
+                              decoration: BoxDecoration(
+                                borderRadius: BorderRadius.circular(10),
+                                border: Border.all(
+                                  color: const Color(0xFFE6E6E6),
+                                ),
+                                color: Colors.white,
+                              ),
+                              child: Text(
+                                context.l10n.text(
+                                  'No document types found',
+                                ),
+                                textAlign: TextAlign.center,
+                                style: const TextStyle(
+                                  color: Color(0xFF616161),
+                                  fontWeight: FontWeight.w500,
+                                ),
+                              ),
+                            ),
                           );
                         }
 
@@ -328,19 +335,19 @@ class _UploadDocumentsScreenState extends State<UploadDocumentsScreen> {
                             ),
                             const SizedBox(height: 10),
                             ..._docs.skip(1).map(
-                              (doc) => Padding(
-                                padding: const EdgeInsets.only(bottom: 10),
-                                child: _UploadListTile(
-                                  title: doc.title,
-                                  subtitle: doc.subtitle,
-                                  selectedFileName:
-                                      _selectedFileLabel(doc.type),
-                                  onTap: _isUploading
-                                      ? () {}
-                                      : () => _pickDocument(doc),
+                                  (doc) => Padding(
+                                    padding: const EdgeInsets.only(bottom: 10),
+                                    child: _UploadListTile(
+                                      title: doc.title,
+                                      subtitle: doc.subtitle,
+                                      selectedFileName:
+                                          _selectedFileLabel(doc.type),
+                                      onTap: _isUploading
+                                          ? () {}
+                                          : () => _pickDocument(doc),
+                                    ),
+                                  ),
                                 ),
-                              ),
-                            ),
                             const SizedBox(height: 18),
                             AppPrimaryButton(
                               label: context.l10n.text('saveContinue'),
@@ -453,8 +460,12 @@ class _UploadDropZone extends StatelessWidget {
                   ? '${context.l10n.text('supportedPrefix')}${context.l10n.text('uploadFormats')}'
                   : '${context.l10n.text('selectedPrefix')}$selectedFileName',
               style: TextStyle(
-                color: selectedFileName == null ? AppColors.textMuted : AppColors.accent,
-                fontWeight: selectedFileName == null ? FontWeight.w400 : FontWeight.w600,
+                color: selectedFileName == null
+                    ? AppColors.textMuted
+                    : AppColors.accent,
+                fontWeight: selectedFileName == null
+                    ? FontWeight.w400
+                    : FontWeight.w600,
               ),
               textAlign: TextAlign.center,
             ),
@@ -511,8 +522,10 @@ class _UploadListTile extends StatelessWidget {
                   Text(
                     isUploaded ? selectedFileName! : subtitle,
                     style: TextStyle(
-                      color: isUploaded ? AppColors.accent : AppColors.textMuted,
-                      fontWeight: isUploaded ? FontWeight.w600 : FontWeight.w400,
+                      color:
+                          isUploaded ? AppColors.accent : AppColors.textMuted,
+                      fontWeight:
+                          isUploaded ? FontWeight.w600 : FontWeight.w400,
                     ),
                     overflow: TextOverflow.ellipsis,
                   ),
@@ -523,7 +536,9 @@ class _UploadListTile extends StatelessWidget {
               width: 30,
               height: 30,
               decoration: BoxDecoration(
-                color: isUploaded ? const Color(0xFFA0E1BE) : const Color(0xFFECECEC),
+                color: isUploaded
+                    ? const Color(0xFFA0E1BE)
+                    : const Color(0xFFECECEC),
                 borderRadius: BorderRadius.circular(8),
               ),
               child: Icon(

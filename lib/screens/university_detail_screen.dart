@@ -31,7 +31,8 @@ class _UniversityDetailScreenState extends State<UniversityDetailScreen> {
   AdminUniversity get data => widget.data;
 
   Map<String, List<AcademicList>> get _academicGroups {
-    final Map<String, List<AcademicList>> grouped = <String, List<AcademicList>>{};
+    final Map<String, List<AcademicList>> grouped =
+        <String, List<AcademicList>>{};
 
     for (final AcademicList entry in data.academicList ?? <AcademicList>[]) {
       final String academicName = entry.academicname?.trim() ?? '';
@@ -289,7 +290,7 @@ class _UniversityDetailScreenState extends State<UniversityDetailScreen> {
                                       ),
                                       SizedBox(width: 4),
                                       Text(
-                                        '(${data.averageRating!.toDouble().toString()} reviews)',
+                                        '(${data.ratingCount!.toDouble().toString()} reviews)',
                                         style: TextStyle(
                                           fontSize: isSmallMobile ? 11 : 12,
                                           color: AppColors.textMuted,
@@ -399,7 +400,8 @@ class _UniversityDetailScreenState extends State<UniversityDetailScreen> {
                             crossAxisAlignment: CrossAxisAlignment.start,
                             children: _academicGroups.entries.map((groupEntry) {
                               final String academicName = groupEntry.key;
-                              final bool isExpanded = _expandedColleges.contains(academicName);
+                              final bool isExpanded =
+                                  _expandedColleges.contains(academicName);
 
                               return _CollegeAccordion(
                                 academicName: academicName,
@@ -569,10 +571,10 @@ class _CollegeAccordionState extends State<_CollegeAccordion> {
             Column(
               children: (widget.adminUniversity.academicPrograms ?? [])
                   .where(
-                    (academicProgram) =>
-                        (academicProgram.academicname ?? '').trim() ==
-                        widget.academicName.trim(),
-                  )
+                (academicProgram) =>
+                    (academicProgram.academicname ?? '').trim() ==
+                    widget.academicName.trim(),
+              )
                   .map((academicProgram) {
                 final String academicName = academicProgram.academicname ?? '';
 
@@ -593,7 +595,6 @@ class _CollegeAccordionState extends State<_CollegeAccordion> {
                           isEmpty: false,
                           collegeName: collegeName,
                         ),
-
                         ...collegeCourses.asMap().entries.map((entry) {
                           final int index = entry.key;
                           final Courses details = entry.value;
@@ -601,14 +602,12 @@ class _CollegeAccordionState extends State<_CollegeAccordion> {
                           final String courseKey = [
                             academicName,
                             collegeName,
-                            details.programId ??
-                                details.programName ??
-                                '',
+                            details.programId ?? details.programName ?? '',
                             details.name ?? '',
                           ].map((e) => e.trim()).join('-');
 
                           final bool isSelected =
-                          widget.selectedCourses.contains(courseKey);
+                              widget.selectedCourses.contains(courseKey);
 
                           return _buildCourseRow(
                             index: index,
@@ -633,7 +632,6 @@ class _CollegeAccordionState extends State<_CollegeAccordion> {
       ),
     );
   }
-
 
   Widget _buildTableHeader(
     BuildContext context, {
@@ -670,7 +668,7 @@ class _CollegeAccordionState extends State<_CollegeAccordion> {
               flex: 2,
               child: Center(
                 child: Text(
-                  context.l10n.text('Credit\nHour Fee'),
+                  context.l10n.text('No of\nCredit'),
                   textAlign: TextAlign.center,
                   style: TextStyle(
                     fontWeight: FontWeight.w600,
@@ -750,7 +748,6 @@ class _CollegeAccordionState extends State<_CollegeAccordion> {
     });
     return payload;
   }
-
   Widget _buildCourseRow({
     required int index,
     required Courses details,
@@ -763,6 +760,13 @@ class _CollegeAccordionState extends State<_CollegeAccordion> {
     required bool isSmallMobile,
     required double tableWidth,
   }) {
+    final String courseKey = [
+      academicProgram.academicname ?? '',
+      collegeName,
+      details.programId ?? details.programName ?? '',
+      details.name ?? '',
+    ].map((e) => e.trim()).join('-');
+
     return InkWell(
       onTap: onTap,
       child: Container(
@@ -773,14 +777,10 @@ class _CollegeAccordionState extends State<_CollegeAccordion> {
         decoration: BoxDecoration(
           color: isSelected
               ? AppColors.primaryDark.withOpacity(0.2)
-              : (index % 2 == 0
-              ? Colors.white
-              : AppColors.peachSoft),
+              : (index % 2 == 0 ? Colors.white : AppColors.peachSoft),
           border: Border(
             left: BorderSide(
-              color: isSelected
-                  ? AppColors.primaryDark
-                  : Colors.transparent,
+              color: isSelected ? AppColors.primaryDark : Colors.transparent,
               width: 3,
             ),
             bottom: const BorderSide(
@@ -805,11 +805,10 @@ class _CollegeAccordionState extends State<_CollegeAccordion> {
                   ),
                 ),
               ),
-
               Expanded(
                 flex: 2,
                 child: Text(
-                  '${details.creditHours ?? 0}\n${details.currency ?? ''}',
+                  '${details.creditHours?.toInt() ?? 0}',
                   textAlign: TextAlign.center,
                   style: TextStyle(
                     fontWeight: FontWeight.w400,
@@ -817,7 +816,6 @@ class _CollegeAccordionState extends State<_CollegeAccordion> {
                   ),
                 ),
               ),
-
               Expanded(
                 flex: 2,
                 child: Text(
@@ -829,12 +827,10 @@ class _CollegeAccordionState extends State<_CollegeAccordion> {
                   ),
                 ),
               ),
-
               Expanded(
                 flex: 2,
                 child: Text(
-                  details.track == null ||
-                      details.track!.isEmpty
+                  details.track == null || details.track!.isEmpty
                       ? details.minBaGpa ?? "-"
                       : details.track ?? "-",
                   textAlign: TextAlign.center,
@@ -844,17 +840,18 @@ class _CollegeAccordionState extends State<_CollegeAccordion> {
                   ),
                 ),
               ),
-
               const SizedBox(width: 6),
-
               Expanded(
                 flex: 3,
                 child: Column(
-                  crossAxisAlignment:
-                  CrossAxisAlignment.center,
+                  crossAxisAlignment: CrossAxisAlignment.center,
                   children: [
                     InkWell(
-                      onTap: () {
+                      onTap: () async {
+                        widget.onToggleCourse(courseKey);
+
+                        if (!context.mounted) return;
+
                         Navigator.of(context).push(
                           MaterialPageRoute(
                             builder: (_) => CourseDetailScreen(
@@ -869,60 +866,50 @@ class _CollegeAccordionState extends State<_CollegeAccordion> {
                         textAlign: TextAlign.center,
                         style: TextStyle(
                           fontWeight: FontWeight.w400,
-                          fontSize:
-                          isSmallMobile ? 11 : 12,
+                          fontSize: isSmallMobile ? 11 : 12,
                         ),
                       ),
                     ),
-
                     const SizedBox(height: 5),
-
                     InkWell(
-                      onTap: () {
+                      onTap: () async {
+                        widget.onToggleCourse(courseKey);
+
+                        if (!context.mounted) return;
+
                         Navigator.push(
                           context,
                           MaterialPageRoute(
-                            builder: (_) =>
-                                UploadDocumentsScreen(
-                                  universityName:
-                                  adminUniversity.name,
-                                  universityHeroImage:
-                                  ImageUrlHelper
-                                      .resolveUploadUrl(
-                                    adminUniversity
-                                        .coverImagePath,
-                                  ),
-                                  courseTitle: details.name,
-                                  applicationsPayload: <
-                                      Map<String, dynamic>>[
-                                    _buildApplicationPayload(
-                                      adminUniversity:
-                                      adminUniversity,
-                                      academicProgram:
-                                      academicProgram,
-                                      collegeName:
-                                      collegeName,
-                                      courseDetails: details,
-                                    ),
-                                  ],
+                            builder: (_) => UploadDocumentsScreen(
+                              universityName: adminUniversity.name,
+                              universityHeroImage:
+                              ImageUrlHelper.resolveUploadUrl(
+                                adminUniversity.coverImagePath,
+                              ),
+                              courseTitle: details.name,
+                              applicationsPayload: <Map<String, dynamic>>[
+                                _buildApplicationPayload(
+                                  adminUniversity: adminUniversity,
+                                  academicProgram: academicProgram,
+                                  collegeName: collegeName,
+                                  courseDetails: details,
                                 ),
+                              ],
+                            ),
                           ),
                         );
                       },
                       child: Container(
                         alignment: Alignment.center,
-                        padding:
-                        const EdgeInsets.symmetric(
+                        padding: const EdgeInsets.symmetric(
                           horizontal: 4,
                           vertical: 3,
                         ),
                         decoration: BoxDecoration(
                           color: const Color(0xFF0070e2),
-                          borderRadius:
-                          BorderRadius.circular(4),
+                          borderRadius: BorderRadius.circular(4),
                           border: Border.all(
-                            color:
-                            const Color(0xFF0070e2),
+                            color: const Color(0xFF0070e2),
                           ),
                         ),
                         child: Text(

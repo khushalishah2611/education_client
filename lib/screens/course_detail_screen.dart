@@ -7,7 +7,6 @@ import '../core/app_theme.dart';
 import '../widgets/common_widgets.dart';
 import '../widgets/flow_widgets.dart';
 
-
 class CourseDetailScreen extends StatefulWidget {
   const CourseDetailScreen({
     super.key,
@@ -24,32 +23,43 @@ class CourseDetailScreen extends StatefulWidget {
 
 class _CourseDetailScreenState extends State<CourseDetailScreen> {
   AdminUniversity get data => widget.university;
+
   String get selectedCourseTitle =>
       widget.course.name?.trim().isNotEmpty == true
-      ? widget.course.name!.trim()
-      : 'Course Details';
+          ? widget.course.name!.trim()
+          : 'Course Details';
 
   List<String> get eligibilityList =>
       widget.course.eligibility
           ?.where((item) => item.trim().isNotEmpty)
           .toList() ??
-      const [];
+          const [];
 
   List<String> get otherRequirementList =>
       widget.course.otherRequirements
           ?.where((item) => item.trim().isNotEmpty)
           .toList() ??
-      const [];
+          const [];
+
   List<String> get admissionRequirementList =>
       widget.course.eligibility
           ?.where((item) => item.trim().isNotEmpty)
           .toList() ??
-      [];
+          [];
 
+  /// 🔷 PRICE FORMAT
+  /// 155.5 => 156
+  /// Currency at end => 156 USD
   String _priceWithCurrency(num? amount) {
     final currency = widget.course.currency?.trim() ?? '';
+
     if (amount == null) return '-';
-    return currency.isEmpty ? amount.toString() : '$currency $amount';
+
+    final roundedAmount = amount.round();
+
+    return currency.isEmpty
+        ? roundedAmount.toString()
+        : '$roundedAmount $currency';
   }
 
   void _showAddressDialog() {
@@ -64,11 +74,13 @@ class _CourseDetailScreenState extends State<CourseDetailScreen> {
     final bool isSmallMobile = context.isSmallMobile;
     final bool isMediumMobile = context.isMediumMobile;
     final double horizontalPadding = context.responsiveHorizontalPadding;
+
     final double headerHeight = isSmallMobile
         ? 220
         : isMediumMobile
         ? 245
         : 280;
+
     final double topGap = isSmallMobile ? 52 : 60;
 
     final String courseTitle = selectedCourseTitle;
@@ -77,7 +89,7 @@ class _CourseDetailScreenState extends State<CourseDetailScreen> {
       body: AppBackground(
         child: Column(
           children: [
-            /// 🔷 FIXED HEADER (NO SCROLL)
+            /// 🔷 HEADER
             Stack(
               clipBehavior: Clip.none,
               children: [
@@ -92,19 +104,26 @@ class _CourseDetailScreenState extends State<CourseDetailScreen> {
                       ImageUrlHelper.resolveUploadUrl(
                         widget.university.coverImagePath,
                       ),
-                      fit: BoxFit.fill,
-                      errorBuilder: (_, __, ___) =>
-                          Center(child: Image.asset('assets/images/logo.webp')),
+                      fit: BoxFit.cover,
+                      errorBuilder: (_, __, ___) {
+                        return Center(
+                          child: Image.asset(
+                            'assets/images/logo.webp',
+                          ),
+                        );
+                      },
                     ),
                   ),
                 ),
 
+                /// 🔷 UNIVERSITY CARD
                 Positioned(
                   left: horizontalPadding,
                   right: horizontalPadding,
                   bottom: -40,
                   child: InkWell(
                     onTap: _showAddressDialog,
+                    borderRadius: BorderRadius.circular(12),
                     child: Container(
                       padding: const EdgeInsets.all(12),
                       decoration: BoxDecoration(
@@ -133,43 +152,56 @@ class _CourseDetailScreenState extends State<CourseDetailScreen> {
                                 widget.university.logoPath,
                               ),
                               fit: BoxFit.cover,
-                              errorBuilder: (_, __, ___) => Center(
-                                child: Image.asset('assets/images/logo.webp'),
-                              ),
+                              errorBuilder: (_, __, ___) {
+                                return Center(
+                                  child: Image.asset(
+                                    'assets/images/logo.webp',
+                                  ),
+                                );
+                              },
                             ),
                           ),
+
                           const SizedBox(width: 12),
+
                           Expanded(
                             child: Column(
-                              crossAxisAlignment: CrossAxisAlignment.start,
+                              crossAxisAlignment:
+                              CrossAxisAlignment.start,
                               children: [
                                 Row(
                                   children: [
-                                    Icon(
+                                    const Icon(
                                       Icons.star,
                                       color: Color(0xFFFFB300),
                                       size: 16,
                                     ),
-                                    SizedBox(width: 4),
+                                    const SizedBox(width: 4),
+
                                     Text(
-                                      widget.university.averageRating!
-                                          .toDouble()
-                                          .toString(),
-                                      style: TextStyle(
+                                      widget.university.averageRating
+                                          ?.toDouble()
+                                          .toStringAsFixed(1) ??
+                                          '0.0',
+                                      style: const TextStyle(
                                         fontWeight: FontWeight.w700,
                                       ),
                                     ),
-                                    SizedBox(width: 4),
+
+                                    const SizedBox(width: 4),
+
                                     Text(
-                                      '(${widget.university.averageRating!.toDouble().toString()} reviews)',
-                                      style: TextStyle(
+                                      '(${widget.university.averageRating?.round() ?? 0} reviews)',
+                                      style: const TextStyle(
                                         fontSize: 12,
                                         color: AppColors.textMuted,
                                       ),
                                     ),
                                   ],
                                 ),
+
                                 const SizedBox(height: 8),
+
                                 Text(
                                   widget.university.name ?? "",
                                   style: const TextStyle(
@@ -177,15 +209,19 @@ class _CourseDetailScreenState extends State<CourseDetailScreen> {
                                     fontWeight: FontWeight.w700,
                                   ),
                                 ),
+
                                 const SizedBox(height: 4),
+
                                 Row(
-                                  crossAxisAlignment: CrossAxisAlignment.start,
+                                  crossAxisAlignment:
+                                  CrossAxisAlignment.start,
                                   children: [
                                     const Icon(
                                       Icons.location_on_outlined,
                                       size: 15,
                                       color: AppColors.textMuted,
                                     ),
+
                                     const SizedBox(width: 4),
 
                                     Expanded(
@@ -215,43 +251,40 @@ class _CourseDetailScreenState extends State<CourseDetailScreen> {
 
             SizedBox(height: topGap),
 
-            /// 🔷 SCROLLABLE CONTENT ONLY
+            /// 🔷 BODY
             Expanded(
               child: ListView(
-                padding: EdgeInsets.only(bottom: isSmallMobile ? 10 : 14),
+                padding: EdgeInsets.only(
+                  bottom: isSmallMobile ? 10 : 14,
+                ),
                 children: [
                   Padding(
-                    padding: EdgeInsets.fromLTRB(
-                      horizontalPadding,
-                      0,
-                      horizontalPadding,
-                      0,
+                    padding: EdgeInsets.symmetric(
+                      horizontal: horizontalPadding,
                     ),
                     child: _InfoDetailsCard(
                       course: widget.course,
                       priceWithCurrency: _priceWithCurrency,
                     ),
                   ),
+
                   const SizedBox(height: 20),
+
                   Padding(
-                    padding: EdgeInsets.fromLTRB(
-                      horizontalPadding,
-                      0,
-                      horizontalPadding,
-                      0,
+                    padding: EdgeInsets.symmetric(
+                      horizontal: horizontalPadding,
                     ),
                     child: _RequirementSection(
                       title: 'Admission Requirements',
                       items: admissionRequirementList,
                     ),
                   ),
+
                   const SizedBox(height: 20),
+
                   Padding(
-                    padding: EdgeInsets.fromLTRB(
-                      horizontalPadding,
-                      0,
-                      horizontalPadding,
-                      0,
+                    padding: EdgeInsets.symmetric(
+                      horizontal: horizontalPadding,
                     ),
                     child: _RequirementSection(
                       title: 'Other Requirements',
@@ -262,7 +295,7 @@ class _CourseDetailScreenState extends State<CourseDetailScreen> {
               ),
             ),
 
-            /// 🔷 BUTTON (FIXED)
+            /// 🔷 BUTTON
             SafeArea(
               top: false,
               child: Padding(
@@ -297,46 +330,68 @@ class _InfoDetailsCard extends StatelessWidget {
       decoration: BoxDecoration(
         color: Colors.white,
         borderRadius: BorderRadius.circular(10),
-        border: Border.all(color: const Color(0xFFE7E2DA)),
+        border: Border.all(
+          color: const Color(0xFFE7E2DA),
+        ),
       ),
       child: Column(
         children: [
           Container(
             decoration: const BoxDecoration(
               color: Color(0xFFE5F8F2),
-              borderRadius: BorderRadius.vertical(top: Radius.circular(10)),
+              borderRadius: BorderRadius.vertical(
+                top: Radius.circular(10),
+              ),
             ),
-            padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 10),
+            padding: const EdgeInsets.symmetric(
+              horizontal: 12,
+              vertical: 10,
+            ),
             child: const Row(
               children: [
                 Expanded(
                   child: Text(
                     'Information',
-                    style: TextStyle(fontWeight: FontWeight.w700, fontSize: 12),
+                    style: TextStyle(
+                      fontWeight: FontWeight.w700,
+                      fontSize: 12,
+                    ),
                   ),
                 ),
                 Expanded(
                   child: Text(
                     'Details',
                     textAlign: TextAlign.right,
-                    style: TextStyle(fontWeight: FontWeight.w700, fontSize: 12),
+                    style: TextStyle(
+                      fontWeight: FontWeight.w700,
+                      fontSize: 12,
+                    ),
                   ),
                 ),
               ],
             ),
           ),
+
           _InfoRow(
-            label: 'Credit Hours',
-            value: '${course.creditHours ?? '-'}',
+            label: 'No of Credit',
+            value: '${course.creditHours?.round() ?? 0}',
           ),
+
+          _InfoRow(
+            label: 'Credit Fee',
+            value: priceWithCurrency(course.feePerCredit),
+          ),
+
           _InfoRow(
             label: 'Min Admission Rate',
-            value: '${course.minAdmissionRate ?? '-'}%',
+            value: '${course.minAdmissionRate?.round() ?? 0}%',
           ),
+
           _InfoRow(
             label: 'Annual Fee',
             value: priceWithCurrency(course.annualFee),
           ),
+
           _InfoRow(
             label: 'Total Cost',
             valueWidget: _PriceValue(
@@ -345,9 +400,12 @@ class _InfoDetailsCard extends StatelessWidget {
               priceWithCurrency: priceWithCurrency,
             ),
           ),
+
           _InfoRow(
             label: 'Application Fee',
-            value: priceWithCurrency(course.applicationFee),
+            value: course.applicationFee != null
+                ? '${course.applicationFee!.round()} Omani Rial'
+                : '-',
             isLast: true,
           ),
         ],
@@ -371,43 +429,30 @@ class _PriceValue extends StatelessWidget {
   Widget build(BuildContext context) {
     final double base = (basePrice ?? 0).toDouble();
 
-    // Jo discountedPrice percent hoy (e.g. 33)
-    final double discountPercent = (discountedPrice ?? 0).toDouble();
-    final double finalPrice = base - (base * discountPercent / 100);
+    final double discountPercent =
+    (discountedPrice ?? 0).toDouble();
 
-    // Valid discount check
+    final double finalPrice =
+        base - (base * discountPercent / 100);
+
     if (basePrice != null &&
         discountedPrice != null &&
         discountPercent > 0 &&
         discountPercent < 100) {
-      return Wrap(
-        alignment: WrapAlignment.end,
-        crossAxisAlignment: WrapCrossAlignment.center,
-        spacing: 8,
-        children: [
-          Text(
-            priceWithCurrency(base),
-            style: const TextStyle(
-              color: Colors.red,
-              decoration: TextDecoration.lineThrough,
-              fontSize: 13,
-            ),
-          ),
-          Text(
-            priceWithCurrency(finalPrice),
-            style: const TextStyle(
-              color: AppColors.primaryDark,
-              fontWeight: FontWeight.w700,
-            ),
-          ),
-        ],
+      return Text(
+        priceWithCurrency(finalPrice.round()),
+        style: const TextStyle(
+          color: AppColors.primaryDark,
+          fontWeight: FontWeight.w700,
+        ),
       );
     }
 
-    // Fallback (no discount)
     return Text(
-      priceWithCurrency(base),
-      style: const TextStyle(fontWeight: FontWeight.w700),
+      priceWithCurrency(base.round()),
+      style: const TextStyle(
+        fontWeight: FontWeight.w700,
+      ),
     );
   }
 }
@@ -428,21 +473,36 @@ class _InfoRow extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Container(
-      padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 10),
+      padding: const EdgeInsets.symmetric(
+        horizontal: 12,
+        vertical: 10,
+      ),
       decoration: BoxDecoration(
         border: Border(
           bottom: isLast
               ? BorderSide.none
-              : const BorderSide(color: Color(0xFFF1ECE4)),
+              : const BorderSide(
+            color: Color(0xFFF1ECE4),
+          ),
         ),
       ),
       child: Row(
         children: [
-          Expanded(child: Text(label, style: const TextStyle(fontSize: 13))),
+          Expanded(
+            child: Text(
+              label,
+              style: const TextStyle(fontSize: 13),
+            ),
+          ),
+
           Expanded(
             child: Align(
               alignment: Alignment.centerRight,
-              child: valueWidget ?? Text(value ?? '-'),
+              child: valueWidget ??
+                  Text(
+                    value ?? '-',
+                    textAlign: TextAlign.right,
+                  ),
             ),
           ),
         ],
@@ -452,7 +512,10 @@ class _InfoRow extends StatelessWidget {
 }
 
 class _RequirementSection extends StatelessWidget {
-  const _RequirementSection({required this.title, required this.items});
+  const _RequirementSection({
+    required this.title,
+    required this.items,
+  });
 
   final String title;
   final List<String> items;
@@ -463,20 +526,36 @@ class _RequirementSection extends StatelessWidget {
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
         Padding(
-          padding: const EdgeInsets.symmetric(horizontal: 10),
+          padding:
+          const EdgeInsets.symmetric(horizontal: 10),
           child: Text(
             title,
-            style: const TextStyle(fontSize: 18, fontWeight: FontWeight.w700),
+            style: const TextStyle(
+              fontSize: 18,
+              fontWeight: FontWeight.w700,
+            ),
           ),
         ),
-        SizedBox(height: 10),
+
+        const SizedBox(height: 10),
+
         Card(
           color: AppColors.white,
           child: Padding(
-            padding: const EdgeInsets.fromLTRB(10, 10, 10, 0),
+            padding: const EdgeInsets.fromLTRB(
+              10,
+              10,
+              10,
+              0,
+            ),
             child: items.isEmpty
-                ? const _BulletLine('No requirements available')
-                : Column(children: items.map(_BulletLine.new).toList()),
+                ? const _BulletLine(
+              'No requirements available',
+            )
+                : Column(
+              children:
+              items.map(_BulletLine.new).toList(),
+            ),
           ),
         ),
       ],
@@ -494,7 +573,8 @@ class _BulletLine extends StatelessWidget {
     return Padding(
       padding: const EdgeInsets.only(bottom: 8),
       child: Row(
-        crossAxisAlignment: CrossAxisAlignment.start,
+        crossAxisAlignment:
+        CrossAxisAlignment.start,
         children: [
           const Padding(
             padding: EdgeInsets.only(top: 2),
@@ -504,113 +584,20 @@ class _BulletLine extends StatelessWidget {
               size: 18,
             ),
           ),
+
           const SizedBox(width: 8),
+
           Expanded(
             child: Text(
               text,
-              style: const TextStyle(fontSize: 15, color: AppColors.textMuted),
+              style: const TextStyle(
+                fontSize: 15,
+                color: AppColors.textMuted,
+              ),
             ),
           ),
         ],
       ),
     );
   }
-}
-
-class _DocTile extends StatelessWidget {
-  const _DocTile(this.title);
-
-  final String title;
-
-  @override
-  Widget build(BuildContext context) {
-    return Container(
-      width: double.infinity,
-      padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 12),
-      decoration: BoxDecoration(
-        color: Colors.white,
-        borderRadius: BorderRadius.circular(10),
-        border: Border.all(color: const Color(0xFFE7E2DA)),
-      ),
-      child: Row(
-        children: [
-          Container(
-            width: 32,
-            height: 32,
-            decoration: BoxDecoration(
-              color: const Color(0xFFF4F4F4),
-              borderRadius: BorderRadius.circular(8),
-            ),
-            child: const Icon(
-              Icons.insert_drive_file_outlined,
-              size: 18,
-              color: AppColors.textMuted,
-            ),
-          ),
-          const SizedBox(width: 12),
-          Expanded(
-            child: Text(
-              title,
-              style: const TextStyle(color: AppColors.textMuted, fontSize: 15),
-            ),
-          ),
-        ],
-      ),
-    );
-  }
-}
-
-class _IntakeChip extends StatelessWidget {
-  const _IntakeChip({
-    required this.month,
-    required this.year,
-    required this.isSelected,
-    required this.onTap,
-  });
-
-  final String month;
-  final String year;
-  final bool isSelected;
-  final VoidCallback onTap;
-
-  @override
-  Widget build(BuildContext context) {
-    return InkWell(
-      onTap: onTap,
-      borderRadius: BorderRadius.circular(8),
-      child: Container(
-        width: 100,
-        padding: const EdgeInsets.symmetric(vertical: 10),
-        decoration: BoxDecoration(
-          color: isSelected ? const Color(0xFFFFF7ED) : Colors.white,
-          borderRadius: BorderRadius.circular(8),
-          border: Border.all(
-            color: isSelected ? AppColors.accent : const Color(0xFFE7E2DA),
-          ),
-        ),
-        child: Column(
-          children: [
-            Text(month, style: const TextStyle(color: AppColors.textMuted)),
-            const SizedBox(height: 4),
-            Text(
-              year,
-              style: const TextStyle(fontSize: 18, fontWeight: FontWeight.w700),
-            ),
-          ],
-        ),
-      ),
-    );
-  }
-}
-
-class _IntakeOption {
-  const _IntakeOption({
-    required this.month,
-    required this.year,
-    required this.deadlineDate,
-  });
-
-  final String month;
-  final String year;
-  final String deadlineDate;
 }
