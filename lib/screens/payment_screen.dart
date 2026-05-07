@@ -290,19 +290,16 @@ class _PaymentScreenState extends State<PaymentScreen> {
                 ],
               ),
               if (_isSubmitting)
-                Container(
-                    width: double.infinity,
-                    padding: const EdgeInsets.symmetric(
-                      vertical: 20,
-                      horizontal: 12,
-                    ),
-                    decoration: BoxDecoration(
-                      borderRadius: BorderRadius.circular(10),
-                      border: Border.all(
-                        color: const Color(0xFFE6E6E6),
+                const Positioned.fill(
+                  child: ColoredBox(
+                    color: Color.fromRGBO(0, 0, 0, 0.25),
+                    child: Center(
+                      child: CircularProgressIndicator(
+                        color: AppColors.primary,
                       ),
-                      color: Colors.white,
-                    ))
+                    ),
+                  ),
+                )
             ],
           ),
         ),
