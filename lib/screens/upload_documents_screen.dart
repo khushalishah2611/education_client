@@ -180,10 +180,6 @@ class _UploadDocumentsScreenState extends State<UploadDocumentsScreen> {
     final SharedPreferences prefs = await SharedPreferences.getInstance();
     final String studentUserId =
         prefs.getString('studentUserId')?.trim() ?? '';
-    if (studentUserId.isEmpty) {
-      throw Exception('studentUserId not found');
-    }
-
     final List<Map<String, dynamic>> uploaded =
         await _applicationApiService.fetchStudentDocuments(
       studentUserId: studentUserId,
@@ -208,7 +204,6 @@ class _UploadDocumentsScreenState extends State<UploadDocumentsScreen> {
 
   Future<void> _onContinue() async {
     setState(() => _isUploading = true);
-
     try {
       final bool hasAllRequiredFromApi =
           _hasAllRequiredDocuments || await _refreshUploadedDocuments();
