@@ -189,13 +189,14 @@ class _UploadDocumentsScreenState extends State<UploadDocumentsScreen> {
       studentUserId: studentUserId,
     );
     final Map<String, _UploadedDocumentInfo> uploadedDocs =
-        _uploadedDocumentsFromApiItems(uploaded);
+        _uploadedDocumentsFromApiItems(
+      uploaded,
+      documentTypeAliases: _documentTypeAliases,
+    );
 
     if (mounted) {
       setState(() {
-        _uploadedDocuments
-          ..clear()
-          ..addAll(uploadedDocs);
+        _uploadedDocuments.addAll(uploadedDocs);
       });
     }
 
@@ -203,7 +204,8 @@ class _UploadDocumentsScreenState extends State<UploadDocumentsScreen> {
       (doc) {
         final String documentKey = _resolveDocumentKey(doc.type);
         return _selectedFiles[documentKey] != null ||
-            uploadedDocs.containsKey(documentKey);
+            uploadedDocs.containsKey(documentKey) ||
+            _uploadedDocuments.containsKey(documentKey);
       },
     );
   }
