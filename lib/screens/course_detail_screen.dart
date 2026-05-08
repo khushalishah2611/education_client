@@ -359,11 +359,11 @@ class _InfoDetailsCard extends StatelessWidget {
             value: '${course.creditHours?.round() ?? 0}',
           ),
           _InfoRow(
-            label: 'Credit Fee',
+            label: 'Credit Fee (Hourly)',
             value: priceWithCurrency(course.annualFee),
           ),
           _InfoRow(
-            label: 'Number of Study Years',
+            label: 'Number of Years',
             value: '${course.totalSemesters?.round() ?? 0}',
           ),
           _InfoRow(
