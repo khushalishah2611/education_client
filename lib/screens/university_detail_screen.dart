@@ -668,7 +668,7 @@ class _CollegeAccordionState extends State<_CollegeAccordion> {
               flex: 2,
               child: Center(
                 child: Text(
-                  context.l10n.text('No of\nCredit'),
+                  context.l10n.text('Credit Fee\n(Hourly)'),
                   textAlign: TextAlign.center,
                   style: TextStyle(
                     fontWeight: FontWeight.w600,
@@ -829,7 +829,7 @@ class _CollegeAccordionState extends State<_CollegeAccordion> {
               Expanded(
                 flex: 2,
                 child: Text(
-                  '${details.creditHours?.toInt() ?? 0}',
+                  '${details.annualFee?.toInt() ?? 0}\n${details.currency}',
                   textAlign: TextAlign.center,
                   style: TextStyle(
                     fontWeight: FontWeight.w400,
@@ -840,7 +840,7 @@ class _CollegeAccordionState extends State<_CollegeAccordion> {
               Expanded(
                 flex: 2,
                 child: Text(
-                  '${details.minAdmissionRate ?? 0}%',
+                  '${details.minAdmissionRate?.toInt() ?? 0}%',
                   textAlign: TextAlign.center,
                   style: TextStyle(
                     fontWeight: FontWeight.w400,
