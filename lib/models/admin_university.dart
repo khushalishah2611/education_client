@@ -829,8 +829,8 @@ class Courses {
   String? duration;
   double? creditHours;
   double? totalFees;
-  double? semesters;
-  double? totalSemesters;
+  String? semesters;
+  String? totalSemesters;
   double? feePerCredit;
   double? semesterFee;
   double? annualFee;
@@ -887,8 +887,8 @@ class Courses {
       duration: details.duration,
       creditHours: details.creditHours,
       totalFees: details.totalFees,
-      semesters: details.semesters,
-      totalSemesters: details.totalSemesters,
+      semesters: details.semesters.toString(),
+      totalSemesters: details.totalSemesters.toString(),
       feePerCredit: details.feePerCredit,
       semesterFee: details.semesterFee,
       annualFee: details.annualFee,
@@ -916,8 +916,8 @@ class Courses {
     duration = json['duration'];
     creditHours = _toDouble(json['creditHours']);
     totalFees = _toDouble(json['totalFees']);
-    semesters = _toDouble(json['semesters']);
-    totalSemesters = _toDouble(json['totalSemesters']);
+    semesters = json['semesters'];
+    totalSemesters = json['totalSemesters'];
     feePerCredit = _toDouble(json['feePerCredit']);
     semesterFee = _toDouble(json['semesterFee']);
     annualFee = _toDouble(json['annualFee']);

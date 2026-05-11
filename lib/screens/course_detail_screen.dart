@@ -364,7 +364,7 @@ class _InfoDetailsCard extends StatelessWidget {
           ),
           _InfoRow(
             label: 'Number of Years',
-            value: '${course.totalSemesters?.round() ?? 0}',
+            value: course.totalSemesters ?? "-",
           ),
           _InfoRow(
             label: 'Min Admission Rate',
