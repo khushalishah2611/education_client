@@ -28,7 +28,6 @@ class SideMenuScaffold extends StatelessWidget {
         : isMediumMobile
             ? 76
             : 80;
-    final double contentPadding = context.responsiveHorizontalPadding;
     final double titleFontSize = isSmallMobile ? 16 : 18;
 
     return Material(
@@ -95,14 +94,8 @@ class SideMenuScaffold extends StatelessWidget {
                 child: MediaQuery.removePadding(
                   context: context,
                   removeTop: true,
-                  child: Padding(
-                    padding: EdgeInsets.all(contentPadding),
-                    child: Center(
-                      child: ConstrainedBox(
-                        constraints: const BoxConstraints(maxWidth: 560),
-                        child: child,
-                      ),
-                    ),
+                  child: Center(
+                    child: child,
                   ),
                 ),
               ),
@@ -119,61 +112,78 @@ class SimpleTile extends StatelessWidget {
     super.key,
     required this.leading,
     required this.title,
-    required this.subtitle,
+    this.subtitle,
+    this.subtitleWidget,
     this.trailing,
+    this.onTap,
   });
 
   final IconData leading;
   final String title;
-  final String subtitle;
+  final String? subtitle;
+  final Widget? subtitleWidget;
   final Widget? trailing;
+  final VoidCallback? onTap;
 
   @override
   Widget build(BuildContext context) {
     final bool isSmallMobile = context.isSmallMobile;
-    return Container(
-      padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 8),
-      decoration: BoxDecoration(
-        color: Colors.white,
-        borderRadius: BorderRadius.circular(10),
-        border: Border.all(color: const Color(0xFFE8E1D9)),
-      ),
-      child: Row(
-        children: [
-          Container(
-            width: 28,
-            height: 28,
-            decoration: BoxDecoration(
-              color: const Color(0xFFFFEFE2),
-              borderRadius: BorderRadius.circular(8),
+
+    return InkWell(
+      onTap: onTap,
+      borderRadius: BorderRadius.circular(10),
+      child: Container(
+        padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 8),
+        decoration: BoxDecoration(
+          color: Colors.white,
+          borderRadius: BorderRadius.circular(10),
+          border: Border.all(color: const Color(0xFFE8E1D9)),
+        ),
+        child: Row(
+          children: [
+            Container(
+              width: 28,
+              height: 28,
+              decoration: BoxDecoration(
+                color: const Color(0xFFFFEFE2),
+                borderRadius: BorderRadius.circular(8),
+              ),
+              child: Icon(
+                leading,
+                size: 16,
+                color: Colors.redAccent,
+              ),
             ),
-            child: Icon(leading, size: 16, color: Colors.redAccent),
-          ),
-          const SizedBox(width: 10),
-          Expanded(
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                Text(
-                  title,
-                  style: TextStyle(
-                    fontWeight: FontWeight.w600,
-                    fontSize: isSmallMobile ? 11 : 12,
+            const SizedBox(width: 10),
+
+            Expanded(
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Text(
+                    title,
+                    style: TextStyle(
+                      fontWeight: FontWeight.w600,
+                      fontSize: isSmallMobile ? 11 : 12,
+                    ),
                   ),
-                ),
-                const SizedBox(height: 2),
-                Text(
-                  subtitle,
-                  style: TextStyle(
-                    fontSize: isSmallMobile ? 9 : 10,
-                    color: AppColors.textMuted,
-                  ),
-                ),
-              ],
+                  const SizedBox(height: 2),
+
+                  subtitleWidget ??
+                      Text(
+                        subtitle ?? '',
+                        style: TextStyle(
+                          fontSize: isSmallMobile ? 9 : 10,
+                          color: AppColors.textMuted,
+                        ),
+                      ),
+                ],
+              ),
             ),
-          ),
-          if (trailing != null) trailing!,
-        ],
+
+            if (trailing != null) trailing!,
+          ],
+        ),
       ),
     );
   }

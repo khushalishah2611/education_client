@@ -42,6 +42,7 @@ dependencies:
   flutter_svg:
   pdf:
   printing:
+  intl:
 
 dev_dependencies:
   flutter_test:
