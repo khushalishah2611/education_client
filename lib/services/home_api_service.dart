@@ -52,6 +52,21 @@ class HomeApiService {
         .toList(growable: false);
   }
 
+  
+
+  Future<Map<String, dynamic>> fetchLatestUpdates({int page = 1, int limit = 10}) async {
+    final Uri url = ApiConfig.uri('/api/admin/latest-updates').replace(
+      queryParameters: {'page': '$page', 'limit': '$limit'},
+    );
+    final response = await http.get(url);
+    final decoded = _decode(response.body);
+    logApiCall(method: 'GET', url: url.toString(), statusCode: response.statusCode, requestBody: null, responseBody: decoded);
+    if (!ApiStatus.isSuccess(response.statusCode)) {
+      throw Exception(decoded['message']?.toString() ?? 'Failed to load latest updates.');
+    }
+    return decoded;
+  }
+
   Future<List<AdminUniversity>> fetchUniversities({
     String? country,
     String? academic,

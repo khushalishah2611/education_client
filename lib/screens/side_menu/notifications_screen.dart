@@ -1,159 +1,50 @@
 import 'package:flutter/material.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 
 import '../../core/app_localizations.dart';
 import '../../core/app_theme.dart';
+import '../../services/application_api_service.dart';
 import 'side_menu_common.dart';
 
-class NotificationsScreen extends StatelessWidget {
-  const NotificationsScreen({super.key});
-
-  @override
-  Widget build(BuildContext context) {
-    final todayItems = [
-      NotificationItemData(context.l10n.text('documentsApprovedSuccessfully')),
-      NotificationItemData(context.l10n.text('applicationDeadlineReminder')),
-    ];
-
-    final yesterdayItems = [
-      NotificationItemData(context.l10n.text('documentsApprovedSuccessfully')),
-      NotificationItemData(context.l10n.text('applicationDeadlineReminder')),
-      NotificationItemData(context.l10n.text('applicationDeadlineReminder')),
-    ];
-
+class NotificationsScreen extends StatefulWidget { const NotificationsScreen({super.key}); @override State<NotificationsScreen> createState()=>_N(); }
+class _N extends State<NotificationsScreen>{
+  final _api = const ApplicationApiService();
+  List<Map<String,dynamic>> _items = const [];
+  bool _loading = true;
+  @override void initState(){super.initState();_load();}
+  Future<void> _load() async {
+    final prefs = await SharedPreferences.getInstance();
+    final studentUserId = prefs.getString('studentUserId')?.trim() ?? '';
+    final data = await _api.fetchStudentOverview(studentUserId: studentUserId);
+    final items = data['notifications'];
+    if(mounted){setState((){_items=items is List? items.whereType<Map>().map((e)=>e.map((k,v)=>MapEntry(k.toString(), v))).toList():const []; _loading=false;});}
+  }
+  @override Widget build(BuildContext context) {
     return SideMenuScaffold(
       title: context.l10n.text('notifications'),
-      child: ListView(
-        children: [
-          NotificationSection(
-            title: context.l10n.text('today'),
-            items: todayItems,
-          ),
-          const SizedBox(height: 10),
-          NotificationSection(
-            title: context.l10n.text('yesterday'),
-            items: yesterdayItems,
-          ),
-        ],
+      child: _loading ? const Center(child:CircularProgressIndicator(color: AppColors.primary)) : ListView(
+        children: _items.map((e)=>NotificationCard(title:e['title']?.toString()??'-', description:e['message']?.toString()??'', date:e['createdAt']?.toString()??'')).toList(),
       ),
-    );
-  }
-}
-
-class NotificationSection extends StatelessWidget {
-  const NotificationSection({
-    super.key,
-    required this.title,
-    required this.items,
-  });
-
-  final String title;
-  final List<NotificationItemData> items;
-
-  @override
-  Widget build(BuildContext context) {
-    return Column(
-      crossAxisAlignment: CrossAxisAlignment.start,
-      children: [
-        Text(
-          title,
-          style: const TextStyle(fontSize: 10, color: AppColors.textMuted),
-        ),
-        const SizedBox(height: 10),
-        ...List.generate(items.length, (index) {
-          final item = items[index];
-          final isLast = index == items.length - 1;
-          return Padding(
-            padding: const EdgeInsets.only(bottom: 8),
-            child: Row(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                SizedBox(
-                  width: 16,
-                  child: Column(
-                    children: [
-                      Container(
-                        width: 12,
-                        height: 12,
-                        decoration: const BoxDecoration(
-                          color: AppColors.accent,
-                          shape: BoxShape.circle,
-                        ),
-                      ),
-                      if (!isLast)
-                        Container(
-                          width: 1,
-                          height: 60,
-                          margin: const EdgeInsets.only(top: 4),
-                          color: const Color(0xFFCAC2B8),
-                        ),
-                    ],
-                  ),
-                ),
-                const SizedBox(width: 8),
-                Expanded(child: NotificationCard(title: item.title)),
-              ],
-            ),
-          );
-        }),
-      ],
     );
   }
 }
 
 class NotificationCard extends StatelessWidget {
-  const NotificationCard({super.key, required this.title});
-
-  final String title;
-
+  const NotificationCard({super.key, required this.title, required this.description, required this.date});
+  final String title; final String description; final String date;
   @override
   Widget build(BuildContext context) {
     return Container(
+      margin: const EdgeInsets.only(bottom: 8),
       padding: const EdgeInsets.fromLTRB(10, 10, 10, 12),
-      decoration: BoxDecoration(
-        color: Colors.white,
-        borderRadius: BorderRadius.circular(6),
-        border: Border.all(color: const Color(0xFFD7D4D0)),
-      ),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          Text(
-            title,
-            style: const TextStyle(fontSize: 14, fontWeight: FontWeight.w700),
-          ),
-          const SizedBox(height: 4),
-          Text(
-            context.l10n.text('notificationDescription'),
-            style: const TextStyle(fontSize: 12, color: AppColors.textMuted),
-          ),
-          const SizedBox(height: 10),
-          Row(
-            children: [
-              Text(
-                context.l10n.text('notificationTime'),
-                style: const TextStyle(
-                  fontSize: 12,
-                  color: AppColors.textMuted,
-                ),
-              ),
-              const Spacer(),
-              Text(
-                context.l10n.text('notificationDate'),
-                style: const TextStyle(
-                  fontSize: 12,
-                  color: AppColors.textMuted,
-                ),
-              ),
-            ],
-          ),
-        ],
-      ),
+      decoration: BoxDecoration(color: Colors.white,borderRadius: BorderRadius.circular(6),border: Border.all(color: const Color(0xFFD7D4D0))),
+      child: Column(crossAxisAlignment: CrossAxisAlignment.start,children: [
+        Text(title, style: const TextStyle(fontSize: 14, fontWeight: FontWeight.w700)),
+        const SizedBox(height: 4),
+        Text(description, style: const TextStyle(fontSize: 12, color: AppColors.textMuted)),
+        const SizedBox(height: 8),
+        Text(date, style: const TextStyle(fontSize: 12, color: AppColors.textMuted)),
+      ]),
     );
   }
-}
-
-class NotificationItemData {
-  const NotificationItemData(this.title);
-
-  final String title;
 }

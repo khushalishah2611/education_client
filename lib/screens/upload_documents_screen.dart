@@ -288,12 +288,7 @@ class _UploadDocumentsScreenState extends State<UploadDocumentsScreen> {
 
     final Uri? openUri = uploadedDocument.openUri;
     if (openUri == null) {
-      if (!mounted) return;
-      showAppSnackBar(
-        context,
-        type: AppSnackBarType.error,
-        message: 'Document link is not available. Please upload again.',
-      );
+      await _pickDocument(doc);
       return;
     }
 
