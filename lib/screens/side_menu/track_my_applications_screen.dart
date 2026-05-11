@@ -1,163 +1,46 @@
 import 'package:flutter/material.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 
 import '../../core/app_theme.dart';
+import '../../services/application_api_service.dart';
 import 'side_menu_common.dart';
 
 class TrackMyApplicationsScreen extends StatelessWidget {
   const TrackMyApplicationsScreen({super.key, this.activeTab = false});
-
   final bool activeTab;
-
   @override
   Widget build(BuildContext context) {
-    return SideMenuScaffold(
-      title: 'Track My Applications',
-      showBackButton: activeTab,
-      child: TrackMyApplicationsContent(),
-    );
+    return SideMenuScaffold(title: 'Track My Applications', showBackButton: activeTab, child: const TrackMyApplicationsContent());
   }
 }
 
-class TrackMyApplicationsContent extends StatelessWidget {
-  const TrackMyApplicationsContent({super.key});
-
-  @override
-  Widget build(BuildContext context) {
-    final applications = [
-      const ApplicationCardData(
-        universityName: 'Harvard University',
-        courseName: 'Bachelor of Computer Science',
-        shortCode: 'HAR',
-        appId: '#12345',
-      ),
-      const ApplicationCardData(
-        universityName: 'Al-Ahliyya Amman University',
-        courseName: 'Bachelor of Computer Science',
-        shortCode: 'AAU',
-        appId: '#12346',
-      ),
-      const ApplicationCardData(
-        universityName: 'Beirut Arab University',
-        courseName: 'Bachelor of Computer Science',
-        shortCode: 'BAU',
-        appId: '#12347',
-      ),
-    ];
-
-    return ListView.separated(
-      itemCount: applications.length,
-      separatorBuilder: (_, __) => const SizedBox(height: 8),
-      itemBuilder: (context, index) {
-        final item = applications[index];
-
-        return Container(
-          padding: const EdgeInsets.all(12),
-          decoration: BoxDecoration(
-            color: Colors.white,
-            borderRadius: BorderRadius.circular(8),
-            border: Border.all(color: const Color(0xFFE0DDD8)),
-          ),
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              Text(
-                'Application ID : ${item.appId}',
-                style: const TextStyle(
-                  fontSize: 14,
-                  fontWeight: FontWeight.w500,
-                ),
-              ),
-              const SizedBox(height: 10),
-              Row(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  Container(
-                    width: 54,
-                    height: 54,
-                    alignment: Alignment.center,
-                    decoration: BoxDecoration(
-                      color: const Color(0xFFF5F5F5),
-                      borderRadius: BorderRadius.circular(8),
-                    ),
-                    child: Text(
-                      item.shortCode,
-                      style: const TextStyle(
-                        fontWeight: FontWeight.w800,
-                        color: AppColors.textMuted,
-                      ),
-                    ),
-                  ),
-                  const SizedBox(width: 10),
-                  Expanded(
-                    child: Column(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: [
-                        Text(
-                          item.universityName,
-                          style: const TextStyle(
-                            fontSize: 16,
-                            fontWeight: FontWeight.w700,
-                          ),
-                          maxLines: 2,
-                          overflow: TextOverflow.ellipsis,
-                        ),
-                        const SizedBox(height: 2),
-                        Text(
-                          item.courseName,
-                          style: const TextStyle(
-                            fontSize: 14,
-                            color: AppColors.textMuted,
-                          ),
-                          maxLines: 2,
-                          overflow: TextOverflow.ellipsis,
-                        ),
-                      ],
-                    ),
-                  ),
-                ],
-              ),
-              const SizedBox(height: 12),
-              const Divider(height: 1, color: Color(0xFFE0DDD8)),
-              const SizedBox(height: 10),
-              Row(
-                children: [
-                  const Text(
-                    'Application Progress',
-                    style: TextStyle(fontSize: 16, fontWeight: FontWeight.w700),
-                  ),
-                  const Spacer(),
-                  Container(
-                    width: 18,
-                    height: 18,
-                    decoration: const BoxDecoration(
-                      color: Color(0xFFF1F1F1),
-                      shape: BoxShape.circle,
-                    ),
-                    child: const Icon(
-                      Icons.keyboard_arrow_down_rounded,
-                      size: 16,
-                    ),
-                  ),
-                ],
-              ),
-            ],
-          ),
-        );
-      },
-    );
+class TrackMyApplicationsContent extends StatefulWidget { const TrackMyApplicationsContent({super.key}); @override State<TrackMyApplicationsContent> createState()=>_T(); }
+class _T extends State<TrackMyApplicationsContent> {
+  final _api = const ApplicationApiService();
+  List<Map<String,dynamic>> _apps = const [];
+  bool _loading=true;
+  @override void initState(){super.initState();_load();}
+  Future<void> _load() async {
+    final prefs = await SharedPreferences.getInstance();
+    final studentUserId = prefs.getString('studentUserId')?.trim() ?? '';
+    final data = await _api.fetchStudentOverview(studentUserId: studentUserId);
+    final apps = data['applications'];
+    if(mounted){setState((){_apps = apps is List ? apps.whereType<Map>().map((e)=>e.map((k,v)=>MapEntry(k.toString(), v))).toList() : const []; _loading=false;});}
   }
-}
-
-class ApplicationCardData {
-  const ApplicationCardData({
-    required this.universityName,
-    required this.courseName,
-    required this.shortCode,
-    required this.appId,
-  });
-
-  final String universityName;
-  final String courseName;
-  final String shortCode;
-  final String appId;
+  @override Widget build(BuildContext context){
+    if(_loading){return const Center(child:CircularProgressIndicator(color: AppColors.primary));}
+    return ListView.separated(itemCount:_apps.length,separatorBuilder:(_,__)=>const SizedBox(height:8),itemBuilder:(context,index){
+      final item=_apps[index];
+      final uni=item['university'] is Map ? (item['university']['name']?.toString() ?? '-') : '-';
+      final prog=item['program'] is Map ? (item['program']['name']?.toString() ?? '-') : '-';
+      final id=item['id']?.toString() ?? '';
+      return Container(padding: const EdgeInsets.all(12),decoration: BoxDecoration(color: Colors.white,borderRadius: BorderRadius.circular(8),border: Border.all(color: const Color(0xFFE0DDD8))),child: Column(crossAxisAlignment: CrossAxisAlignment.start,children:[
+        Text('Application ID : #${id.length>8?id.substring(0,8):id}',style: const TextStyle(fontSize:14,fontWeight: FontWeight.w500)),
+        const SizedBox(height:8),
+        Text(uni,style: const TextStyle(fontSize:16,fontWeight: FontWeight.w700)),
+        const SizedBox(height:2),
+        Text(prog,style: const TextStyle(fontSize:14,color: AppColors.textMuted)),
+      ]));
+    });
+  }
 }
