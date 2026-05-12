@@ -107,25 +107,28 @@ class _NotificationsScreenState extends State<NotificationsScreen> {
                 color: AppColors.primary,
               ),
             )
-          : RefreshIndicator(
-              onRefresh: _refresh,
-              child: _items.isEmpty
-                  ? ListView(
-                      physics: const AlwaysScrollableScrollPhysics(),
-                      children: [
-                        _emptyState(context),
-                      ],
-                    )
-                  : ListView(
-                      physics: const AlwaysScrollableScrollPhysics(),
-                      children: _items.map((e) {
-                        return NotificationCard(
-                          title: e['title'] ?? '-',
-                          description: e['message'] ?? '',
-                          date: _formatDate(e['createdAt'] ?? ''),
-                        );
-                      }).toList(),
-                    ),
+          : Padding(
+              padding: EdgeInsets.symmetric(horizontal: 16),
+              child: RefreshIndicator(
+                onRefresh: _refresh,
+                child: _items.isEmpty
+                    ? ListView(
+                        physics: const AlwaysScrollableScrollPhysics(),
+                        children: [
+                          _emptyState(context),
+                        ],
+                      )
+                    : ListView(
+                        physics: const AlwaysScrollableScrollPhysics(),
+                        children: _items.map((e) {
+                          return NotificationCard(
+                            title: e['title'] ?? '-',
+                            description: e['message'] ?? '',
+                            date: _formatDate(e['createdAt'] ?? ''),
+                          );
+                        }).toList(),
+                      ),
+              ),
             ),
     );
   }

@@ -22,12 +22,6 @@ class SideMenuScaffold extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final bool isSmallMobile = context.isSmallMobile;
-    final bool isMediumMobile = context.isMediumMobile;
-    final double headerHeight = isSmallMobile
-        ? 70
-        : isMediumMobile
-            ? 76
-            : 80;
     final double titleFontSize = isSmallMobile ? 16 : 18;
 
     return Material(
@@ -37,7 +31,7 @@ class SideMenuScaffold extends StatelessWidget {
             children: [
               Container(
                 width: MediaQuery.sizeOf(context).width,
-                height: headerHeight,
+                height: 50,
                 decoration: const BoxDecoration(
                   color: Colors.white,
                   borderRadius: BorderRadius.vertical(

@@ -1,14 +1,17 @@
+import 'package:education/core/image_url_helper.dart';
 import 'package:flutter/material.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:url_launcher/url_launcher.dart';
-
 import '../../core/app_theme.dart';
 import '../../widgets/common_widgets.dart';
 import '../../services/application_api_service.dart';
 import 'side_menu_common.dart';
 
 class UploadedDocumentsScreen extends StatelessWidget {
-  const UploadedDocumentsScreen({super.key, this.activeTab = false});
+  const UploadedDocumentsScreen({
+    super.key,
+    this.activeTab = false,
+  });
 
   final bool activeTab;
 
@@ -34,7 +37,9 @@ class _UploadedDocumentsContentState extends State<UploadedDocumentsContent> {
   final ApplicationApiService _api = const ApplicationApiService();
 
   List<Map<String, dynamic>> _documents = [];
+
   bool _loading = true;
+  String? _openingDocumentId;
 
   @override
   void initState() {
@@ -45,70 +50,138 @@ class _UploadedDocumentsContentState extends State<UploadedDocumentsContent> {
   Future<void> _load() async {
     setState(() => _loading = true);
 
-    final prefs = await SharedPreferences.getInstance();
-    final studentUserId = prefs.getString('studentUserId')?.trim() ?? '';
+    try {
+      final prefs = await SharedPreferences.getInstance();
 
-    final overview =
-    await _api.fetchStudentOverview(studentUserId: studentUserId);
+      final studentUserId = prefs.getString('studentUserId')?.trim() ?? '';
 
-    final docs = overview['documents'];
+      final overview = await _api.fetchStudentOverview(
+        studentUserId: studentUserId,
+      );
 
-    if (mounted) {
+      final docs = overview['documents'];
+
+      if (!mounted) return;
+
       setState(() {
         _documents = docs is List
             ? docs
-            .whereType<Map>()
-            .map((e) => e.map(
-              (k, v) => MapEntry(k.toString(), v),
-        ))
-            .toList()
+                .whereType<Map>()
+                .map(
+                  (e) => e.map(
+                    (k, v) => MapEntry(k.toString(), v),
+                  ),
+                )
+                .toList()
             : [];
+
         _loading = false;
       });
+    } catch (e) {
+      debugPrint('Load documents error: $e');
+
+      if (!mounted) return;
+
+      setState(() => _loading = false);
+
+      showAppSnackBar(
+        context,
+        type: AppSnackBarType.error,
+        message: 'Failed to load documents.',
+      );
     }
   }
 
   Future<void> _delete(Map<String, dynamic> item) async {
-    final prefs = await SharedPreferences.getInstance();
-    final studentUserId = prefs.getString('studentUserId')?.trim() ?? '';
+    try {
+      final prefs = await SharedPreferences.getInstance();
 
-    await _api.deleteStudentDocument(
-      documentId: item['id']?.toString() ?? '',
-      studentUserId: studentUserId,
-    );
+      final studentUserId = prefs.getString('studentUserId')?.trim() ?? '';
 
-    if (!mounted) return;
+      await _api.deleteStudentDocument(
+        documentId: item['id']?.toString() ?? '',
+        studentUserId: studentUserId,
+      );
 
-    showAppSnackBar(
-      context,
-      type: AppSnackBarType.success,
-      message: 'Document deleted.',
-    );
+      if (!mounted) return;
 
-    await _load();
+      showAppSnackBar(
+        context,
+        type: AppSnackBarType.success,
+        message: 'Document deleted successfully.',
+      );
+
+      await _load();
+    } catch (e) {
+      debugPrint('Delete document error: $e');
+
+      showAppSnackBar(
+        context,
+        type: AppSnackBarType.error,
+        message: 'Failed to delete document.',
+      );
+    }
   }
 
   Future<void> _openDocument(Map<String, dynamic> doc) async {
-    final fileName = doc['fileName']?.toString();
+    try {
+      final filePath = doc['filePath']?.toString() ?? '';
+      final documentId = doc['id']?.toString() ?? '';
 
-    if (fileName == null || fileName.isEmpty) return;
+      if (filePath.isEmpty) {
+        showAppSnackBar(
+          context,
+          type: AppSnackBarType.error,
+          message: 'Document path not found.',
+        );
+        return;
+      }
 
-    final encodedFileName = Uri.encodeComponent(fileName);
+      setState(() {
+        _openingDocumentId = documentId;
+      });
 
-    final url = 'https://arab.vedx.cloud/uploads/$encodedFileName';
+      final url = ImageUrlHelper.resolveUploadUrl(filePath);
 
-    final uri = Uri.parse(url);
+      debugPrint('Resolved Document URL: $url');
 
-    if (await canLaunchUrl(uri)) {
-      await launchUrl(uri, mode: LaunchMode.externalApplication);
+      final uri = Uri.parse(url);
+
+      final launched = await launchUrl(
+        uri,
+        mode: LaunchMode.externalApplication,
+      );
+
+      if (!launched && mounted) {
+        showAppSnackBar(
+          context,
+          type: AppSnackBarType.error,
+          message: 'Unable to open document.',
+        );
+      }
+    } catch (e) {
+      debugPrint('Open document error: $e');
+
+      if (mounted) {
+        showAppSnackBar(
+          context,
+          type: AppSnackBarType.error,
+          message: 'Failed to open document.',
+        );
+      }
+    } finally {
+      if (mounted) {
+        setState(() {
+          _openingDocumentId = null;
+        });
+      }
     }
   }
+
   @override
   Widget build(BuildContext context) {
     if (_loading) {
-      return const Center(
-        child: CircularProgressIndicator(color: AppColors.primary),
-      );
+      return _buildShimmerList();
     }
 
     if (_documents.isEmpty) {
@@ -122,35 +195,136 @@ class _UploadedDocumentsContentState extends State<UploadedDocumentsContent> {
         physics: const AlwaysScrollableScrollPhysics(),
         padding: const EdgeInsets.all(12),
         itemCount: _documents.length,
-        separatorBuilder: (_, __) => const SizedBox(height: 8),
+        separatorBuilder: (_, __) => const SizedBox(height: 10),
         itemBuilder: (context, index) {
           final doc = _documents[index];
 
-          return SimpleTile(
-            leading: Icons.picture_as_pdf_outlined,
-            title: doc['type']?.toString() ?? '-',
-            subtitleWidget: GestureDetector(
-              onTap: () => _openDocument(doc), // 👈 FILE NAME CLICK
-              child: Text(
-                doc['fileName']?.toString() ?? '',
-                style: const TextStyle(
-                  color: Colors.blue,
-                  decoration: TextDecoration.underline,
-                  fontWeight: FontWeight.w500,
-                ),
+          final documentId = doc['id']?.toString() ?? '';
+          final isOpening = _openingDocumentId == documentId;
+
+          return Container(
+            decoration: BoxDecoration(
+              color: Colors.white,
+              borderRadius: BorderRadius.circular(8),
+              border: Border.all(
+                color: const Color(0xFFEAEAEA),
               ),
             ),
-            onTap: () => _openDocument(doc), // optional full tile tap
-            trailing: IconButton(
-              onPressed: () => _delete(doc),
-              icon: const Icon(
-                Icons.cancel_outlined,
-                color: AppColors.textMuted,
+            child: ListTile(
+              contentPadding: const EdgeInsets.symmetric(
+                horizontal: 10,
+                vertical: 0,
               ),
+              leading: Container(
+                height: 30,
+                width: 30,
+                decoration: BoxDecoration(
+                  color: Colors.red.withOpacity(0.08),
+                  borderRadius: BorderRadius.circular(8),
+                ),
+                child: const Icon(
+                  Icons.picture_as_pdf_rounded,
+                  color: Colors.red,
+                  size: 20,
+                ),
+              ),
+              title: Text(
+                doc['type']?.toString() ?? 'Document',
+                style: const TextStyle(
+                  fontWeight: FontWeight.w600,
+                  fontSize: 15,
+                ),
+              ),
+              subtitle: Padding(
+                padding: const EdgeInsets.only(top: 6),
+                child: GestureDetector(
+                  onTap: isOpening ? null : () => _openDocument(doc),
+                  child: Text(
+                    doc['fileName']?.toString() ?? '',
+                    maxLines: 2,
+                    overflow: TextOverflow.ellipsis,
+                    style: TextStyle(
+                      color: isOpening ? Colors.grey : Colors.blue,
+                      decoration: TextDecoration.underline,
+                      fontWeight: FontWeight.w500,
+                    ),
+                  ),
+                ),
+              ),
+              trailing: isOpening
+                  ? const SizedBox(
+                      width: 24,
+                      height: 24,
+                      child: CircularProgressIndicator(
+                        strokeWidth: 2,
+                        color: AppColors.primary,
+                      ),
+                    )
+                  : IconButton(
+                      onPressed: () => _delete(doc),
+                      icon: const Icon(
+                        Icons.delete_outline_rounded,
+                        color: Colors.redAccent,
+                      ),
+                    ),
+              onTap: isOpening ? null : () => _openDocument(doc),
             ),
           );
         },
       ),
+    );
+  }
+
+  Widget _buildShimmerList() {
+    return ListView.separated(
+      padding: const EdgeInsets.all(12),
+      itemCount: 10,
+      separatorBuilder: (_, __) => const SizedBox(height: 10),
+      itemBuilder: (_, __) {
+        return Container(
+          margin: const EdgeInsets.only(bottom: 8),
+          padding: const EdgeInsets.all(12),
+          decoration: BoxDecoration(
+            color: Colors.grey.shade200,
+            borderRadius: BorderRadius.circular(8),
+          ),
+          child: Column(
+            children: [
+              Row(
+                children: [
+                  Container(
+                    width: 54,
+                    height: 54,
+                    color: Colors.grey.shade300,
+                  ),
+                  const SizedBox(width: 10),
+                  Expanded(
+                    child: Column(
+                      children: [
+                        Container(
+                          height: 12,
+                          color: Colors.grey.shade300,
+                        ),
+                        SizedBox(height: 5,),
+                        Container(
+                          height: 12,
+                          color: Colors.grey.shade300,
+                        ),
+                      ],
+                    ),
+                  ),
+                  const SizedBox(width: 10),
+                  Container(
+                    width: 54,
+                    height: 54,
+                    color: Colors.grey.shade300,
+                  ),
+                ],
+              ),
+            ],
+          ),
+        );
+      },
     );
   }
 
@@ -165,21 +339,36 @@ class _UploadedDocumentsContentState extends State<UploadedDocumentsContent> {
           Center(
             child: Container(
               width: double.infinity,
-              padding:
-              const EdgeInsets.symmetric(vertical: 20, horizontal: 12),
+              padding: const EdgeInsets.symmetric(
+                vertical: 24,
+                horizontal: 16,
+              ),
               margin: const EdgeInsets.all(12),
               decoration: BoxDecoration(
-                borderRadius: BorderRadius.circular(10),
-                border: Border.all(color: const Color(0xFFE6E6E6)),
+                borderRadius: BorderRadius.circular(14),
+                border: Border.all(
+                  color: const Color(0xFFE6E6E6),
+                ),
                 color: Colors.white,
               ),
-              child: const Text(
-                'No uploaded documents available',
-                textAlign: TextAlign.center,
-                style: TextStyle(
-                  color: Color(0xFF616161),
-                  fontWeight: FontWeight.w500,
-                ),
+              child: Column(
+                children: const [
+                  Icon(
+                    Icons.folder_open_outlined,
+                    size: 52,
+                    color: Colors.grey,
+                  ),
+                  SizedBox(height: 14),
+                  Text(
+                    'No uploaded documents available',
+                    textAlign: TextAlign.center,
+                    style: TextStyle(
+                      color: Color(0xFF616161),
+                      fontWeight: FontWeight.w600,
+                      fontSize: 15,
+                    ),
+                  ),
+                ],
               ),
             ),
           ),
