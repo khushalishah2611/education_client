@@ -205,8 +205,8 @@ class SectionCard extends StatelessWidget {
           Text(
             title,
             style: TextStyle(
-              fontWeight: FontWeight.w700,
-              fontSize: isSmallMobile ? 13 : 14,
+              fontWeight: FontWeight.bold,
+              fontSize: isSmallMobile ? 14 : 16,
             ),
           ),
           const SizedBox(height: 6),
