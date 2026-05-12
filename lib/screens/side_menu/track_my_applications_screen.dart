@@ -178,7 +178,7 @@ class _TrackMyApplicationsScreenState extends State<TrackMyApplicationsScreen> {
               studentOverview: const <String, dynamic>{},
             ),
           ),
-        ),
+        );
       },
       child: Container(
         padding: const EdgeInsets.all(12),
@@ -201,117 +201,117 @@ class _TrackMyApplicationsScreenState extends State<TrackMyApplicationsScreen> {
             ),
             const SizedBox(height: 10),
 
-          Row(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              Container(
-                height: 54,
-                width: 54,
-                decoration: BoxDecoration(
-                  color: const Color(0xFFF5F5F5),
-                  borderRadius: BorderRadius.circular(8),
-                ),
-                child: ClipRRect(
-                  borderRadius: BorderRadius.circular(8),
-                  child: Image.network(
-                    ImageUrlHelper.resolveUploadUrl(
-                      item['logoPath'] ?? '',
-                    ),
-                    fit: BoxFit.cover,
-                    errorBuilder: (_, __, ___) => Image.asset(
-                      'assets/images/logo.webp',
-                      fit: BoxFit.contain,
-                    ),
+            Row(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Container(
+                  height: 54,
+                  width: 54,
+                  decoration: BoxDecoration(
+                    color: const Color(0xFFF5F5F5),
+                    borderRadius: BorderRadius.circular(8),
                   ),
-                ),
-              ),
-              const SizedBox(width: 10),
-              Expanded(
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    Text(
-                      item['universityName'] ?? '',
-                      style: const TextStyle(
-                        fontSize: 16,
-                        fontWeight: FontWeight.w700,
+                  child: ClipRRect(
+                    borderRadius: BorderRadius.circular(8),
+                    child: Image.network(
+                      ImageUrlHelper.resolveUploadUrl(
+                        item['logoPath'] ?? '',
+                      ),
+                      fit: BoxFit.cover,
+                      errorBuilder: (_, __, ___) => Image.asset(
+                        'assets/images/logo.webp',
+                        fit: BoxFit.contain,
                       ),
                     ),
-
-                    const SizedBox(height: 4),
-
-                    // ✅ COLLEGE
-                    Text(
-                      '${item['college'] ?? ''} (${item['programName'] ?? ''})',
-                      style: const TextStyle(
-                        fontSize: 14,
-                        fontWeight: FontWeight.w400,
-                        color: Colors.black87,
+                  ),
+                ),
+                const SizedBox(width: 10),
+                Expanded(
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Text(
+                        item['universityName'] ?? '',
+                        style: const TextStyle(
+                          fontSize: 16,
+                          fontWeight: FontWeight.w700,
+                        ),
                       ),
-                    ),
-                    const SizedBox(height: 2),
 
-                    // ✅ COURSE
-                    Text(
-                      item['courseName'] ?? '',
-                      style: const TextStyle(
-                        fontSize: 13,
-                        color: AppColors.textMuted,
+                      const SizedBox(height: 4),
+
+                      // ✅ COLLEGE
+                      Text(
+                        '${item['college'] ?? ''} (${item['programName'] ?? ''})',
+                        style: const TextStyle(
+                          fontSize: 14,
+                          fontWeight: FontWeight.w400,
+                          color: Colors.black87,
+                        ),
                       ),
-                    ),
-                  ],
-                ),
-              ),
-            ],
-          ),
+                      const SizedBox(height: 2),
 
-          const SizedBox(height: 12),
-
-          const Divider(
-            height: 1,
-            color: Color(0xFFE0DDD8),
-          ),
-
-          const SizedBox(height: 10),
-
-          // ✅ STATUS SECTION
-          Row(
-            children: [
-              const Text(
-                'Application Status',
-                style: TextStyle(
-                  fontSize: 16,
-                  fontWeight: FontWeight.w700,
-                ),
-              ),
-              const Spacer(),
-              Container(
-                padding: const EdgeInsets.symmetric(
-                  horizontal: 12,
-                  vertical: 5,
-                ),
-                decoration: BoxDecoration(
-                  color: statusColor.withOpacity(
-                    0.12,
-                  ),
-                  borderRadius: BorderRadius.circular(
-                    20,
-                  ),
-                  border: Border.all(
-                    color: statusColor,
+                      // ✅ COURSE
+                      Text(
+                        item['courseName'] ?? '',
+                        style: const TextStyle(
+                          fontSize: 13,
+                          color: AppColors.textMuted,
+                        ),
+                      ),
+                    ],
                   ),
                 ),
-                child: Text(
-                  status,
+              ],
+            ),
+
+            const SizedBox(height: 12),
+
+            const Divider(
+              height: 1,
+              color: Color(0xFFE0DDD8),
+            ),
+
+            const SizedBox(height: 10),
+
+            // ✅ STATUS SECTION
+            Row(
+              children: [
+                const Text(
+                  'Application Status',
                   style: TextStyle(
-                    fontSize: 12,
+                    fontSize: 16,
                     fontWeight: FontWeight.w700,
-                    color: statusColor,
                   ),
                 ),
-              ),
-            ],
-          ),
+                const Spacer(),
+                Container(
+                  padding: const EdgeInsets.symmetric(
+                    horizontal: 12,
+                    vertical: 5,
+                  ),
+                  decoration: BoxDecoration(
+                    color: statusColor.withOpacity(
+                      0.12,
+                    ),
+                    borderRadius: BorderRadius.circular(
+                      20,
+                    ),
+                    border: Border.all(
+                      color: statusColor,
+                    ),
+                  ),
+                  child: Text(
+                    status,
+                    style: TextStyle(
+                      fontSize: 12,
+                      fontWeight: FontWeight.w700,
+                      color: statusColor,
+                    ),
+                  ),
+                ),
+              ],
+            ),
           ],
         ),
       ),

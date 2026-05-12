@@ -15,31 +15,103 @@ class NotificationsScreen extends StatefulWidget {
   State<NotificationsScreen> createState() => _NotificationsScreenState();
 }
 
-class _NotificationsScreenState extends State<NotificationsScreen> {
-  final _api = const ApplicationApiService();
+class _NotificationsScreenState extends State<NotificationsScreen>
+    with SingleTickerProviderStateMixin {
+  final ApplicationApiService _api = ApplicationApiService();
+
+  bool _loading = true;
 
   List<Map<String, dynamic>> _items = [];
-  bool _loading = true;
+
+  late AnimationController _shimmerController;
 
   @override
   void initState() {
     super.initState();
+
+    _shimmerController = AnimationController(
+      vsync: this,
+      duration: const Duration(milliseconds: 1200),
+    )..repeat();
+
     _load();
+  }
+
+  @override
+  void dispose() {
+    _shimmerController.dispose();
+    super.dispose();
   }
 
   String _formatDate(String dateStr) {
     try {
       final date = DateTime.parse(dateStr).toLocal();
-      final formattedDate = DateFormat('dd-MM-yyyy').format(date);
-      final weekday = DateFormat('EEEE').format(date);
-      return '$formattedDate $weekday';
+      return DateFormat('dd-MM-yyyy').format(date);
     } catch (e) {
       return dateStr;
     }
   }
 
+  String _formatTime(String dateStr) {
+    try {
+      final date = DateTime.parse(dateStr).toLocal();
+      return DateFormat('hh:mm a').format(date);
+    } catch (e) {
+      return '';
+    }
+  }
+
+  String _getGroupTitle(String dateStr) {
+    try {
+      final date = DateTime.parse(dateStr).toLocal();
+
+      final now = DateTime.now();
+
+      final today = DateTime(now.year, now.month, now.day);
+
+      final yesterday = today.subtract(
+        const Duration(days: 1),
+      );
+
+      final itemDate = DateTime(
+        date.year,
+        date.month,
+        date.day,
+      );
+
+      if (itemDate == today) {
+        return 'Today';
+      } else if (itemDate == yesterday) {
+        return 'Yesterday';
+      } else {
+        return DateFormat('dd MMM yyyy').format(date);
+      }
+    } catch (e) {
+      return 'Others';
+    }
+  }
+
+  Map<String, List<Map<String, dynamic>>> _groupNotifications() {
+    final Map<String, List<Map<String, dynamic>>> grouped = {};
+
+    for (final item in _items) {
+      final group = _getGroupTitle(
+        item['createdAt'] ?? '',
+      );
+
+      if (!grouped.containsKey(group)) {
+        grouped[group] = [];
+      }
+
+      grouped[group]!.add(item);
+    }
+
+    return grouped;
+  }
+
   Future<void> _load() async {
     final prefs = await SharedPreferences.getInstance();
+
     final studentUserId = prefs.getString('studentUserId')?.trim() ?? '';
 
     final data = await _api.fetchStudentOverview(
@@ -63,101 +135,348 @@ class _NotificationsScreenState extends State<NotificationsScreen> {
             }).toList()
           : [];
 
+      _items.sort((a, b) {
+        final aDate = DateTime.tryParse(a['createdAt'] ?? '') ?? DateTime.now();
+
+        final bDate = DateTime.tryParse(b['createdAt'] ?? '') ?? DateTime.now();
+
+        return bDate.compareTo(aDate);
+      });
+
       final unread = _items.where((item) => item['isRead'] != true).length;
+
       NotificationSyncService.instance.updateUnreadCount(unread);
+
       _loading = false;
     });
   }
 
   Future<void> _markAsRead(int index) async {
     final item = _items[index];
+
     if (item['isRead'] == true) return;
 
     final prefs = await SharedPreferences.getInstance();
+
     final studentUserId = prefs.getString('studentUserId')?.trim() ?? '';
+
     final id = (item['id'] ?? '').toString();
+
     if (id.isEmpty || studentUserId.isEmpty) return;
 
     await _api.markStudentNotificationAsRead(
       notificationId: id,
       studentUserId: studentUserId,
     );
+
     if (!mounted) return;
+
     setState(() {
       _items[index]['isRead'] = true;
     });
+
     final unread = _items.where((entry) => entry['isRead'] != true).length;
+
     NotificationSyncService.instance.updateUnreadCount(unread);
   }
 
   Future<void> _refresh() async {
     setState(() => _loading = true);
+
     await _load();
   }
 
-  Widget _emptyState(BuildContext context) {
-    return Center(
-      child: Container(
-        width: double.infinity,
-        padding: const EdgeInsets.symmetric(
-          vertical: 20,
-          horizontal: 12,
-        ),
-        margin: const EdgeInsets.all(12),
-        decoration: BoxDecoration(
-          borderRadius: BorderRadius.circular(10),
-          border: Border.all(
-            color: const Color(0xFFE6E6E6),
+  @override
+  Widget build(BuildContext context) {
+    final groupedItems = _groupNotifications();
+
+    return SideMenuScaffold(
+      title: context.l10n.text('notifications'),
+      child: _loading
+          ? _buildShimmerList()
+          : RefreshIndicator(
+              onRefresh: _refresh,
+              child: _items.isEmpty
+                  ? ListView(
+                      children: [
+                        Container(
+                          margin: const EdgeInsets.all(12),
+                          padding: const EdgeInsets.all(20),
+                          decoration: BoxDecoration(
+                            color: Colors.white,
+                            borderRadius: BorderRadius.circular(10),
+                            border: Border.all(
+                              color: const Color(0xFFE6E6E6),
+                            ),
+                          ),
+                          child: const Text(
+                            'No Notifications Found',
+                            textAlign: TextAlign.center,
+                            style: TextStyle(
+                              color: Color(0xFF616161),
+                              fontWeight: FontWeight.w500,
+                            ),
+                          ),
+                        )
+                      ],
+                    )
+                  : ListView(
+                      children: groupedItems.entries.map((entry) {
+                        final groupTitle = entry.key;
+                        final groupItems = entry.value;
+
+                        return NotificationSection(
+                          title: groupTitle,
+                          items: groupItems,
+                          formatDate: _formatDate,
+                          formatTime: _formatTime,
+                          onTap: (item) {
+                            final index = _items.indexOf(item);
+
+                            if (index != -1) {
+                              _markAsRead(index);
+                            }
+                          },
+                        );
+                      }).toList(),
+                    ),
+            ),
+    );
+  }
+
+  Widget _buildShimmerList() {
+    return AnimatedBuilder(
+      animation: _shimmerController,
+      builder: (context, child) {
+        return ListView.builder(
+          padding: const EdgeInsets.all(12),
+          itemCount: 6,
+          itemBuilder: (context, index) {
+            return Padding(
+              padding: const EdgeInsets.only(bottom: 12),
+              child: Row(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  SizedBox(
+                    width: 16,
+                    child: Column(
+                      children: [
+                        _shimmerCircle(),
+                        Container(
+                          width: 1,
+                          height: 90,
+                          color: Colors.grey.shade300,
+                        ),
+                      ],
+                    ),
+                  ),
+                  const SizedBox(width: 8),
+                  Expanded(
+                    child: _shimmerCard(),
+                  ),
+                ],
+              ),
+            );
+          },
+        );
+      },
+    );
+  }
+
+  Widget _shimmerCircle() {
+    return Container(
+      width: 12,
+      height: 12,
+      decoration: BoxDecoration(
+        shape: BoxShape.circle,
+        gradient: LinearGradient(
+          begin: Alignment(
+            -1 + (_shimmerController.value * 2),
+            0,
           ),
-          color: Colors.white,
-        ),
-        child: Text(
-          context.l10n.text('No notifications available'),
-          textAlign: TextAlign.center,
-          style: const TextStyle(
-            color: Color(0xFF616161),
-            fontWeight: FontWeight.w500,
+          end: Alignment(
+            1 + (_shimmerController.value * 2),
+            0,
           ),
+          colors: [
+            Colors.grey.shade300,
+            Colors.grey.shade100,
+            Colors.grey.shade300,
+          ],
         ),
       ),
     );
   }
 
+  Widget _shimmerCard() {
+    return Container(
+      padding: const EdgeInsets.all(12),
+      decoration: BoxDecoration(
+        borderRadius: BorderRadius.circular(8),
+        border: Border.all(
+          color: Colors.grey.shade300,
+        ),
+      ),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          _shimmerLine(width: double.infinity),
+          const SizedBox(height: 10),
+          _shimmerLine(width: 220),
+          const SizedBox(height: 6),
+          _shimmerLine(width: 180),
+          const SizedBox(height: 14),
+          Row(
+            children: [
+              _shimmerLine(width: 70),
+              const Spacer(),
+              _shimmerLine(width: 90),
+            ],
+          ),
+        ],
+      ),
+    );
+  }
+
+  Widget _shimmerLine({
+    required double width,
+    double height = 12,
+  }) {
+    return Container(
+      width: width,
+      height: height,
+      decoration: BoxDecoration(
+        borderRadius: BorderRadius.circular(4),
+        gradient: LinearGradient(
+          begin: Alignment(
+            -1 + (_shimmerController.value * 2),
+            0,
+          ),
+          end: Alignment(
+            1 + (_shimmerController.value * 2),
+            0,
+          ),
+          colors: [
+            Colors.grey.shade300,
+            Colors.grey.shade100,
+            Colors.grey.shade300,
+          ],
+        ),
+      ),
+    );
+  }
+}
+
+class NotificationSection extends StatelessWidget {
+  const NotificationSection({
+    super.key,
+    required this.title,
+    required this.items,
+    required this.formatDate,
+    required this.formatTime,
+    required this.onTap,
+  });
+
+  final String title;
+
+  final List<Map<String, dynamic>> items;
+
+  final String Function(String) formatDate;
+
+  final String Function(String) formatTime;
+
+  final Function(Map<String, dynamic>) onTap;
+
   @override
   Widget build(BuildContext context) {
-    return SideMenuScaffold(
-      title: context.l10n.text('notifications'),
-      child: _loading
-          ? const Center(
-              child: CircularProgressIndicator(
-                color: AppColors.primary,
-              ),
-            )
-          : Padding(
-              padding: EdgeInsets.symmetric(horizontal: 16),
-              child: RefreshIndicator(
-                onRefresh: _refresh,
-                child: _items.isEmpty
-                    ? ListView(
-                        physics: const AlwaysScrollableScrollPhysics(),
-                        children: [
-                          _emptyState(context),
-                        ],
-                      )
-                    : ListView(
-                        physics: const AlwaysScrollableScrollPhysics(),
-                        children: _items.map((e) {
-                          return NotificationCard(
-                            title: e['title'] ?? '-',
-                            description: e['message'] ?? '',
-                            date: _formatDate(e['createdAt'] ?? ''),
-                            isRead: e['isRead'] == true,
-                            onTap: () => _markAsRead(_items.indexOf(e)),
-                          );
-                        }).toList(),
-                      ),
-              ),
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        Container(
+          alignment: Alignment.topLeft,
+          margin:
+              const EdgeInsets.only(left: 10, right: 10, top: 10, bottom: 10),
+          child: Text(
+            title,
+            style: const TextStyle(
+              fontSize: 16,
+              fontWeight: FontWeight.bold,
+              color: AppColors.accent,
             ),
+          ),
+        ),
+        Padding(
+          padding: const EdgeInsets.symmetric(
+            horizontal: 10,
+          ),
+          child: Column(
+            children: List.generate(
+              items.length,
+              (index) {
+                final item = items[index];
+
+                return IntrinsicHeight(
+                  child: Padding(
+                    padding: const EdgeInsets.only(
+                      bottom: 10,
+                    ),
+                    child: Row(
+                      crossAxisAlignment: CrossAxisAlignment.stretch,
+                      children: [
+                        SizedBox(
+                          width: 16,
+                          child: Column(
+                            children: [
+                              Container(
+                                width: 12,
+                                height: 12,
+                                decoration: BoxDecoration(
+                                  color: item['isRead'] == true
+                                      ? Colors.grey
+                                      : AppColors.accent,
+                                  shape: BoxShape.circle,
+                                ),
+                              ),
+                              Expanded(
+                                child: Container(
+                                  width: 1,
+                                  margin: const EdgeInsets.only(
+                                    top: 4,
+                                  ),
+                                  color: const Color(
+                                    0xFFCAC2B8,
+                                  ),
+                                ),
+                              ),
+                            ],
+                          ),
+                        ),
+                        const SizedBox(width: 8),
+                        Expanded(
+                          child: GestureDetector(
+                            onTap: () => onTap(item),
+                            child: NotificationCard(
+                              title: item['title'] ?? '',
+                              description: item['message'] ?? '',
+                              time: formatTime(
+                                item['createdAt'] ?? '',
+                              ),
+                              date: formatDate(
+                                item['createdAt'] ?? '',
+                              ),
+                              isRead: item['isRead'] == true,
+                            ),
+                          ),
+                        ),
+                      ],
+                    ),
+                  ),
+                );
+              },
+            ),
+          ),
+        ),
+      ],
     );
   }
 }
@@ -167,59 +486,80 @@ class NotificationCard extends StatelessWidget {
     super.key,
     required this.title,
     required this.description,
+    required this.time,
     required this.date,
     required this.isRead,
-    required this.onTap,
   });
 
   final String title;
+
   final String description;
+
+  final String time;
+
   final String date;
+
   final bool isRead;
-  final VoidCallback onTap;
 
   @override
   Widget build(BuildContext context) {
-    return InkWell(
-      onTap: onTap,
-      child: Container(
-        margin: const EdgeInsets.only(bottom: 10),
-        padding: const EdgeInsets.fromLTRB(10, 10, 10, 10),
-        decoration: BoxDecoration(
-          color: isRead ? Colors.white : const Color(0xFFFFF3E6),
-          borderRadius: BorderRadius.circular(6),
-          border: Border.all(
-            color: isRead ? const Color(0xFFD7D4D0) : AppColors.accent,
+    return Container(
+      padding: const EdgeInsets.fromLTRB(
+        10,
+        10,
+        10,
+        10,
+      ),
+      decoration: BoxDecoration(
+        color: isRead ? Colors.grey.shade100 : Colors.white,
+        borderRadius: BorderRadius.circular(6),
+        border: Border.all(
+          color: const Color(0xFFD7D4D0),
+        ),
+      ),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Text(
+            title,
+            style: const TextStyle(
+              fontSize: 14,
+              fontWeight: FontWeight.w700,
+            ),
           ),
-        ),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            Text(
-              date,
-              style: const TextStyle(
-                fontSize: 12,
-                color: AppColors.textMuted,
-              ),
+          const SizedBox(height: 4),
+          Text(
+            description.isEmpty
+                ? context.l10n.text(
+                    'notificationDescription',
+                  )
+                : description,
+            style: const TextStyle(
+              fontSize: 12,
+              color: AppColors.textMuted,
             ),
-            const SizedBox(height: 8),
-            Text(
-              title,
-              style: const TextStyle(
-                fontSize: 14,
-                fontWeight: FontWeight.w700,
+          ),
+          const SizedBox(height: 10),
+          Row(
+            children: [
+              Text(
+                time,
+                style: const TextStyle(
+                  fontSize: 12,
+                  color: AppColors.textMuted,
+                ),
               ),
-            ),
-            const SizedBox(height: 4),
-            Text(
-              description,
-              style: const TextStyle(
-                fontSize: 12,
-                color: AppColors.textMuted,
+              const Spacer(),
+              Text(
+                date,
+                style: const TextStyle(
+                  fontSize: 12,
+                  color: AppColors.textMuted,
+                ),
               ),
-            ),
-          ],
-        ),
+            ],
+          ),
+        ],
       ),
     );
   }
