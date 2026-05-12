@@ -250,7 +250,7 @@ class _NotificationsScreenState extends State<NotificationsScreen>
       builder: (context, child) {
         return ListView.builder(
           padding: const EdgeInsets.all(12),
-          itemCount: 6,
+          itemCount: 10,
           itemBuilder: (context, index) {
             return Padding(
               padding: const EdgeInsets.only(bottom: 12),
