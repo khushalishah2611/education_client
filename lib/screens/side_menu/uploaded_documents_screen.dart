@@ -274,54 +274,111 @@ class _UploadedDocumentsContentState extends State<UploadedDocumentsContent> {
       ),
     );
   }
-
   Widget _buildShimmerList() {
     return ListView.separated(
       padding: const EdgeInsets.all(12),
       itemCount: 10,
-      separatorBuilder: (_, __) => const SizedBox(height: 10),
+      separatorBuilder: (_, __) => const SizedBox(height: 12),
       itemBuilder: (_, __) {
-        return Container(
-          margin: const EdgeInsets.only(bottom: 8),
-          padding: const EdgeInsets.all(12),
-          decoration: BoxDecoration(
-            color: Colors.grey.shade200,
-            borderRadius: BorderRadius.circular(8),
-          ),
-          child: Column(
-            children: [
-              Row(
-                children: [
-                  Container(
-                    width: 54,
-                    height: 54,
-                    color: Colors.grey.shade300,
-                  ),
-                  const SizedBox(width: 10),
-                  Expanded(
-                    child: Column(
-                      children: [
-                        Container(
-                          height: 12,
-                          color: Colors.grey.shade300,
-                        ),
-                        SizedBox(height: 5,),
-                        Container(
-                          height: 12,
-                          color: Colors.grey.shade300,
-                        ),
-                      ],
-                    ),
-                  ),
-                  const SizedBox(width: 10),
-                  Container(
-                    width: 54,
-                    height: 54,
-                    color: Colors.grey.shade300,
-                  ),
-                ],
+        return TweenAnimationBuilder<double>(
+          tween: Tween(begin: 0.3, end: 1),
+          duration: const Duration(milliseconds: 900),
+          curve: Curves.easeInOut,
+          builder: (context, value, child) {
+            return Opacity(
+              opacity: value,
+              child: child,
+            );
+          },
+          onEnd: () {
+            if (mounted) {
+              setState(() {});
+            }
+          },
+          child: Container(
+            padding: const EdgeInsets.all(14),
+            decoration: BoxDecoration(
+              color: const Color(0xFFF5F5F5),
+              borderRadius: BorderRadius.circular(8),
+              border: Border.all(
+                color: Colors.grey.shade200,
               ),
-            ],
+            ),
+            child: Row(
+              crossAxisAlignment: CrossAxisAlignment.center,
+              children: [
+                // PDF ICON BOX
+                Container(
+                  height: 52,
+                  width: 52,
+                  decoration: BoxDecoration(
+                    color: const Color(0xFFE0E0E0),
+                    borderRadius: BorderRadius.circular(14),
+                  ),
+                ),
+
+                const SizedBox(width: 14),
+
+                // TEXT AREA
+                Expanded(
+                  child: Column(
+                    crossAxisAlignment:
+                    CrossAxisAlignment.start,
+                    children: [
+                      Container(
+                        height: 14,
+                        width: 110,
+                        decoration: BoxDecoration(
+                          color: const Color(0xFFE0E0E0),
+                          borderRadius:
+                          BorderRadius.circular(6),
+                        ),
+                      ),
+
+                      const SizedBox(height: 12),
+
+                      Container(
+                        height: 12,
+                        width: double.infinity,
+                        decoration: BoxDecoration(
+                          color: const Color(0xFFE0E0E0),
+                          borderRadius:
+                          BorderRadius.circular(6),
+                        ),
+                      ),
+
+                      const SizedBox(height: 8),
+
+                      Container(
+                        height: 12,
+                        width:
+                        MediaQuery.of(context)
+                            .size
+                            .width *
+                            0.45,
+                        decoration: BoxDecoration(
+                          color: const Color(0xFFE0E0E0),
+                          borderRadius:
+                          BorderRadius.circular(6),
+                        ),
+                      ),
+                    ],
+                  ),
+                ),
+
+                const SizedBox(width: 10),
+
+                // DELETE BUTTON
+                Container(
+                  height: 28,
+                  width: 28,
+                  decoration: const BoxDecoration(
+                    color: Color(0xFFE0E0E0),
+                    shape: BoxShape.circle,
+                  ),
+                ),
+              ],
+            ),
           ),
         );
       },
@@ -345,7 +402,7 @@ class _UploadedDocumentsContentState extends State<UploadedDocumentsContent> {
               ),
               margin: const EdgeInsets.all(12),
               decoration: BoxDecoration(
-                borderRadius: BorderRadius.circular(14),
+                borderRadius: BorderRadius.circular(8),
                 border: Border.all(
                   color: const Color(0xFFE6E6E6),
                 ),
