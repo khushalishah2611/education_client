@@ -5,6 +5,7 @@ import 'package:shared_preferences/shared_preferences.dart';
 import '../../core/app_localizations.dart';
 import '../../core/app_theme.dart';
 import '../../services/application_api_service.dart';
+import '../../services/notification_sync_service.dart';
 import 'side_menu_common.dart';
 
 class NotificationsScreen extends StatefulWidget {
@@ -53,15 +54,40 @@ class _NotificationsScreenState extends State<NotificationsScreen> {
       _items = (notifications is List)
           ? notifications.map<Map<String, dynamic>>((item) {
               return {
+                'id': item['id'] ?? '',
                 'title': item['title'] ?? '-',
                 'message': item['message'] ?? '',
                 'createdAt': item['createdAt'] ?? '',
+                'isRead': item['isRead'] == true,
               };
             }).toList()
           : [];
 
+      final unread = _items.where((item) => item['isRead'] != true).length;
+      NotificationSyncService.instance.updateUnreadCount(unread);
       _loading = false;
     });
+  }
+
+  Future<void> _markAsRead(int index) async {
+    final item = _items[index];
+    if (item['isRead'] == true) return;
+
+    final prefs = await SharedPreferences.getInstance();
+    final studentUserId = prefs.getString('studentUserId')?.trim() ?? '';
+    final id = (item['id'] ?? '').toString();
+    if (id.isEmpty || studentUserId.isEmpty) return;
+
+    await _api.markStudentNotificationAsRead(
+      notificationId: id,
+      studentUserId: studentUserId,
+    );
+    if (!mounted) return;
+    setState(() {
+      _items[index]['isRead'] = true;
+    });
+    final unread = _items.where((entry) => entry['isRead'] != true).length;
+    NotificationSyncService.instance.updateUnreadCount(unread);
   }
 
   Future<void> _refresh() async {
@@ -125,6 +151,8 @@ class _NotificationsScreenState extends State<NotificationsScreen> {
                             title: e['title'] ?? '-',
                             description: e['message'] ?? '',
                             date: _formatDate(e['createdAt'] ?? ''),
+                            isRead: e['isRead'] == true,
+                            onTap: () => _markAsRead(_items.indexOf(e)),
                           );
                         }).toList(),
                       ),
@@ -140,49 +168,58 @@ class NotificationCard extends StatelessWidget {
     required this.title,
     required this.description,
     required this.date,
+    required this.isRead,
+    required this.onTap,
   });
 
   final String title;
   final String description;
   final String date;
+  final bool isRead;
+  final VoidCallback onTap;
 
   @override
   Widget build(BuildContext context) {
-    return Container(
-      margin: const EdgeInsets.only(bottom: 10),
-      padding: const EdgeInsets.fromLTRB(10, 10, 10, 10),
-      decoration: BoxDecoration(
-        color: Colors.white,
-        borderRadius: BorderRadius.circular(6),
-        border: Border.all(color: const Color(0xFFD7D4D0)),
-      ),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          Text(
-            date,
-            style: const TextStyle(
-              fontSize: 12,
-              color: AppColors.textMuted,
-            ),
+    return InkWell(
+      onTap: onTap,
+      child: Container(
+        margin: const EdgeInsets.only(bottom: 10),
+        padding: const EdgeInsets.fromLTRB(10, 10, 10, 10),
+        decoration: BoxDecoration(
+          color: isRead ? Colors.white : const Color(0xFFFFF3E6),
+          borderRadius: BorderRadius.circular(6),
+          border: Border.all(
+            color: isRead ? const Color(0xFFD7D4D0) : AppColors.accent,
           ),
-          const SizedBox(height: 8),
-          Text(
-            title,
-            style: const TextStyle(
-              fontSize: 14,
-              fontWeight: FontWeight.w700,
+        ),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Text(
+              date,
+              style: const TextStyle(
+                fontSize: 12,
+                color: AppColors.textMuted,
+              ),
             ),
-          ),
-          const SizedBox(height: 4),
-          Text(
-            description,
-            style: const TextStyle(
-              fontSize: 12,
-              color: AppColors.textMuted,
+            const SizedBox(height: 8),
+            Text(
+              title,
+              style: const TextStyle(
+                fontSize: 14,
+                fontWeight: FontWeight.w700,
+              ),
             ),
-          ),
-        ],
+            const SizedBox(height: 4),
+            Text(
+              description,
+              style: const TextStyle(
+                fontSize: 12,
+                color: AppColors.textMuted,
+              ),
+            ),
+          ],
+        ),
       ),
     );
   }

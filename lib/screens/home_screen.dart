@@ -1,9 +1,13 @@
 import 'package:education/models/admin_university.dart';
 import 'package:education/models/banner_item.dart';
+import 'package:education/services/application_api_service.dart';
+import 'package:education/services/notification_sync_service.dart';
 import 'package:education/screens/lates_updates_screen.dart';
 import 'package:education/screens/side_menu/track_my_applications_screen.dart';
 import 'package:education/screens/side_menu/uploaded_documents_screen.dart';
 import 'package:flutter/material.dart';
+import 'package:shared_preferences/shared_preferences.dart';
+import 'dart:async';
 import '../core/app_localizations.dart';
 import '../core/app_theme.dart';
 import '../core/image_url_helper.dart';
@@ -34,6 +38,8 @@ class _HomeScreenState extends State<HomeScreen> {
     viewportFraction: 1,
   );
   int _activeBannerIndex = 0;
+  Timer? _notificationTimer;
+  final _applicationApi = const ApplicationApiService();
 
   @override
   void initState() {
@@ -44,6 +50,11 @@ class _HomeScreenState extends State<HomeScreen> {
       initialDialCode: widget.initialDialCode,
     )..addListener(_onControllerChanged);
     _controller.initialize();
+    _refreshUnreadNotifications();
+    _notificationTimer = Timer.periodic(
+      const Duration(seconds: 20),
+      (_) => _refreshUnreadNotifications(),
+    );
   }
 
   @override
@@ -52,7 +63,24 @@ class _HomeScreenState extends State<HomeScreen> {
       ..removeListener(_onControllerChanged)
       ..dispose();
     _bannerPageController.dispose();
+    _notificationTimer?.cancel();
     super.dispose();
+  }
+
+  Future<void> _refreshUnreadNotifications() async {
+    final prefs = await SharedPreferences.getInstance();
+    final studentUserId = prefs.getString('studentUserId')?.trim() ?? '';
+    if (studentUserId.isEmpty) return;
+    try {
+      final data = await _applicationApi.fetchStudentOverview(
+        studentUserId: studentUserId,
+      );
+      final notifications = data['notifications'];
+      final unread = notifications is List
+          ? notifications.where((item) => item['isRead'] != true).length
+          : 0;
+      NotificationSyncService.instance.updateUnreadCount(unread);
+    } catch (_) {}
   }
 
   void _onControllerChanged() {
@@ -151,28 +179,36 @@ class _HomeScreenState extends State<HomeScreen> {
                                 const Spacer(),
                                 const AppLogo(compact: true, center: true),
                                 const Spacer(),
-                                Stack(
-                                  clipBehavior: Clip.none,
-                                  children: [
-                                    const Icon(
-                                      Icons.notifications_none_rounded,
-                                      size: 26,
-                                    ),
-                                    Positioned(
-                                      right: 2,
-                                      top: 2,
-                                      child: Container(
-                                        width: 8,
-                                        height: 8,
-                                        decoration: BoxDecoration(
-                                          color: Colors.red,
-                                          borderRadius: BorderRadius.circular(
-                                            10,
-                                          ),
+                                ValueListenableBuilder<int>(
+                                  valueListenable:
+                                      NotificationSyncService.instance.unreadCount,
+                                  builder: (_, unread, __) {
+                                    return Stack(
+                                      clipBehavior: Clip.none,
+                                      children: [
+                                        const Icon(
+                                          Icons.notifications_none_rounded,
+                                          size: 26,
                                         ),
-                                      ),
-                                    ),
-                                  ],
+                                        if (unread > 0)
+                                          Positioned(
+                                            right: 2,
+                                            top: 2,
+                                            child: Container(
+                                              width: 8,
+                                              height: 8,
+                                              decoration: BoxDecoration(
+                                                color: Colors.red,
+                                                borderRadius:
+                                                    BorderRadius.circular(
+                                                  10,
+                                                ),
+                                              ),
+                                            ),
+                                          ),
+                                      ],
+                                    );
+                                  },
                                 ),
                               ],
                             ),

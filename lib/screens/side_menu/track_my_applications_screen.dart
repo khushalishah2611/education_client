@@ -4,6 +4,7 @@ import 'package:flutter/material.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
 import '../../core/app_theme.dart';
+import '../track_application_screen.dart';
 import 'side_menu_common.dart';
 
 class TrackMyApplicationsScreen extends StatefulWidget {
@@ -162,26 +163,43 @@ class _TrackMyApplicationsScreenState extends State<TrackMyApplicationsScreen> {
 
     final statusColor = _getStatusColor(status);
 
-    return Container(
-      padding: const EdgeInsets.all(12),
-      decoration: BoxDecoration(
-        color: Colors.white,
-        borderRadius: BorderRadius.circular(8),
-        border: Border.all(
-          color: const Color(0xFFE0DDD8),
-        ),
-      ),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          Text(
-            'Application ID : #${(item['appId'] ?? '').toString().substring(0, 8)}',
-            style: const TextStyle(
-              fontSize: 14,
-              fontWeight: FontWeight.w500,
+    final resolvedUniversityName = (item['universityName'] ?? '').toString();
+    final resolvedCourseTitle = (item['courseName'] ?? '').toString();
+    final appId = (item['id'] ?? '').toString();
+    return InkWell(
+      onTap: () {
+        Navigator.of(context).push(
+          MaterialPageRoute(
+            builder: (_) => TrackApplicationScreen(
+              universityName: resolvedUniversityName,
+              universityHeroImage: (item['logoPath'] ?? '').toString(),
+              courseTitle: resolvedCourseTitle,
+              applicationId: appId,
+              studentOverview: const <String, dynamic>{},
             ),
           ),
-          const SizedBox(height: 10),
+        ),
+      },
+      child: Container(
+        padding: const EdgeInsets.all(12),
+        decoration: BoxDecoration(
+          color: Colors.white,
+          borderRadius: BorderRadius.circular(8),
+          border: Border.all(
+            color: const Color(0xFFE0DDD8),
+          ),
+        ),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Text(
+              'Application ID : #${(item['appId'] ?? '').toString().substring(0, 8)}',
+              style: const TextStyle(
+                fontSize: 14,
+                fontWeight: FontWeight.w500,
+              ),
+            ),
+            const SizedBox(height: 10),
 
           Row(
             crossAxisAlignment: CrossAxisAlignment.start,
@@ -294,7 +312,8 @@ class _TrackMyApplicationsScreenState extends State<TrackMyApplicationsScreen> {
               ),
             ],
           ),
-        ],
+          ],
+        ),
       ),
     );
   }

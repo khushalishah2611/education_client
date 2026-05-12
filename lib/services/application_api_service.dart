@@ -24,6 +24,37 @@ class ApplicationApiException implements Exception {
 class ApplicationApiService {
   const ApplicationApiService();
 
+  Future<Map<String, dynamic>> markStudentNotificationAsRead({
+    required String notificationId,
+    required String studentUserId,
+  }) async {
+    final Uri uri = ApiConfig.uri(
+      '/api/student/notifications/${Uri.encodeComponent(notificationId)}/read',
+    ).replace(
+      queryParameters: <String, String>{'studentUserId': studentUserId},
+    );
+    final response = await http.patch(uri, headers: await _authHeaders());
+    final decoded = _decodeMap(response.body);
+
+    logApiCall(
+      method: 'PATCH',
+      url: uri.toString(),
+      statusCode: response.statusCode,
+      requestBody: null,
+      responseBody: decoded,
+    );
+
+    if (!ApiStatus.isSuccess(response.statusCode)) {
+      throw ApplicationApiException(
+        statusCode: response.statusCode,
+        message: decoded['message']?.toString() ??
+            'Failed to mark notification as read',
+      );
+    }
+
+    return decoded;
+  }
+
   Future<Map<String, dynamic>> createBulkApplications({
     required String studentUserId,
     required List<Map<String, dynamic>> applications,
