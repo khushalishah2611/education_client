@@ -17,6 +17,7 @@ import '../models/country_option.dart';
 import '../services/home_api_service.dart';
 import '../widgets/app_drawer.dart';
 import '../widgets/common_widgets.dart';
+import 'side_menu/notifications_screen.dart';
 import '../widgets/flow_widgets.dart';
 import 'university_detail_screen.dart';
 
@@ -179,11 +180,20 @@ class _HomeScreenState extends State<HomeScreen> {
                                 const Spacer(),
                                 const AppLogo(compact: true, center: true),
                                 const Spacer(),
-                                ValueListenableBuilder<int>(
-                                  valueListenable:
-                                      NotificationSyncService.instance.unreadCount,
-                                  builder: (_, unread, __) {
-                                    return Stack(
+                                InkWell(
+                                  borderRadius: BorderRadius.circular(20),
+                                  onTap: () {
+                                    Navigator.of(context).push(
+                                      MaterialPageRoute(
+                                        builder: (_) => const NotificationsScreen(),
+                                      ),
+                                    );
+                                  },
+                                  child: ValueListenableBuilder<int>(
+                                    valueListenable:
+                                        NotificationSyncService.instance.unreadCount,
+                                    builder: (_, unread, __) {
+                                      return Stack(
                                       clipBehavior: Clip.none,
                                       children: [
                                         const Icon(
@@ -208,7 +218,8 @@ class _HomeScreenState extends State<HomeScreen> {
                                           ),
                                       ],
                                     );
-                                  },
+                                    },
+                                  ),
                                 ),
                               ],
                             ),
