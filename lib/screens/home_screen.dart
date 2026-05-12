@@ -1,8 +1,8 @@
 import 'package:education/models/admin_university.dart';
 import 'package:education/models/banner_item.dart';
+import 'package:education/screens/latest_updates_screen.dart';
 import 'package:education/services/application_api_service.dart';
 import 'package:education/services/notification_sync_service.dart';
-import 'package:education/screens/lates_updates_screen.dart';
 import 'package:education/screens/side_menu/track_my_applications_screen.dart';
 import 'package:education/screens/side_menu/uploaded_documents_screen.dart';
 import 'package:flutter/material.dart';
