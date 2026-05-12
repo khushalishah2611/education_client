@@ -211,7 +211,7 @@ class SectionCard extends StatelessWidget {
           ),
           const SizedBox(height: 6),
           ...bullets.map(
-            (point) => Padding(
+                (point) => Padding(
               padding: const EdgeInsets.only(bottom: 4),
               child: Row(
                 crossAxisAlignment: CrossAxisAlignment.start,
@@ -308,9 +308,7 @@ Future<void> showLogoutDialog(BuildContext context) {
                         onPressed: () async {
                           final navigator = Navigator.of(context);
                           final prefs = await SharedPreferences.getInstance();
-                          await prefs.setBool('isLoggedIn', false);
-                          await prefs.remove('loginCountry');
-                          await prefs.remove('loginDialCode');
+                          await prefs.clear();
                           if (!context.mounted) return;
 
                           navigator.pop();
@@ -318,7 +316,7 @@ Future<void> showLogoutDialog(BuildContext context) {
                             MaterialPageRoute(
                               builder: (_) => const LoginScreen(),
                             ),
-                            (route) => false,
+                                (route) => false,
                           );
                         },
                         style: FilledButton.styleFrom(
