@@ -769,6 +769,23 @@ class _CollegeAccordionState extends State<_CollegeAccordion> {
     return payload;
   }
 
+  bool _shouldShowApplyAndPayButton(Courses details) {
+    final bool hasApplicationFee = (details.applicationFee ?? 0) > 0;
+    if (!hasApplicationFee) return false;
+
+    final String status = (details.status ?? '').trim().toLowerCase();
+    final bool isApplicationFeePaid =
+        status == 'paid' ||
+        status == 'payment_done' ||
+        status == 'payment done' ||
+        status == 'payment_completed' ||
+        status == 'payment completed' ||
+        status == 'application_submitted' ||
+        status == 'application submitted';
+
+    return !isApplicationFeePaid;
+  }
+
   Widget _buildCourseRow({
     required int index,
     required Courses details,
@@ -891,35 +908,36 @@ class _CollegeAccordionState extends State<_CollegeAccordion> {
                         ),
                       ),
                     ),
-                    InkWell(
-                      onTap: () async {
-                        widget.onToggleCourse(courseKey);
+                    if (_shouldShowApplyAndPayButton(details))
+                      InkWell(
+                        onTap: () async {
+                          widget.onToggleCourse(courseKey);
 
-                        if (!context.mounted) return;
+                          if (!context.mounted) return;
 
-                        Navigator.push(
-                          context,
-                          MaterialPageRoute(
-                            builder: (_) => UploadDocumentsScreen(
-                              universityName: adminUniversity.name,
-                              universityHeroImage:
-                                  ImageUrlHelper.resolveUploadUrl(
-                                adminUniversity.coverImagePath,
-                              ),
-                              courseTitle: details.name,
-                              applicationsPayload: <Map<String, dynamic>>[
-                                _buildApplicationPayload(
-                                  adminUniversity: adminUniversity,
-                                  collegeName: collegeName,
-                                  courseDetails: details,
-                                  courseKey: courseKey,
+                          Navigator.push(
+                            context,
+                            MaterialPageRoute(
+                              builder: (_) => UploadDocumentsScreen(
+                                universityName: adminUniversity.name,
+                                universityHeroImage:
+                                    ImageUrlHelper.resolveUploadUrl(
+                                  adminUniversity.coverImagePath,
                                 ),
-                              ],
+                                courseTitle: details.name,
+                                applicationsPayload: <Map<String, dynamic>>[
+                                  _buildApplicationPayload(
+                                    adminUniversity: adminUniversity,
+                                    collegeName: collegeName,
+                                    courseDetails: details,
+                                    courseKey: courseKey,
+                                  ),
+                                ],
+                              ),
                             ),
-                          ),
-                        );
-                      },
-                      child: Container(
+                          );
+                        },
+                        child: Container(
                         alignment: Alignment.center,
                         margin: EdgeInsets.symmetric(vertical: 5),
                         padding: const EdgeInsets.symmetric(
