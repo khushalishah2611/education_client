@@ -249,7 +249,7 @@ extension ApplicationApiDocuments on ApplicationApiService {
       ..fields['type'] = type
       ..files.add(
         await http.MultipartFile.fromPath(
-          'files',
+          'file',
           filePath,
           filename: fileName,
         ),
