@@ -111,7 +111,7 @@ class _TrackMyApplicationsScreenState extends State<TrackMyApplicationsScreen> {
       case 'IN_PROGRESS':
         return Colors.orange;
 
-      case 'APPROVED':
+      case 'ACCEPTED':
         return Colors.green;
 
       case 'ON_HOLD':
