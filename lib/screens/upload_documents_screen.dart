@@ -127,6 +127,11 @@ class _UploadDocumentsScreenState extends State<UploadDocumentsScreen> {
       if (studentUserId.isEmpty) {
         throw Exception('studentUserId not found');
       }
+      final String documentKey = _resolveDocumentKey(doc.type);
+      await _deleteExistingDocumentsByKey(
+        studentUserId: studentUserId,
+        documentKey: documentKey,
+      );
 
       final Map<String, dynamic> response =
           await _applicationApiService.uploadStudentDocument(
@@ -143,7 +148,6 @@ class _UploadDocumentsScreenState extends State<UploadDocumentsScreen> {
         fallbackFilePath: filePath,
       );
 
-      final String documentKey = _resolveDocumentKey(doc.type);
       setState(() {
         _selectedFiles[documentKey] = file;
         _uploadedDocuments[documentKey] = uploadedDocument;
@@ -372,9 +376,33 @@ class _UploadDocumentsScreenState extends State<UploadDocumentsScreen> {
 
     return _UploadedDocumentInfo(
       type: type,
+      documentId: _documentIdFromApiItem(item),
       fileName: _firstDocumentString(item, _fileNameKeys),
       openUri: _uriFromApiValue(_firstDocumentString(item, _fileUrlKeys)),
     );
+  }
+
+  Future<void> _deleteExistingDocumentsByKey({
+    required String studentUserId,
+    required String documentKey,
+  }) async {
+    final List<MapEntry<String, _UploadedDocumentInfo>> matchingEntries =
+        _uploadedDocuments.entries
+            .where(
+              (entry) =>
+                  entry.key == documentKey ||
+                  entry.key.startsWith('${documentKey}_'),
+            )
+            .toList(growable: false);
+    for (final MapEntry<String, _UploadedDocumentInfo> entry
+        in matchingEntries) {
+      final String documentId = entry.value.documentId?.trim() ?? '';
+      if (documentId.isEmpty) continue;
+      await _applicationApiService.deleteStudentDocument(
+        documentId: documentId,
+        studentUserId: studentUserId,
+      );
+    }
   }
 
   List<_DocumentDefinition> _documentDefinitionsFromTypes(
@@ -530,6 +558,15 @@ class _UploadDocumentsScreenState extends State<UploadDocumentsScreen> {
       if (text.isNotEmpty) return text;
     }
     return '';
+  }
+
+  String? _documentIdFromApiItem(Map<String, dynamic> item) {
+    final String id = _firstNonEmptyValue(item, const <String>[
+      'id',
+      'documentId',
+      'document_id',
+    ]);
+    return id.isEmpty ? null : id;
   }
 
   String? _firstDocumentString(
@@ -764,11 +801,13 @@ const Set<String> _fileUrlKeys = <String>{
 class _UploadedDocumentInfo {
   const _UploadedDocumentInfo({
     required this.type,
+    this.documentId,
     this.fileName,
     this.openUri,
   });
 
   final String type;
+  final String? documentId;
   final String? fileName;
   final Uri? openUri;
 
@@ -779,11 +818,13 @@ class _UploadedDocumentInfo {
 
   _UploadedDocumentInfo copyWith({
     String? type,
+    String? documentId,
     String? fileName,
     Uri? openUri,
   }) {
     return _UploadedDocumentInfo(
       type: type ?? this.type,
+      documentId: documentId ?? this.documentId,
       fileName: fileName ?? this.fileName,
       openUri: openUri ?? this.openUri,
     );

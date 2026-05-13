@@ -173,6 +173,19 @@ class _TrackApplicationScreenState extends State<TrackApplicationScreen> {
     return context.l10n.text('courseOrProgram');
   }
 
+  String get _educationInstitute {
+    final Object? selectedCourses = _application?['selectedCourses'];
+    if (selectedCourses is List && selectedCourses.isNotEmpty) {
+      final Object? selectedCourse = selectedCourses.first;
+      if (selectedCourse is Map) {
+        final String educationInstitute =
+            _textFrom(selectedCourse['educationInstitute']);
+        if (educationInstitute.isNotEmpty) return educationInstitute;
+      }
+    }
+    return '-';
+  }
+
   String get _status => _textFrom(_application?['status']).ifEmpty('NEW');
 
   String get _paymentStatus => _textFrom(_payment?['status']).ifEmpty('-');
@@ -235,6 +248,7 @@ class _TrackApplicationScreenState extends State<TrackApplicationScreen> {
                           applicationId: _applicationId,
                           universityName: _universityName,
                           courseTitle: _courseTitle,
+                          educationInstitute: _educationInstitute,
                           status: _status,
                           applicationFee: _applicationFee,
                           paymentStatus: _paymentStatus,
@@ -345,6 +359,7 @@ class _ApplicationOverviewCard extends StatelessWidget {
     required this.applicationId,
     required this.universityName,
     required this.courseTitle,
+    required this.educationInstitute,
     required this.status,
     required this.applicationFee,
     required this.paymentStatus,
@@ -356,6 +371,7 @@ class _ApplicationOverviewCard extends StatelessWidget {
   final String applicationId;
   final String universityName;
   final String courseTitle;
+  final String educationInstitute;
   final String status;
   final String applicationFee;
   final String paymentStatus;
@@ -402,6 +418,15 @@ class _ApplicationOverviewCard extends StatelessWidget {
                 ),
               ),
             ],
+          ),
+          const SizedBox(height: 8),
+          Text(
+            educationInstitute,
+            style: TextStyle(
+              fontSize: isSmallMobile ? 13 : 14,
+              color: AppColors.textMuted,
+              fontWeight: FontWeight.w500,
+            ),
           ),
           const SizedBox(height: 12),
           // _OverviewGrid(
