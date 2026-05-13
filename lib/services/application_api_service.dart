@@ -309,6 +309,106 @@ extension ApplicationApiDocuments on ApplicationApiService {
   }
 }
 
+
+extension ApplicationApiStudents on ApplicationApiService {
+  Future<List<Map<String, dynamic>>> fetchStudents() async {
+    final Uri uri = ApiConfig.uri('/api/admin/students');
+    final response = await http.get(uri);
+    final Object? parsed = jsonDecode(response.body);
+
+    logApiCall(
+      method: 'GET',
+      url: uri.toString(),
+      statusCode: response.statusCode,
+      requestBody: null,
+      responseBody: parsed,
+    );
+
+    if (!ApiStatus.isSuccess(response.statusCode)) {
+      final Map<String, dynamic> decoded = _decodeMap(response.body);
+      throw ApplicationApiException(
+        statusCode: response.statusCode,
+        message: decoded['message']?.toString() ?? 'Failed to fetch students',
+      );
+    }
+
+    if (parsed is List<dynamic>) {
+      return parsed.whereType<Map<String, dynamic>>().toList(growable: false);
+    }
+
+    return <Map<String, dynamic>>[];
+  }
+
+  Future<Map<String, dynamic>> updateStudentProfile({
+    required String studentUserId,
+    required String fullName,
+    required String firstName,
+    required String lastName,
+    required String email,
+    required String country,
+    required int? age,
+    required String dateOfBirth,
+    required String phone,
+    required String gender,
+    required String emergencyContactGuardianName,
+    required String emergencyContactRelationship,
+    required String emergencyContactMobile,
+    required String emergencyContactEmail,
+    required bool isActive,
+    String? profileImagePath,
+    String? profileImageName,
+  }) async {
+    final Uri uri = ApiConfig.uri('/api/admin/students/${Uri.encodeComponent(studentUserId)}');
+
+    final request = http.MultipartRequest('PUT', uri)
+      ..fields['fullName'] = fullName
+      ..fields['firstName'] = firstName
+      ..fields['lastName'] = lastName
+      ..fields['email'] = email
+      ..fields['country'] = country
+      ..fields['age'] = (age ?? 0).toString()
+      ..fields['dateOfBirth'] = dateOfBirth
+      ..fields['phone'] = phone
+      ..fields['gender'] = gender
+      ..fields['emergencyContactGuardianName'] = emergencyContactGuardianName
+      ..fields['emergencyContactRelationship'] = emergencyContactRelationship
+      ..fields['emergencyContactMobile'] = emergencyContactMobile
+      ..fields['emergencyContactEmail'] = emergencyContactEmail
+      ..fields['isActive'] = isActive.toString();
+
+    if ((profileImagePath ?? '').isNotEmpty) {
+      request.files.add(
+        await http.MultipartFile.fromPath(
+          'profileImage',
+          profileImagePath!,
+          filename: profileImageName,
+        ),
+      );
+    }
+
+    final streamed = await request.send();
+    final response = await http.Response.fromStream(streamed);
+    final decoded = _decodeMap(response.body);
+
+    logApiCall(
+      method: 'PUT',
+      url: uri.toString(),
+      statusCode: response.statusCode,
+      requestBody: request.fields,
+      responseBody: decoded,
+    );
+
+    if (!ApiStatus.isSuccess(response.statusCode)) {
+      throw ApplicationApiException(
+        statusCode: response.statusCode,
+        message: decoded['message']?.toString() ?? 'Failed to update student',
+      );
+    }
+
+    return decoded;
+  }
+}
+
 Map<String, dynamic> _decodeMap(String body) {
   try {
     final Object? parsed = jsonDecode(body);
