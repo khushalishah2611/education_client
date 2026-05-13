@@ -1,10 +1,9 @@
 import 'package:file_picker/file_picker.dart';
 import 'package:flutter/material.dart';
+
 import '../core/app_localizations.dart';
-import '../core/api_config.dart';
 import '../core/app_theme.dart';
 import '../core/responsive_helper.dart';
-import '../core/url_launcher_helper.dart';
 import '../core/student_session.dart';
 import '../models/document_type.dart';
 import '../services/application_api_service.dart';
@@ -12,7 +11,11 @@ import '../widgets/common_widgets.dart';
 import '../widgets/flow_widgets.dart';
 import 'payment_screen.dart';
 
-typedef _DocumentDefinition = ({String type, String title, String subtitle});
+typedef _DocumentDefinition = ({
+String type,
+String title,
+String subtitle,
+});
 
 class UploadDocumentsScreen extends StatefulWidget {
   const UploadDocumentsScreen({
@@ -29,19 +32,24 @@ class UploadDocumentsScreen extends StatefulWidget {
   final List<Map<String, dynamic>> applicationsPayload;
 
   @override
-  State<UploadDocumentsScreen> createState() => _UploadDocumentsScreenState();
+  State<UploadDocumentsScreen> createState() =>
+      _UploadDocumentsScreenState();
 }
 
-class _UploadDocumentsScreenState extends State<UploadDocumentsScreen> {
+class _UploadDocumentsScreenState
+    extends State<UploadDocumentsScreen> {
   static const int _maxUploadBytes = 5 * 1024 * 1024;
-  late final Map<String, PlatformFile?> _selectedFiles = {};
-  final Map<String, _UploadedDocumentInfo> _uploadedDocuments =
-      <String, _UploadedDocumentInfo>{};
+
+  final Map<String, PlatformFile?> _selectedFiles =
+  <String, PlatformFile?>{};
+
   final ApplicationApiService _applicationApiService =
-      const ApplicationApiService();
+  const ApplicationApiService();
+
   bool _isUploading = false;
-  List<_DocumentDefinition> _docs = const [];
-  Map<String, String> _documentTypeAliases = const <String, String>{};
+
+  List<_DocumentDefinition> _docs =
+  const <_DocumentDefinition>[];
 
   @override
   void initState() {
@@ -55,119 +63,117 @@ class _UploadDocumentsScreenState extends State<UploadDocumentsScreen> {
     });
 
     try {
-      final String studentUserId = await _resolveStudentUserId();
       final List<DocumentTypeItem> types =
-          await _applicationApiService.fetchDocumentTypes();
-      final List<Map<String, dynamic>> uploaded =
-          await _applicationApiService.fetchStudentDocuments(
-        studentUserId: studentUserId,
-      );
+      await _applicationApiService.fetchDocumentTypes();
+
       final bool isArabic =
-          (WidgetsBinding.instance.platformDispatcher.locale.languageCode) ==
+          WidgetsBinding
+              .instance
+              .platformDispatcher
+              .locale
+              .languageCode ==
               'ar';
 
       final List<_DocumentDefinition> docs =
-          _documentDefinitionsFromTypes(types, isArabic: isArabic);
-      final Map<String, String> documentTypeAliases =
-          _documentTypeAliasesFromTypes(types);
-      final Map<String, _UploadedDocumentInfo> uploadedDocs =
-          _uploadedDocumentsFromApiItems(
-        uploaded,
-        documentTypeAliases: documentTypeAliases,
+      _documentDefinitionsFromTypes(
+        types,
+        isArabic: isArabic,
       );
 
       if (!mounted) return;
+
       setState(() {
         _docs = docs;
-        _documentTypeAliases = documentTypeAliases;
-        _uploadedDocuments
-          ..clear()
-          ..addAll(uploadedDocs);
       });
     } catch (e) {
+      debugPrint(e.toString());
     } finally {
       if (mounted) {
-        setState(() => _isUploading = false);
+        setState(() {
+          _isUploading = false;
+        });
       }
     }
   }
 
   Future<void> _pickDocument(
-    _DocumentDefinition doc,
-  ) async {
-    final result = await FilePicker.platform.pickFiles(
+      _DocumentDefinition doc,
+      ) async {
+    final result =
+    await FilePicker.platform.pickFiles(
       type: FileType.custom,
       allowedExtensions: ['pdf'],
       allowMultiple: false,
     );
 
-    if (result == null || result.files.isEmpty) {
+    if (result == null ||
+        result.files.isEmpty) {
       return;
     }
 
-    final file = result.files.first;
-    final filePath = file.path;
-    if (filePath == null || filePath.isEmpty) {
+    final PlatformFile file =
+        result.files.first;
+
+    final String? filePath = file.path;
+
+    if (filePath == null ||
+        filePath.isEmpty) {
       return;
     }
 
     if (file.size > _maxUploadBytes) {
       if (!mounted) return;
+
       showAppSnackBar(
         context,
         type: AppSnackBarType.error,
-        message: 'File too large. Maximum allowed size is 5 MB.',
+        message:
+        'File too large. Maximum allowed size is 5 MB.',
       );
+
       return;
     }
 
-    setState(() => _isUploading = true);
-    try {
-      final String studentUserId = await _resolveStudentUserId();
-      if (studentUserId.isEmpty) {
-        throw Exception('studentUserId not found');
-      }
-      final String documentKey = _resolveDocumentKey(doc.type);
-      final String? existingDocumentKey = _uploadedDocumentKeyFor(documentKey);
-      final String? existingDocumentId = existingDocumentKey == null
-          ? null
-          : _uploadedDocuments[existingDocumentKey]?.documentId?.trim();
+    setState(() {
+      _isUploading = true;
+    });
 
-      final Map<String, dynamic> response = (existingDocumentId != null &&
-              existingDocumentId.isNotEmpty)
-          ? await _applicationApiService.updateStudentDocument(
-              studentUserId: studentUserId,
-              documentId: existingDocumentId,
-              type: doc.type,
-              filePath: filePath,
-              fileName: file.name,
-            )
-          : await _applicationApiService.uploadStudentDocument(
-              studentUserId: studentUserId,
-              type: doc.type,
-              filePath: filePath,
-              fileName: file.name,
-            );
-      final _UploadedDocumentInfo uploadedDocument =
-          _uploadedDocumentFromUploadResponse(
-        response,
-        fallbackType: doc.type,
-        fallbackFileName: file.name,
-        fallbackFilePath: filePath,
+    try {
+      final String studentUserId =
+      await _resolveStudentUserId();
+
+      if (studentUserId.isEmpty) {
+        throw Exception(
+          'studentUserId not found',
+        );
+      }
+
+      await _applicationApiService
+          .uploadStudentDocument(
+        studentUserId: studentUserId,
+        type: doc.type,
+        filePath: filePath,
+        fileName: file.name,
       );
+
+      final String documentKey =
+      _documentKey(doc.type);
 
       setState(() {
         _selectedFiles[documentKey] = file;
-        _uploadedDocuments[documentKey] = uploadedDocument;
       });
+
       if (!mounted) return;
+
       showAppSnackBar(
         context,
         type: AppSnackBarType.success,
-        message: '${doc.title} uploaded successfully',
+        message:
+        '${doc.title} uploaded successfully',
       );
     } catch (e) {
       if (!mounted) return;
+
       showAppSnackBar(
         context,
         type: AppSnackBarType.error,
@@ -175,272 +181,198 @@ class _UploadDocumentsScreenState extends State<UploadDocumentsScreen> {
       );
     } finally {
       if (mounted) {
-        setState(() => _isUploading = false);
+        setState(() {
+          _isUploading = false;
+        });
       }
     }
   }
 
   bool get _hasAllRequiredDocuments =>
       _docs.isNotEmpty &&
-      _docs.every(
-        (doc) {
-          final String documentKey = _resolveDocumentKey(doc.type);
-          return _selectedFiles[documentKey] != null ||
-              _hasUploadedDocumentForKey(documentKey);
-        },
-      );
+          _docs.every(
+                (doc) {
+              final String documentKey =
+              _documentKey(doc.type);
 
-  Future<bool> _refreshUploadedDocuments() async {
-    final String studentUserId = await _resolveStudentUserId();
-    final List<Map<String, dynamic>> uploaded =
-        await _applicationApiService.fetchStudentDocuments(
-      studentUserId: studentUserId,
-    );
-    final Map<String, _UploadedDocumentInfo> uploadedDocs =
-        _uploadedDocumentsFromApiItems(
-      uploaded,
-      documentTypeAliases: _documentTypeAliases,
-    );
-
-    if (mounted) {
-      setState(() {
-        _uploadedDocuments
-          ..clear()
-          ..addAll(uploadedDocs);
-      });
-    }
-
-    return _docs.every(
-      (doc) {
-        final String documentKey = _resolveDocumentKey(doc.type);
-        return _selectedFiles[documentKey] != null ||
-            _hasUploadedDocumentForKey(
-              documentKey,
-              uploadedDocuments: uploadedDocs,
-            );
-      },
-    );
-  }
+              return _selectedFiles[
+              documentKey] !=
+                  null;
+            },
+          );
 
   Future<void> _onContinue() async {
-    setState(() => _isUploading = true);
-    try {
-      final bool hasAllRequiredFromApi =
-          _hasAllRequiredDocuments || await _refreshUploadedDocuments();
-
-      if (!hasAllRequiredFromApi) {
-        if (!mounted) return;
-        showAppSnackBar(
-          context,
-          type: AppSnackBarType.error,
-          message: context.l10n.text('uploadAllRequiredDocs'),
-        );
-        return;
-      }
-
-      if (!mounted) return;
-      Navigator.of(context).push(
-        MaterialPageRoute(
-          builder: (_) => PaymentScreen(
-            universityName: widget.universityName,
-            universityHeroImage: widget.universityHeroImage,
-            courseTitle: widget.courseTitle,
-            applicationsPayload: widget.applicationsPayload,
-          ),
-        ),
-      );
-    } catch (e) {
-      if (!mounted) return;
+    if (!_hasAllRequiredDocuments) {
       showAppSnackBar(
         context,
         type: AppSnackBarType.error,
-        message: e.toString(),
+        message: context.l10n.text(
+          'uploadAllRequiredDocs',
+        ),
       );
-    } finally {
-      if (mounted) {
-        setState(() => _isUploading = false);
+
+      return;
+    }
+
+    Navigator.of(context).push(
+      MaterialPageRoute(
+        builder: (_) => PaymentScreen(
+          universityName:
+          widget.universityName,
+          universityHeroImage:
+          widget.universityHeroImage,
+          courseTitle:
+          widget.courseTitle,
+          applicationsPayload:
+          widget.applicationsPayload,
+        ),
+      ),
+    );
+  }
+
+  Future<String>
+  _resolveStudentUserId() async {
+    final String fromSession =
+    await StudentSession
+        .currentStudentUserId();
+
+    if (fromSession.isNotEmpty) {
+      return fromSession;
+    }
+
+    for (final Map<String, dynamic>
+    item in widget
+        .applicationsPayload) {
+      final String fromTopLevel =
+      (item['studentUserId'] ?? '')
+          .toString()
+          .trim();
+
+      if (fromTopLevel.isNotEmpty) {
+        return fromTopLevel;
       }
-    }
-  }
 
-  _UploadedDocumentInfo? _uploadedDocument(String type) {
-    final String documentKey = _resolveDocumentKey(type);
-    final PlatformFile? selectedFile = _selectedFiles[documentKey];
-    if (selectedFile != null) {
-      return _UploadedDocumentInfo(
-        type: type,
-        fileName: selectedFile.name,
-        openUri: _uriFromFilePath(selectedFile.path),
-      );
-    }
-    return _uploadedDocuments[_uploadedDocumentKeyFor(documentKey)];
-  }
+      final String fromStudentId =
+      (item['studentId'] ?? '')
+          .toString()
+          .trim();
 
-  Future<String> _resolveStudentUserId() async {
-    final String fromSession = await StudentSession.currentStudentUserId();
-    if (fromSession.isNotEmpty) return fromSession;
+      if (fromStudentId.isNotEmpty) {
+        return fromStudentId;
+      }
 
-    for (final Map<String, dynamic> item in widget.applicationsPayload) {
-      final String fromTopLevel = (item['studentUserId'] ?? '').toString().trim();
-      if (fromTopLevel.isNotEmpty) return fromTopLevel;
-      final String fromStudentId = (item['studentId'] ?? '').toString().trim();
-      if (fromStudentId.isNotEmpty) return fromStudentId;
-      final Object? student = item['student'];
+      final Object? student =
+      item['student'];
+
       if (student is Map) {
-        final String fromStudentObject = (student['id'] ?? '').toString().trim();
-        if (fromStudentObject.isNotEmpty) return fromStudentObject;
+        final String
+        fromStudentObject =
+        (student['id'] ?? '')
+            .toString()
+            .trim();
+
+        if (fromStudentObject
+            .isNotEmpty) {
+          return fromStudentObject;
+        }
       }
-      final Object? application = item['application'];
+
+      final Object? application =
+      item['application'];
+
       if (application is Map) {
         final String fromApplication =
-            (application['studentUserId'] ?? '').toString().trim();
-        if (fromApplication.isNotEmpty) return fromApplication;
-        final String fromApplicationStudentId =
-            (application['studentId'] ?? '').toString().trim();
-        if (fromApplicationStudentId.isNotEmpty) return fromApplicationStudentId;
+        (application[
+        'studentUserId'] ??
+            '')
+            .toString()
+            .trim();
+
+        if (fromApplication
+            .isNotEmpty) {
+          return fromApplication;
+        }
+
+        final String
+        fromApplicationStudentId =
+        (application['studentId'] ??
+            '')
+            .toString()
+            .trim();
+
+        if (fromApplicationStudentId
+            .isNotEmpty) {
+          return fromApplicationStudentId;
+        }
       }
     }
+
     return '';
   }
 
-  String? _selectedFileLabel(String type) {
-    final _UploadedDocumentInfo? uploadedDocument = _uploadedDocument(type);
-    return uploadedDocument?.displayName ??
-        (uploadedDocument != null
-            ? context.l10n.text('alreadyUploaded')
-            : null);
+  String? _selectedFileLabel(
+      String type,
+      ) {
+    final String documentKey =
+    _documentKey(type);
+
+    final PlatformFile? file =
+    _selectedFiles[documentKey];
+
+    return file?.name;
   }
 
   Future<void> _handleDocumentTap(
-    _DocumentDefinition doc,
-  ) async {
-    final _UploadedDocumentInfo? uploadedDocument = _uploadedDocument(doc.type);
-    if (uploadedDocument == null) {
-      await _pickDocument(doc);
-      return;
-    }
-
-    final Uri? openUri = uploadedDocument.openUri;
-    if (openUri == null) {
-      await _pickDocument(doc);
-      return;
-    }
-
-    await openExternalLink(openUri.toString());
+      _DocumentDefinition doc,
+      ) async {
+    await _pickDocument(doc);
   }
 
-  Map<String, _UploadedDocumentInfo> _uploadedDocumentsFromApiItems(
-    List<Map<String, dynamic>> items, {
-    Map<String, String>? documentTypeAliases,
-  }) {
-    final Map<String, _UploadedDocumentInfo> uploadedDocs =
-        <String, _UploadedDocumentInfo>{};
+  List<_DocumentDefinition>
+  _documentDefinitionsFromTypes(
+      List<DocumentTypeItem> types, {
+        required bool isArabic,
+      }) {
+    final Set<String> seenKeys =
+    <String>{};
 
-    for (int i = 0; i < items.length; i++) {
-      final _UploadedDocumentInfo? uploadedDocument =
-          _uploadedDocumentInfoFromApiItem(items[i]);
+    final List<_DocumentDefinition>
+    docs =
+    <_DocumentDefinition>[];
 
-      if (uploadedDocument == null) {
-        debugPrint('Skipped null document at index => $i');
-        continue;
-      }
+    for (final DocumentTypeItem
+    item in types) {
+      final String type =
+      item.value.trim();
 
-      String documentKey = _resolveDocumentKey(
-        uploadedDocument.type,
-        aliases: documentTypeAliases,
-      );
+      final String key =
+      _documentKey(type);
 
-      if (documentKey.isEmpty) {
-        documentKey = 'document_$i';
-      }
-
-      // FIX: Always create unique key
-      String uniqueKey = documentKey;
-      int duplicateIndex = 1;
-
-      while (uploadedDocs.containsKey(uniqueKey)) {
-        uniqueKey = '${documentKey}_$duplicateIndex';
-        duplicateIndex++;
-      }
-
-      uploadedDocs[uniqueKey] = uploadedDocument;
-
-      debugPrint(
-        'Added Document => $uniqueKey => ${uploadedDocument.fileName}',
-      );
-    }
-
-    debugPrint('API Count => ${items.length}');
-    debugPrint('Uploaded Count => ${uploadedDocs.length}');
-    debugPrint('FINAL MAP KEYS => ${uploadedDocs.keys.toList()}');
-
-    return uploadedDocs;
-  }
-
-  _UploadedDocumentInfo _uploadedDocumentFromUploadResponse(
-    Map<String, dynamic> response, {
-    required String fallbackType,
-    required String fallbackFileName,
-    required String fallbackFilePath,
-  }) {
-    final _UploadedDocumentInfo? uploadedDocument =
-        _uploadedDocumentInfoFromApiItem(response, fallbackType: fallbackType);
-    if (uploadedDocument != null) {
-      return uploadedDocument.copyWith(
-        type: uploadedDocument.type.isEmpty
-            ? fallbackType
-            : uploadedDocument.type,
-        fileName: uploadedDocument.fileName ?? fallbackFileName,
-        openUri: uploadedDocument.openUri ?? _uriFromFilePath(fallbackFilePath),
-      );
-    }
-
-    return _UploadedDocumentInfo(
-      type: fallbackType,
-      fileName: fallbackFileName,
-      openUri: _uriFromFilePath(fallbackFilePath),
-    );
-  }
-
-  _UploadedDocumentInfo? _uploadedDocumentInfoFromApiItem(
-    Map<String, dynamic> item, {
-    String? fallbackType,
-  }) {
-    final String type = _documentTypeFromApiItem(item).ifEmpty(fallbackType);
-    if (type.isEmpty) return null;
-
-    return _UploadedDocumentInfo(
-      type: type,
-      documentId: _documentIdFromApiItem(item),
-      studentUserId: _studentUserIdFromApiItem(item),
-      fileName: _firstDocumentString(item, _fileNameKeys),
-      openUri: _uriFromApiValue(_firstDocumentString(item, _fileUrlKeys)),
-    );
-  }
-
-  List<_DocumentDefinition> _documentDefinitionsFromTypes(
-    List<DocumentTypeItem> types, {
-    required bool isArabic,
-  }) {
-    final Set<String> seenDocumentKeys = <String>{};
-    final List<_DocumentDefinition> docs = <_DocumentDefinition>[];
-
-    for (final DocumentTypeItem item in types) {
-      final String type = item.value.trim();
-      final String documentKey = _documentKey(type);
-      if (documentKey.isEmpty || !seenDocumentKeys.add(documentKey)) {
+      if (key.isEmpty ||
+          !seenKeys.add(key)) {
         continue;
       }
 
       final String localizedTitle =
-          (isArabic ? item.labelAr : item.labelEn).trim();
+      (isArabic
+          ? item.labelAr
+          : item.labelEn)
+          .trim();
+
       final String fallbackTitle =
-          item.labelEn.trim().ifEmpty(item.labelAr.trim());
+      item.labelEn
+          .trim()
+          .ifEmpty(
+        item.labelAr.trim(),
+      );
+
       docs.add(
         (
-          type: type,
-          title: localizedTitle.ifEmpty(fallbackTitle).ifEmpty(type),
-          subtitle: type,
+        type: type,
+        title: localizedTitle
+            .ifEmpty(fallbackTitle)
+            .ifEmpty(type),
+        subtitle: type,
         ),
       );
     }
@@ -448,239 +380,45 @@ class _UploadDocumentsScreenState extends State<UploadDocumentsScreen> {
     return docs;
   }
 
-  Map<String, String> _documentTypeAliasesFromTypes(
-    List<DocumentTypeItem> types,
-  ) {
-    final Map<String, String> aliases = <String, String>{};
-    for (final DocumentTypeItem item in types) {
-      final String canonicalKey = _documentKey(item.value);
-      if (canonicalKey.isEmpty) continue;
-
-      for (final String alias in <String>[
-        item.value,
-        item.id,
-        item.labelEn,
-        item.labelAr,
-      ]) {
-        final String aliasKey = _documentKey(alias);
-        if (aliasKey.isNotEmpty) {
-          aliases[aliasKey] = canonicalKey;
-        }
-      }
-    }
-    return aliases;
-  }
-
-  String _resolveDocumentKey(
-    String type, {
-    Map<String, String>? aliases,
-  }) {
-    final String key = _documentKey(type);
-    return aliases?[key] ?? _documentTypeAliases[key] ?? key;
-  }
-
-  bool _hasUploadedDocumentForKey(
-    String documentKey, {
-    Map<String, _UploadedDocumentInfo>? uploadedDocuments,
-  }) =>
-      _uploadedDocumentKeyFor(
-        documentKey,
-        uploadedDocuments: uploadedDocuments,
-      ) !=
-      null;
-
-  String? _uploadedDocumentKeyFor(
-    String documentKey, {
-    Map<String, _UploadedDocumentInfo>? uploadedDocuments,
-  }) {
-    final Map<String, _UploadedDocumentInfo> documents =
-        uploadedDocuments ?? _uploadedDocuments;
-
-    // Exact match
-    if (documents.containsKey(documentKey)) {
-      return documentKey;
-    }
-
-    // Match duplicate keys
-    final List<String> matchingKeys = documents.keys
-        .where(
-          (key) => key == documentKey || key.startsWith('${documentKey}_'),
-        )
-        .toList();
-
-    if (matchingKeys.isEmpty) {
-      return null;
-    }
-
-    return matchingKeys.first;
-  }
-
   String _documentKey(String type) {
     return type
         .trim()
         .toLowerCase()
-        .replaceAll(RegExp(r'[\s\-/]+'), '_')
-        .replaceAll(RegExp(r'_+'), '_')
-        .replaceAll(RegExp(r'^_|_$'), '');
-  }
-
-  String _documentTypeFromApiItem(Map<String, dynamic> item) {
-    final Object? documentType = item['documentType'];
-    if (documentType is Map) {
-      final String nestedType =
-          _firstNonEmptyValue(documentType, const <String>[
-        'value',
-        'type',
-        'documentTypeValue',
-        'document_type_value',
-        'id',
-        'documentTypeId',
-        'document_type_id',
-        'labelEn',
-        'labelAr',
-        'name',
-      ]);
-      if (nestedType.isNotEmpty) return nestedType;
-    } else if (documentType != null) {
-      final String type = documentType.toString().trim();
-      if (type.isNotEmpty) return type;
-    }
-
-    return _firstNonEmptyValue(item, const <String>[
-      'type',
-      'value',
-      'documentTypeValue',
-      'document_type_value',
-      'document_type',
-      'documentTypeId',
-      'document_type_id',
-      'documentType',
-      'id',
-      'labelEn',
-      'labelAr',
-      'name',
-    ]);
-  }
-
-  String _firstNonEmptyValue(Map<dynamic, dynamic> item, List<String> keys) {
-    for (final String key in keys) {
-      final Object? value = item[key];
-      if (value == null || value is Map || value is List) continue;
-
-      final String text = value.toString().trim();
-      if (text.isNotEmpty) return text;
-    }
-    return '';
-  }
-
-  String? _documentIdFromApiItem(Map<String, dynamic> item) {
-    final String id = _firstNonEmptyValue(item, const <String>[
-      'id',
-      'documentId',
-      'document_id',
-    ]);
-    return id.isEmpty ? null : id;
-  }
-
-  String? _studentUserIdFromApiItem(Map<String, dynamic> item) {
-    final String studentUserId = _firstNonEmptyValue(item, const <String>[
-      'studentUserId',
-      'student_user_id',
-      'studentId',
-      'student_id',
-    ]);
-    return studentUserId.isEmpty ? null : studentUserId;
-  }
-
-  String? _firstDocumentString(
-    Map<String, dynamic> item,
-    Set<String> keys, [
-    Set<Object?> visited = const <Object?>{},
-  ]) {
-    if (visited.contains(item)) return null;
-    final Set<Object?> nextVisited = <Object?>{...visited, item};
-
-    for (final MapEntry<String, dynamic> entry in item.entries) {
-      if (keys.contains(entry.key) && entry.value != null) {
-        final String value = entry.value.toString().trim();
-        if (value.isNotEmpty) return value;
-      }
-    }
-
-    for (final Object? value in item.values) {
-      if (value is Map) {
-        final Map<String, dynamic> nested = value.map(
-          (key, value) => MapEntry(key.toString(), value),
-        );
-        final String? nestedValue =
-            _firstDocumentString(nested, keys, nextVisited);
-        if (nestedValue != null) return nestedValue;
-      }
-      if (value is List) {
-        for (final Object? listItem in value) {
-          if (listItem is Map) {
-            final Map<String, dynamic> nested = listItem.map(
-              (key, value) => MapEntry(key.toString(), value),
-            );
-            final String? nestedValue =
-                _firstDocumentString(nested, keys, nextVisited);
-            if (nestedValue != null) return nestedValue;
-          }
-        }
-      }
-    }
-
-    return null;
-  }
-
-  Uri? _uriFromApiValue(String? value) {
-    if (value == null || value.isEmpty) return null;
-    final Uri? uri = Uri.tryParse(value);
-    if (uri == null) return null;
-    if (uri.hasScheme) return _publicDocumentUri(uri);
-    if (value.startsWith('/')) {
-      return _publicDocumentUri(Uri.tryParse('${ApiConfig.baseUrl}$value'));
-    }
-    return _publicDocumentUri(Uri.tryParse('${ApiConfig.baseUrl}/$value'));
-  }
-
-  Uri? _publicDocumentUri(Uri? uri) {
-    if (uri == null) return null;
-
-    final String path = uri.path;
-    final int uploadsIndex = path.indexOf('/uploads/');
-    if (uploadsIndex >= 0) {
-      return uri.replace(path: path.substring(uploadsIndex));
-    }
-
-    final int studentDocumentsIndex = path.indexOf('/student-documents/');
-    if (studentDocumentsIndex >= 0) {
-      return uri.replace(
-        path: '/uploads${path.substring(studentDocumentsIndex)}',
-      );
-    }
-
-    return uri;
-  }
-
-  Uri? _uriFromFilePath(String? filePath) {
-    if (filePath == null || filePath.isEmpty) return null;
-    return Uri.file(filePath);
+        .replaceAll(
+      RegExp(r'[\s\-/]+'),
+      '_',
+    )
+        .replaceAll(
+      RegExp(r'_+'),
+      '_',
+    )
+        .replaceAll(
+      RegExp(r'^_|_$'),
+      '',
+    );
   }
 
   @override
   Widget build(BuildContext context) {
-    final bool isSmallMobile = context.isSmallMobile;
-    final double horizontalPadding = context.responsiveHorizontalPadding;
+    final bool isSmallMobile =
+        context.isSmallMobile;
+
+    final double horizontalPadding =
+        context
+            .responsiveHorizontalPadding;
+
     return Scaffold(
       body: AppBackground(
         child: AppPageEntrance(
           child: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
+            crossAxisAlignment:
+            CrossAxisAlignment.start,
             children: [
               FlowStepHeader(
                 currentStep: 0,
-                title: context.l10n.text('uploadDocuments'),
+                title: context.l10n.text(
+                  'uploadDocuments',
+                ),
               ),
               Expanded(
                 child: Stack(
@@ -689,29 +427,52 @@ class _UploadDocumentsScreenState extends State<UploadDocumentsScreen> {
                       builder: (context) {
                         if (_docs.isEmpty) {
                           return Padding(
-                            padding: EdgeInsets.symmetric(
-                                horizontal: 16, vertical: 20),
+                            padding:
+                            const EdgeInsets.symmetric(
+                              horizontal: 16,
+                              vertical: 20,
+                            ),
                             child: Container(
-                              width: double.infinity,
-                              padding: const EdgeInsets.symmetric(
+                              width:
+                              double.infinity,
+                              padding:
+                              const EdgeInsets.symmetric(
                                 vertical: 20,
                                 horizontal: 12,
                               ),
-                              decoration: BoxDecoration(
-                                borderRadius: BorderRadius.circular(10),
-                                border: Border.all(
-                                  color: const Color(0xFFE6E6E6),
+                              decoration:
+                              BoxDecoration(
+                                borderRadius:
+                                BorderRadius
+                                    .circular(
+                                  10,
                                 ),
-                                color: Colors.white,
+                                border:
+                                Border.all(
+                                  color:
+                                  const Color(
+                                    0xFFE6E6E6,
+                                  ),
+                                ),
+                                color:
+                                Colors.white,
                               ),
                               child: Text(
-                                context.l10n.text(
+                                context.l10n
+                                    .text(
                                   'No document types found',
                                 ),
-                                textAlign: TextAlign.center,
-                                style: const TextStyle(
-                                  color: Color(0xFF616161),
-                                  fontWeight: FontWeight.w500,
+                                textAlign:
+                                TextAlign
+                                    .center,
+                                style:
+                                const TextStyle(
+                                  color: Color(
+                                    0xFF616161,
+                                  ),
+                                  fontWeight:
+                                  FontWeight
+                                      .w500,
                                 ),
                               ),
                             ),
@@ -719,45 +480,82 @@ class _UploadDocumentsScreenState extends State<UploadDocumentsScreen> {
                         }
 
                         return ListView(
-                          padding: EdgeInsets.fromLTRB(
+                          padding:
+                          EdgeInsets.fromLTRB(
                             horizontalPadding,
-                            isSmallMobile ? 14 : 20,
+                            isSmallMobile
+                                ? 14
+                                : 20,
                             horizontalPadding,
                             20,
                           ),
                           children: [
                             Text(
-                              context.l10n.text('requiredDocuments'),
-                              style: TextStyle(
-                                fontSize: isSmallMobile ? 16 : 18,
-                                fontWeight: FontWeight.w700,
+                              context.l10n.text(
+                                'requiredDocuments',
+                              ),
+                              style:
+                              TextStyle(
+                                fontSize:
+                                isSmallMobile
+                                    ? 16
+                                    : 18,
+                                fontWeight:
+                                FontWeight
+                                    .w700,
                               ),
                             ),
-                            const SizedBox(height: 14),
-                            _UploadDropZone(
-                              title: _docs.first.title,
-                              subtitle: _docs.first.subtitle,
-                              selectedFileName:
-                                  _selectedFileLabel(_docs.first.type),
-                              onTap: _isUploading
-                                  ? () {}
-                                  : () => _handleDocumentTap(_docs.first),
+                            const SizedBox(
+                              height: 14,
                             ),
-                            const SizedBox(height: 10),
-                            ..._docs.skip(1).map(
-                                  (doc) => Padding(
-                                    padding: const EdgeInsets.only(bottom: 10),
-                                    child: _UploadListTile(
-                                      title: doc.title,
-                                      subtitle: doc.subtitle,
+                            _UploadDropZone(
+                              title: _docs
+                                  .first.title,
+                              subtitle: _docs
+                                  .first.subtitle,
+                              selectedFileName:
+                              _selectedFileLabel(
+                                _docs.first.type,
+                              ),
+                              onTap:
+                              _isUploading
+                                  ? () {}
+                                  : () => _handleDocumentTap(
+                                _docs.first,
+                              ),
+                            ),
+                            const SizedBox(
+                              height: 10,
+                            ),
+                            ..._docs
+                                .skip(1)
+                                .map(
+                                  (doc) =>
+                                  Padding(
+                                    padding:
+                                    const EdgeInsets.only(
+                                      bottom:
+                                      10,
+                                    ),
+                                    child:
+                                    _UploadListTile(
+                                      title:
+                                      doc.title,
+                                      subtitle:
+                                      doc.subtitle,
                                       selectedFileName:
-                                          _selectedFileLabel(doc.type),
-                                      onTap: _isUploading
+                                      _selectedFileLabel(
+                                        doc.type,
+                                      ),
+                                      onTap:
+                                      _isUploading
                                           ? () {}
-                                          : () => _handleDocumentTap(doc),
+                                          : () => _handleDocumentTap(
+                                        doc,
+                                      ),
                                     ),
                                   ),
-                                ),
+                            ),
                           ],
                         );
                       },
@@ -765,10 +563,19 @@ class _UploadDocumentsScreenState extends State<UploadDocumentsScreen> {
                     if (_isUploading)
                       const Positioned.fill(
                         child: ColoredBox(
-                          color: Color.fromRGBO(0, 0, 0, 0.25),
+                          color:
+                          Color.fromRGBO(
+                            0,
+                            0,
+                            0,
+                            0.25,
+                          ),
                           child: Center(
-                            child: CircularProgressIndicator(
-                              color: AppColors.primary,
+                            child:
+                            CircularProgressIndicator(
+                              color:
+                              AppColors
+                                  .primary,
                             ),
                           ),
                         ),
@@ -779,10 +586,21 @@ class _UploadDocumentsScreenState extends State<UploadDocumentsScreen> {
               SafeArea(
                 top: false,
                 child: Padding(
-                  padding: const EdgeInsets.all(16),
-                  child: AppPrimaryButton(
-                    label: context.l10n.text('saveContinue'),
-                    onPressed: _isUploading ? null : () => _onContinue(),
+                  padding:
+                  const EdgeInsets.all(
+                    16,
+                  ),
+                  child:
+                  AppPrimaryButton(
+                    label: context.l10n
+                        .text(
+                      'saveContinue',
+                    ),
+                    onPressed:
+                    _isUploading
+                        ? null
+                        : () =>
+                        _onContinue(),
                   ),
                 ),
               ),
@@ -794,75 +612,16 @@ class _UploadDocumentsScreenState extends State<UploadDocumentsScreen> {
   }
 }
 
-const Set<String> _fileNameKeys = <String>{
-  'fileName',
-  'filename',
-  'file_name',
-  'originalName',
-  'originalname',
-  'original_file_name',
-  'name',
-  'title',
-};
-
-const Set<String> _fileUrlKeys = <String>{
-  'url',
-  'fileUrl',
-  'file_url',
-  'documentUrl',
-  'document_url',
-  'downloadUrl',
-  'download_url',
-  'secureUrl',
-  'secure_url',
-  'location',
-  'path',
-  'filePath',
-  'file_path',
-};
-
-class _UploadedDocumentInfo {
-  const _UploadedDocumentInfo({
-    required this.type,
-    this.documentId,
-    this.studentUserId,
-    this.fileName,
-    this.openUri,
-  });
-
-  final String type;
-  final String? documentId;
-  final String? studentUserId;
-  final String? fileName;
-  final Uri? openUri;
-
-  String? get displayName {
-    final String? trimmed = fileName?.trim();
-    return trimmed == null || trimmed.isEmpty ? null : trimmed;
-  }
-
-  _UploadedDocumentInfo copyWith({
-    String? type,
-    String? documentId,
-    String? studentUserId,
-    String? fileName,
-    Uri? openUri,
-  }) {
-    return _UploadedDocumentInfo(
-      type: type ?? this.type,
-      documentId: documentId ?? this.documentId,
-      studentUserId: studentUserId ?? this.studentUserId,
-      fileName: fileName ?? this.fileName,
-      openUri: openUri ?? this.openUri,
-    );
-  }
-}
-
 extension _StringFallback on String {
-  String ifEmpty(String? fallback) => isEmpty ? (fallback ?? '') : this;
+  String ifEmpty(String? fallback) {
+    return isEmpty
+        ? (fallback ?? '')
+        : this;
+  }
 }
 
-class _UploadDropZone extends StatelessWidget {
+class _UploadDropZone
+    extends StatelessWidget {
   const _UploadDropZone({
     required this.title,
     required this.subtitle,
@@ -877,85 +636,142 @@ class _UploadDropZone extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final bool isUploaded = selectedFileName != null;
+    final bool isUploaded =
+        selectedFileName != null;
+
     return InkWell(
-      borderRadius: BorderRadius.circular(10),
+      borderRadius:
+      BorderRadius.circular(10),
       onTap: onTap,
       child: Container(
-        padding: const EdgeInsets.all(12),
+        padding:
+        const EdgeInsets.all(12),
         decoration: BoxDecoration(
           color: Colors.white,
-          borderRadius: BorderRadius.circular(10),
-          border: Border.all(color: const Color(0xFFE8E2D9)),
+          borderRadius:
+          BorderRadius.circular(
+            10,
+          ),
+          border: Border.all(
+            color:
+            const Color(0xFFE8E2D9),
+          ),
         ),
         child: Column(
           children: [
             Row(
               children: [
                 const _DocIcon(),
-                const SizedBox(width: 12),
+                const SizedBox(
+                  width: 12,
+                ),
                 Expanded(
                   child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
+                    crossAxisAlignment:
+                    CrossAxisAlignment
+                        .start,
                     children: [
                       Text(
                         title,
-                        style: const TextStyle(
+                        style:
+                        const TextStyle(
                           fontSize: 15,
-                          fontWeight: FontWeight.w700,
+                          fontWeight:
+                          FontWeight
+                              .w700,
                         ),
                       ),
                       Text(
                         subtitle,
-                        style: const TextStyle(color: AppColors.textMuted),
+                        style:
+                        const TextStyle(
+                          color: AppColors
+                              .textMuted,
+                        ),
                       ),
                     ],
                   ),
                 ),
               ],
             ),
-            const Divider(height: 26),
+            const Divider(
+              height: 26,
+            ),
             Icon(
               isUploaded
-                  ? Icons.check_circle_outline
-                  : Icons.cloud_upload_outlined,
+                  ? Icons
+                  .check_circle_outline
+                  : Icons
+                  .cloud_upload_outlined,
               size: 54,
-              color: isUploaded ? AppColors.accent : const Color(0xFFB8B8B8),
+              color: isUploaded
+                  ? AppColors.accent
+                  : const Color(
+                0xFFB8B8B8,
+              ),
             ),
-            const SizedBox(height: 10),
+            const SizedBox(
+              height: 10,
+            ),
             Text.rich(
               TextSpan(
                 text: isUploaded
-                    ? context.l10n.text('openDocument')
-                    : context.l10n.text('tapToBrowse'),
-                style: const TextStyle(
+                    ? context.l10n.text(
+                  'uploaded',
+                )
+                    : context.l10n.text(
+                  'tapToBrowse',
+                ),
+                style:
+                const TextStyle(
                   fontSize: 16,
-                  fontWeight: FontWeight.w600,
-                  color: AppColors.text,
+                  fontWeight:
+                  FontWeight.w600,
+                  color:
+                  AppColors.text,
                 ),
                 children: [
                   if (!isUploaded)
                     TextSpan(
-                      text: context.l10n.text('uploadFormats'),
-                      style: const TextStyle(color: AppColors.accent),
+                      text: context
+                          .l10n
+                          .text(
+                        'uploadFormats',
+                      ),
+                      style:
+                      const TextStyle(
+                        color:
+                        AppColors
+                            .accent,
+                      ),
                     ),
                 ],
               ),
             ),
-            const SizedBox(height: 6),
+            const SizedBox(
+              height: 6,
+            ),
             Text(
-              selectedFileName == null
-                  ? '${context.l10n.text('supportedPrefix')}${context.l10n.text('uploadFormats')}'
-                  : selectedFileName!,
+              selectedFileName ??
+                  '${context.l10n.text('supportedPrefix')}${context.l10n.text('uploadFormats')}',
               style: TextStyle(
-                color: selectedFileName == null
-                    ? AppColors.textMuted
-                    : AppColors.accent,
-                fontWeight: selectedFileName == null
-                    ? FontWeight.w400
-                    : FontWeight.w600,
+                color:
+                selectedFileName ==
+                    null
+                    ? AppColors
+                    .textMuted
+                    : AppColors
+                    .accent,
+                fontWeight:
+                selectedFileName ==
+                    null
+                    ? FontWeight
+                    .w400
+                    : FontWeight
+                    .w600,
               ),
-              textAlign: TextAlign.center,
+              textAlign:
+              TextAlign.center,
             ),
           ],
         ),
@@ -964,7 +780,8 @@ class _UploadDropZone extends StatelessWidget {
   }
 }
 
-class _UploadListTile extends StatelessWidget {
+class _UploadListTile
+    extends StatelessWidget {
   const _UploadListTile({
     required this.title,
     required this.subtitle,
@@ -979,43 +796,72 @@ class _UploadListTile extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final bool isUploaded = selectedFileName != null;
+    final bool isUploaded =
+        selectedFileName != null;
 
     return InkWell(
-      borderRadius: BorderRadius.circular(10),
+      borderRadius:
+      BorderRadius.circular(10),
       onTap: onTap,
       child: Container(
-        padding: const EdgeInsets.all(12),
+        padding:
+        const EdgeInsets.all(12),
         decoration: BoxDecoration(
           color: Colors.white,
-          borderRadius: BorderRadius.circular(10),
-          border: Border.all(color: const Color(0xFFE8E2D9)),
+          borderRadius:
+          BorderRadius.circular(
+            10,
+          ),
+          border: Border.all(
+            color:
+            const Color(0xFFE8E2D9),
+          ),
         ),
         child: Row(
           children: [
             const _DocIcon(),
-            const SizedBox(width: 12),
+            const SizedBox(
+              width: 12,
+            ),
             Expanded(
               child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
+                crossAxisAlignment:
+                CrossAxisAlignment
+                    .start,
                 children: [
                   Text(
                     title,
-                    style: const TextStyle(
+                    style:
+                    const TextStyle(
                       fontSize: 15,
-                      fontWeight: FontWeight.w700,
+                      fontWeight:
+                      FontWeight
+                          .w700,
                     ),
                   ),
-                  const SizedBox(height: 2),
+                  const SizedBox(
+                    height: 2,
+                  ),
                   Text(
-                    isUploaded ? selectedFileName! : subtitle,
+                    isUploaded
+                        ? selectedFileName!
+                        : subtitle,
                     style: TextStyle(
-                      color:
-                          isUploaded ? AppColors.accent : AppColors.textMuted,
+                      color: isUploaded
+                          ? AppColors
+                          .accent
+                          : AppColors
+                          .textMuted,
                       fontWeight:
-                          isUploaded ? FontWeight.w600 : FontWeight.w400,
+                      isUploaded
+                          ? FontWeight
+                          .w600
+                          : FontWeight
+                          .w400,
                     ),
-                    overflow: TextOverflow.ellipsis,
+                    overflow:
+                    TextOverflow
+                        .ellipsis,
                   ),
                 ],
               ),
@@ -1023,16 +869,27 @@ class _UploadListTile extends StatelessWidget {
             Container(
               width: 30,
               height: 30,
-              decoration: BoxDecoration(
+              decoration:
+              BoxDecoration(
                 color: isUploaded
-                    ? const Color(0xFFA0E1BE)
-                    : const Color(0xFFECECEC),
-                borderRadius: BorderRadius.circular(8),
+                    ? const Color(
+                  0xFFA0E1BE,
+                )
+                    : const Color(
+                  0xFFECECEC,
+                ),
+                borderRadius:
+                BorderRadius
+                    .circular(8),
               ),
               child: Icon(
-                isUploaded ? Icons.open_in_new : Icons.upload_outlined,
+                isUploaded
+                    ? Icons.check
+                    : Icons
+                    .upload_outlined,
                 size: 18,
-                color: Colors.black87,
+                color:
+                Colors.black87,
               ),
             ),
           ],
@@ -1042,7 +899,8 @@ class _UploadListTile extends StatelessWidget {
   }
 }
 
-class _DocIcon extends StatelessWidget {
+class _DocIcon
+    extends StatelessWidget {
   const _DocIcon();
 
   @override
@@ -1051,10 +909,17 @@ class _DocIcon extends StatelessWidget {
       width: 40,
       height: 40,
       decoration: BoxDecoration(
-        color: const Color(0xFFF4F4F4),
-        borderRadius: BorderRadius.circular(8),
+        color:
+        const Color(0xFFF4F4F4),
+        borderRadius:
+        BorderRadius.circular(
+          8,
+        ),
       ),
-      child: const Icon(Icons.description_outlined, color: AppColors.accent),
+      child: const Icon(
+        Icons.description_outlined,
+        color: AppColors.accent,
+      ),
     );
   }
 }

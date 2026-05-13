@@ -232,42 +232,6 @@ extension ApplicationApiDocuments on ApplicationApiService {
     return decoded;
   }
 
-  Future<List<Map<String, dynamic>>> fetchStudentDocuments({
-    required String studentUserId,
-  }) async {
-    final Uri uri = ApiConfig.uri('/api/student/document-types').replace(
-      queryParameters: <String, String>{'studentUserId': studentUserId},
-    );
-    final response = await http.get(
-      uri,
-    );
-    final decoded = _decodeMap(response.body);
-
-    logApiCall(
-      method: 'GET',
-      url: uri.toString(),
-      statusCode: response.statusCode,
-      requestBody: null,
-      responseBody: decoded,
-    );
-
-    if (!ApiStatus.isSuccess(response.statusCode)) {
-      throw Exception(decoded['message']?.toString() ??
-          'Failed to fetch student documents');
-    }
-
-    final Object? items =
-        decoded['items'] ?? decoded['data'] ?? decoded['documents'] ?? decoded;
-    if (items is List) {
-      return items
-          .whereType<Map>()
-          .map((item) =>
-              item.map((key, value) => MapEntry(key.toString(), value)))
-          .toList(growable: false);
-    }
-    return const <Map<String, dynamic>>[];
-  }
-
   Future<Map<String, dynamic>> updateStudentDocument({
     required String studentUserId,
     required String documentId,

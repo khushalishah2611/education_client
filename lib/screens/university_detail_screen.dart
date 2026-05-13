@@ -891,62 +891,65 @@ class _CollegeAccordionState extends State<_CollegeAccordion> {
                         ),
                       ),
                     ),
-                    InkWell(
-                      onTap: () async {
-                        widget.onToggleCourse(courseKey);
+                    Visibility(
+                      visible: !(details.isBooked ?? false),
+                      child: InkWell(
+                        onTap: () async {
+                          widget.onToggleCourse(courseKey);
 
-                        if (!context.mounted) return;
+                          if (!context.mounted) return;
 
-                        Navigator.push(
-                          context,
-                          MaterialPageRoute(
-                            builder: (_) => UploadDocumentsScreen(
-                              universityName: adminUniversity.name,
-                              universityHeroImage:
-                                  ImageUrlHelper.resolveUploadUrl(
-                                adminUniversity.coverImagePath,
-                              ),
-                              courseTitle: details.name,
-                              applicationsPayload: <Map<String, dynamic>>[
-                                _buildApplicationPayload(
-                                  adminUniversity: adminUniversity,
-                                  collegeName: collegeName,
-                                  courseDetails: details,
-                                  courseKey: courseKey,
+                          Navigator.push(
+                            context,
+                            MaterialPageRoute(
+                              builder: (_) => UploadDocumentsScreen(
+                                universityName: adminUniversity.name,
+                                universityHeroImage:
+                                    ImageUrlHelper.resolveUploadUrl(
+                                  adminUniversity.coverImagePath,
                                 ),
-                              ],
+                                courseTitle: details.name,
+                                applicationsPayload: <Map<String, dynamic>>[
+                                  _buildApplicationPayload(
+                                    adminUniversity: adminUniversity,
+                                    collegeName: collegeName,
+                                    courseDetails: details,
+                                    courseKey: courseKey,
+                                  ),
+                                ],
+                              ),
+                            ),
+                          );
+                        },
+                        child: Container(
+                          alignment: Alignment.center,
+                          margin: EdgeInsets.symmetric(vertical: 5),
+                          padding: const EdgeInsets.symmetric(
+                            horizontal: 4,
+                            vertical: 3,
+                          ),
+                          decoration: BoxDecoration(
+                            color: const Color(0xFF0070e2),
+                            borderRadius: BorderRadius.circular(4),
+                            border: Border.all(
+                              color: const Color(0xFF0070e2),
                             ),
                           ),
-                        );
-                      },
-                      child: Container(
-                        alignment: Alignment.center,
-                        margin: EdgeInsets.symmetric(vertical: 5),
-                        padding: const EdgeInsets.symmetric(
-                          horizontal: 4,
-                          vertical: 3,
-                        ),
-                        decoration: BoxDecoration(
-                          color: const Color(0xFF0070e2),
-                          borderRadius: BorderRadius.circular(4),
-                          border: Border.all(
-                            color: const Color(0xFF0070e2),
-                          ),
-                        ),
-                        child: Text(
-                          context.l10n.text(
-                            'Apply & Pay\nApplication Fee',
-                          ),
-                          textAlign: TextAlign.center,
-                          style: TextStyle(
-                            fontSize: 8.6,
-                            fontWeight: FontWeight.w600,
-                            color: AppColors.white,
-                            height: 1.1,
+                          child: Text(
+                            context.l10n.text(
+                              'Apply & Pay\nApplication Fee',
+                            ),
+                            textAlign: TextAlign.center,
+                            style: TextStyle(
+                              fontSize: 8.6,
+                              fontWeight: FontWeight.w600,
+                              color: AppColors.white,
+                              height: 1.1,
+                            ),
                           ),
                         ),
                       ),
-                    ),
+                    )
                   ],
                 ),
               ),
