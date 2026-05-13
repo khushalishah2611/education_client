@@ -378,6 +378,10 @@ extension ApplicationApiStudents on ApplicationApiService {
       ..fields['isActive'] = isActive.toString();
 
     if ((profileImagePath ?? '').isNotEmpty) {
+      request.fields['profileImage'] =
+          (profileImageName ?? '').trim().isNotEmpty
+              ? profileImageName!.trim()
+              : profileImagePath!;
       request.files.add(
         await http.MultipartFile.fromPath(
           'profileImage',

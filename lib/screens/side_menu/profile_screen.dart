@@ -1,3 +1,5 @@
+import 'dart:io';
+
 import 'package:education/core/app_localizations.dart';
 import 'package:education/core/student_session.dart';
 import 'package:education/models/country_master.dart';
@@ -427,6 +429,7 @@ class _ProfileBodyState extends State<ProfileBody> {
 
           ProfileAvatar(
             imagePath: _profileImagePath,
+            selectedImagePath: _selectedProfileImage?.path,
             onEdit: _pickProfileImage,
           ),
 
@@ -768,7 +771,7 @@ class CountryMobileField
                         CountryMaster>(
                       value: c,
                       child: Text(
-                        '${c.flagEmoji} ${c.dialCode}',
+                        '${c.flagEmoji} ${c.dialCode} ${c.nameEn}',
                       ),
                     ),
               )
@@ -822,13 +825,17 @@ class ProfileAvatar extends StatelessWidget {
     super.key,
     required this.onEdit,
     this.imagePath,
+    this.selectedImagePath,
   });
 
   final VoidCallback onEdit;
   final String? imagePath;
+  final String? selectedImagePath;
 
   @override
   Widget build(BuildContext context) {
+    final bool hasSelectedImage =
+        (selectedImagePath ?? '').trim().isNotEmpty;
     final String url =
     (imagePath ?? '').startsWith('http')
         ? imagePath!
@@ -850,12 +857,14 @@ class ProfileAvatar extends StatelessWidget {
               ),
             ),
             child: CircleAvatar(
-              backgroundImage:
-              (imagePath ?? '').isEmpty
+              backgroundImage: hasSelectedImage
+                  ? FileImage(File(selectedImagePath!))
+                  : (imagePath ?? '').isEmpty
                   ? null
                   : NetworkImage(url),
               child:
-              (imagePath ?? '').isEmpty
+              (imagePath ?? '').isEmpty &&
+                  !hasSelectedImage
                   ? const Icon(
                 Icons.person,
                 size: 42,
