@@ -53,7 +53,8 @@ class _PaymentConfirmationScreenState extends State<PaymentConfirmationScreen> {
   }
 
   List<Map<String, dynamic>> get _overviewPayments {
-    final Object? payments = widget.studentOverview?['payments'];
+    final Map<String, dynamic> overview = _overviewData(widget.studentOverview);
+    final Object? payments = overview['payments'];
     if (payments is! List) return const <Map<String, dynamic>>[];
 
     return payments
@@ -84,7 +85,28 @@ class _PaymentConfirmationScreenState extends State<PaymentConfirmationScreen> {
       }
     }
 
+    final Map<String, dynamic>? createdPayment = _paymentFromCreatedResponse;
+    if (createdPayment != null) {
+      return createdPayment;
+    }
+
     return _overviewPayments.isNotEmpty ? _overviewPayments.first : null;
+  }
+
+  Map<String, dynamic>? get _paymentFromCreatedResponse {
+    final Object? directPayment = widget.createdApplicationsResponse?['payment'];
+    if (directPayment is Map) {
+      return directPayment.map((k, v) => MapEntry(k.toString(), v));
+    }
+
+    final Object? createdPayments = widget.createdApplicationsResponse?['payments'];
+    if (createdPayments is List && createdPayments.isNotEmpty) {
+      final Object? first = createdPayments.first;
+      if (first is Map) {
+        return first.map((k, v) => MapEntry(k.toString(), v));
+      }
+    }
+    return null;
   }
 
   String get _applicationId => _textFrom(_primaryApplication?['id']);
@@ -94,7 +116,8 @@ class _PaymentConfirmationScreenState extends State<PaymentConfirmationScreen> {
     return 'Application ID: ${_shortId(_applicationId)}';
   }
 
-  String get _paymentId => _textFrom(_primaryPayment?['id']);
+  String get _paymentId => _textFrom(_primaryPayment?['id'])
+      .ifEmpty(_textFrom(_primaryPayment?['paymentId']));
 
   String get _displayUniversityName {
     final Map<String, dynamic>? application = _primaryApplication;
@@ -222,6 +245,15 @@ class _PaymentConfirmationScreenState extends State<PaymentConfirmationScreen> {
     } finally {
       if (mounted) setState(() => _isDownloadingReceipt = false);
     }
+  }
+
+  Map<String, dynamic> _overviewData(Map<String, dynamic>? rawOverview) {
+    if (rawOverview == null) return const <String, dynamic>{};
+    final Object? data = rawOverview['data'];
+    if (data is Map) {
+      return data.map((k, v) => MapEntry(k.toString(), v));
+    }
+    return rawOverview;
   }
 
   Future<Uint8List> _buildReceiptPdf(String receiptHtml) async {
