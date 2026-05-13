@@ -27,12 +27,16 @@ class TrackApplicationScreen extends StatefulWidget {
   final Map<String, dynamic>? studentOverview;
 
   @override
-  State<TrackApplicationScreen> createState() => _TrackApplicationScreenState();
+  State<TrackApplicationScreen> createState() =>
+      _TrackApplicationScreenState();
 }
 
 class _TrackApplicationScreenState extends State<TrackApplicationScreen> {
   final ApplicationApiService _applicationApiService =
-      const ApplicationApiService();
+  const ApplicationApiService();
+
+  final RefreshIndicatorKey = GlobalKey<RefreshIndicatorState>();
+
   Map<String, dynamic>? _studentOverview;
   bool _isLoading = false;
 
@@ -40,79 +44,130 @@ class _TrackApplicationScreenState extends State<TrackApplicationScreen> {
   void initState() {
     super.initState();
     _studentOverview = widget.studentOverview;
-    if (_studentOverview == null) {
-      _fetchStudentOverview();
-    }
+
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      if (_studentOverview == null) {
+        _fetchStudentOverview();
+      }
+    });
   }
 
-  Future<void> _fetchStudentOverview() async {
+  Future<void> _fetchStudentOverview({bool isRefresh = false}) async {
+    if (!mounted) return;
+
     setState(() => _isLoading = true);
+
     try {
-      final SharedPreferences prefs = await SharedPreferences.getInstance();
+      final SharedPreferences prefs =
+      await SharedPreferences.getInstance();
+
       final String studentUserId =
           prefs.getString('studentUserId')?.trim() ?? '';
-      if (studentUserId.isEmpty) return;
+
+      if (studentUserId.isEmpty) {
+        throw Exception('Student user id not found');
+      }
 
       final Map<String, dynamic> overview =
-          await _applicationApiService.fetchStudentOverview(
+      await _applicationApiService.fetchStudentOverview(
         studentUserId: studentUserId,
       );
+
       if (!mounted) return;
-      setState(() => _studentOverview = overview);
+
+      setState(() {
+        _studentOverview = overview;
+      });
+
+      if (isRefresh) {
+        showAppSnackBar(
+          context,
+          type: AppSnackBarType.success,
+          message: 'Application data refreshed successfully',
+        );
+      }
     } catch (e) {
       if (!mounted) return;
+
       showAppSnackBar(
         context,
         type: AppSnackBarType.error,
         message: e.toString(),
       );
     } finally {
-      if (mounted) setState(() => _isLoading = false);
+      if (mounted) {
+        setState(() => _isLoading = false);
+      }
     }
+  }
+
+  Future<void> _onRefresh() async {
+    await _fetchStudentOverview(isRefresh: true);
   }
 
   void _goHome() {
     Navigator.of(context).pushAndRemoveUntil(
-      MaterialPageRoute(builder: (_) => const HomeScreen()),
-      (route) => false,
+      MaterialPageRoute(
+        builder: (_) => const HomeScreen(),
+      ),
+          (route) => false,
     );
   }
 
   List<Map<String, dynamic>> get _applications =>
       _listFromOverview('applications');
 
-  List<Map<String, dynamic>> get _payments => _listFromOverview('payments');
+  List<Map<String, dynamic>> get _payments =>
+      _listFromOverview('payments');
 
-  List<Map<String, dynamic>> get _documents => _listFromOverview('documents');
+  List<Map<String, dynamic>> get _documents =>
+      _listFromOverview('documents');
 
   List<Map<String, dynamic>> _listFromOverview(String key) {
     final Object? items = _studentOverview?[key];
-    if (items is! List) return const <Map<String, dynamic>>[];
+
+    if (items is! List) {
+      return const <Map<String, dynamic>>[];
+    }
 
     return items
         .whereType<Map>()
         .map(
-            (item) => item.map((key, value) => MapEntry(key.toString(), value)))
+          (item) => item.map(
+            (key, value) => MapEntry(
+          key.toString(),
+          value,
+        ),
+      ),
+    )
         .toList(growable: false);
   }
 
   Map<String, dynamic>? get _application {
-    final String selectedApplicationId = widget.applicationId?.trim() ?? '';
+    final String selectedApplicationId =
+        widget.applicationId?.trim() ?? '';
+
     for (final Map<String, dynamic> application in _applications) {
       if (selectedApplicationId.isNotEmpty &&
-          _textFrom(application['id']) == selectedApplicationId) {
+          _textFrom(application['id']) ==
+              selectedApplicationId) {
         return application;
       }
     }
 
-    return _applications.isNotEmpty ? _applications.first : null;
+    return _applications.isNotEmpty
+        ? _applications.first
+        : null;
   }
 
   Map<String, dynamic>? get _payment {
-    final String selectedApplicationId = _textFrom(_application?['id']);
+    final String selectedApplicationId =
+    _textFrom(_application?['id']);
+
     for (final Map<String, dynamic> payment in _payments) {
       if (selectedApplicationId.isNotEmpty &&
-          _textFrom(payment['applicationId']) == selectedApplicationId) {
+          _textFrom(payment['applicationId']) ==
+              selectedApplicationId) {
         return payment;
       }
     }
@@ -122,29 +177,43 @@ class _TrackApplicationScreenState extends State<TrackApplicationScreen> {
 
   String get _applicationId {
     final String id =
-        _textFrom(_application?['id']).ifEmpty(widget.applicationId);
+    _textFrom(_application?['id'])
+        .ifEmpty(widget.applicationId);
+
     return id.isEmpty ? '-' : '#${_shortId(id)}';
   }
 
   String get _universityName {
     final Object? university = _application?['university'];
+
     if (university is Map) {
       final String name = _textFrom(university['name']);
-      if (name.isNotEmpty) return name;
+
+      if (name.isNotEmpty) {
+        return name;
+      }
     }
-    return widget.universityName ?? context.l10n.text('university');
+
+    return widget.universityName ??
+        context.l10n.text('university');
   }
 
   String get _heroImage {
-    if (widget.universityHeroImage?.trim().isNotEmpty == true) {
+    if (widget.universityHeroImage?.trim().isNotEmpty ==
+        true) {
       return widget.universityHeroImage!.trim();
     }
 
     final Object? university = _application?['university'];
+
     if (university is Map) {
-      final String coverImagePath = _textFrom(university['coverImagePath']);
+      final String coverImagePath =
+      _textFrom(university['coverImagePath']);
+
       if (coverImagePath.isNotEmpty) {
-        return ImageUrlHelper.resolveUploadUrl(coverImagePath);
+        return ImageUrlHelper.resolveUploadUrl(
+          coverImagePath,
+        );
       }
     }
 
@@ -156,98 +225,192 @@ class _TrackApplicationScreenState extends State<TrackApplicationScreen> {
       return widget.courseTitle!.trim();
     }
 
-    final Object? selectedCourses = _application?['selectedCourses'];
-    if (selectedCourses is List && selectedCourses.isNotEmpty) {
-      final Object? selectedCourse = selectedCourses.first;
-      if (selectedCourse is Map) {
-        final String name = _textFrom(selectedCourse['name']);
-        if (name.isNotEmpty) return name;
+    final Object? selectedCourses =
+    _application?['selectedCourses'];
 
-        final String courseName = _textFrom(selectedCourse['courseName']);
-        if (courseName.isNotEmpty) return courseName;
+    if (selectedCourses is List &&
+        selectedCourses.isNotEmpty) {
+      final Object? selectedCourse =
+          selectedCourses.first;
+
+      if (selectedCourse is Map) {
+        final String name =
+        _textFrom(selectedCourse['name']);
+
+        if (name.isNotEmpty) {
+          return name;
+        }
+
+        final String courseName =
+        _textFrom(selectedCourse['courseName']);
+
+        if (courseName.isNotEmpty) {
+          return courseName;
+        }
       }
     }
 
     final Object? program = _application?['program'];
+
     if (program is Map) {
-      final String programName = _textFrom(program['name']);
-      if (programName.isNotEmpty) return programName;
+      final String programName =
+      _textFrom(program['name']);
+
+      if (programName.isNotEmpty) {
+        return programName;
+      }
     }
 
     return context.l10n.text('courseOrProgram');
   }
 
   String get _educationInstitute {
-    final Object? selectedCourses = _application?['selectedCourses'];
-    if (selectedCourses is List && selectedCourses.isNotEmpty) {
-      final Object? selectedCourse = selectedCourses.first;
+    final Object? selectedCourses =
+    _application?['selectedCourses'];
+
+    if (selectedCourses is List &&
+        selectedCourses.isNotEmpty) {
+      final Object? selectedCourse =
+          selectedCourses.first;
+
       if (selectedCourse is Map) {
         final String educationInstitute =
-            _textFrom(selectedCourse['educationInstitute']);
-        if (educationInstitute.isNotEmpty) return educationInstitute;
+        _textFrom(
+          selectedCourse['educationInstitute'],
+        );
+
+        if (educationInstitute.isNotEmpty) {
+          return educationInstitute;
+        }
       }
     }
+
     return '-';
   }
 
-  String get _status => _textFrom(_application?['status']).ifEmpty('NEW');
+  String get _status =>
+      _textFrom(_application?['status'])
+          .ifEmpty('NEW');
+
   List<Map<String, dynamic>> get _applicationHistory {
     final Object? history = _application?['history'];
-    if (history is! List) return const <Map<String, dynamic>>[];
+
+    if (history is! List) {
+      return const <Map<String, dynamic>>[];
+    }
 
     final List<Map<String, dynamic>> items = history
         .whereType<Map>()
-        .map((item) => item.map((key, value) => MapEntry(key.toString(), value)))
+        .map(
+          (item) => item.map(
+            (key, value) => MapEntry(
+          key.toString(),
+          value,
+        ),
+      ),
+    )
         .toList(growable: true);
 
     items.sort((a, b) {
-      final DateTime? aDate = DateTime.tryParse(_textFrom(a['createdAt']));
-      final DateTime? bDate = DateTime.tryParse(_textFrom(b['createdAt']));
-      if (aDate == null && bDate == null) return 0;
-      if (aDate == null) return -1;
-      if (bDate == null) return 1;
+      final DateTime? aDate =
+      DateTime.tryParse(_textFrom(a['createdAt']));
+
+      final DateTime? bDate =
+      DateTime.tryParse(_textFrom(b['createdAt']));
+
+      if (aDate == null && bDate == null) {
+        return 0;
+      }
+
+      if (aDate == null) {
+        return -1;
+      }
+
+      if (bDate == null) {
+        return 1;
+      }
+
       return aDate.compareTo(bDate);
     });
+
     return items;
   }
 
   String get _latestStatusFromHistory {
-    for (final Map<String, dynamic> item in _applicationHistory.reversed) {
-      final String status = _textFrom(item['status']);
-      if (status.isNotEmpty) return status;
+    for (final Map<String, dynamic> item
+    in _applicationHistory.reversed) {
+      final String status =
+      _textFrom(item['status']);
+
+      if (status.isNotEmpty) {
+        return status;
+      }
     }
+
     return _status;
   }
 
   String get _latestStatusComment {
-    for (final Map<String, dynamic> item in _applicationHistory.reversed) {
-      final String comment = _textFrom(item['comment']);
-      if (comment.isNotEmpty) return comment;
+    for (final Map<String, dynamic> item
+    in _applicationHistory.reversed) {
+      final String comment =
+      _textFrom(item['comment']);
+
+      if (comment.isNotEmpty) {
+        return comment;
+      }
     }
+
     return '';
   }
 
-  String get _paymentStatus => _textFrom(_payment?['status']).ifEmpty('-');
+  String get _paymentStatus =>
+      _textFrom(_payment?['status']).ifEmpty('-');
 
   String get _applicationFee {
-    final double? appFee = _parseAmount(_application?['applicationFee']);
-    final double? paymentAmount = _parseAmount(_payment?['amount']);
-    final double? fee =
-        appFee == null || appFee == 0 ? paymentAmount ?? appFee : appFee;
-    final String currency =
-        _textFrom(_application?['applicationFeeCurrency']).isNotEmpty
-            ? _textFrom(_application?['applicationFeeCurrency'])
-            : _textFrom(_payment?['currency']);
+    final double? appFee =
+    _parseAmount(_application?['applicationFee']);
 
-    if (fee == null) return currency.isEmpty ? '-' : currency;
+    final double? paymentAmount =
+    _parseAmount(_payment?['amount']);
+
+    final double? fee =
+    appFee == null || appFee == 0
+        ? paymentAmount ?? appFee
+        : appFee;
+
+    final String currency =
+    _textFrom(
+      _application?['applicationFeeCurrency'],
+    )
+        .isNotEmpty
+        ? _textFrom(
+      _application?['applicationFeeCurrency'],
+    )
+        : _textFrom(_payment?['currency']);
+
+    if (fee == null) {
+      return currency.isEmpty ? '-' : currency;
+    }
+
     return '${_formatAmount(fee)}${currency.isEmpty ? '' : ' $currency'}';
   }
 
   String get _submittedDate {
-    final String createdAt = _textFrom(_application?['createdAt']);
-    if (createdAt.isEmpty) return context.l10n.text('completedOnDate');
-    final DateTime? parsed = DateTime.tryParse(createdAt);
-    if (parsed == null) return createdAt;
+    final String createdAt =
+    _textFrom(_application?['createdAt']);
+
+    if (createdAt.isEmpty) {
+      return context.l10n.text('completedOnDate');
+    }
+
+    final DateTime? parsed =
+    DateTime.tryParse(createdAt);
+
+    if (parsed == null) {
+      return createdAt;
+    }
+
     return 'Completed on ${parsed.day}/${parsed.month}/${parsed.year}';
   }
 
@@ -255,29 +418,42 @@ class _TrackApplicationScreenState extends State<TrackApplicationScreen> {
     switch (_latestStatusFromHistory) {
       case 'NEW':
         return 1;
+
       case 'IN_PROCESS':
       case 'UNDER_REVIEW':
         return 2;
+
       case 'ON_HOLD':
         return 2;
+
       case 'ACCEPTED':
       case 'REJECTED':
         return 4;
+
       default:
         return 1;
     }
   }
 
   _StepState _stateForStep(int stepIndex) {
-    if (_progressIndex > stepIndex) return _StepState.done;
-    if (_progressIndex == stepIndex) return _StepState.active;
+    if (_progressIndex > stepIndex) {
+      return _StepState.done;
+    }
+
+    if (_progressIndex == stepIndex) {
+      return _StepState.active;
+    }
+
     return _StepState.pending;
   }
 
   @override
   Widget build(BuildContext context) {
-    final bool isSmallMobile = context.isSmallMobile;
-    final double horizontalPadding = context.responsiveHorizontalPadding;
+    final bool isSmallMobile =
+        context.isSmallMobile;
+
+    final double horizontalPadding =
+        context.responsiveHorizontalPadding;
 
     return WillPopScope(
       onWillPop: () async {
@@ -290,74 +466,159 @@ class _TrackApplicationScreenState extends State<TrackApplicationScreen> {
             child: Column(
               children: [
                 TopRoundedHeader(
-                  title: context.l10n.text('trackApplication'),
+                  title:
+                  context.l10n.text('trackApplication'),
                   onBack: _goHome,
                 ),
                 Expanded(
-                  child: ListView(
-                    padding: EdgeInsets.fromLTRB(
-                      horizontalPadding,
-                      isSmallMobile ? 14 : 18,
-                      horizontalPadding,
-                      20,
-                    ),
-                    children: [
-                      _ApplicationOverviewCard(
-                        applicationId: _applicationId,
-                        universityName: _universityName,
-                        courseTitle: _courseTitle,
-                        educationInstitute: _educationInstitute,
-                        status: _status,
-                        applicationFee: _applicationFee,
-                        paymentStatus: _paymentStatus,
-                        documentsCount: _documents.length,
-                        universityHeroImage: _heroImage,
-                        isSmallMobile: isSmallMobile,
-                      ),
-                      const SizedBox(height: 14),
-                      Text(
-                        context.l10n.text('applicationProgress'),
-                        style: TextStyle(
-                          fontSize: isSmallMobile ? 16 : 18,
-                          fontWeight: FontWeight.w700,
+                  child: RefreshIndicator(
+                    key: RefreshIndicatorKey,
+                    onRefresh: _onRefresh,
+                    child: _isLoading &&
+                        _studentOverview == null
+                        ? ListView(
+                      physics:
+                      const AlwaysScrollableScrollPhysics(),
+                      children: const [
+                        SizedBox(height: 250),
+                        Center(
+                          child:
+                          CircularProgressIndicator(),
                         ),
+                      ],
+                    )
+                        : ListView(
+                      physics:
+                      const AlwaysScrollableScrollPhysics(),
+                      padding: EdgeInsets.fromLTRB(
+                        horizontalPadding,
+                        isSmallMobile ? 14 : 18,
+                        horizontalPadding,
+                        20,
                       ),
-                      const SizedBox(height: 18),
-                      _ProgressStep(
-                        title: context.l10n.text('submitted'),
-                        subtitle: _submittedDate,
-                        state: _StepState.done,
-                        showLine: true,
-                      ),
-                      _ProgressStep(
-                        title: context.l10n.text('underReview'),
-                        subtitle: _stateForStep(2) == _StepState.pending
-                            ? context.l10n.text('underReviewSubtitle')
-                            : (_latestStatusComment.isNotEmpty
-                                ? _latestStatusComment
-                                : context.l10n.text('underReviewSubtitle')),
-                        state: _stateForStep(2),
-                        showLine: true,
-                      ),
-                      _ProgressStep(
-                        title: context.l10n.text('documentsVerified'),
-                        subtitle: _stateForStep(3) == _StepState.pending
-                            ? context.l10n.text('pendingReview')
-                            : context.l10n.text('documentsVerified'),
-                        state: _stateForStep(3),
-                        showLine: true,
-                      ),
-                      _ProgressStep(
-                        title: context.l10n.text('acceptedRejected'),
-                        subtitle: _stateForStep(4) == _StepState.pending
-                            ? context.l10n.text('waitingDecision')
-                            : (_latestStatusComment.isNotEmpty
-                                ? _latestStatusComment
-                                : _latestStatusFromHistory),
-                        state: _stateForStep(4),
-                        showLine: false,
-                      ),
-                    ],
+                      children: [
+                        _ApplicationOverviewCard(
+                          applicationId:
+                          _applicationId,
+                          universityName:
+                          _universityName,
+                          courseTitle:
+                          _courseTitle,
+                          educationInstitute:
+                          _educationInstitute,
+                          status: _status,
+                          applicationFee:
+                          _applicationFee,
+                          paymentStatus:
+                          _paymentStatus,
+                          documentsCount:
+                          _documents.length,
+                          universityHeroImage:
+                          _heroImage,
+                          isSmallMobile:
+                          isSmallMobile,
+                        ),
+
+                        const SizedBox(height: 14),
+
+                        Text(
+                          context.l10n.text(
+                            'applicationProgress',
+                          ),
+                          style: TextStyle(
+                            fontSize:
+                            isSmallMobile
+                                ? 16
+                                : 18,
+                            fontWeight:
+                            FontWeight.w700,
+                          ),
+                        ),
+
+                        const SizedBox(height: 18),
+
+                        _ProgressStep(
+                          title:
+                          context.l10n.text(
+                            'submitted',
+                          ),
+                          subtitle:
+                          _submittedDate,
+                          state:
+                          _StepState.done,
+                          showLine: true,
+                        ),
+
+                        _ProgressStep(
+                          title:
+                          context.l10n.text(
+                            'underReview',
+                          ),
+                          subtitle: _stateForStep(
+                              2) ==
+                              _StepState
+                                  .pending
+                              ? context.l10n.text(
+                            'underReviewSubtitle',
+                          )
+                              : (_latestStatusComment
+                              .isNotEmpty
+                              ? _latestStatusComment
+                              : context
+                              .l10n
+                              .text(
+                            'underReviewSubtitle',
+                          )),
+                          state:
+                          _stateForStep(2),
+                          showLine: true,
+                        ),
+
+                        _ProgressStep(
+                          title:
+                          context.l10n.text(
+                            'documentsVerified',
+                          ),
+                          subtitle: _stateForStep(
+                              3) ==
+                              _StepState
+                                  .pending
+                              ? context.l10n.text(
+                            'pendingReview',
+                          )
+                              : context.l10n
+                              .text(
+                            'documentsVerified',
+                          ),
+                          state:
+                          _stateForStep(3),
+                          showLine: true,
+                        ),
+
+                        _ProgressStep(
+                          title:
+                          context.l10n.text(
+                            'acceptedRejected',
+                          ),
+                          subtitle: _stateForStep(
+                              4) ==
+                              _StepState
+                                  .pending
+                              ? context.l10n.text(
+                            'waitingDecision',
+                          )
+                              : (_latestStatusComment
+                              .isNotEmpty
+                              ? _latestStatusComment
+                              : _latestStatusFromHistory),
+                          state:
+                          _stateForStep(4),
+                          showLine: false,
+                        ),
+
+                        const SizedBox(height: 24),
+                      ],
+                    ),
                   ),
                 ),
               ],
@@ -368,19 +629,32 @@ class _TrackApplicationScreenState extends State<TrackApplicationScreen> {
     );
   }
 
-  static String _textFrom(Object? value) => value?.toString().trim() ?? '';
+  static String _textFrom(Object? value) =>
+      value?.toString().trim() ?? '';
 
   static double? _parseAmount(Object? value) {
-    if (value is num) return value.toDouble();
-    if (value is String) return double.tryParse(value.trim());
+    if (value is num) {
+      return value.toDouble();
+    }
+
+    if (value is String) {
+      return double.tryParse(value.trim());
+    }
+
     return null;
   }
 
-  static String _formatAmount(double amount) => amount % 1 == 0
-      ? amount.toInt().toString()
-      : amount.toStringAsFixed(3).replaceFirst(RegExp(r'0+$'), '');
+  static String _formatAmount(double amount) =>
+      amount % 1 == 0
+          ? amount.toInt().toString()
+          : amount
+          .toStringAsFixed(3)
+          .replaceFirst(RegExp(r'0+$'), '');
 
-  static String _shortId(String id) => id.length > 8 ? id.substring(0, 8) : id;
+  static String _shortId(String id) =>
+      id.length > 8
+          ? id.substring(0, 8)
+          : id;
 }
 
 class _ApplicationOverviewCard extends StatelessWidget {
@@ -415,68 +689,108 @@ class _ApplicationOverviewCard extends StatelessWidget {
       decoration: BoxDecoration(
         color: Colors.white,
         borderRadius: BorderRadius.circular(10),
-        border: Border.all(color: const Color(0xFFE8E2D9)),
+        border: Border.all(
+          color: const Color(0xFFE8E2D9),
+        ),
       ),
       child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
+        crossAxisAlignment:
+        CrossAxisAlignment.start,
         children: [
           Text(
             'Application ID: $applicationId',
             style: const TextStyle(fontSize: 11),
           ),
+
           const SizedBox(height: 10),
+
           Text(
             universityName,
             style: TextStyle(
-              fontSize: isSmallMobile ? 16 : 18,
+              fontSize:
+              isSmallMobile ? 16 : 18,
               fontWeight: FontWeight.w700,
             ),
           ),
+
           const SizedBox(height: 6),
+
           Row(
             children: [
-              const Icon(Icons.school_outlined, size: 18),
+              const Icon(
+                Icons.school_outlined,
+                size: 18,
+              ),
+
               const SizedBox(width: 6),
+
               Expanded(
                 child: Text(
                   courseTitle,
                   style: TextStyle(
-                    fontSize: isSmallMobile ? 14 : 16,
-                    fontWeight: FontWeight.w600,
+                    fontSize:
+                    isSmallMobile
+                        ? 14
+                        : 16,
+                    fontWeight:
+                    FontWeight.w600,
                   ),
                 ),
               ),
             ],
           ),
+
           const SizedBox(height: 8),
+
           Text(
             educationInstitute,
             style: TextStyle(
-              fontSize: isSmallMobile ? 13 : 14,
+              fontSize:
+              isSmallMobile ? 13 : 14,
               color: AppColors.textMuted,
               fontWeight: FontWeight.w500,
             ),
           ),
+
           const SizedBox(height: 12),
-          // _OverviewGrid(
-          //   rows: [
-          //     ('Status', status),
-          //     ('Application Fee', applicationFee),
-          //     ('Payment', paymentStatus),
-          //     ('Documents', '$documentsCount uploaded'),
-          //   ],
-          // ),
-          // const SizedBox(height: 14),
+
           ClipRRect(
-            borderRadius: BorderRadius.circular(10),
+            borderRadius:
+            BorderRadius.circular(10),
             child: Image.network(
               universityHeroImage,
               height: 150,
               width: double.infinity,
               fit: BoxFit.cover,
-              errorBuilder: (_, __, ___) => Container(
+              loadingBuilder:
+                  (
+                  context,
+                  child,
+                  loadingProgress,
+                  ) {
+                if (loadingProgress == null) {
+                  return child;
+                }
+
+                return Container(
+                  height: 150,
+                  alignment: Alignment.center,
+                  color: const Color(0xFFF5F5F5),
+                  child:
+                  const CircularProgressIndicator(),
+                );
+              },
+              errorBuilder:
+                  (_, __, ___) => Container(
                 height: 150,
-                color: const Color(0xFFE2E2E2),
+                color:
+                const Color(0xFFE2E2E2),
+                alignment: Alignment.center,
+                child: const Icon(
+                  Icons.image_not_supported,
+                  size: 40,
+                  color: Colors.grey,
+                ),
               ),
             ),
           ),
@@ -486,56 +800,11 @@ class _ApplicationOverviewCard extends StatelessWidget {
   }
 }
 
-class _OverviewGrid extends StatelessWidget {
-  const _OverviewGrid({required this.rows});
-
-  final List<(String, String)> rows;
-
-  @override
-  Widget build(BuildContext context) {
-    return Wrap(
-      spacing: 8,
-      runSpacing: 8,
-      children: rows
-          .map(
-            (row) => Container(
-              width: (MediaQuery.sizeOf(context).width -
-                      (context.responsiveHorizontalPadding * 2) -
-                      44) /
-                  2,
-              padding: const EdgeInsets.all(10),
-              decoration: BoxDecoration(
-                color: const Color(0xFFF8F5EA),
-                borderRadius: BorderRadius.circular(8),
-                border: Border.all(color: const Color(0xFFE8E2D9)),
-              ),
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  Text(
-                    row.$1,
-                    style: const TextStyle(
-                      color: AppColors.textMuted,
-                      fontSize: 11,
-                    ),
-                  ),
-                  const SizedBox(height: 4),
-                  Text(
-                    row.$2,
-                    maxLines: 2,
-                    overflow: TextOverflow.ellipsis,
-                    style: const TextStyle(fontWeight: FontWeight.w700),
-                  ),
-                ],
-              ),
-            ),
-          )
-          .toList(),
-    );
-  }
+enum _StepState {
+  done,
+  active,
+  pending,
 }
-
-enum _StepState { done, active, pending }
 
 class _ProgressStep extends StatelessWidget {
   const _ProgressStep({
@@ -553,62 +822,103 @@ class _ProgressStep extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final color = switch (state) {
-      _StepState.done => const Color(0xFF0E9F58),
-      _StepState.active => AppColors.accent,
-      _StepState.pending => const Color(0xFF777777),
+      _StepState.done =>
+      const Color(0xFF0E9F58),
+
+      _StepState.active =>
+      AppColors.accent,
+
+      _StepState.pending =>
+      const Color(0xFF777777),
     };
 
     return Row(
-      crossAxisAlignment: CrossAxisAlignment.start,
+      crossAxisAlignment:
+      CrossAxisAlignment.start,
       children: [
         SizedBox(
           width: 24,
           child: Column(
             children: [
-              Container(
+              AnimatedContainer(
+                duration:
+                const Duration(milliseconds: 300),
                 width: 24,
                 height: 24,
                 decoration: BoxDecoration(
-                  color: state == _StepState.active ? Colors.white : color,
+                  color:
+                  state ==
+                      _StepState.active
+                      ? Colors.white
+                      : color,
                   shape: BoxShape.circle,
-                  border: Border.all(color: color, width: 3),
+                  border: Border.all(
+                    color: color,
+                    width: 3,
+                  ),
                 ),
-                child: state == _StepState.done
-                    ? const Icon(Icons.check, size: 16, color: Colors.white)
+                child: state ==
+                    _StepState.done
+                    ? const Icon(
+                  Icons.check,
+                  size: 16,
+                  color: Colors.white,
+                )
                     : null,
               ),
+
               if (showLine)
                 Container(
                   width: 2,
                   height: 42,
-                  color: state == _StepState.pending
-                      ? const Color(0xFFD7D7D7)
-                      : const Color(0xFF0E9F58),
+                  color: state ==
+                      _StepState.pending
+                      ? const Color(
+                    0xFFD7D7D7,
+                  )
+                      : const Color(
+                    0xFF0E9F58,
+                  ),
                 ),
             ],
           ),
         ),
+
         const SizedBox(width: 10),
+
         Expanded(
           child: Padding(
-            padding: const EdgeInsets.only(top: 1),
+            padding:
+            const EdgeInsets.only(top: 1),
             child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
+              crossAxisAlignment:
+              CrossAxisAlignment.start,
               children: [
                 Text(
                   title,
                   style: TextStyle(
                     fontSize: 16,
-                    fontWeight: FontWeight.w700,
-                    color: state == _StepState.pending
-                        ? const Color(0xFF777777)
+                    fontWeight:
+                    FontWeight.w700,
+                    color:
+                    state ==
+                        _StepState
+                            .pending
+                        ? const Color(
+                      0xFF777777,
+                    )
                         : AppColors.text,
                   ),
                 ),
+
                 const SizedBox(height: 4),
+
                 Text(
                   subtitle,
-                  style: const TextStyle(color: AppColors.textMuted),
+                  style: const TextStyle(
+                    color:
+                    AppColors.textMuted,
+                  ),
                 ),
               ],
             ),
@@ -620,5 +930,7 @@ class _ProgressStep extends StatelessWidget {
 }
 
 extension _StringFallback on String {
-  String ifEmpty(String? fallback) => isEmpty ? (fallback ?? '') : this;
+  String ifEmpty(String? fallback) {
+    return isEmpty ? (fallback ?? '') : this;
+  }
 }

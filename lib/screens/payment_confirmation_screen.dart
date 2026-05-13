@@ -116,8 +116,10 @@ class _PaymentConfirmationScreenState extends State<PaymentConfirmationScreen> {
     return 'Application ID: ${_shortId(_applicationId)}';
   }
 
-  String get _paymentId => _textFrom(_primaryPayment?['id'])
-      .ifEmpty(_textFrom(_primaryPayment?['paymentId']));
+  String get _paymentId =>
+      _textFrom(_primaryPayment?['id']).isNotEmpty
+          ? _textFrom(_primaryPayment?['id'])
+          : _textFrom(_primaryPayment?['paymentId']);
 
   String get _displayUniversityName {
     final Map<String, dynamic>? application = _primaryApplication;
