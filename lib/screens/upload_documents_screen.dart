@@ -128,18 +128,26 @@ class _UploadDocumentsScreenState extends State<UploadDocumentsScreen> {
         throw Exception('studentUserId not found');
       }
       final String documentKey = _resolveDocumentKey(doc.type);
-      await _deleteExistingDocumentsByKey(
-        studentUserId: studentUserId,
-        documentKey: documentKey,
-      );
+      final String? existingDocumentKey = _uploadedDocumentKeyFor(documentKey);
+      final String? existingDocumentId = existingDocumentKey == null
+          ? null
+          : _uploadedDocuments[existingDocumentKey]?.documentId?.trim();
 
-      final Map<String, dynamic> response =
-          await _applicationApiService.uploadStudentDocument(
-        studentUserId: studentUserId,
-        type: doc.type,
-        filePath: filePath,
-        fileName: file.name,
-      );
+      final Map<String, dynamic> response = (existingDocumentId != null &&
+              existingDocumentId.isNotEmpty)
+          ? await _applicationApiService.updateStudentDocument(
+              studentUserId: studentUserId,
+              documentId: existingDocumentId,
+              type: doc.type,
+              filePath: filePath,
+              fileName: file.name,
+            )
+          : await _applicationApiService.uploadStudentDocument(
+              studentUserId: studentUserId,
+              type: doc.type,
+              filePath: filePath,
+              fileName: file.name,
+            );
       final _UploadedDocumentInfo uploadedDocument =
           _uploadedDocumentFromUploadResponse(
         response,
@@ -408,31 +416,6 @@ class _UploadDocumentsScreenState extends State<UploadDocumentsScreen> {
       fileName: _firstDocumentString(item, _fileNameKeys),
       openUri: _uriFromApiValue(_firstDocumentString(item, _fileUrlKeys)),
     );
-  }
-
-  Future<void> _deleteExistingDocumentsByKey({
-    required String studentUserId,
-    required String documentKey,
-  }) async {
-    final List<MapEntry<String, _UploadedDocumentInfo>> matchingEntries =
-        _uploadedDocuments.entries
-            .where(
-              (entry) =>
-                  entry.key == documentKey ||
-                  entry.key.startsWith('${documentKey}_'),
-            )
-            .toList(growable: false);
-    for (final MapEntry<String, _UploadedDocumentInfo> entry
-        in matchingEntries) {
-      final String documentId = entry.value.documentId?.trim() ?? '';
-      if (documentId.isEmpty) continue;
-      final String deleteStudentUserId =
-          entry.value.studentUserId?.trim().ifEmpty(studentUserId) ?? studentUserId;
-      await _applicationApiService.deleteStudentDocument(
-        documentId: documentId,
-        studentUserId: deleteStudentUserId,
-      );
-    }
   }
 
   List<_DocumentDefinition> _documentDefinitionsFromTypes(

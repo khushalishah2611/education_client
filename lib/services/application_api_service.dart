@@ -268,6 +268,57 @@ extension ApplicationApiDocuments on ApplicationApiService {
     return const <Map<String, dynamic>>[];
   }
 
+  Future<Map<String, dynamic>> updateStudentDocument({
+    required String studentUserId,
+    required String documentId,
+    required String type,
+    required String filePath,
+    required String fileName,
+  }) async {
+    final Uri uri = ApiConfig.uri(
+            '/api/student/documents/${Uri.encodeComponent(documentId)}')
+        .replace(
+      queryParameters: <String, String>{'studentUserId': studentUserId},
+    );
+
+    final request = http.MultipartRequest('PUT', uri)
+      ..fields['type'] = type
+      ..files.add(
+        await http.MultipartFile.fromPath(
+          'files',
+          filePath,
+          filename: fileName,
+        ),
+      );
+
+    final streamedResponse = await request.send();
+    final response = await http.Response.fromStream(streamedResponse);
+    final decoded = _decodeMap(response.body);
+
+    logApiCall(
+      method: 'PUT',
+      url: uri.toString(),
+      statusCode: response.statusCode,
+      requestBody: <String, dynamic>{
+        'type': type,
+        'fileName': fileName,
+        'filePath': filePath,
+      },
+      responseBody: decoded,
+    );
+
+    if (!ApiStatus.isSuccess(response.statusCode)) {
+      if (response.statusCode == 413) {
+        throw Exception(
+            'Selected file is too large. Please upload a smaller file.');
+      }
+      throw Exception(
+          decoded['message']?.toString() ?? 'Failed to update document');
+    }
+
+    return decoded;
+  }
+
   Future<void> deleteStudentDocument({
     required String documentId,
     required String studentUserId,
