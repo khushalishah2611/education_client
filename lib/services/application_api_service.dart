@@ -67,6 +67,9 @@ class ApplicationApiService {
 
     final response = await http.post(
       uri,
+      headers: const <String, String>{
+        'Content-Type': 'application/json',
+      },
       body: jsonEncode(body),
     );
 

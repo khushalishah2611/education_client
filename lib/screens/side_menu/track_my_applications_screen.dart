@@ -168,17 +168,17 @@ class _TrackMyApplicationsScreenState extends State<TrackMyApplicationsScreen> {
     final appId = (item['id'] ?? '').toString();
     return InkWell(
       onTap: () {
-        Navigator.of(context).push(
-          MaterialPageRoute(
-            builder: (_) => TrackApplicationScreen(
-              universityName: resolvedUniversityName,
-              universityHeroImage: (item['logoPath'] ?? '').toString(),
-              courseTitle: resolvedCourseTitle,
-              applicationId: appId,
-              studentOverview: const <String, dynamic>{},
-            ),
-          ),
-        );
+        // Navigator.of(context).push(
+        //   MaterialPageRoute(
+        //     builder: (_) => TrackApplicationScreen(
+        //       universityName: resolvedUniversityName,
+        //       universityHeroImage: (item['logoPath'] ?? '').toString(),
+        //       courseTitle: resolvedCourseTitle,
+        //       applicationId: appId,
+        //       studentOverview: const <String, dynamic>{},
+        //     ),
+        //   ),
+        // );
       },
       child: Container(
         padding: const EdgeInsets.all(12),
