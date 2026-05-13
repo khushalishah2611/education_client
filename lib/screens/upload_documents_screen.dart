@@ -404,6 +404,7 @@ class _UploadDocumentsScreenState extends State<UploadDocumentsScreen> {
     return _UploadedDocumentInfo(
       type: type,
       documentId: _documentIdFromApiItem(item),
+      studentUserId: _studentUserIdFromApiItem(item),
       fileName: _firstDocumentString(item, _fileNameKeys),
       openUri: _uriFromApiValue(_firstDocumentString(item, _fileUrlKeys)),
     );
@@ -425,9 +426,11 @@ class _UploadDocumentsScreenState extends State<UploadDocumentsScreen> {
         in matchingEntries) {
       final String documentId = entry.value.documentId?.trim() ?? '';
       if (documentId.isEmpty) continue;
+      final String deleteStudentUserId =
+          entry.value.studentUserId?.trim().ifEmpty(studentUserId) ?? studentUserId;
       await _applicationApiService.deleteStudentDocument(
         documentId: documentId,
-        studentUserId: studentUserId,
+        studentUserId: deleteStudentUserId,
       );
     }
   }
@@ -594,6 +597,16 @@ class _UploadDocumentsScreenState extends State<UploadDocumentsScreen> {
       'document_id',
     ]);
     return id.isEmpty ? null : id;
+  }
+
+  String? _studentUserIdFromApiItem(Map<String, dynamic> item) {
+    final String studentUserId = _firstNonEmptyValue(item, const <String>[
+      'studentUserId',
+      'student_user_id',
+      'studentId',
+      'student_id',
+    ]);
+    return studentUserId.isEmpty ? null : studentUserId;
   }
 
   String? _firstDocumentString(
@@ -829,12 +842,14 @@ class _UploadedDocumentInfo {
   const _UploadedDocumentInfo({
     required this.type,
     this.documentId,
+    this.studentUserId,
     this.fileName,
     this.openUri,
   });
 
   final String type;
   final String? documentId;
+  final String? studentUserId;
   final String? fileName;
   final Uri? openUri;
 
@@ -846,12 +861,14 @@ class _UploadedDocumentInfo {
   _UploadedDocumentInfo copyWith({
     String? type,
     String? documentId,
+    String? studentUserId,
     String? fileName,
     Uri? openUri,
   }) {
     return _UploadedDocumentInfo(
       type: type ?? this.type,
       documentId: documentId ?? this.documentId,
+      studentUserId: studentUserId ?? this.studentUserId,
       fileName: fileName ?? this.fileName,
       openUri: openUri ?? this.openUri,
     );

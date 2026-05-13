@@ -261,13 +261,12 @@ class _UploadedDocumentsContentState extends State<UploadedDocumentsContent> {
           final documentId = doc['id']?.toString() ?? '';
           final isOpening = _openingDocumentId == documentId;
 
-          return Container(
-            decoration: BoxDecoration(
-              color: Colors.white,
+          return Material(
+            color: Colors.white,
+            borderRadius: BorderRadius.circular(8),
+            shape: RoundedRectangleBorder(
               borderRadius: BorderRadius.circular(8),
-              border: Border.all(
-                color: const Color(0xFFEAEAEA),
-              ),
+              side: const BorderSide(color: Color(0xFFEAEAEA)),
             ),
             child: ListTile(
               contentPadding: const EdgeInsets.symmetric(
