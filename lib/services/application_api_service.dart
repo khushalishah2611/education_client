@@ -370,6 +370,7 @@ extension ApplicationApiStudents on ApplicationApiService {
       ..fields['dateOfBirth'] = dateOfBirth
       ..fields['phone'] = phone
       ..fields['gender'] = gender
+      ..fields['profileImage'] = gender
       ..fields['emergencyContactGuardianName'] = emergencyContactGuardianName
       ..fields['emergencyContactRelationship'] = emergencyContactRelationship
       ..fields['emergencyContactMobile'] = emergencyContactMobile
