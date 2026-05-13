@@ -55,7 +55,7 @@ class _UploadDocumentsScreenState extends State<UploadDocumentsScreen> {
     });
 
     try {
-      final String studentUserId = await StudentSession.currentStudentUserId();
+      final String studentUserId = await _resolveStudentUserId();
       final List<DocumentTypeItem> types =
           await _applicationApiService.fetchDocumentTypes();
       final List<Map<String, dynamic>> uploaded =
@@ -123,7 +123,7 @@ class _UploadDocumentsScreenState extends State<UploadDocumentsScreen> {
 
     setState(() => _isUploading = true);
     try {
-      final String studentUserId = await StudentSession.currentStudentUserId();
+      final String studentUserId = await _resolveStudentUserId();
       if (studentUserId.isEmpty) {
         throw Exception('studentUserId not found');
       }
@@ -183,7 +183,7 @@ class _UploadDocumentsScreenState extends State<UploadDocumentsScreen> {
       );
 
   Future<bool> _refreshUploadedDocuments() async {
-    final String studentUserId = await StudentSession.currentStudentUserId();
+    final String studentUserId = await _resolveStudentUserId();
     final List<Map<String, dynamic>> uploaded =
         await _applicationApiService.fetchStudentDocuments(
       studentUserId: studentUserId,
@@ -266,6 +266,33 @@ class _UploadDocumentsScreenState extends State<UploadDocumentsScreen> {
       );
     }
     return _uploadedDocuments[_uploadedDocumentKeyFor(documentKey)];
+  }
+
+  Future<String> _resolveStudentUserId() async {
+    final String fromSession = await StudentSession.currentStudentUserId();
+    if (fromSession.isNotEmpty) return fromSession;
+
+    for (final Map<String, dynamic> item in widget.applicationsPayload) {
+      final String fromTopLevel = (item['studentUserId'] ?? '').toString().trim();
+      if (fromTopLevel.isNotEmpty) return fromTopLevel;
+      final String fromStudentId = (item['studentId'] ?? '').toString().trim();
+      if (fromStudentId.isNotEmpty) return fromStudentId;
+      final Object? student = item['student'];
+      if (student is Map) {
+        final String fromStudentObject = (student['id'] ?? '').toString().trim();
+        if (fromStudentObject.isNotEmpty) return fromStudentObject;
+      }
+      final Object? application = item['application'];
+      if (application is Map) {
+        final String fromApplication =
+            (application['studentUserId'] ?? '').toString().trim();
+        if (fromApplication.isNotEmpty) return fromApplication;
+        final String fromApplicationStudentId =
+            (application['studentId'] ?? '').toString().trim();
+        if (fromApplicationStudentId.isNotEmpty) return fromApplicationStudentId;
+      }
+    }
+    return '';
   }
 
   String? _selectedFileLabel(String type) {

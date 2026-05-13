@@ -191,6 +191,41 @@ class _TrackApplicationScreenState extends State<TrackApplicationScreen> {
   }
 
   String get _status => _textFrom(_application?['status']).ifEmpty('NEW');
+  List<Map<String, dynamic>> get _applicationHistory {
+    final Object? history = _application?['history'];
+    if (history is! List) return const <Map<String, dynamic>>[];
+
+    final List<Map<String, dynamic>> items = history
+        .whereType<Map>()
+        .map((item) => item.map((key, value) => MapEntry(key.toString(), value)))
+        .toList(growable: true);
+
+    items.sort((a, b) {
+      final DateTime? aDate = DateTime.tryParse(_textFrom(a['createdAt']));
+      final DateTime? bDate = DateTime.tryParse(_textFrom(b['createdAt']));
+      if (aDate == null && bDate == null) return 0;
+      if (aDate == null) return -1;
+      if (bDate == null) return 1;
+      return aDate.compareTo(bDate);
+    });
+    return items;
+  }
+
+  String get _latestStatusFromHistory {
+    for (final Map<String, dynamic> item in _applicationHistory.reversed) {
+      final String status = _textFrom(item['status']);
+      if (status.isNotEmpty) return status;
+    }
+    return _status;
+  }
+
+  String get _latestStatusComment {
+    for (final Map<String, dynamic> item in _applicationHistory.reversed) {
+      final String comment = _textFrom(item['comment']);
+      if (comment.isNotEmpty) return comment;
+    }
+    return '';
+  }
 
   String get _paymentStatus => _textFrom(_payment?['status']).ifEmpty('-');
 
@@ -214,6 +249,29 @@ class _TrackApplicationScreenState extends State<TrackApplicationScreen> {
     final DateTime? parsed = DateTime.tryParse(createdAt);
     if (parsed == null) return createdAt;
     return 'Completed on ${parsed.day}/${parsed.month}/${parsed.year}';
+  }
+
+  int get _progressIndex {
+    switch (_latestStatusFromHistory) {
+      case 'NEW':
+        return 1;
+      case 'IN_PROCESS':
+      case 'UNDER_REVIEW':
+        return 2;
+      case 'ON_HOLD':
+        return 2;
+      case 'ACCEPTED':
+      case 'REJECTED':
+        return 4;
+      default:
+        return 1;
+    }
+  }
+
+  _StepState _stateForStep(int stepIndex) {
+    if (_progressIndex > stepIndex) return _StepState.done;
+    if (_progressIndex == stepIndex) return _StepState.active;
+    return _StepState.pending;
   }
 
   @override
@@ -273,26 +331,30 @@ class _TrackApplicationScreenState extends State<TrackApplicationScreen> {
                       ),
                       _ProgressStep(
                         title: context.l10n.text('underReview'),
-                        subtitle: context.l10n.text('underReviewSubtitle'),
-                        state: _status == 'NEW'
-                            ? _StepState.active
-                            : _StepState.done,
+                        subtitle: _stateForStep(2) == _StepState.pending
+                            ? context.l10n.text('underReviewSubtitle')
+                            : (_latestStatusComment.isNotEmpty
+                                ? _latestStatusComment
+                                : context.l10n.text('underReviewSubtitle')),
+                        state: _stateForStep(2),
                         showLine: true,
                       ),
                       _ProgressStep(
                         title: context.l10n.text('documentsVerified'),
-                        subtitle: _documents.isEmpty
+                        subtitle: _stateForStep(3) == _StepState.pending
                             ? context.l10n.text('pendingReview')
-                            : '${_documents.length} document(s) uploaded',
-                        state: _documents.isEmpty
-                            ? _StepState.pending
-                            : _StepState.done,
+                            : context.l10n.text('documentsVerified'),
+                        state: _stateForStep(3),
                         showLine: true,
                       ),
                       _ProgressStep(
                         title: context.l10n.text('acceptedRejected'),
-                        subtitle: context.l10n.text('waitingDecision'),
-                        state: _StepState.pending,
+                        subtitle: _stateForStep(4) == _StepState.pending
+                            ? context.l10n.text('waitingDecision')
+                            : (_latestStatusComment.isNotEmpty
+                                ? _latestStatusComment
+                                : _latestStatusFromHistory),
+                        state: _stateForStep(4),
                         showLine: false,
                       ),
                     ],
