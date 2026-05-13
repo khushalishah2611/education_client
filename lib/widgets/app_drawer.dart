@@ -1,3 +1,4 @@
+import 'package:education/core/image_url_helper.dart';
 import 'package:flutter/material.dart';
 
 import '../core/app_localizations.dart';
@@ -31,12 +32,11 @@ class _CommonSideMenuState extends State<CommonSideMenu> {
       final String userId = await StudentSession.currentStudentUserId();
       final List<Map<String, dynamic>> students = await _api.fetchStudents();
 
-      final Map<String, dynamic>? current = students
-          .cast<Map<String, dynamic>?>()
-          .firstWhere(
-            (item) => (item?['userId'] ?? '').toString() == userId,
-            orElse: () => students.isNotEmpty ? students.first : null,
-          );
+      final Map<String, dynamic>? current =
+          students.cast<Map<String, dynamic>?>().firstWhere(
+                (item) => (item?['userId'] ?? '').toString() == userId,
+                orElse: () => students.isNotEmpty ? students.first : null,
+              );
 
       if (current == null || !mounted) return;
 
@@ -51,7 +51,9 @@ class _CommonSideMenuState extends State<CommonSideMenu> {
       setState(() {
         _displayName = fullName;
         _displayEmail = (user['email'] ?? '').toString().trim();
-        _profileImageUrl = (current['profileImagePath'] ?? '').toString().trim();
+        _profileImageUrl =
+            (current['profileImagePath'] ?? '').toString().trim();
+        print("_profileImageUrl---->" + _profileImageUrl);
       });
     } catch (_) {
       // Keep drawer usable even if profile lookup fails.
@@ -148,7 +150,10 @@ class _CommonSideMenuState extends State<CommonSideMenu> {
                       border: Border.all(color: AppColors.accent, width: 1.5),
                       image: _profileImageUrl.isNotEmpty
                           ? DecorationImage(
-                              image: NetworkImage(_profileImageUrl),
+                              image: NetworkImage(
+                                ImageUrlHelper.resolveUploadUrl(
+                                    _profileImageUrl),
+                              ),
                               fit: BoxFit.cover,
                             )
                           : null,

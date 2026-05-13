@@ -858,10 +858,10 @@ class ProfileAvatar extends StatelessWidget {
             ),
             child: CircleAvatar(
               backgroundImage: hasSelectedImage
-                  ? FileImage(File(selectedImagePath!))
+                  ? FileImage(File(selectedImagePath!)) as ImageProvider
                   : (imagePath ?? '').isEmpty
                   ? null
-                  : NetworkImage(url),
+                  : NetworkImage(url) as ImageProvider,
               child:
               (imagePath ?? '').isEmpty &&
                   !hasSelectedImage
