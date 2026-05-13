@@ -41,6 +41,78 @@ class _UploadedDocumentsContentState extends State<UploadedDocumentsContent> {
   bool _loading = true;
   String? _openingDocumentId;
 
+  String _normalizedType(Map<String, dynamic> document) {
+    return (document['type']?.toString() ?? '').trim().toLowerCase();
+  }
+
+  DateTime? _documentTimestamp(Map<String, dynamic> document) {
+    final timestamp = document['updatedAt'] ??
+        document['updated_at'] ??
+        document['createdAt'] ??
+        document['created_at'];
+
+    if (timestamp == null) return null;
+    return DateTime.tryParse(timestamp.toString());
+  }
+
+  int _documentIdAsInt(Map<String, dynamic> document) {
+    return int.tryParse(document['id']?.toString() ?? '') ?? 0;
+  }
+
+  List<Map<String, dynamic>> _mergeDocumentsByType(List<dynamic> docs) {
+    final parsedDocs = docs
+        .whereType<Map>()
+        .map(
+          (e) => e.map(
+            (k, v) => MapEntry(k.toString(), v),
+          ),
+        )
+        .toList();
+
+    final docsByType = <String, Map<String, dynamic>>{};
+
+    for (final doc in parsedDocs) {
+      final typeKey = _normalizedType(doc);
+
+      if (typeKey.isEmpty) {
+        docsByType['__unknown_${_documentIdAsInt(doc)}'] = doc;
+        continue;
+      }
+
+      final existing = docsByType[typeKey];
+      if (existing == null) {
+        docsByType[typeKey] = doc;
+        continue;
+      }
+
+      final existingTime = _documentTimestamp(existing);
+      final incomingTime = _documentTimestamp(doc);
+
+      final shouldReplace = incomingTime != null && existingTime != null
+          ? incomingTime.isAfter(existingTime)
+          : _documentIdAsInt(doc) > _documentIdAsInt(existing);
+
+      if (shouldReplace) {
+        docsByType[typeKey] = doc;
+      }
+    }
+
+    final mergedDocs = docsByType.values.toList();
+
+    mergedDocs.sort((a, b) {
+      final bTime = _documentTimestamp(b);
+      final aTime = _documentTimestamp(a);
+
+      if (aTime != null && bTime != null) {
+        return bTime.compareTo(aTime);
+      }
+
+      return _documentIdAsInt(b).compareTo(_documentIdAsInt(a));
+    });
+
+    return mergedDocs;
+  }
+
   @override
   void initState() {
     super.initState();
@@ -62,16 +134,7 @@ class _UploadedDocumentsContentState extends State<UploadedDocumentsContent> {
       if (!mounted) return;
 
       setState(() {
-        _documents = docs is List
-            ? docs
-                .whereType<Map>()
-                .map(
-                  (e) => e.map(
-                    (k, v) => MapEntry(k.toString(), v),
-                  ),
-                )
-                .toList()
-            : [];
+        _documents = docs is List ? _mergeDocumentsByType(docs) : [];
 
         _loading = false;
       });
