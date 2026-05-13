@@ -1,8 +1,8 @@
 import 'package:education/core/image_url_helper.dart';
 import 'package:flutter/material.dart';
-import 'package:shared_preferences/shared_preferences.dart';
 import 'package:url_launcher/url_launcher.dart';
 import '../../core/app_theme.dart';
+import '../../core/student_session.dart';
 import '../../widgets/common_widgets.dart';
 import '../../services/application_api_service.dart';
 import 'side_menu_common.dart';
@@ -51,9 +51,7 @@ class _UploadedDocumentsContentState extends State<UploadedDocumentsContent> {
     setState(() => _loading = true);
 
     try {
-      final prefs = await SharedPreferences.getInstance();
-
-      final studentUserId = prefs.getString('studentUserId')?.trim() ?? '';
+      final studentUserId = await StudentSession.currentStudentUserId();
 
       final overview = await _api.fetchStudentOverview(
         studentUserId: studentUserId,
@@ -94,9 +92,7 @@ class _UploadedDocumentsContentState extends State<UploadedDocumentsContent> {
 
   Future<void> _delete(Map<String, dynamic> item) async {
     try {
-      final prefs = await SharedPreferences.getInstance();
-
-      final studentUserId = prefs.getString('studentUserId')?.trim() ?? '';
+      final studentUserId = await StudentSession.currentStudentUserId();
 
       await _api.deleteStudentDocument(
         documentId: item['id']?.toString() ?? '',

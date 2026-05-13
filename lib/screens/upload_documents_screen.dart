@@ -1,11 +1,11 @@
 import 'package:file_picker/file_picker.dart';
 import 'package:flutter/material.dart';
-import 'package:shared_preferences/shared_preferences.dart';
 import '../core/app_localizations.dart';
 import '../core/api_config.dart';
 import '../core/app_theme.dart';
 import '../core/responsive_helper.dart';
 import '../core/url_launcher_helper.dart';
+import '../core/student_session.dart';
 import '../models/document_type.dart';
 import '../services/application_api_service.dart';
 import '../widgets/common_widgets.dart';
@@ -55,9 +55,7 @@ class _UploadDocumentsScreenState extends State<UploadDocumentsScreen> {
     });
 
     try {
-      final SharedPreferences prefs = await SharedPreferences.getInstance();
-      final String studentUserId =
-          prefs.getString('studentUserId')?.trim() ?? '';
+      final String studentUserId = await StudentSession.currentStudentUserId();
       final List<DocumentTypeItem> types =
           await _applicationApiService.fetchDocumentTypes();
       final List<Map<String, dynamic>> uploaded =
@@ -125,9 +123,7 @@ class _UploadDocumentsScreenState extends State<UploadDocumentsScreen> {
 
     setState(() => _isUploading = true);
     try {
-      final SharedPreferences prefs = await SharedPreferences.getInstance();
-      final String studentUserId =
-          prefs.getString('studentUserId')?.trim() ?? '';
+      final String studentUserId = await StudentSession.currentStudentUserId();
       if (studentUserId.isEmpty) {
         throw Exception('studentUserId not found');
       }
@@ -183,8 +179,7 @@ class _UploadDocumentsScreenState extends State<UploadDocumentsScreen> {
       );
 
   Future<bool> _refreshUploadedDocuments() async {
-    final SharedPreferences prefs = await SharedPreferences.getInstance();
-    final String studentUserId = prefs.getString('studentUserId')?.trim() ?? '';
+    final String studentUserId = await StudentSession.currentStudentUserId();
     final List<Map<String, dynamic>> uploaded =
         await _applicationApiService.fetchStudentDocuments(
       studentUserId: studentUserId,

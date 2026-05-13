@@ -2,12 +2,12 @@ import 'dart:async';
 
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
-import 'package:shared_preferences/shared_preferences.dart';
 
 import '../core/app_localizations.dart';
 import '../core/app_theme.dart';
 import '../core/responsive_helper.dart';
 import '../core/url_launcher_helper.dart';
+import '../core/student_session.dart';
 import '../services/auth_api_service.dart';
 import '../widgets/common_widgets.dart';
 import 'home_screen.dart';
@@ -172,21 +172,12 @@ class _VerifyOtpScreenState extends State<VerifyOtpScreen> {
         studentId: widget.studentId,
         otp: otp,
       );
-      final prefs = await SharedPreferences.getInstance();
-      await prefs.setBool('isLoggedIn', true);
-      await prefs.setString(
-        'studentUserId',
-        response.id.isNotEmpty ? response.id : widget.studentId,
+      await StudentSession.saveLogin(
+        studentUserId: response.id.isNotEmpty ? response.id : widget.studentId,
+        loginCountry: widget.loginCountry,
+        loginDialCode: widget.loginDialCode,
+        authToken: response.accessToken,
       );
-      if (widget.loginCountry.trim().isNotEmpty) {
-        await prefs.setString('loginCountry', widget.loginCountry.trim());
-      }
-      if (response.accessToken.isNotEmpty) {
-        await prefs.setString('authToken', response.accessToken);
-      }
-      if (widget.loginDialCode.trim().isNotEmpty) {
-        await prefs.setString('loginDialCode', widget.loginDialCode.trim());
-      }
       if (!mounted) return;
       showAppSnackBar(
         context,
