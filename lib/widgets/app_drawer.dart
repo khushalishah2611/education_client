@@ -2,10 +2,61 @@ import 'package:flutter/material.dart';
 
 import '../core/app_localizations.dart';
 import '../core/app_theme.dart';
+import '../core/student_session.dart';
 import '../screens/side_menu_screens.dart';
+import '../services/application_api_service.dart';
 
-class CommonSideMenu extends StatelessWidget {
+class CommonSideMenu extends StatefulWidget {
   const CommonSideMenu({super.key});
+
+  @override
+  State<CommonSideMenu> createState() => _CommonSideMenuState();
+}
+
+class _CommonSideMenuState extends State<CommonSideMenu> {
+  final ApplicationApiService _api = const ApplicationApiService();
+
+  String _displayName = '';
+  String _displayEmail = '';
+  String _profileImageUrl = '';
+
+  @override
+  void initState() {
+    super.initState();
+    _loadCurrentUser();
+  }
+
+  Future<void> _loadCurrentUser() async {
+    try {
+      final String userId = await StudentSession.currentStudentUserId();
+      final List<Map<String, dynamic>> students = await _api.fetchStudents();
+
+      final Map<String, dynamic>? current = students
+          .cast<Map<String, dynamic>?>()
+          .firstWhere(
+            (item) => (item?['userId'] ?? '').toString() == userId,
+            orElse: () => students.isNotEmpty ? students.first : null,
+          );
+
+      if (current == null || !mounted) return;
+
+      final String firstName = (current['firstName'] ?? '').toString().trim();
+      final String lastName = (current['lastName'] ?? '').toString().trim();
+      final String fullName = '$firstName $lastName'.trim();
+      final Map<String, dynamic> user =
+          (current['user'] is Map<String, dynamic>)
+              ? current['user'] as Map<String, dynamic>
+              : <String, dynamic>{};
+
+      setState(() {
+        _displayName = fullName;
+        _displayEmail = (user['email'] ?? '').toString().trim();
+        _profileImageUrl = (current['profileImagePath'] ?? '').toString().trim();
+      });
+    } catch (_) {
+      // Keep drawer usable even if profile lookup fails.
+    }
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -95,30 +146,41 @@ class CommonSideMenu extends StatelessWidget {
                     decoration: BoxDecoration(
                       shape: BoxShape.circle,
                       border: Border.all(color: AppColors.accent, width: 1.5),
-                      image: const DecorationImage(
-                        image: NetworkImage(
-                          'https://images.unsplash.com/photo-1500648767791-00dcc994a43e?auto=format&fit=crop&w=200&q=80',
-                        ),
-                        fit: BoxFit.cover,
-                      ),
+                      image: _profileImageUrl.isNotEmpty
+                          ? DecorationImage(
+                              image: NetworkImage(_profileImageUrl),
+                              fit: BoxFit.cover,
+                            )
+                          : null,
                     ),
+                    child: _profileImageUrl.isEmpty
+                        ? const Icon(
+                            Icons.person,
+                            color: AppColors.textMuted,
+                            size: 24,
+                          )
+                        : null,
                   ),
                   const SizedBox(width: 12),
-                  const Expanded(
+                  Expanded(
                     child: Column(
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
                         Text(
-                          'Ishan Sharma',
+                          _displayName.isNotEmpty
+                              ? _displayName
+                              : context.l10n.text('myProfile'),
                           style: TextStyle(
                             fontSize: 20,
                             fontWeight: FontWeight.w700,
                           ),
                         ),
-                        SizedBox(height: 2),
+                        const SizedBox(height: 2),
                         Text(
-                          'Ishan01@gmail.com',
-                          style: TextStyle(color: AppColors.textMuted),
+                          _displayEmail,
+                          maxLines: 1,
+                          overflow: TextOverflow.ellipsis,
+                          style: const TextStyle(color: AppColors.textMuted),
                         ),
                       ],
                     ),
