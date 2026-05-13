@@ -388,40 +388,27 @@ class _UploadedDocumentsContentState extends State<UploadedDocumentsContent> {
       child: ListView(
         physics: const AlwaysScrollableScrollPhysics(),
         children: [
-          const SizedBox(height: 120),
-          Center(
-            child: Container(
-              width: double.infinity,
-              padding: const EdgeInsets.symmetric(
-                vertical: 24,
-                horizontal: 16,
+          Container(
+            width: double.infinity,
+            padding: const EdgeInsets.symmetric(
+              vertical: 24,
+              horizontal: 16,
+            ),
+            margin: const EdgeInsets.all(12),
+            decoration: BoxDecoration(
+              borderRadius: BorderRadius.circular(8),
+              border: Border.all(
+                color: const Color(0xFFE6E6E6),
               ),
-              margin: const EdgeInsets.all(12),
-              decoration: BoxDecoration(
-                borderRadius: BorderRadius.circular(8),
-                border: Border.all(
-                  color: const Color(0xFFE6E6E6),
-                ),
-                color: Colors.white,
-              ),
-              child: Column(
-                children: const [
-                  Icon(
-                    Icons.folder_open_outlined,
-                    size: 52,
-                    color: Colors.grey,
-                  ),
-                  SizedBox(height: 14),
-                  Text(
-                    'No uploaded documents available',
-                    textAlign: TextAlign.center,
-                    style: TextStyle(
-                      color: Color(0xFF616161),
-                      fontWeight: FontWeight.w600,
-                      fontSize: 15,
-                    ),
-                  ),
-                ],
+              color: Colors.white,
+            ),
+            child:   Text(
+              'No uploaded documents available',
+              textAlign: TextAlign.center,
+              style: TextStyle(
+                color: Color(0xFF616161),
+                fontWeight: FontWeight.w600,
+                fontSize: 15,
               ),
             ),
           ),

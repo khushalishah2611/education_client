@@ -1,8 +1,5 @@
 import 'dart:convert';
-
 import 'package:http/http.dart' as http;
-import 'package:shared_preferences/shared_preferences.dart';
-
 import '../core/api_config.dart';
 import '../core/api_logger.dart';
 import '../core/api_status.dart';
@@ -235,7 +232,7 @@ extension ApplicationApiDocuments on ApplicationApiService {
   Future<List<Map<String, dynamic>>> fetchStudentDocuments({
     required String studentUserId,
   }) async {
-    final Uri uri = ApiConfig.uri('/api/student/documents').replace(
+    final Uri uri = ApiConfig.uri('/api/student/document-types').replace(
       queryParameters: <String, String>{'studentUserId': studentUserId},
     );
     final response = await http.get(

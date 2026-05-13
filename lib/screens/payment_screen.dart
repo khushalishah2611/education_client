@@ -31,97 +31,107 @@ class PaymentScreen extends StatefulWidget {
 class _PaymentScreenState extends State<PaymentScreen> {
   int selected = 0;
   bool _isSubmitting = false;
+
   final ApplicationApiService _applicationApiService =
-      const ApplicationApiService();
+  const ApplicationApiService();
 
-  String get _applicationFeeCurrency {
-    for (final Map<String, dynamic> payload in widget.applicationsPayload) {
-      final Object? directCurrency = payload['applicationFeeCurrency'];
-      if (directCurrency != null &&
-          directCurrency.toString().trim().isNotEmpty) {
-        return directCurrency.toString().trim();
-      }
-
-      final Object? selectedCourses = payload['selectedCourses'];
-      if (selectedCourses is List && selectedCourses.isNotEmpty) {
-        final Object? selectedCourse = selectedCourses.first;
-        if (selectedCourse is Map) {
-          final Object? currency = selectedCourse['currency'];
-          if (currency != null && currency.toString().trim().isNotEmpty) {
-            return currency.toString().trim();
-          }
-        }
-      }
-
-      final Object? courseDetails = payload['courseDetails'];
-      if (courseDetails is Map) {
-        final Object? currency = courseDetails['currency'];
-        if (currency != null && currency.toString().trim().isNotEmpty) {
-          return currency.toString().trim();
-        }
-      }
-    }
-
-    return 'Omani Rial';
-  }
+  // FIXED OMANI RIAL CURRENCY
+  String get _applicationFeeCurrency => 'Omani Rial';
 
   double get _applicationFeeTotal {
     return widget.applicationsPayload.fold<double>(0, (total, payload) {
       final Object? selectedApplicationFeeTotal =
-          payload['selectedApplicationFeeTotal'];
+      payload['selectedApplicationFeeTotal'];
+
       final double? selectedTotal =
-          _parseApplicationFee(selectedApplicationFeeTotal);
-      if (selectedTotal != null) return total + selectedTotal;
+      _parseApplicationFee(selectedApplicationFeeTotal);
+
+      if (selectedTotal != null) {
+        return total + selectedTotal;
+      }
 
       final Object? directApplicationFee = payload['applicationFee'];
-      final double? directFee = _parseApplicationFee(directApplicationFee);
-      if (directFee != null) return total + directFee;
+
+      final double? directFee =
+      _parseApplicationFee(directApplicationFee);
+
+      if (directFee != null) {
+        return total + directFee;
+      }
 
       final Object? courseDetails = payload['courseDetails'];
-      if (courseDetails is! Map) return total;
 
-      final Object? applicationFee = courseDetails['applicationFee'];
+      if (courseDetails is! Map) {
+        return total;
+      }
+
+      final Object? applicationFee =
+      courseDetails['applicationFee'];
+
       return total + (_parseApplicationFee(applicationFee) ?? 0);
     });
   }
 
+  // APPLICATION FEE TEXT WITH OMANI RIAL
   String get _applicationFeeText {
     final double total = _applicationFeeTotal;
+
     final String amount = total % 1 == 0
         ? total.toInt().toString()
-        : total.toStringAsFixed(3).replaceFirst(RegExp(r'0+$'), '');
+        : total
+        .toStringAsFixed(3)
+        .replaceFirst(RegExp(r'0+$'), '');
 
-    return '$amount $_applicationFeeCurrency';
+    return '$amount Omani Rial';
   }
 
   double? _parseApplicationFee(Object? value) {
-    if (value is num) return value.toDouble();
-    if (value is String) return double.tryParse(value.trim());
+    if (value is num) {
+      return value.toDouble();
+    }
+
+    if (value is String) {
+      return double.tryParse(value.trim());
+    }
+
     return null;
   }
 
   Future<void> _submitApplicationsAndContinue() async {
     if (_isSubmitting) return;
+
     setState(() => _isSubmitting = true);
+
     Map<String, dynamic>? createdApplicationsResponse;
     Map<String, dynamic>? studentOverview;
+
     try {
       if (widget.applicationsPayload.isNotEmpty) {
-        final SharedPreferences prefs = await SharedPreferences.getInstance();
+        final SharedPreferences prefs =
+        await SharedPreferences.getInstance();
+
         final String studentUserId =
             prefs.getString('studentUserId')?.trim() ?? '';
+
         if (studentUserId.isNotEmpty) {
+
+          // CREATE APPLICATION API
           createdApplicationsResponse =
-              await _applicationApiService.createBulkApplications(
+          await _applicationApiService.createBulkApplications(
             studentUserId: studentUserId,
             applications: widget.applicationsPayload,
           );
-          try {
-            studentOverview = await _applicationApiService.fetchStudentOverview(
-              studentUserId: studentUserId,
-            );
-          } catch (_) {
-            studentOverview = null;
+
+          // ONLY IF STATUS = 200 THEN CALL OVERVIEW API
+          if (createdApplicationsResponse['status'] == 201) {
+            try {
+              studentOverview =
+              await _applicationApiService.fetchStudentOverview(
+                studentUserId: studentUserId,
+              );
+            } catch (_) {
+              studentOverview = null;
+            }
           }
         }
       }
@@ -129,6 +139,7 @@ class _PaymentScreenState extends State<PaymentScreen> {
       await SelectedCourseStorage.clear();
 
       if (!mounted) return;
+
       Navigator.of(context).push(
         MaterialPageRoute(
           builder: (_) => PaymentConfirmationScreen(
@@ -136,7 +147,8 @@ class _PaymentScreenState extends State<PaymentScreen> {
             universityHeroImage: widget.universityHeroImage,
             courseTitle: widget.courseTitle,
             applicationsPayload: widget.applicationsPayload,
-            createdApplicationsResponse: createdApplicationsResponse,
+            createdApplicationsResponse:
+            createdApplicationsResponse,
             studentOverview: studentOverview,
           ),
         ),
@@ -145,7 +157,9 @@ class _PaymentScreenState extends State<PaymentScreen> {
       if (e.statusCode == 409) {
         await SelectedCourseStorage.clear();
       }
+
       if (!mounted) return;
+
       showAppSnackBar(
         context,
         type: AppSnackBarType.error,
@@ -153,6 +167,7 @@ class _PaymentScreenState extends State<PaymentScreen> {
       );
     } catch (e) {
       if (!mounted) return;
+
       showAppSnackBar(
         context,
         type: AppSnackBarType.error,
@@ -168,7 +183,9 @@ class _PaymentScreenState extends State<PaymentScreen> {
   @override
   Widget build(BuildContext context) {
     final bool isSmallMobile = context.isSmallMobile;
-    final double horizontalPadding = context.responsiveHorizontalPadding;
+
+    final double horizontalPadding =
+        context.responsiveHorizontalPadding;
 
     return Scaffold(
       body: AppBackground(
@@ -192,55 +209,76 @@ class _PaymentScreenState extends State<PaymentScreen> {
                       ),
                       children: [
                         Text(
-                          context.l10n.text('applicationFeeSummary'),
+                          context.l10n.text(
+                              'applicationFeeSummary'),
                           style: TextStyle(
-                            fontSize: isSmallMobile ? 16 : 18,
+                            fontSize:
+                            isSmallMobile ? 16 : 18,
                             fontWeight: FontWeight.w700,
                           ),
                         ),
+
                         const SizedBox(height: 12),
+
                         Container(
                           padding: const EdgeInsets.all(12),
                           decoration: BoxDecoration(
                             color: Colors.white,
-                            borderRadius: BorderRadius.circular(10),
-                            border: Border.all(color: const Color(0xFFE8E2D9)),
+                            borderRadius:
+                            BorderRadius.circular(10),
+                            border: Border.all(
+                              color:
+                              const Color(0xFFE8E2D9),
+                            ),
                           ),
                           child: Column(
                             children: [
                               Row(
                                 children: [
                                   Text(
-                                    context.l10n.text('applicationFee'),
+                                    context.l10n.text(
+                                        'applicationFee'),
                                     style: const TextStyle(
-                                      color: AppColors.textMuted,
+                                      color:
+                                      AppColors.textMuted,
                                     ),
                                   ),
+
                                   const Spacer(),
+
                                   Text(
                                     _applicationFeeText,
                                     style: const TextStyle(
-                                      fontWeight: FontWeight.w700,
+                                      fontWeight:
+                                      FontWeight.w700,
                                     ),
                                   ),
                                 ],
                               ),
+
                               const Divider(height: 24),
+
                               Row(
                                 children: [
                                   Text(
-                                    context.l10n.text('totalAmount'),
+                                    context.l10n.text(
+                                        'totalAmount'),
                                     style: const TextStyle(
-                                      fontWeight: FontWeight.w700,
+                                      fontWeight:
+                                      FontWeight.w700,
                                     ),
                                   ),
+
                                   const Spacer(),
+
                                   Text(
                                     _applicationFeeText,
                                     style: const TextStyle(
                                       fontSize: 18,
-                                      fontWeight: FontWeight.w700,
-                                      color: AppColors.accent,
+                                      fontWeight:
+                                      FontWeight.w700,
+                                      color:
+                                      AppColors.accent,
                                     ),
                                   ),
                                 ],
@@ -248,38 +286,34 @@ class _PaymentScreenState extends State<PaymentScreen> {
                             ],
                           ),
                         ),
+
                         const SizedBox(height: 18),
+
                         Text(
-                          context.l10n.text('paymentMethod'),
+                          context.l10n.text(
+                              'paymentMethod'),
                           style: TextStyle(
-                            fontSize: isSmallMobile ? 16 : 18,
+                            fontSize:
+                            isSmallMobile ? 16 : 18,
                             fontWeight: FontWeight.w700,
                           ),
                         ),
+
                         const SizedBox(height: 12),
+
                         _PaymentMethodTile(
                           label: context.l10n.text('COD'),
                           iconText: 'COD',
                           selected: selected == 0,
-                          onTap: () => setState(() => selected = 0),
+                          onTap: () =>
+                              setState(() => selected = 0),
                         ),
-                        const SizedBox(height: 10),
-                        // _PaymentMethodTile(
-                        //   label: context.l10n.text('upiPay'),
-                        //   iconText: 'UPI',
-                        //   selected: selected == 1,
-                        //   onTap: () => setState(() => selected = 1),
-                        // ),
-                        // const SizedBox(height: 10),
-                        // _PaymentMethodTile(
-                        //   label: context.l10n.text('netBanking'),
-                        //   iconText: 'BANK',
-                        //   selected: selected == 2,
-                        //   onTap: () => setState(() => selected = 2),
-                        // ),
+
                         const SizedBox(height: 30),
+
                         AppPrimaryButton(
-                          label: context.l10n.text('payNow'),
+                          label:
+                          context.l10n.text('payNow'),
                           onPressed: _isSubmitting
                               ? null
                               : _submitApplicationsAndContinue,
@@ -289,17 +323,19 @@ class _PaymentScreenState extends State<PaymentScreen> {
                   ),
                 ],
               ),
+
               if (_isSubmitting)
                 const Positioned.fill(
                   child: ColoredBox(
-                    color: Color.fromRGBO(0, 0, 0, 0.25),
+                    color: Color.fromRGBO(
+                        0, 0, 0, 0.25),
                     child: Center(
                       child: CircularProgressIndicator(
                         color: AppColors.primary,
                       ),
                     ),
                   ),
-                )
+                ),
             ],
           ),
         ),
@@ -323,17 +359,24 @@ class _PaymentMethodTile extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final bool isSmallMobile = context.isSmallMobile;
+    final bool isSmallMobile =
+        context.isSmallMobile;
+
     return InkWell(
       onTap: onTap,
       borderRadius: BorderRadius.circular(10),
       child: Container(
-        padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 14),
+        padding: const EdgeInsets.symmetric(
+          horizontal: 12,
+          vertical: 14,
+        ),
         decoration: BoxDecoration(
           color: Colors.white,
           borderRadius: BorderRadius.circular(10),
           border: Border.all(
-            color: selected ? AppColors.accent : const Color(0xFFE8E2D9),
+            color: selected
+                ? AppColors.accent
+                : const Color(0xFFE8E2D9),
           ),
         ),
         child: Row(
@@ -344,7 +387,8 @@ class _PaymentMethodTile extends StatelessWidget {
               alignment: Alignment.center,
               decoration: BoxDecoration(
                 color: const Color(0xFFF3F3F3),
-                borderRadius: BorderRadius.circular(4),
+                borderRadius:
+                BorderRadius.circular(4),
               ),
               child: Text(
                 iconText,
@@ -354,31 +398,39 @@ class _PaymentMethodTile extends StatelessWidget {
                 ),
               ),
             ),
+
             const SizedBox(width: 10),
+
             Text(
               label,
               style: TextStyle(
-                fontSize: isSmallMobile ? 14 : 16,
+                fontSize:
+                isSmallMobile ? 14 : 16,
                 color: AppColors.textMuted,
               ),
             ),
+
             const Spacer(),
+
             Container(
               width: 18,
               height: 18,
               decoration: BoxDecoration(
                 shape: BoxShape.circle,
                 border: Border.all(
-                  color: selected ? AppColors.accent : AppColors.textMuted,
+                  color: selected
+                      ? AppColors.accent
+                      : AppColors.textMuted,
                 ),
               ),
               child: selected
                   ? const Center(
-                      child: CircleAvatar(
-                        radius: 5,
-                        backgroundColor: AppColors.accent,
-                      ),
-                    )
+                child: CircleAvatar(
+                  radius: 5,
+                  backgroundColor:
+                  AppColors.accent,
+                ),
+              )
                   : null,
             ),
           ],
