@@ -477,23 +477,26 @@ class _ProfileBodyState extends State<ProfileBody> {
 
           const SizedBox(height: 14),
 
-          const ProfileLabel(
-            'Country & Mobile Number',
-          ),
+          const ProfileLabel('Country'),
 
-          CountryMobileField(
+          CountryDropdownField(
             countries: _countries,
-            selectedCountry:
-            _selectedCountry,
-            mobileController:
-            _phoneController,
-            isLoading:
-            _isLoadingCountries,
+            selectedCountry: _selectedCountry,
+            isLoading: _isLoadingCountries,
             onCountryChanged: (v) {
               setState(() {
                 _selectedCountry = v;
               });
             },
+          ),
+
+          const SizedBox(height: 14),
+
+          const ProfileLabel('Mobile Number'),
+
+          MobileNumberField(
+            dialCode: _selectedCountry?.dialCode ?? '',
+            mobileController: _phoneController,
           ),
 
           const SizedBox(height: 14),
@@ -713,24 +716,68 @@ class _ProfileShimmerState
   }
 }
 
-class CountryMobileField
-    extends StatelessWidget {
-  const CountryMobileField({
+class CountryDropdownField extends StatelessWidget {
+  const CountryDropdownField({
     super.key,
     required this.countries,
     required this.selectedCountry,
-    required this.mobileController,
     required this.isLoading,
     required this.onCountryChanged,
   });
 
   final List<CountryMaster> countries;
   final CountryMaster? selectedCountry;
-  final TextEditingController
-  mobileController;
   final bool isLoading;
-  final ValueChanged<CountryMaster?>
-  onCountryChanged;
+  final ValueChanged<CountryMaster?> onCountryChanged;
+
+  @override
+  Widget build(BuildContext context) {
+    return Container(
+      height: 56,
+      padding: const EdgeInsets.symmetric(horizontal: 12),
+      decoration: BoxDecoration(
+        color: Colors.white,
+        borderRadius: BorderRadius.circular(12),
+        border: Border.all(color: AppColors.border),
+      ),
+      child: DropdownButtonHideUnderline(
+        child: DropdownButton<CountryMaster>(
+          isExpanded: true,
+          value: selectedCountry,
+          borderRadius: BorderRadius.circular(12),
+          icon: const Icon(Icons.keyboard_arrow_down_rounded, size: 20),
+          style: const TextStyle(
+            fontSize: 15,
+            color: AppColors.text,
+            fontWeight: FontWeight.w500,
+          ),
+          items: countries
+              .map(
+                (c) => DropdownMenuItem<CountryMaster>(
+                  value: c,
+                  child: Text(
+                    '${c.flagEmoji} ${c.nameEn}',
+                    overflow: TextOverflow.ellipsis,
+                  ),
+                ),
+              )
+              .toList(growable: false),
+          onChanged: isLoading ? null : onCountryChanged,
+        ),
+      ),
+    );
+  }
+}
+
+class MobileNumberField extends StatelessWidget {
+  const MobileNumberField({
+    super.key,
+    required this.dialCode,
+    required this.mobileController,
+  });
+
+  final String dialCode;
+  final TextEditingController mobileController;
 
   @override
   Widget build(BuildContext context) {
@@ -738,81 +785,42 @@ class CountryMobileField
       height: 56,
       decoration: BoxDecoration(
         color: Colors.white,
-        borderRadius:
-        BorderRadius.circular(12),
-        border: Border.all(
-          color: AppColors.border,
-        ),
+        borderRadius: BorderRadius.circular(12),
+        border: Border.all(color: AppColors.border),
       ),
       child: Row(
         children: [
           const SizedBox(width: 12),
-
-          DropdownButtonHideUnderline(
-            child:
-            DropdownButton<CountryMaster>(
-              value: selectedCountry,
-              borderRadius:
-              BorderRadius.circular(12),
-              icon: const Icon(
-                Icons
-                    .keyboard_arrow_down_rounded,
-                size: 20,
-              ),
+          Container(
+            padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 8),
+            decoration: BoxDecoration(
+              color: const Color(0xFFF4F4F4),
+              borderRadius: BorderRadius.circular(8),
+            ),
+            child: Text(
+              dialCode.isEmpty ? '--' : dialCode,
               style: const TextStyle(
-                fontSize: 15,
+                fontSize: 14,
                 color: AppColors.text,
-                fontWeight: FontWeight.w500,
+                fontWeight: FontWeight.w600,
               ),
-              items: countries
-                  .map(
-                    (c) =>
-                    DropdownMenuItem<
-                        CountryMaster>(
-                      value: c,
-                      child: Text(
-                        '${c.flagEmoji} ${c.dialCode} ${c.nameEn}',
-                      ),
-                    ),
-              )
-                  .toList(
-                growable: false,
-              ),
-              onChanged:
-              isLoading
-                  ? null
-                  : onCountryChanged,
             ),
           ),
-
           const SizedBox(width: 10),
-
-          Container(
-            width: 1,
-            height: 30,
-            color: AppColors.border,
-          ),
-
+          Container(width: 1, height: 30, color: AppColors.border),
           const SizedBox(width: 10),
-
           Expanded(
             child: TextField(
               controller: mobileController,
-              keyboardType:
-              TextInputType.phone,
-              decoration:
-              const InputDecoration(
-                hintText:
-                'Enter mobile number',
+              keyboardType: TextInputType.phone,
+              decoration: const InputDecoration(
+                hintText: 'Enter mobile number',
                 border: InputBorder.none,
-                enabledBorder:
-                InputBorder.none,
-                focusedBorder:
-                InputBorder.none,
+                enabledBorder: InputBorder.none,
+                focusedBorder: InputBorder.none,
               ),
             ),
           ),
-
           const SizedBox(width: 12),
         ],
       ),
