@@ -42,6 +42,10 @@ class _UploadDocumentsScreenState
 
   final Map<String, PlatformFile?> _selectedFiles =
   <String, PlatformFile?>{};
+  final Map<String, String> _selectedFileNames =
+  <String, String>{};
+  final Map<String, String> _uploadedDocumentIds =
+  <String, String>{};
 
   final ApplicationApiService _applicationApiService =
   const ApplicationApiService();
@@ -63,8 +67,17 @@ class _UploadDocumentsScreenState
     });
 
     try {
+      final String studentUserId =
+      await _resolveStudentUserId();
+
       final List<DocumentTypeItem> types =
       await _applicationApiService.fetchDocumentTypes();
+      final Map<String, dynamic> overview =
+      studentUserId.isEmpty
+          ? <String, dynamic>{}
+          : await _applicationApiService.fetchStudentOverview(
+        studentUserId: studentUserId,
+      );
 
       final bool isArabic =
           WidgetsBinding
@@ -78,6 +91,10 @@ class _UploadDocumentsScreenState
       _documentDefinitionsFromTypes(
         types,
         isArabic: isArabic,
+      );
+      _seedUploadedDocumentsFromOverview(
+        docs: docs,
+        overview: overview,
       );
 
       if (!mounted) return;
@@ -148,19 +165,38 @@ class _UploadDocumentsScreenState
         );
       }
 
-      await _applicationApiService
-          .uploadStudentDocument(
+      final String documentKey =
+      _documentKey(doc.type);
+      final String existingDocumentId =
+      (_uploadedDocumentIds[documentKey] ?? '').trim();
+
+      final Map<String, dynamic> response =
+      existingDocumentId.isNotEmpty
+          ? await _applicationApiService.updateStudentDocument(
+        studentUserId: studentUserId,
+        documentId: existingDocumentId,
+        type: doc.type,
+        filePath: filePath,
+        fileName: file.name,
+      )
+          : await _applicationApiService.uploadStudentDocument(
         studentUserId: studentUserId,
         type: doc.type,
         filePath: filePath,
         fileName: file.name,
       );
 
-      final String documentKey =
-      _documentKey(doc.type);
-
       setState(() {
         _selectedFiles[documentKey] = file;
+        _selectedFileNames[documentKey] = file.name;
+        final String responseDocumentId =
+        _extractDocumentIdFromUploadResponse(
+          response,
+        );
+        if (responseDocumentId.isNotEmpty) {
+          _uploadedDocumentIds[documentKey] =
+              responseDocumentId;
+        }
       });
 
       if (!mounted) return;
@@ -197,7 +233,11 @@ class _UploadDocumentsScreenState
 
               return _selectedFiles[
               documentKey] !=
-                  null;
+                  null ||
+                  (_selectedFileNames[
+                  documentKey] ??
+                      '')
+                      .isNotEmpty;
             },
           );
 
@@ -319,7 +359,96 @@ class _UploadDocumentsScreenState
     final PlatformFile? file =
     _selectedFiles[documentKey];
 
-    return file?.name;
+    if (file != null) {
+      return file.name;
+    }
+
+    final String existingName =
+    (_selectedFileNames[documentKey] ?? '')
+        .trim();
+
+    return existingName.isEmpty
+        ? null
+        : existingName;
+  }
+
+  void _seedUploadedDocumentsFromOverview({
+    required List<_DocumentDefinition> docs,
+    required Map<String, dynamic> overview,
+  }) {
+    final Object? documentsRaw = overview['documents'];
+    if (documentsRaw is! List) {
+      return;
+    }
+
+    final Set<String> requiredKeys = docs
+        .map((doc) => _documentKey(doc.type))
+        .where((key) => key.isNotEmpty)
+        .toSet();
+
+    for (final Object? item in documentsRaw) {
+      if (item is! Map) {
+        continue;
+      }
+
+      final String type = (item['type'] ?? '')
+          .toString()
+          .trim();
+      final String key = _documentKey(type);
+      if (key.isEmpty || !requiredKeys.contains(key)) {
+        continue;
+      }
+
+      final String fileName =
+      _extractDocumentFileName(item);
+      if (fileName.isNotEmpty) {
+        _selectedFileNames[key] = fileName;
+      }
+
+      final String documentId = (item['id'] ?? '')
+          .toString()
+          .trim();
+      if (documentId.isNotEmpty) {
+        _uploadedDocumentIds[key] = documentId;
+      }
+    }
+  }
+
+  String _extractDocumentIdFromUploadResponse(
+      Map<String, dynamic> response) {
+    final Object? data = response['data'];
+    if (data is Map) {
+      final String id = (data['id'] ?? '')
+          .toString()
+          .trim();
+      if (id.isNotEmpty) {
+        return id;
+      }
+    }
+
+    final String id = (response['id'] ?? '')
+        .toString()
+        .trim();
+    return id;
+  }
+
+  String _extractDocumentFileName(Map item) {
+    final List<String> candidates = <String>[
+      (item['originalName'] ?? '').toString(),
+      (item['fileName'] ?? '').toString(),
+      (item['filename'] ?? '').toString(),
+      (item['name'] ?? '').toString(),
+      (item['url'] ?? '').toString().split('/').last,
+    ];
+
+    for (final String value in candidates) {
+      final String normalized = value.trim();
+      if (normalized.isNotEmpty) {
+        return normalized;
+      }
+    }
+
+    return '';
   }
 
   Future<void> _handleDocumentTap(
