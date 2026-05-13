@@ -49,7 +49,8 @@ class _TrackApplicationScreenState extends State<TrackApplicationScreen> {
     setState(() => _isLoading = true);
     try {
       final SharedPreferences prefs = await SharedPreferences.getInstance();
-      final String studentUserId = prefs.getString('studentUserId')?.trim() ?? '';
+      final String studentUserId =
+          prefs.getString('studentUserId')?.trim() ?? '';
       if (studentUserId.isEmpty) return;
 
       final Map<String, dynamic> overview =
@@ -77,7 +78,8 @@ class _TrackApplicationScreenState extends State<TrackApplicationScreen> {
     );
   }
 
-  List<Map<String, dynamic>> get _applications => _listFromOverview('applications');
+  List<Map<String, dynamic>> get _applications =>
+      _listFromOverview('applications');
 
   List<Map<String, dynamic>> get _payments => _listFromOverview('payments');
 
@@ -89,7 +91,8 @@ class _TrackApplicationScreenState extends State<TrackApplicationScreen> {
 
     return items
         .whereType<Map>()
-        .map((item) => item.map((key, value) => MapEntry(key.toString(), value)))
+        .map(
+            (item) => item.map((key, value) => MapEntry(key.toString(), value)))
         .toList(growable: false);
   }
 
@@ -118,7 +121,8 @@ class _TrackApplicationScreenState extends State<TrackApplicationScreen> {
   }
 
   String get _applicationId {
-    final String id = _textFrom(_application?['id']).ifEmpty(widget.applicationId);
+    final String id =
+        _textFrom(_application?['id']).ifEmpty(widget.applicationId);
     return id.isEmpty ? '-' : '#${_shortId(id)}';
   }
 
@@ -193,13 +197,12 @@ class _TrackApplicationScreenState extends State<TrackApplicationScreen> {
   String get _applicationFee {
     final double? appFee = _parseAmount(_application?['applicationFee']);
     final double? paymentAmount = _parseAmount(_payment?['amount']);
-    final double? fee = appFee == null || appFee == 0
-        ? paymentAmount ?? appFee
-        : appFee;
-    final String currency = _textFrom(_application?['applicationFeeCurrency'])
-            .isNotEmpty
-        ? _textFrom(_application?['applicationFeeCurrency'])
-        : _textFrom(_payment?['currency']);
+    final double? fee =
+        appFee == null || appFee == 0 ? paymentAmount ?? appFee : appFee;
+    final String currency =
+        _textFrom(_application?['applicationFeeCurrency']).isNotEmpty
+            ? _textFrom(_application?['applicationFeeCurrency'])
+            : _textFrom(_payment?['currency']);
 
     if (fee == null) return currency.isEmpty ? '-' : currency;
     return '${_formatAmount(fee)}${currency.isEmpty ? '' : ' $currency'}';
@@ -241,21 +244,18 @@ class _TrackApplicationScreenState extends State<TrackApplicationScreen> {
                       20,
                     ),
                     children: [
-                      if (_isLoading)
-                        const _LoadingCard()
-                      else
-                        _ApplicationOverviewCard(
-                          applicationId: _applicationId,
-                          universityName: _universityName,
-                          courseTitle: _courseTitle,
-                          educationInstitute: _educationInstitute,
-                          status: _status,
-                          applicationFee: _applicationFee,
-                          paymentStatus: _paymentStatus,
-                          documentsCount: _documents.length,
-                          universityHeroImage: _heroImage,
-                          isSmallMobile: isSmallMobile,
-                        ),
+                      _ApplicationOverviewCard(
+                        applicationId: _applicationId,
+                        universityName: _universityName,
+                        courseTitle: _courseTitle,
+                        educationInstitute: _educationInstitute,
+                        status: _status,
+                        applicationFee: _applicationFee,
+                        paymentStatus: _paymentStatus,
+                        documentsCount: _documents.length,
+                        universityHeroImage: _heroImage,
+                        isSmallMobile: isSmallMobile,
+                      ),
                       const SizedBox(height: 14),
                       Text(
                         context.l10n.text('applicationProgress'),
@@ -319,39 +319,6 @@ class _TrackApplicationScreenState extends State<TrackApplicationScreen> {
       : amount.toStringAsFixed(3).replaceFirst(RegExp(r'0+$'), '');
 
   static String _shortId(String id) => id.length > 8 ? id.substring(0, 8) : id;
-}
-
-class _LoadingCard extends StatelessWidget {
-  const _LoadingCard();
-
-  @override
-  Widget build(BuildContext context) {
-    return Container(
-      width: double.infinity,
-      padding: const EdgeInsets.symmetric(
-        vertical: 20,
-        horizontal: 12,
-      ),
-      decoration: BoxDecoration(
-        borderRadius: BorderRadius.circular(10),
-        border: Border.all(
-          color: const Color(0xFFE6E6E6),
-        ),
-        color: Colors.white,
-      ),
-      child: const Column(
-        mainAxisSize: MainAxisSize.min,
-        children: [
-          CircularProgressIndicator(color: AppColors.primary),
-          SizedBox(height: 12),
-          Text(
-            'Loading application details...',
-            style: TextStyle(fontWeight: FontWeight.w700),
-          ),
-        ],
-      ),
-    );
-  }
 }
 
 class _ApplicationOverviewCard extends StatelessWidget {
