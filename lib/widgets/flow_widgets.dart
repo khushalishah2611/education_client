@@ -178,7 +178,7 @@ class FlowStepHeader extends StatelessWidget {
     final bool isSmallMobile = context.isSmallMobile;
     final labels = [
       context.l10n.text('stepUploadDoc'),
-      context.l10n.text('stepVerify'),
+      // context.l10n.text('stepVerify'),
       context.l10n.text('stepPayment'),
       context.l10n.text('stepStatus'),
     ];

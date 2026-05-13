@@ -33,7 +33,9 @@ class ApplicationApiService {
     ).replace(
       queryParameters: <String, String>{'studentUserId': studentUserId},
     );
-    final response = await http.patch(uri, headers: await _authHeaders());
+    final response = await http.patch(
+      uri,
+    );
     final decoded = _decodeMap(response.body);
 
     logApiCall(
@@ -68,7 +70,6 @@ class ApplicationApiService {
 
     final response = await http.post(
       uri,
-      headers: await _jsonHeaders(),
       body: jsonEncode(body),
     );
 
@@ -97,7 +98,9 @@ class ApplicationApiService {
     final Uri uri = ApiConfig.uri(
       '/api/admin/students/${Uri.encodeComponent(studentUserId)}/overview',
     );
-    final response = await http.get(uri, headers: await _authHeaders());
+    final response = await http.get(
+      uri,
+    );
     final decoded = _decodeMap(response.body);
 
     logApiCall(
@@ -124,7 +127,9 @@ class ApplicationApiService {
     final Uri uri = ApiConfig.uri(
       '/api/payments/${Uri.encodeComponent(paymentId)}/receipt',
     );
-    final response = await http.get(uri, headers: await _authHeaders());
+    final response = await http.get(
+      uri,
+    );
 
     logApiCall(
       method: 'GET',
@@ -144,13 +149,14 @@ class ApplicationApiService {
 
     return response.body;
   }
-
 }
 
 extension ApplicationApiDocumentTypes on ApplicationApiService {
   Future<List<DocumentTypeItem>> fetchDocumentTypes() async {
     final Uri uri = ApiConfig.uri('/api/student/document-types');
-    final response = await http.get(uri, headers: await _authHeaders());
+    final response = await http.get(
+      uri,
+    );
     final decoded = _decodeMap(response.body);
     logApiCall(
       method: 'GET',
@@ -189,7 +195,6 @@ extension ApplicationApiDocuments on ApplicationApiService {
     );
 
     final request = http.MultipartRequest('POST', uri)
-      ..headers.addAll(await _authHeaders())
       ..fields['type'] = type
       ..files.add(
         await http.MultipartFile.fromPath(
@@ -233,7 +238,9 @@ extension ApplicationApiDocuments on ApplicationApiService {
     final Uri uri = ApiConfig.uri('/api/student/document-types').replace(
       queryParameters: <String, String>{'studentUserId': studentUserId},
     );
-    final response = await http.get(uri, headers: await _authHeaders());
+    final response = await http.get(
+      uri,
+    );
     final decoded = _decodeMap(response.body);
 
     logApiCall(
@@ -261,19 +268,28 @@ extension ApplicationApiDocuments on ApplicationApiService {
     return const <Map<String, dynamic>>[];
   }
 
-
   Future<void> deleteStudentDocument({
     required String documentId,
     required String studentUserId,
   }) async {
-    final Uri uri = ApiConfig.uri('/api/student/documents/${Uri.encodeComponent(documentId)}').replace(
+    final Uri uri = ApiConfig.uri(
+            '/api/student/documents/${Uri.encodeComponent(documentId)}')
+        .replace(
       queryParameters: <String, String>{'studentUserId': studentUserId},
     );
-    final response = await http.delete(uri, headers: await _authHeaders());
+    final response = await http.delete(
+      uri,
+    );
     final decoded = _decodeMap(response.body);
-    logApiCall(method: 'DELETE', url: uri.toString(), statusCode: response.statusCode, requestBody: null, responseBody: decoded);
+    logApiCall(
+        method: 'DELETE',
+        url: uri.toString(),
+        statusCode: response.statusCode,
+        requestBody: null,
+        responseBody: decoded);
     if (!ApiStatus.isSuccess(response.statusCode)) {
-      throw Exception(decoded['message']?.toString() ?? 'Failed to delete document');
+      throw Exception(
+          decoded['message']?.toString() ?? 'Failed to delete document');
     }
   }
 }
@@ -286,22 +302,4 @@ Map<String, dynamic> _decodeMap(String body) {
     }
   } catch (_) {}
   return <String, dynamic>{};
-}
-
-Future<Map<String, String>> _authHeaders() async {
-  final SharedPreferences prefs = await SharedPreferences.getInstance();
-  final String token = prefs.getString('authToken')?.trim() ?? '';
-  if (token.isEmpty) return const <String, String>{};
-
-  return <String, String>{
-    'Authorization': 'Bearer $token',
-  };
-}
-
-Future<Map<String, String>> _jsonHeaders() async {
-  final Map<String, String> headers = <String, String>{
-    'Content-Type': 'application/json'
-  };
-  headers.addAll(await _authHeaders());
-  return headers;
 }
