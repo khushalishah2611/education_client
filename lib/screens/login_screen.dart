@@ -291,7 +291,7 @@ class _LoginScreenState extends State<LoginScreen> {
                   child: TextField(
                     controller: _mobileController,
                     keyboardType: TextInputType.phone,
-                    decoration: const InputDecoration(
+                    decoration:  InputDecoration(
                       contentPadding: EdgeInsets.all(5),
                       hintText: context.l10n.text('enterMobileNumber'),
                       border: InputBorder.none,

@@ -813,7 +813,7 @@ class MobileNumberField extends StatelessWidget {
             child: TextField(
               controller: mobileController,
               keyboardType: TextInputType.phone,
-              decoration: const InputDecoration(
+              decoration:  InputDecoration(
                 hintText: context.l10n.text('enterMobileNumber'),
                 border: InputBorder.none,
                 enabledBorder: InputBorder.none,

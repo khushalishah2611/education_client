@@ -278,7 +278,7 @@ class _TrackMyApplicationsScreenState extends State<TrackMyApplicationsScreen> {
             // ✅ STATUS SECTION
             Row(
               children: [
-                const Text(
+                 Text(
                   context.l10n.text('applicationStatus'),
                   style: TextStyle(
                     fontSize: 16,
@@ -395,7 +395,7 @@ class _TrackMyApplicationsScreenState extends State<TrackMyApplicationsScreen> {
           color: const Color(0xFFE6E6E6),
         ),
       ),
-      child: const Text(
+      child:  Text(
         context.l10n.text('noApplicationsAvailable'),
         textAlign: TextAlign.center,
         style: TextStyle(
