@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:url_launcher/url_launcher.dart';
 
+import '../../core/app_localizations.dart';
 import '../../core/app_theme.dart';
 import 'side_menu_common.dart';
 
@@ -10,12 +11,12 @@ class EmergencyContactScreen extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return SideMenuScaffold(
-      title: 'Help',
+      title: context.l10n.text('help'),
       child: Align(
         alignment: Alignment.topCenter,
-        child: const Padding(
+        child: Padding(
           padding: EdgeInsets.all(8),
-          child: EmergencyContactCard(),
+          child: const EmergencyContactCard(),
         ),
       ),
     );
@@ -57,16 +58,16 @@ class EmergencyContactCard extends StatelessWidget {
       child: Column(
         mainAxisSize: MainAxisSize.min,
         children: [
-          const ContactInfoField(
-            label: 'Guardian Name',
+          ContactInfoField(
+            label: context.l10n.text('guardianName'),
             value: 'Arab Education',
             icon: Icons.person_outline_rounded,
           ),
 
           const Divider(height: 1),
 
-          const ContactInfoField(
-            label: 'Relationship',
+          ContactInfoField(
+            label: context.l10n.text('relationship'),
             value: 'Support Person',
             icon: Icons.person_outline_rounded,
           ),
@@ -74,7 +75,7 @@ class EmergencyContactCard extends StatelessWidget {
           const Divider(height: 1),
 
           ContactInfoField(
-            label: 'Mobile Number',
+            label: context.l10n.text('mobileNumber'),
             value: '+968 7742 8887',
             icon: Icons.call_outlined,
             onTap: () => _makeCall(
@@ -85,7 +86,7 @@ class EmergencyContactCard extends StatelessWidget {
           const Divider(height: 1),
 
           ContactInfoField(
-            label: 'Email Address',
+            label: context.l10n.text('emailAddress'),
             value: 'arabuapp@gmail.com',
             icon: Icons.mail_outline_rounded,
             onTap: () => _sendEmail(

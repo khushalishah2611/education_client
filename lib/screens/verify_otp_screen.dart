@@ -114,9 +114,7 @@ class _VerifyOtpScreenState extends State<VerifyOtpScreen> {
       showAppSnackBar(
         context,
         type: AppSnackBarType.error,
-        message: context.l10n.isArabic
-            ? 'تعذر إعادة إرسال OTP'
-            : 'Failed to resend OTP',
+        message: context.l10n.text('failedResendOtp'),
       );
       return;
     } finally {
@@ -134,11 +132,9 @@ class _VerifyOtpScreenState extends State<VerifyOtpScreen> {
 
   String _resendText(BuildContext context) {
     if (_secondsRemaining == 0) {
-      return context.l10n.isArabic ? 'إعادة إرسال OTP' : 'Resend OTP';
+      return context.l10n.text('resendOtpAction');
     }
-    return context.l10n.isArabic
-        ? 'إعادة إرسال OTP خلال : $_secondsRemaining ثانية'
-        : 'Resend OTP in : $_secondsRemaining second';
+    return context.l10n.text('resendOtpCountdown').replaceAll('{seconds}', '$_secondsRemaining');
   }
 
   Future<void> _verifyOtp(BuildContext context) async {
@@ -148,9 +144,7 @@ class _VerifyOtpScreenState extends State<VerifyOtpScreen> {
       showAppSnackBar(
         context,
         type: AppSnackBarType.error,
-        message: context.l10n.isArabic
-            ? 'يرجى إدخال OTP كامل'
-            : 'Please enter complete OTP',
+        message: context.l10n.text('pleaseEnterCompleteOtp'),
       );
       return;
     }
@@ -161,7 +155,7 @@ class _VerifyOtpScreenState extends State<VerifyOtpScreen> {
       showAppSnackBar(
         context,
         type: AppSnackBarType.error,
-        message: context.l10n.isArabic ? 'OTP غير صحيح' : 'Invalid OTP',
+        message: context.l10n.text('invalidOtp'),
       );
       return;
     }
@@ -184,9 +178,7 @@ class _VerifyOtpScreenState extends State<VerifyOtpScreen> {
         type: AppSnackBarType.success,
         message: response.message.isNotEmpty
             ? response.message
-            : (context.l10n.isArabic
-                ? 'تم التحقق من OTP بنجاح'
-                : 'OTP verified successfully'),
+            : (context.l10n.text('otpVerifiedSuccessfully')),
       );
       Navigator.of(context).pushAndRemoveUntil(
         MaterialPageRoute(
@@ -210,7 +202,7 @@ class _VerifyOtpScreenState extends State<VerifyOtpScreen> {
       showAppSnackBar(
         context,
         type: AppSnackBarType.error,
-        message: context.l10n.isArabic ? 'حدث خطأ' : 'Something went wrong',
+        message: context.l10n.text('somethingWentWrong'),
       );
     } finally {
       if (mounted) {

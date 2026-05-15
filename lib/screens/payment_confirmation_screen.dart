@@ -221,7 +221,7 @@ class _PaymentConfirmationScreenState extends State<PaymentConfirmationScreen> {
       showAppSnackBar(
         context,
         type: AppSnackBarType.error,
-        message: 'Receipt is not available yet.',
+        message: context.l10n.text('receiptNotAvailableYet'),
       );
       return;
     }
@@ -731,13 +731,13 @@ class _ConfirmationDetailsCard extends StatelessWidget {
       ),
       child: Column(
         children: [
-          _DetailRow(label: 'University', value: universityName),
+          _DetailRow(label: context.l10n.text('university'), value: universityName),
           const Divider(height: 18),
-          _DetailRow(label: 'Course', value: courseTitle),
+          _DetailRow(label: context.l10n.text('Course'), value: courseTitle),
           const Divider(height: 18),
-          _DetailRow(label: 'Status', value: status),
+          _DetailRow(label: context.l10n.text('status'), value: status),
           const Divider(height: 18),
-          _DetailRow(label: 'Application Fee', value: applicationFee),
+          _DetailRow(label: context.l10n.text('applicationFee'), value: applicationFee),
         ],
       ),
     );

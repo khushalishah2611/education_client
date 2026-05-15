@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
+import '../../core/app_localizations.dart';
 import '../../core/app_theme.dart';
 import '../../widgets/common_widgets.dart';
 import '../../services/application_api_service.dart';
@@ -12,9 +13,9 @@ class PaymentsScreen extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return const SideMenuScaffold(
-      title: 'Payments History',
-      child: PaymentsContent(),
+    return SideMenuScaffold(
+      title: context.l10n.text('paymentsHistory'),
+      child: const PaymentsContent(),
     );
   }
 }
@@ -107,7 +108,7 @@ class _PaymentsContentState extends State<PaymentsContent>
       showAppSnackBar(
         context,
         type: AppSnackBarType.error,
-        message: 'Failed to load payments.',
+        message: context.l10n.text('failedLoadPayments'),
       );
     }
   }

@@ -1,6 +1,7 @@
 import 'package:education/screens/side_menu/side_menu_common.dart';
 import 'package:flutter/material.dart';
 
+import '../core/app_localizations.dart';
 import '../core/app_theme.dart';
 import '../services/home_api_service.dart';
 
@@ -70,7 +71,7 @@ class _LatestUpdatesScreenState
   @override
   Widget build(BuildContext context) {
     return SideMenuScaffold(
-      title: 'Latest Updates',
+      title: context.l10n.text('latestUpdates'),
       showBackButton: widget.activeTab,
       child: _buildBody(),
     );
@@ -95,10 +96,10 @@ class _LatestUpdatesScreenState
               const Color(0xFFE6E6E6),
             ),
           ),
-          child: const Text(
-            'No updates available',
+          child: Text(
+            context.l10n.text('noUpdatesAvailable'),
             textAlign: TextAlign.center,
-            style: TextStyle(
+            style: const TextStyle(
               color: Color(0xFF616161),
               fontWeight: FontWeight.w500,
             ),
@@ -136,11 +137,11 @@ class _LatestUpdatesScreenState
                   8,
                 ),
               ),
-              child: const Row(
+              child: Row(
                 children: [
                   Text(
-                    'Recent Updates',
-                    style: TextStyle(
+                    context.l10n.text('recentUpdates'),
+                    style: const TextStyle(
                       fontWeight:
                       FontWeight.w700,
                       fontSize: 16,

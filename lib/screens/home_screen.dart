@@ -254,7 +254,7 @@ class _HomeScreenState extends State<HomeScreen> {
                                         Expanded(
                                           child: Text(
                                             _controller.selectedCountry ??
-                                                'Select Country',
+                                                context.l10n.text('selectCountry'),
                                             overflow: TextOverflow.ellipsis,
                                           ),
                                         ),
@@ -281,17 +281,17 @@ class _HomeScreenState extends State<HomeScreen> {
                                       ),
                                       color: Colors.white,
                                     ),
-                                    child: const Row(
+                                    child: Row(
                                       mainAxisAlignment:
                                           MainAxisAlignment.center,
                                       children: [
-                                        Icon(
+                                        const Icon(
                                           Icons.tune_rounded,
                                           color: AppColors.accent,
                                         ),
-                                        SizedBox(width: 8),
+                                        const SizedBox(width: 8),
                                         Text(
-                                          'Advance Search',
+                                          context.l10n.text('advanceSearch'),
                                           style: TextStyle(
                                             color: AppColors.accent,
                                           ),
@@ -676,7 +676,7 @@ class _CountrySelectionDialogState extends State<_CountrySelectionDialog> {
                 children: [
                   Expanded(
                     child: Text(
-                      "Select Country",
+                      context.l10n.text('selectCountry'),
                       style: TextStyle(
                         fontSize: isSmall ? 16 : 18,
                         fontWeight: FontWeight.w700,
@@ -696,10 +696,10 @@ class _CountrySelectionDialogState extends State<_CountrySelectionDialog> {
                 child: TextField(
                   controller: _searchController,
                   onChanged: _onSearchChanged,
-                  decoration: const InputDecoration(
-                    hintText: 'Search country',
+                  decoration: InputDecoration(
+                    hintText: context.l10n.text('searchCountry'),
                     isDense: true,
-                    contentPadding: EdgeInsets.symmetric(
+                    contentPadding: const EdgeInsets.symmetric(
                       vertical: 8,
                       horizontal: 8,
                     ),
@@ -712,10 +712,10 @@ class _CountrySelectionDialogState extends State<_CountrySelectionDialog> {
               ConstrainedBox(
                 constraints: const BoxConstraints(maxHeight: 320),
                 child: _filteredCountries.isEmpty
-                    ? const Center(
+                    ? Center(
                         child: Padding(
-                          padding: EdgeInsets.all(16),
-                          child: Text('No countries found'),
+                          padding: const EdgeInsets.all(16),
+                          child: Text(context.l10n.text('noCountriesFound')),
                         ),
                       )
                     : ListView.separated(
@@ -865,7 +865,7 @@ class _AdvanceSearchDialogState extends State<_AdvanceSearchDialog> {
                   color: Color(0xFF757575),
                 ),
                 hint: Text(
-                  options.isEmpty ? 'No options found' : 'Select $title',
+                  options.isEmpty ? context.l10n.text('noOptionsFound') : context.l10n.text('selectOption').replaceAll('{title}', title),
                   style: const TextStyle(
                     color: Color(0xFF8A8A8A),
                     fontSize: 14,
@@ -928,7 +928,7 @@ class _AdvanceSearchDialogState extends State<_AdvanceSearchDialog> {
                 children: [
                   Expanded(
                     child: Text(
-                      "Advance Search",
+                      context.l10n.text('advanceSearch'),
                       style: TextStyle(
                         fontSize: context.isSmallMobile ? 16 : 18,
                         fontWeight: FontWeight.w700,
@@ -944,7 +944,7 @@ class _AdvanceSearchDialogState extends State<_AdvanceSearchDialog> {
               ),
               const SizedBox(height: 8),
               dropdownTile(
-                title: 'Country',
+                title: context.l10n.text('country'),
                 options: _filteredCountryOptions,
                 value: _selectedCountry,
                 onChanged: (value) async {
@@ -955,7 +955,7 @@ class _AdvanceSearchDialogState extends State<_AdvanceSearchDialog> {
                 icon: Icons.flag_outlined,
               ),
               dropdownTile(
-                title: 'Academic Qualification',
+                title: context.l10n.text('academicQualification'),
                 options: widget.academicOptions,
                 value: _selectedAcademic,
                 onChanged: (value) => setState(() {
@@ -970,7 +970,7 @@ class _AdvanceSearchDialogState extends State<_AdvanceSearchDialog> {
               Opacity(
                 opacity: shouldDisableDetails ? 0.55 : 1,
                 child: dropdownTile(
-                  title: 'Secondary School Certificate Program',
+                  title: context.l10n.text('secondarySchoolCertificateProgram'),
                   options: widget.trackOptions,
                   value: _selectedTrack,
                   onChanged: (value) => setState(() => _selectedTrack = value),
@@ -984,9 +984,9 @@ class _AdvanceSearchDialogState extends State<_AdvanceSearchDialog> {
                   ignoring: shouldDisableDetails,
                   child: AppTextField(
                     label: widget.currencyOptions.isNotEmpty
-                        ? 'High school graduation rate (${widget.currencyOptions.first})'
-                        : 'High school graduation rate',
-                    hint: 'Enter high school graduation rate',
+                        ? '${context.l10n.text('highSchoolGraduationRate')} (${widget.currencyOptions.first})'
+                        : context.l10n.text('highSchoolGraduationRate'),
+                    hint: context.l10n.text('enterHighSchoolGraduationRate'),
                     controller: widget.resultController,
                     keyboardType: TextInputType.number,
                     height: 48,
@@ -998,7 +998,7 @@ class _AdvanceSearchDialogState extends State<_AdvanceSearchDialog> {
                 children: [
                   Expanded(
                     child: AppOutlinedButton(
-                      label: context.l10n.text('Reset'),
+                      label: context.l10n.text('reset'),
                       onPressed: () async {
                         setState(() {
                           _selectedCountry = null;
@@ -1013,7 +1013,7 @@ class _AdvanceSearchDialogState extends State<_AdvanceSearchDialog> {
                   const SizedBox(width: 8),
                   Expanded(
                     child: AppPrimaryButton(
-                      label: context.l10n.text('Continue'),
+                      label: context.l10n.text('continue'),
                       onPressed: () async {
                         widget.onCountryChanged(_selectedCountry);
                         widget.onAcademicChanged(_selectedAcademic);

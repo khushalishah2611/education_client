@@ -57,9 +57,7 @@ class _LoginScreenState extends State<LoginScreen> {
       showAppSnackBar(
         context,
         type: AppSnackBarType.error,
-        message: context.l10n.isArabic
-            ? 'تعذر تحميل بيانات تسجيل الدخول'
-            : 'Failed to load login data',
+        message: context.l10n.text('failedLoadLoginData'),
       );
     } finally {
       if (mounted) {
@@ -74,7 +72,7 @@ class _LoginScreenState extends State<LoginScreen> {
         context,
         type: AppSnackBarType.error,
         message:
-            context.l10n.isArabic ? 'أدخل رقم الجوال' : 'Enter mobile number',
+            context.l10n.text('enterMobileNumber'),
       );
       return;
     }
@@ -83,9 +81,7 @@ class _LoginScreenState extends State<LoginScreen> {
       showAppSnackBar(
         context,
         type: AppSnackBarType.error,
-        message: context.l10n.isArabic
-            ? 'يرجى قبول الشروط وسياسة الخصوصية'
-            : 'Please accept Terms & Privacy',
+        message: context.l10n.text('pleaseAcceptTermsPrivacy'),
       );
       return;
     }
@@ -94,9 +90,7 @@ class _LoginScreenState extends State<LoginScreen> {
       showAppSnackBar(
         context,
         type: AppSnackBarType.error,
-        message: context.l10n.isArabic
-            ? 'اختر الدولة أولًا'
-            : 'Select country first',
+        message: context.l10n.text('selectCountryFirst'),
       );
       return;
     }
@@ -148,9 +142,7 @@ class _LoginScreenState extends State<LoginScreen> {
       showAppSnackBar(
         context,
         type: AppSnackBarType.error,
-        message: context.l10n.isArabic
-            ? 'تعذر إرسال OTP، حاول مرة أخرى'
-            : 'Failed to send OTP, try again',
+        message: context.l10n.text('failedSendOtp'),
       );
     } finally {
       if (mounted) {
@@ -301,7 +293,7 @@ class _LoginScreenState extends State<LoginScreen> {
                     keyboardType: TextInputType.phone,
                     decoration: const InputDecoration(
                       contentPadding: EdgeInsets.all(5),
-                      hintText: 'Enter mobile number',
+                      hintText: context.l10n.text('enterMobileNumber'),
                       border: InputBorder.none,
                       focusedBorder: InputBorder.none,
                       enabledBorder: InputBorder.none,

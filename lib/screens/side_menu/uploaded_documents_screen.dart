@@ -1,6 +1,7 @@
 import 'package:education/core/image_url_helper.dart';
 import 'package:flutter/material.dart';
 import 'package:url_launcher/url_launcher.dart';
+import '../../core/app_localizations.dart';
 import '../../core/app_theme.dart';
 import '../../core/student_session.dart';
 import '../../widgets/common_widgets.dart';
@@ -18,7 +19,7 @@ class UploadedDocumentsScreen extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return SideMenuScaffold(
-      title: 'Uploaded Documents',
+      title: context.l10n.text('uploadedDocuments'),
       showBackButton: activeTab,
       child: const UploadedDocumentsContent(),
     );
@@ -148,7 +149,7 @@ class _UploadedDocumentsContentState extends State<UploadedDocumentsContent> {
       showAppSnackBar(
         context,
         type: AppSnackBarType.error,
-        message: 'Failed to load documents.',
+        message: context.l10n.text('failedLoadDocuments'),
       );
     }
   }
@@ -167,7 +168,7 @@ class _UploadedDocumentsContentState extends State<UploadedDocumentsContent> {
       showAppSnackBar(
         context,
         type: AppSnackBarType.success,
-        message: 'Document deleted successfully.',
+        message: context.l10n.text('documentDeletedSuccessfully'),
       );
 
       await _load();
@@ -177,7 +178,7 @@ class _UploadedDocumentsContentState extends State<UploadedDocumentsContent> {
       showAppSnackBar(
         context,
         type: AppSnackBarType.error,
-        message: 'Failed to delete document.',
+        message: context.l10n.text('failedDeleteDocument'),
       );
     }
   }
@@ -191,7 +192,7 @@ class _UploadedDocumentsContentState extends State<UploadedDocumentsContent> {
         showAppSnackBar(
           context,
           type: AppSnackBarType.error,
-          message: 'Document path not found.',
+          message: context.l10n.text('documentPathNotFound'),
         );
         return;
       }
@@ -215,7 +216,7 @@ class _UploadedDocumentsContentState extends State<UploadedDocumentsContent> {
         showAppSnackBar(
           context,
           type: AppSnackBarType.error,
-          message: 'Unable to open document.',
+          message: context.l10n.text('unableOpenDocument'),
         );
       }
     } catch (e) {
@@ -225,7 +226,7 @@ class _UploadedDocumentsContentState extends State<UploadedDocumentsContent> {
         showAppSnackBar(
           context,
           type: AppSnackBarType.error,
-          message: 'Failed to open document.',
+          message: context.l10n.text('failedOpenDocument'),
         );
       }
     } finally {

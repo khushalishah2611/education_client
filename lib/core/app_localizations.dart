@@ -33,7 +33,10 @@ class AppLocalizations {
       isArabic ? TextDirection.rtl : TextDirection.ltr;
 
   String text(String key) {
-    return _values[key] as String? ?? key;
+    return (_values[key] as String?) ??
+        (_fallbackValues[locale.languageCode]?[key] as String?) ??
+        (_fallbackValues['en']?[key] as String?) ??
+        key;
   }
 
   Locale get alternateLocale =>

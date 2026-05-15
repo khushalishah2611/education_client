@@ -84,7 +84,7 @@ class _TermsConditionsScreenState extends State<TermsConditionsScreen>
       showAppSnackBar(
         context,
         type: AppSnackBarType.error,
-        message: 'Failed to load terms & conditions.',
+        message: context.l10n.text('failedLoadTermsConditions'),
       );
     }
   }
@@ -111,7 +111,7 @@ class _TermsConditionsScreenState extends State<TermsConditionsScreen>
                   final String title =
                       item['title']?.toString().trim().isNotEmpty == true
                           ? item['title'].toString()
-                          : 'Terms';
+                          : context.l10n.text('terms');
 
                   final String content =
                       item['content']?.toString().trim() ?? '';

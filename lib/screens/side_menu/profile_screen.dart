@@ -20,9 +20,9 @@ class ProfileScreen extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return const SideMenuScaffold(
-      title: 'My Profile',
-      child: ProfileBody(),
+    return SideMenuScaffold(
+      title: context.l10n.text('myProfile'),
+      child: const ProfileBody(),
     );
   }
 }
@@ -435,23 +435,23 @@ class _ProfileBodyState extends State<ProfileBody> {
 
           const SizedBox(height: 22),
 
-          const ProfileSectionTitle(
-            'Basic Information',
+          ProfileSectionTitle(
+            context.l10n.text('basicInformation'),
           ),
 
           const SizedBox(height: 14),
 
-          const ProfileLabel('Full Name'),
+          ProfileLabel(context.l10n.text('fullName')),
 
           ProfileInput(
             controller: _fullNameController,
-            hint: 'First Middle Last',
+            hint: context.l10n.text('firstMiddleLast'),
             icon: Icons.person_outline_rounded,
           ),
 
           const SizedBox(height: 14),
 
-          const ProfileLabel('Gender'),
+          ProfileLabel(context.l10n.text('gender')),
 
           GenderSelector(
             selected: _gender,
@@ -464,7 +464,7 @@ class _ProfileBodyState extends State<ProfileBody> {
 
           const SizedBox(height: 14),
 
-          const ProfileLabel('Date of Birth'),
+          ProfileLabel(context.l10n.text('dateOfBirth')),
 
           ProfileInput(
             controller: _dobController,
@@ -477,7 +477,7 @@ class _ProfileBodyState extends State<ProfileBody> {
 
           const SizedBox(height: 14),
 
-          const ProfileLabel('Country'),
+          ProfileLabel(context.l10n.text('country')),
 
           CountryDropdownField(
             countries: _countries,
@@ -492,7 +492,7 @@ class _ProfileBodyState extends State<ProfileBody> {
 
           const SizedBox(height: 14),
 
-          const ProfileLabel('Mobile Number'),
+          ProfileLabel(context.l10n.text('mobileNumber')),
 
           MobileNumberField(
             dialCode: _selectedCountry?.dialCode ?? '',
@@ -501,83 +501,83 @@ class _ProfileBodyState extends State<ProfileBody> {
 
           const SizedBox(height: 14),
 
-          const ProfileLabel('Age'),
+          ProfileLabel(context.l10n.text('age')),
 
           ProfileInput(
             controller: _ageController,
-            hint: 'Age',
+            hint: context.l10n.text('age'),
             icon: Icons.numbers_outlined,
           ),
 
           const SizedBox(height: 14),
 
-          const ProfileLabel(
-            'Email Address',
+          ProfileLabel(
+            context.l10n.text('emailAddress'),
           ),
 
           ProfileInput(
             controller: _emailController,
-            hint: 'Email Address',
+            hint: context.l10n.text('emailAddress'),
             icon: Icons.mail_outline_rounded,
           ),
 
           const SizedBox(height: 22),
 
-          const ProfileSectionTitle(
-            'Emergency Contact',
+          ProfileSectionTitle(
+            context.l10n.text('emergencyContact'),
           ),
 
           const SizedBox(height: 14),
 
-          const ProfileLabel(
-            'Guardian Name',
+          ProfileLabel(
+            context.l10n.text('guardianName'),
           ),
 
           ProfileInput(
             controller:
             _guardianController,
-            hint: 'Guardian Name',
+            hint: context.l10n.text('guardianName'),
             icon:
             Icons.person_outline_rounded,
           ),
 
           const SizedBox(height: 14),
 
-          const ProfileLabel(
-            'Relationship',
+          ProfileLabel(
+            context.l10n.text('relationship'),
           ),
 
           ProfileInput(
             controller:
             _relationshipController,
-            hint: 'Relationship',
+            hint: context.l10n.text('relationship'),
             icon:
             Icons.people_outline_rounded,
           ),
 
           const SizedBox(height: 14),
 
-          const ProfileLabel(
-            'Mobile Number',
+          ProfileLabel(
+            context.l10n.text('mobileNumber'),
           ),
 
           ProfileInput(
             controller:
             _emergencyMobileController,
-            hint: 'Mobile Number',
+            hint: context.l10n.text('mobileNumber'),
             icon: Icons.call_outlined,
           ),
 
           const SizedBox(height: 14),
 
-          const ProfileLabel(
-            'Email Address',
+          ProfileLabel(
+            context.l10n.text('emailAddress'),
           ),
 
           ProfileInput(
             controller:
             _emergencyEmailController,
-            hint: 'Email Address',
+            hint: context.l10n.text('emailAddress'),
             icon:
             Icons.mail_outline_rounded,
           ),
@@ -814,7 +814,7 @@ class MobileNumberField extends StatelessWidget {
               controller: mobileController,
               keyboardType: TextInputType.phone,
               decoration: const InputDecoration(
-                hintText: 'Enter mobile number',
+                hintText: context.l10n.text('enterMobileNumber'),
                 border: InputBorder.none,
                 enabledBorder: InputBorder.none,
                 focusedBorder: InputBorder.none,
@@ -1039,7 +1039,7 @@ class GenderSelector extends StatelessWidget {
           onChanged: (v) =>
               onChanged(v ?? 'MALE'),
         ),
-        const Text('Male'),
+        Text(context.l10n.text('male')),
 
         const SizedBox(width: 14),
 
@@ -1049,7 +1049,7 @@ class GenderSelector extends StatelessWidget {
           onChanged: (v) =>
               onChanged(v ?? 'FEMALE'),
         ),
-        const Text('Female'),
+        Text(context.l10n.text('female')),
       ],
     );
   }

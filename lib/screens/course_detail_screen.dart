@@ -27,7 +27,7 @@ class _CourseDetailScreenState extends State<CourseDetailScreen> {
   String get selectedCourseTitle =>
       widget.course.name?.trim().isNotEmpty == true
           ? widget.course.name!.trim()
-          : 'Course Details';
+          : '';
 
   List<String> get eligibilityList =>
       widget.course.eligibility
@@ -83,7 +83,9 @@ class _CourseDetailScreenState extends State<CourseDetailScreen> {
 
     final double topGap = isSmallMobile ? 52 : 60;
 
-    final String courseTitle = selectedCourseTitle;
+    final String courseTitle = selectedCourseTitle.isNotEmpty
+        ? selectedCourseTitle
+        : context.l10n.text('courseDetails');
 
     return Scaffold(
       body: AppBackground(
@@ -260,7 +262,7 @@ class _CourseDetailScreenState extends State<CourseDetailScreen> {
                       horizontal: horizontalPadding,
                     ),
                     child: _RequirementSection(
-                      title: 'Admission Requirements',
+                      title: context.l10n.text('admissionRequirements'),
                       items: admissionRequirementList,
                     ),
                   ),
@@ -270,7 +272,7 @@ class _CourseDetailScreenState extends State<CourseDetailScreen> {
                       horizontal: horizontalPadding,
                     ),
                     child: _RequirementSection(
-                      title: 'Other Requirements',
+                      title: context.l10n.text('otherRequirements'),
                       items: otherRequirementList,
                     ),
                   ),
@@ -284,7 +286,7 @@ class _CourseDetailScreenState extends State<CourseDetailScreen> {
               child: Padding(
                 padding: EdgeInsets.all(horizontalPadding),
                 child: AppPrimaryButton(
-                  label: context.l10n.text('Go Back'),
+                  label: context.l10n.text('goBack'),
                   onPressed: () {
                     Navigator.of(context).pop();
                   },
@@ -330,12 +332,12 @@ class _InfoDetailsCard extends StatelessWidget {
               horizontal: 12,
               vertical: 10,
             ),
-            child: const Row(
+            child: Row(
               children: [
                 Expanded(
                   child: Text(
-                    'Information',
-                    style: TextStyle(
+                    context.l10n.text('information'),
+                    style: const TextStyle(
                       fontWeight: FontWeight.w700,
                       fontSize: 12,
                     ),
@@ -343,9 +345,9 @@ class _InfoDetailsCard extends StatelessWidget {
                 ),
                 Expanded(
                   child: Text(
-                    'Details',
+                    context.l10n.text('Details'),
                     textAlign: TextAlign.right,
-                    style: TextStyle(
+                    style: const TextStyle(
                       fontWeight: FontWeight.w700,
                       fontSize: 12,
                     ),
@@ -355,23 +357,23 @@ class _InfoDetailsCard extends StatelessWidget {
             ),
           ),
           _InfoRow(
-            label: 'No of Credit',
+            label: context.l10n.text('noOfCredit'),
             value: '${course.creditHours?.round() ?? 0}',
           ),
           _InfoRow(
-            label: 'Credit Fee (Hourly)',
+            label: context.l10n.text('creditFeeHourly'),
             value: priceWithCurrency(course.annualFee),
           ),
           _InfoRow(
-            label: 'Number of Years',
+            label: context.l10n.text('numberOfYears'),
             value: course.totalSemesters ?? "-",
           ),
           _InfoRow(
-            label: 'Min Admission Rate',
+            label: context.l10n.text('minAdmissionRate'),
             value: '${course.minAdmissionRate?.round() ?? 0}%',
           ),
           _InfoRow(
-            label: 'Total Cost',
+            label: context.l10n.text('totalCost'),
             valueWidget: _PriceValue(
               basePrice: course.basePrice,
               discountedPrice: course.minAdmissionRate,
@@ -379,9 +381,9 @@ class _InfoDetailsCard extends StatelessWidget {
             ),
           ),
           _InfoRow(
-            label: 'Application Fee',
+            label: context.l10n.text('applicationFee'),
             value: course.applicationFee != null
-                ? '${course.applicationFee!.round()} Omani Rial'
+                ? '${course.applicationFee!.round()} ${context.l10n.text('omaniRial')}'
                 : '-',
             isLast: true,
           ),

@@ -85,7 +85,7 @@ class _TrackApplicationScreenState extends State<TrackApplicationScreen> {
         showAppSnackBar(
           context,
           type: AppSnackBarType.success,
-          message: 'Application data refreshed successfully',
+          message: context.l10n.text('applicationDataRefreshed'),
         );
       }
     } catch (e) {
@@ -431,7 +431,7 @@ class _TrackApplicationScreenState extends State<TrackApplicationScreen> {
                               ),
                               const SizedBox(height: 14),
                               Text(
-                                'Application Status : ${_latestStatusFromHistory.replaceAll('_', ' ').trim()}',
+                                '${context.l10n.text('applicationStatus')} : ${_latestStatusFromHistory.replaceAll('_', ' ').trim()}',
                                 style: TextStyle(
                                   fontSize: isSmallMobile ? 16 : 18,
                                   fontWeight: FontWeight.w700,
@@ -443,7 +443,7 @@ class _TrackApplicationScreenState extends State<TrackApplicationScreen> {
                                 title: context.l10n.text(
                                   'submitted',
                                 ),
-                                subtitle: 'Application Submitted',
+                                subtitle: context.l10n.text('applicationSubmitted'),
                                 state: _StepState.done,
                                 showLine: true,
                               ),
@@ -453,7 +453,7 @@ class _TrackApplicationScreenState extends State<TrackApplicationScreen> {
                                 ),
                                 subtitle: _latestStatusComment.isNotEmpty
                                     ? _latestStatusComment
-                                    : 'Application under review',
+                                    : context.l10n.text('applicationUnderReview'),
                                 state: _stateForStep(2),
                                 showLine: true,
                               ),
@@ -461,7 +461,7 @@ class _TrackApplicationScreenState extends State<TrackApplicationScreen> {
                                 title: context.l10n.text(
                                   'documentsVerified',
                                 ),
-                                subtitle: 'Documents verification process',
+                                subtitle: context.l10n.text('documentsVerificationProcess'),
                                 state: _stateForStep(3),
                                 showLine: true,
                               ),
@@ -526,7 +526,7 @@ class _ApplicationOverviewCard extends StatelessWidget {
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           Text(
-            'Application ID: $applicationId',
+            '${context.l10n.text('applicationId')}: $applicationId',
             style: const TextStyle(fontSize: 11),
           ),
           const SizedBox(height: 10),

@@ -3,6 +3,7 @@ import 'package:education/services/application_api_service.dart';
 import 'package:flutter/material.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
+import '../../core/app_localizations.dart';
 import '../../core/app_theme.dart';
 import '../track_application_screen.dart';
 import 'side_menu_common.dart';
@@ -128,7 +129,7 @@ class _TrackMyApplicationsScreenState extends State<TrackMyApplicationsScreen> {
   @override
   Widget build(BuildContext context) {
     return SideMenuScaffold(
-      title: 'Track My Applications',
+      title: context.l10n.text('trackApplications'),
       showBackButton: widget.activeTab,
       child: RefreshIndicator(
         onRefresh: _load,
@@ -193,7 +194,7 @@ class _TrackMyApplicationsScreenState extends State<TrackMyApplicationsScreen> {
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
             Text(
-              'Application ID : #${(item['appId'] ?? '').toString().substring(0, 8)}',
+              '${context.l10n.text('applicationId')} : #${(item['appId'] ?? '').toString().substring(0, 8)}',
               style: const TextStyle(
                 fontSize: 14,
                 fontWeight: FontWeight.w500,
@@ -278,7 +279,7 @@ class _TrackMyApplicationsScreenState extends State<TrackMyApplicationsScreen> {
             Row(
               children: [
                 const Text(
-                  'Application Status',
+                  context.l10n.text('applicationStatus'),
                   style: TextStyle(
                     fontSize: 16,
                     fontWeight: FontWeight.w700,
@@ -395,7 +396,7 @@ class _TrackMyApplicationsScreenState extends State<TrackMyApplicationsScreen> {
         ),
       ),
       child: const Text(
-        'No applications available',
+        context.l10n.text('noApplicationsAvailable'),
         textAlign: TextAlign.center,
         style: TextStyle(
           color: Color(0xFF616161),

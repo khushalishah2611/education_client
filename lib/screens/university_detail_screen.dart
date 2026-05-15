@@ -694,7 +694,7 @@ class _CollegeAccordionState extends State<_CollegeAccordion> {
               flex: 2,
               child: Center(
                 child: Text(
-                  isEmpty ? 'Min\nBA GPA' : context.l10n.text('Track'),
+                  isEmpty ? context.l10n.text('minBaGpa') : context.l10n.text('Track'),
                   textAlign: TextAlign.center,
                   style: TextStyle(
                     fontWeight: FontWeight.w600,
@@ -1033,7 +1033,7 @@ class _ReadMoreTextState extends State<ReadMoreText> {
                 child: Padding(
                   padding: const EdgeInsets.only(top: 4),
                   child: Text(
-                    isExpanded ? 'Read Less' : 'Read More',
+                    isExpanded ? context.l10n.text('readLess') : context.l10n.text('readMore'),
                     style: const TextStyle(
                       color: AppColors.primaryDark,
                       fontWeight: FontWeight.w600,
