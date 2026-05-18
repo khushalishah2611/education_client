@@ -694,7 +694,9 @@ class _CollegeAccordionState extends State<_CollegeAccordion> {
               flex: 2,
               child: Center(
                 child: Text(
-                  isEmpty ? context.l10n.text('minBaGpa') : context.l10n.text('Track'),
+                  isEmpty
+                      ? context.l10n.text('minBaGpa')
+                      : context.l10n.text('Track'),
                   textAlign: TextAlign.center,
                   style: TextStyle(
                     fontWeight: FontWeight.w600,
@@ -891,65 +893,66 @@ class _CollegeAccordionState extends State<_CollegeAccordion> {
                         ),
                       ),
                     ),
-                    Visibility(
-                      visible: !(details.isBooked ?? false),
-                      child: InkWell(
-                        onTap: () async {
-                          widget.onToggleCourse(courseKey);
+                    // Visibility(
+                    //   visible: !(details.isBooked ?? false),
+                    //   child:
+                    InkWell(
+                      onTap: () async {
+                        widget.onToggleCourse(courseKey);
 
-                          if (!context.mounted) return;
+                        if (!context.mounted) return;
 
-                          Navigator.push(
-                            context,
-                            MaterialPageRoute(
-                              builder: (_) => UploadDocumentsScreen(
-                                universityName: adminUniversity.name,
-                                universityHeroImage:
-                                    ImageUrlHelper.resolveUploadUrl(
-                                  adminUniversity.coverImagePath,
-                                ),
-                                courseTitle: details.name,
-                                applicationsPayload: <Map<String, dynamic>>[
-                                  _buildApplicationPayload(
-                                    adminUniversity: adminUniversity,
-                                    collegeName: collegeName,
-                                    courseDetails: details,
-                                    courseKey: courseKey,
-                                  ),
-                                ],
+                        Navigator.push(
+                          context,
+                          MaterialPageRoute(
+                            builder: (_) => UploadDocumentsScreen(
+                              universityName: adminUniversity.name,
+                              universityHeroImage:
+                                  ImageUrlHelper.resolveUploadUrl(
+                                adminUniversity.coverImagePath,
                               ),
+                              courseTitle: details.name,
+                              applicationsPayload: <Map<String, dynamic>>[
+                                _buildApplicationPayload(
+                                  adminUniversity: adminUniversity,
+                                  collegeName: collegeName,
+                                  courseDetails: details,
+                                  courseKey: courseKey,
+                                ),
+                              ],
                             ),
-                          );
-                        },
-                        child: Container(
-                          alignment: Alignment.center,
-                          margin: EdgeInsets.symmetric(vertical: 5),
-                          padding: const EdgeInsets.symmetric(
-                            horizontal: 4,
-                            vertical: 3,
                           ),
-                          decoration: BoxDecoration(
+                        );
+                      },
+                      child: Container(
+                        alignment: Alignment.center,
+                        margin: EdgeInsets.symmetric(vertical: 5),
+                        padding: const EdgeInsets.symmetric(
+                          horizontal: 4,
+                          vertical: 3,
+                        ),
+                        decoration: BoxDecoration(
+                          color: const Color(0xFF0070e2),
+                          borderRadius: BorderRadius.circular(4),
+                          border: Border.all(
                             color: const Color(0xFF0070e2),
-                            borderRadius: BorderRadius.circular(4),
-                            border: Border.all(
-                              color: const Color(0xFF0070e2),
-                            ),
                           ),
-                          child: Text(
-                            context.l10n.text(
-                              'Apply & Pay\nApplication Fee',
-                            ),
-                            textAlign: TextAlign.center,
-                            style: TextStyle(
-                              fontSize: 8.6,
-                              fontWeight: FontWeight.w600,
-                              color: AppColors.white,
-                              height: 1.1,
-                            ),
+                        ),
+                        child: Text(
+                          context.l10n.text(
+                            'Apply & Pay\nApplication Fee',
+                          ),
+                          textAlign: TextAlign.center,
+                          style: TextStyle(
+                            fontSize: 8.6,
+                            fontWeight: FontWeight.w600,
+                            color: AppColors.white,
+                            height: 1.1,
                           ),
                         ),
                       ),
-                    )
+                    ),
+                    // )
                   ],
                 ),
               ),
@@ -1033,7 +1036,9 @@ class _ReadMoreTextState extends State<ReadMoreText> {
                 child: Padding(
                   padding: const EdgeInsets.only(top: 4),
                   child: Text(
-                    isExpanded ? context.l10n.text('readLess') : context.l10n.text('readMore'),
+                    isExpanded
+                        ? context.l10n.text('readLess')
+                        : context.l10n.text('readMore'),
                     style: const TextStyle(
                       color: AppColors.primaryDark,
                       fontWeight: FontWeight.w600,

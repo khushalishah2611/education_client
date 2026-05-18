@@ -248,17 +248,6 @@ class _UploadDocumentsScreenState
           );
 
   Future<void> _onContinue() async {
-    if (!_hasAllRequiredDocuments) {
-      showAppSnackBar(
-        context,
-        type: AppSnackBarType.error,
-        message: context.l10n.text(
-          'uploadAllRequiredDocs',
-        ),
-      );
-
-      return;
-    }
 
     Navigator.of(context).push(
       MaterialPageRoute(
