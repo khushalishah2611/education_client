@@ -225,9 +225,9 @@ class _UploadDocumentsScreenState
   }
 
   bool _isMandatoryDocument(_DocumentDefinition doc) {
-    final String normalized = _documentKey(doc.title);
-    return normalized.contains('secondary_school_certificate') ||
-        normalized.contains('passport');
+    final String normalized = _documentKey(doc.type);
+    return normalized == 'secondary_school_certificate' ||
+        normalized == 'passport';
   }
 
   bool get _hasAllRequiredDocuments =>
@@ -248,6 +248,15 @@ class _UploadDocumentsScreenState
           );
 
   Future<void> _onContinue() async {
+    if (!_hasAllRequiredDocuments) {
+      showAppSnackBar(
+        context,
+        type: AppSnackBarType.error,
+        message:
+        'Please upload Passport and Secondary School Certificate before continuing.',
+      );
+      return;
+    }
 
     Navigator.of(context).push(
       MaterialPageRoute(
@@ -728,8 +737,7 @@ class _UploadDocumentsScreenState
                     onPressed:
                     _isUploading
                         ? null
-                        : () =>
-                        _onContinue(),
+                        : () => _onContinue(),
                   ),
                 ),
               ),

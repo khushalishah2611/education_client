@@ -69,6 +69,9 @@ class _ProfileBodyState extends State<ProfileBody> {
 
   List<CountryMaster> _countries = <CountryMaster>[];
   CountryMaster? _selectedCountry;
+  static final RegExp _emailRegex = RegExp(
+    r'^[^@\s]+@[^@\s]+\.[^@\s]+$',
+  );
 
   @override
   void initState() {
@@ -327,6 +330,15 @@ class _ProfileBodyState extends State<ProfileBody> {
 
   Future<void> _saveProfile() async {
     if (_studentUserId.isEmpty) return;
+    final String? validationError = _validateProfileForm();
+    if (validationError != null) {
+      showAppSnackBar(
+        context,
+        type: AppSnackBarType.error,
+        message: validationError,
+      );
+      return;
+    }
 
     final List<String> parts =
     _fullNameController.text
@@ -413,6 +425,70 @@ class _ProfileBodyState extends State<ProfileBody> {
         });
       }
     }
+  }
+
+  String? _validateProfileForm() {
+    final String fullName = _fullNameController.text.trim();
+    if (fullName.isEmpty) {
+      return 'Please enter full name.';
+    }
+
+    final String dob = _dobController.text.trim();
+    if (dob.isEmpty) {
+      return 'Please select date of birth.';
+    }
+
+    final String country = (_selectedCountry?.value ?? '').trim();
+    if (country.isEmpty) {
+      return 'Please select country.';
+    }
+
+    final String phone = _phoneController.text.trim();
+    if (phone.isEmpty) {
+      return 'Please enter mobile number.';
+    }
+
+    final String ageText = _ageController.text.trim();
+    if (ageText.isEmpty) {
+      return 'Please enter age.';
+    }
+    final int? age = int.tryParse(ageText);
+    if (age == null || age <= 0) {
+      return 'Please enter a valid age.';
+    }
+
+    final String email = _emailController.text.trim();
+    if (email.isEmpty) {
+      return 'Please enter email address.';
+    }
+    if (!_emailRegex.hasMatch(email)) {
+      return 'Please enter a valid email address.';
+    }
+
+    final String guardian = _guardianController.text.trim();
+    if (guardian.isEmpty) {
+      return 'Please enter guardian name.';
+    }
+
+    final String relationship = _relationshipController.text.trim();
+    if (relationship.isEmpty) {
+      return 'Please enter relationship.';
+    }
+
+    final String emergencyMobile = _emergencyMobileController.text.trim();
+    if (emergencyMobile.isEmpty) {
+      return 'Please enter emergency mobile number.';
+    }
+
+    final String emergencyEmail = _emergencyEmailController.text.trim();
+    if (emergencyEmail.isEmpty) {
+      return 'Please enter emergency email address.';
+    }
+    if (!_emailRegex.hasMatch(emergencyEmail)) {
+      return 'Please enter a valid emergency email address.';
+    }
+
+    return null;
   }
 
   @override
