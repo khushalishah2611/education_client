@@ -224,9 +224,15 @@ class _UploadDocumentsScreenState
     }
   }
 
+  bool _isMandatoryDocument(_DocumentDefinition doc) {
+    final String normalized = _documentKey(doc.title);
+    return normalized.contains('secondary_school_certificate') ||
+        normalized.contains('passport');
+  }
+
   bool get _hasAllRequiredDocuments =>
-      _docs.isNotEmpty &&
-          _docs.every(
+      _docs.where(_isMandatoryDocument).isNotEmpty &&
+          _docs.where(_isMandatoryDocument).every(
                 (doc) {
               final String documentKey =
               _documentKey(doc.type);
@@ -527,6 +533,12 @@ class _UploadDocumentsScreenState
     );
   }
 
+
+  String _documentDisplayTitle(_DocumentDefinition doc) {
+    return _isMandatoryDocument(doc)
+        ? '${doc.title} *'
+        : '${doc.title} (Optional)';
+  }
   @override
   Widget build(BuildContext context) {
     final bool isSmallMobile =
@@ -638,8 +650,7 @@ class _UploadDocumentsScreenState
                               height: 14,
                             ),
                             _UploadDropZone(
-                              title: _docs
-                                  .first.title,
+                              title: _documentDisplayTitle(_docs.first),
                               subtitle: _docs
                                   .first.subtitle,
                               selectedFileName:
@@ -669,7 +680,7 @@ class _UploadDocumentsScreenState
                                     child:
                                     _UploadListTile(
                                       title:
-                                      doc.title,
+                                      _documentDisplayTitle(doc),
                                       subtitle:
                                       doc.subtitle,
                                       selectedFileName:

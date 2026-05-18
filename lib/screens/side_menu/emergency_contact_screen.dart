@@ -3,6 +3,7 @@ import 'package:url_launcher/url_launcher.dart';
 
 import '../../core/app_localizations.dart';
 import '../../core/app_theme.dart';
+import '../../widgets/contact_support_section.dart';
 import 'side_menu_common.dart';
 
 class EmergencyContactScreen extends StatelessWidget {
@@ -26,6 +27,12 @@ class EmergencyContactScreen extends StatelessWidget {
 class EmergencyContactCard extends StatelessWidget {
   const EmergencyContactCard({super.key});
 
+  static const String whatsappNumber = '96877428887';
+  static const String emailAddress = 'arabuapp@gmail.com';
+  static const String instagramUsername = 'instagram';
+  static const String snapchatUsername = 'snapchat';
+  static const String twitterUsername = 'twitter';
+
   Future<void> _makeCall(String number) async {
     final Uri uri = Uri(
       scheme: 'tel',
@@ -44,9 +51,36 @@ class EmergencyContactCard extends StatelessWidget {
     await launchUrl(uri);
   }
 
+  Future<void> _openWhatsApp() async {
+    await launchUrl(Uri.parse('https://wa.me/$whatsappNumber'));
+  }
+
+  Future<void> _openInstagram() async {
+    await launchUrl(Uri.parse('https://instagram.com/$instagramUsername'));
+  }
+
+  Future<void> _openSnapchat() async {
+    await launchUrl(Uri.parse('https://snapchat.com/add/$snapchatUsername'));
+  }
+
+  Future<void> _openTwitter() async {
+    await launchUrl(Uri.parse('https://twitter.com/$twitterUsername'));
+  }
+
+  Future<void> _openEmail() async {
+    final Uri emailUri = Uri(
+      scheme: 'mailto',
+      path: emailAddress,
+      queryParameters: {'subject': 'Help Support'},
+    );
+    await launchUrl(emailUri);
+  }
+
   @override
   Widget build(BuildContext context) {
-    return Container(
+    return Column(
+      children: [
+        Container(
       width: double.infinity,
       decoration: BoxDecoration(
         color: Colors.white,
@@ -95,6 +129,16 @@ class EmergencyContactCard extends StatelessWidget {
           ),
         ],
       ),
+        ),
+        const SizedBox(height: 16),
+        ContactSupportSection(
+          onOpenWhatsApp: _openWhatsApp,
+          onOpenInstagram: _openInstagram,
+          onOpenSnapchat: _openSnapchat,
+          onOpenTwitter: _openTwitter,
+          onOpenEmail: _openEmail,
+        ),
+      ],
     );
   }
 }
