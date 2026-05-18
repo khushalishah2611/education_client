@@ -511,7 +511,7 @@ class _DiscoverBanner extends StatelessWidget {
       return const _BannerShimmer();
     }
     return Container(
-      height: 150,
+      height: 180,
       width: double.infinity,
       decoration: BoxDecoration(borderRadius: BorderRadius.circular(14)),
       child: ClipRRect(
