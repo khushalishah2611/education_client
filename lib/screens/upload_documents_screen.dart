@@ -41,7 +41,7 @@ class _UploadDocumentsScreenState
   static const int _maxUploadBytes = 5 * 1024 * 1024;
   static const Set<String> _requiredDocumentKeys = <String>{
     'passport',
-    'secondary_school_certificate',
+    'marksheet',
   };
 
   final Map<String, PlatformFile?> _selectedFiles =
@@ -242,9 +242,9 @@ class _UploadDocumentsScreenState
     return normalizedType.contains('passport') ||
         normalizedTitle.contains('passport') ||
         normalizedSubtitle.contains('passport') ||
-        normalizedType.contains('secondary_school_certificate') ||
-        normalizedTitle.contains('secondary_school_certificate') ||
-        normalizedSubtitle.contains('secondary_school_certificate');
+        normalizedType.contains('marksheet') ||
+        normalizedTitle.contains('marksheet') ||
+        normalizedSubtitle.contains('marksheet');
   }
 
   bool get _hasAllRequiredDocuments {
@@ -258,9 +258,9 @@ class _UploadDocumentsScreenState
     );
     final bool hasSecondaryCertificateDoc = requiredDocs.any(
       (doc) =>
-          _documentKey(doc.type).contains('secondary_school_certificate') ||
-          _documentKey(doc.title).contains('secondary_school_certificate') ||
-          _documentKey(doc.subtitle).contains('secondary_school_certificate'),
+          _documentKey(doc.type).contains('marksheet') ||
+          _documentKey(doc.title).contains('marksheet') ||
+          _documentKey(doc.subtitle).contains('marksheet'),
     );
 
     if (!hasPassportDoc || !hasSecondaryCertificateDoc) {
