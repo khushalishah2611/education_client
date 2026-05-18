@@ -565,7 +565,7 @@ class _BannerShimmer extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Container(
-      height: 160,
+      height: 120,
       padding: const EdgeInsets.all(8),
       decoration: BoxDecoration(
         color: Colors.white,
@@ -574,7 +574,7 @@ class _BannerShimmer extends StatelessWidget {
       ),
       child: const Column(
         crossAxisAlignment: CrossAxisAlignment.start,
-        children: [_ShimmerBlock(height: 160, borderRadius: 8)],
+        children: [_ShimmerBlock(height: 100, borderRadius: 8)],
       ),
     );
   }

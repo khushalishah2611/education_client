@@ -80,57 +80,57 @@ class EmergencyContactCard extends StatelessWidget {
   Widget build(BuildContext context) {
     return Column(
       children: [
-        Container(
-      width: double.infinity,
-      decoration: BoxDecoration(
-        color: Colors.white,
-        borderRadius: BorderRadius.circular(12),
-        border: Border.all(
-          color: Colors.grey.shade300,
-        ),
-      ),
-      child: Column(
-        mainAxisSize: MainAxisSize.min,
-        children: [
-          ContactInfoField(
-            label: context.l10n.text('guardianName'),
-            value: 'Arab Education',
-            icon: Icons.person_outline_rounded,
-          ),
-
-          const Divider(height: 1),
-
-          ContactInfoField(
-            label: context.l10n.text('relationship'),
-            value: 'Support Person',
-            icon: Icons.person_outline_rounded,
-          ),
-
-          const Divider(height: 1),
-
-          ContactInfoField(
-            label: context.l10n.text('mobileNumber'),
-            value: '+968 7742 8887',
-            icon: Icons.call_outlined,
-            onTap: () => _makeCall(
-              '+96877428887',
-            ),
-          ),
-
-          const Divider(height: 1),
-
-          ContactInfoField(
-            label: context.l10n.text('emailAddress'),
-            value: 'arabuapp@gmail.com',
-            icon: Icons.mail_outline_rounded,
-            onTap: () => _sendEmail(
-              'arabuapp@gmail.com',
-            ),
-          ),
-        ],
-      ),
-        ),
-        const SizedBox(height: 16),
+        //   Container(
+        // width: double.infinity,
+        // decoration: BoxDecoration(
+        //   color: Colors.white,
+        //   borderRadius: BorderRadius.circular(12),
+        //   border: Border.all(
+        //     color: Colors.grey.shade300,
+        //   ),
+        // ),
+        // child: Column(
+        //   mainAxisSize: MainAxisSize.min,
+        //   children: [
+        //     ContactInfoField(
+        //       label: context.l10n.text('guardianName'),
+        //       value: 'Arab Education',
+        //       icon: Icons.person_outline_rounded,
+        //     ),
+        //
+        //     const Divider(height: 1),
+        //
+        //     ContactInfoField(
+        //       label: context.l10n.text('relationship'),
+        //       value: 'Support Person',
+        //       icon: Icons.person_outline_rounded,
+        //     ),
+        //
+        //     const Divider(height: 1),
+        //
+        //     ContactInfoField(
+        //       label: context.l10n.text('mobileNumber'),
+        //       value: '+968 7742 8887',
+        //       icon: Icons.call_outlined,
+        //       onTap: () => _makeCall(
+        //         '+96877428887',
+        //       ),
+        //     ),
+        //
+        //     const Divider(height: 1),
+        //
+        //     ContactInfoField(
+        //       label: context.l10n.text('emailAddress'),
+        //       value: 'arabuapp@gmail.com',
+        //       icon: Icons.mail_outline_rounded,
+        //       onTap: () => _sendEmail(
+        //         'arabuapp@gmail.com',
+        //       ),
+        //     ),
+        //   ],
+        // ),
+        //   ),
+        //   const SizedBox(height: 16),
         ContactSupportSection(
           onOpenWhatsApp: _openWhatsApp,
           onOpenInstagram: _openInstagram,
@@ -170,53 +170,43 @@ class ContactInfoField extends StatelessWidget {
           vertical: 12,
         ),
         child: Row(
-          crossAxisAlignment:
-          CrossAxisAlignment.start,
+          crossAxisAlignment: CrossAxisAlignment.start,
           children: [
             Expanded(
               child: Column(
-                crossAxisAlignment:
-                CrossAxisAlignment.start,
+                crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
                   Text(
                     label,
                     style: const TextStyle(
                       fontSize: 13,
-                      fontWeight:
-                      FontWeight.w700,
+                      fontWeight: FontWeight.w700,
                     ),
                   ),
-
                   const SizedBox(height: 4),
-
                   Text(
                     value,
                     style: const TextStyle(
                       fontSize: 13,
-                      color:
-                      AppColors.textMuted,
+                      color: AppColors.textMuted,
                     ),
                   ),
                 ],
               ),
             ),
-
             Container(
               width: 32,
               height: 32,
               decoration: BoxDecoration(
-                color:
-                const Color(0xFFA7E7C5),
-                borderRadius:
-                BorderRadius.circular(
+                color: const Color(0xFFA7E7C5),
+                borderRadius: BorderRadius.circular(
                   6,
                 ),
               ),
               child: Icon(
                 icon,
                 size: 18,
-                color:
-                const Color(0xFF0A3F27),
+                color: const Color(0xFF0A3F27),
               ),
             ),
           ],
