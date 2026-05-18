@@ -39,6 +39,10 @@ class UploadDocumentsScreen extends StatefulWidget {
 class _UploadDocumentsScreenState
     extends State<UploadDocumentsScreen> {
   static const int _maxUploadBytes = 5 * 1024 * 1024;
+  static const Set<String> _requiredDocumentKeys = <String>{
+    'passport',
+    'secondary_school_certificate',
+  };
 
   final Map<String, PlatformFile?> _selectedFiles =
   <String, PlatformFile?>{};
@@ -225,27 +229,53 @@ class _UploadDocumentsScreenState
   }
 
   bool _isMandatoryDocument(_DocumentDefinition doc) {
-    final String normalized = _documentKey(doc.type);
-    return normalized == 'secondary_school_certificate' ||
-        normalized == 'passport';
+    final String normalizedType = _documentKey(doc.type);
+    final String normalizedTitle = _documentKey(doc.title);
+    final String normalizedSubtitle = _documentKey(doc.subtitle);
+
+    if (_requiredDocumentKeys.contains(normalizedType) ||
+        _requiredDocumentKeys.contains(normalizedTitle) ||
+        _requiredDocumentKeys.contains(normalizedSubtitle)) {
+      return true;
+    }
+
+    return normalizedType.contains('passport') ||
+        normalizedTitle.contains('passport') ||
+        normalizedSubtitle.contains('passport') ||
+        normalizedType.contains('secondary_school_certificate') ||
+        normalizedTitle.contains('secondary_school_certificate') ||
+        normalizedSubtitle.contains('secondary_school_certificate');
   }
 
-  bool get _hasAllRequiredDocuments =>
-      _docs.where(_isMandatoryDocument).isNotEmpty &&
-          _docs.where(_isMandatoryDocument).every(
-                (doc) {
-              final String documentKey =
-              _documentKey(doc.type);
+  bool get _hasAllRequiredDocuments {
+    final List<_DocumentDefinition> requiredDocs =
+        _docs.where(_isMandatoryDocument).toList();
 
-              return _selectedFiles[
-              documentKey] !=
-                  null ||
-                  (_selectedFileNames[
-                  documentKey] ??
-                      '')
-                      .isNotEmpty;
-            },
-          );
+    final bool hasPassportDoc = requiredDocs.any(
+      (doc) => _documentKey(doc.type).contains('passport') ||
+          _documentKey(doc.title).contains('passport') ||
+          _documentKey(doc.subtitle).contains('passport'),
+    );
+    final bool hasSecondaryCertificateDoc = requiredDocs.any(
+      (doc) =>
+          _documentKey(doc.type).contains('secondary_school_certificate') ||
+          _documentKey(doc.title).contains('secondary_school_certificate') ||
+          _documentKey(doc.subtitle).contains('secondary_school_certificate'),
+    );
+
+    if (!hasPassportDoc || !hasSecondaryCertificateDoc) {
+      return false;
+    }
+
+    return requiredDocs.every(
+      (doc) {
+        final String documentKey = _documentKey(doc.type);
+
+        return _selectedFiles[documentKey] != null ||
+            (_selectedFileNames[documentKey] ?? '').isNotEmpty;
+      },
+    );
+  }
 
   Future<void> _onContinue() async {
     if (!_hasAllRequiredDocuments) {
