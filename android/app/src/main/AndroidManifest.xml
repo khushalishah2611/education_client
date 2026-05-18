@@ -1,6 +1,7 @@
 <manifest xmlns:android="http://schemas.android.com/apk/res/android"
     package="com.arab.education">
 
+    <!-- Permissions -->
     <uses-permission android:name="android.permission.INTERNET"/>
 
     <application
@@ -36,11 +37,45 @@
 
     </application>
 
+    <!-- URL Launcher Queries -->
     <queries>
+
+        <!-- Existing -->
         <intent>
             <action android:name="android.intent.action.PROCESS_TEXT"/>
             <data android:mimeType="text/plain"/>
         </intent>
+
+        <!-- HTTPS Links -->
+        <intent>
+            <action android:name="android.intent.action.VIEW"/>
+            <data android:scheme="https"/>
+        </intent>
+
+        <!-- HTTP Links -->
+        <intent>
+            <action android:name="android.intent.action.VIEW"/>
+            <data android:scheme="http"/>
+        </intent>
+
+        <!-- Email -->
+        <intent>
+            <action android:name="android.intent.action.SENDTO"/>
+            <data android:scheme="mailto"/>
+        </intent>
+
+        <!-- WhatsApp -->
+        <package android:name="com.whatsapp"/>
+
+        <!-- Instagram -->
+        <package android:name="com.instagram.android"/>
+
+        <!-- Snapchat -->
+        <package android:name="com.snapchat.android"/>
+
+        <!-- Twitter / X -->
+        <package android:name="com.twitter.android"/>
+
     </queries>
 
 </manifest>
