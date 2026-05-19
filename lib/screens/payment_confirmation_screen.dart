@@ -214,6 +214,9 @@ class _PaymentConfirmationScreenState extends State<PaymentConfirmationScreen> {
   }
 
   Future<void> _downloadReceipt(BuildContext context) async {
+    debugPrint('Payment ID => $_paymentId');
+    debugPrint('Primary Payment => $_primaryPayment');
+
     if (_isDownloadingReceipt) return;
 
     final String paymentId = _paymentId;
