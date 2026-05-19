@@ -80,7 +80,7 @@ class _PaymentConfirmationScreenState extends State<PaymentConfirmationScreen> {
     final String primaryApplicationId = _applicationId;
     if (primaryApplicationId.isNotEmpty) {
       for (final Map<String, dynamic> payment in _overviewPayments) {
-        if (_textFrom(payment['applicationId']) == primaryApplicationId) {
+        if (_paymentApplicationId(payment) == primaryApplicationId) {
           return payment;
         }
       }
@@ -97,7 +97,7 @@ class _PaymentConfirmationScreenState extends State<PaymentConfirmationScreen> {
 
     if (allKnownApplicationIds.isNotEmpty) {
       for (final Map<String, dynamic> payment in _overviewPayments) {
-        if (allKnownApplicationIds.contains(_textFrom(payment['applicationId']))) {
+        if (allKnownApplicationIds.contains(_paymentApplicationId(payment))) {
           return payment;
         }
       }
@@ -134,23 +134,42 @@ class _PaymentConfirmationScreenState extends State<PaymentConfirmationScreen> {
     return 'Application ID: ${_shortId(_applicationId)}';
   }
 
-  String get _paymentId {
-    final List<String> candidateIds = <String>[
-      _textFrom(_primaryPayment?['id']),
-      _textFrom(_primaryPayment?['paymentId']),
-      _textFrom(_primaryPayment?['payment']?['id']),
-      _textFrom(_primaryPayment?['payment']?['paymentId']),
-    ];
+  String get _paymentId => _resolvePaymentId(_primaryPayment);
 
-    for (final String id in candidateIds) {
-      if (id.isNotEmpty && id.toLowerCase() != 'null') return id;
+  String _paymentApplicationId(Map<String, dynamic> payment) {
+    final String directApplicationId = _textFrom(payment['applicationId']);
+    if (directApplicationId.isNotEmpty) return directApplicationId;
+
+    final Object? nestedApplication = payment['application'];
+    if (nestedApplication is Map) {
+      return _textFrom(nestedApplication['id']);
     }
 
-    for (final Map<String, dynamic> payment in _overviewPayments) {
-      final String overviewId = _textFrom(payment['id']);
-      if (overviewId.isNotEmpty && overviewId.toLowerCase() != 'null') {
-        return overviewId;
+    return '';
+  }
+
+  String _resolvePaymentId(Map<String, dynamic>? payment) {
+    if (payment == null || payment.isEmpty) return '';
+
+    final List<String> candidateKeys = <String>[
+      'id',
+      'paymentId',
+      'payment_id',
+      '_id',
+    ];
+
+    for (final String key in candidateKeys) {
+      final String value = _textFrom(payment[key]);
+      if (value.isNotEmpty) {
+        return value;
       }
+    }
+
+    final Object? nestedPayment = payment['payment'];
+    if (nestedPayment is Map) {
+      return _resolvePaymentId(
+        nestedPayment.map((k, v) => MapEntry(k.toString(), v)),
+      );
     }
 
     return '';
