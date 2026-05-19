@@ -80,7 +80,7 @@ class _PaymentConfirmationScreenState extends State<PaymentConfirmationScreen> {
     final String primaryApplicationId = _applicationId;
     if (primaryApplicationId.isNotEmpty) {
       for (final Map<String, dynamic> payment in _overviewPayments) {
-        if (_textFrom(payment['applicationId']) == primaryApplicationId) {
+        if (_paymentApplicationId(payment) == primaryApplicationId) {
           return payment;
         }
       }
@@ -97,7 +97,7 @@ class _PaymentConfirmationScreenState extends State<PaymentConfirmationScreen> {
 
     if (allKnownApplicationIds.isNotEmpty) {
       for (final Map<String, dynamic> payment in _overviewPayments) {
-        if (allKnownApplicationIds.contains(_textFrom(payment['applicationId']))) {
+        if (allKnownApplicationIds.contains(_paymentApplicationId(payment))) {
           return payment;
         }
       }
@@ -134,10 +134,46 @@ class _PaymentConfirmationScreenState extends State<PaymentConfirmationScreen> {
     return 'Application ID: ${_shortId(_applicationId)}';
   }
 
-  String get _paymentId =>
-      _textFrom(_primaryPayment?['id']).isNotEmpty
-          ? _textFrom(_primaryPayment?['id'])
-          : _textFrom(_primaryPayment?['paymentId']);
+  String get _paymentId => _resolvePaymentId(_primaryPayment);
+
+  String _paymentApplicationId(Map<String, dynamic> payment) {
+    final String directApplicationId = _textFrom(payment['applicationId']);
+    if (directApplicationId.isNotEmpty) return directApplicationId;
+
+    final Object? nestedApplication = payment['application'];
+    if (nestedApplication is Map) {
+      return _textFrom(nestedApplication['id']);
+    }
+
+    return '';
+  }
+
+  String _resolvePaymentId(Map<String, dynamic>? payment) {
+    if (payment == null || payment.isEmpty) return '';
+
+    final List<String> candidateKeys = <String>[
+      'id',
+      'paymentId',
+      'payment_id',
+      '_id',
+    ];
+
+    for (final String key in candidateKeys) {
+      final String value = _textFrom(payment[key]);
+      if (value.isNotEmpty) {
+        return value;
+      }
+    }
+
+    final Object? nestedPayment = payment['payment'];
+    if (nestedPayment is Map) {
+      return _resolvePaymentId(
+        nestedPayment.map((k, v) => MapEntry(k.toString(), v)),
+      );
+    }
+
+    return '';
+  }
 
   String get _displayUniversityName {
     final Map<String, dynamic>? application = _primaryApplication;
