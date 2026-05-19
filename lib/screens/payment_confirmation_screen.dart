@@ -77,11 +77,29 @@ class _PaymentConfirmationScreenState extends State<PaymentConfirmationScreen> {
   }
 
   Map<String, dynamic>? get _primaryPayment {
-    final String applicationId = _textFrom(_primaryApplication?['id']);
-    for (final Map<String, dynamic> payment in _overviewPayments) {
-      if (applicationId.isNotEmpty &&
-          _textFrom(payment['applicationId']) == applicationId) {
-        return payment;
+    final String primaryApplicationId = _applicationId;
+    if (primaryApplicationId.isNotEmpty) {
+      for (final Map<String, dynamic> payment in _overviewPayments) {
+        if (_textFrom(payment['applicationId']) == primaryApplicationId) {
+          return payment;
+        }
+      }
+    }
+
+    final Set<String> allKnownApplicationIds = <String>{
+      ..._createdApplications
+          .map((application) => _textFrom(application['id']))
+          .where((id) => id.isNotEmpty),
+      ...widget.applicationsPayload
+          .map((application) => _textFrom(application['id']))
+          .where((id) => id.isNotEmpty),
+    };
+
+    if (allKnownApplicationIds.isNotEmpty) {
+      for (final Map<String, dynamic> payment in _overviewPayments) {
+        if (allKnownApplicationIds.contains(_textFrom(payment['applicationId']))) {
+          return payment;
+        }
       }
     }
 
