@@ -185,39 +185,40 @@ class _HomeScreenState extends State<HomeScreen> {
                                   onTap: () {
                                     Navigator.of(context).push(
                                       MaterialPageRoute(
-                                        builder: (_) => const NotificationsScreen(),
+                                        builder: (_) =>
+                                            const NotificationsScreen(),
                                       ),
                                     );
                                   },
                                   child: ValueListenableBuilder<int>(
-                                    valueListenable:
-                                        NotificationSyncService.instance.unreadCount,
+                                    valueListenable: NotificationSyncService
+                                        .instance.unreadCount,
                                     builder: (_, unread, __) {
                                       return Stack(
-                                      clipBehavior: Clip.none,
-                                      children: [
-                                        const Icon(
-                                          Icons.notifications_none_rounded,
-                                          size: 26,
-                                        ),
-                                        if (unread > 0)
-                                          Positioned(
-                                            right: 2,
-                                            top: 2,
-                                            child: Container(
-                                              width: 8,
-                                              height: 8,
-                                              decoration: BoxDecoration(
-                                                color: Colors.red,
-                                                borderRadius:
-                                                    BorderRadius.circular(
-                                                  10,
+                                        clipBehavior: Clip.none,
+                                        children: [
+                                          const Icon(
+                                            Icons.notifications_none_rounded,
+                                            size: 26,
+                                          ),
+                                          if (unread > 0)
+                                            Positioned(
+                                              right: 2,
+                                              top: 2,
+                                              child: Container(
+                                                width: 8,
+                                                height: 8,
+                                                decoration: BoxDecoration(
+                                                  color: Colors.red,
+                                                  borderRadius:
+                                                      BorderRadius.circular(
+                                                    10,
+                                                  ),
                                                 ),
                                               ),
                                             ),
-                                          ),
-                                      ],
-                                    );
+                                        ],
+                                      );
                                     },
                                   ),
                                 ),
@@ -254,7 +255,8 @@ class _HomeScreenState extends State<HomeScreen> {
                                         Expanded(
                                           child: Text(
                                             _controller.selectedCountry ??
-                                                context.l10n.text('selectCountry'),
+                                                context.l10n
+                                                    .text('selectCountry'),
                                             overflow: TextOverflow.ellipsis,
                                           ),
                                         ),
@@ -441,11 +443,19 @@ class _HomeScreenState extends State<HomeScreen> {
                       ),
                     ),
                   ] else if (_activeTab == 1) ...[
+                    // Expanded(
+                    //   child: TrackMyApplicationsScreen(activeTab: false),
+                    // ),
                     Expanded(
-                      child: TrackMyApplicationsScreen(activeTab: false),
-                    ),
+                        child: Center(
+                      child: Text("Coming Soon"),
+                    ))
                   ] else if (_activeTab == 2) ...[
-                    Expanded(child: UploadedDocumentsScreen(activeTab: false)),
+                    // Expanded(child: UploadedDocumentsScreen(activeTab: false)),
+                    Expanded(
+                        child: Center(
+                      child: Text("Coming Soon"),
+                    ))
                   ] else ...[
                     Expanded(child: LatestUpdatesScreen(activeTab: false)),
                   ],
@@ -865,7 +875,11 @@ class _AdvanceSearchDialogState extends State<_AdvanceSearchDialog> {
                   color: Color(0xFF757575),
                 ),
                 hint: Text(
-                  options.isEmpty ? context.l10n.text('noOptionsFound') : context.l10n.text('selectOption').replaceAll('{title}', title),
+                  options.isEmpty
+                      ? context.l10n.text('noOptionsFound')
+                      : context.l10n
+                          .text('selectOption')
+                          .replaceAll('{title}', title),
                   style: const TextStyle(
                     color: Color(0xFF8A8A8A),
                     fontSize: 14,
