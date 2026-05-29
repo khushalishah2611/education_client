@@ -537,7 +537,7 @@ class _DiscoverBanner extends StatelessWidget {
               children: [
                 Image.network(
                   banner.imageUrl,
-                  fit: BoxFit.cover,
+                  fit: BoxFit.fill,
                   errorBuilder: (_, __, ___) => const _BannerShimmer(),
                   loadingBuilder: (_, child, progress) {
                     if (progress == null) return child;
