@@ -30,37 +30,67 @@ class ContactSupportSection extends StatelessWidget {
         label: 'Whatsapp',
         backgroundColor: const Color(0xFFE4F4E9),
         onTap: onOpenWhatsApp,
-        icon: const _WhatsAppIcon(),
+        icon: Image.asset(
+          'assets/images/whatsapp.png',
+          width: 36,
+          height: 36,
+          fit: BoxFit.contain,
+        ),
       ),
       _SupportAction(
         label: 'Instagram',
         backgroundColor: const Color(0xFFF4E7EF),
         onTap: onOpenInstagram,
-        icon: const _InstagramIcon(),
+        icon:Image.asset(
+          'assets/images/instagram.png',
+          width: 36,
+          height: 36,
+          fit: BoxFit.contain,
+        ),
       ),
       _SupportAction(
         label: 'Snapchat',
         backgroundColor: const Color(0xFFF7F2C8),
         onTap: onOpenSnapchat,
-        icon: const _SnapchatIcon(),
+        icon: Image.asset(
+          'assets/images/snapchat.png',
+          width: 36,
+          height: 36,
+          fit: BoxFit.contain,
+        ),
       ),
       _SupportAction(
         label: 'Twitter',
         backgroundColor: Colors.white.withOpacity(.22),
         onTap: onOpenTwitter,
-        icon: const _XIcon(),
+        icon: Image.asset(
+          'assets/images/twitter.png',
+          width: 36,
+          height: 36,
+          fit: BoxFit.contain,
+        ),
       ),
       _SupportAction(
         label: 'Email',
         backgroundColor: const Color(0xFFF7F1E8),
         onTap: onOpenEmail,
-        icon: const _GmailIcon(),
+        icon:Image.asset(
+          'assets/images/gmail.png',
+          width: 36,
+          height: 36,
+          fit: BoxFit.contain,
+        ),
       ),
       _SupportAction(
         label: 'Tik Tok',
         backgroundColor: Colors.white.withOpacity(.42),
         onTap: onOpenTikTok ?? onOpenWhatsApp,
-        icon: const _TikTokIcon(),
+        icon: Image.asset(
+          'assets/images/tiktok.png',
+          width: 36,
+          height: 36,
+          fit: BoxFit.contain,
+        ),
       ),
     ];
 
