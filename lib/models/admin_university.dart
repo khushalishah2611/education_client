@@ -117,6 +117,8 @@ List<AcademicPrograms>? _academicProgramsFromAcademicList(
         _toTrimmedString(program?.academicProgram) ??
         _toTrimmedString(program?.name) ??
         '';
+    final String? academicNameAr = _toTrimmedString(entry.academicProgramAr) ??
+        _toTrimmedString(program?.academicProgramAr);
     final String collegeName = _toTrimmedString(entry.college) ??
         _toTrimmedString(program?.educationInstitute) ??
         '';
@@ -129,9 +131,12 @@ List<AcademicPrograms>? _academicProgramsFromAcademicList(
       academicName,
       () => AcademicPrograms(
         academicname: academicName,
+        academicProgramAr: academicNameAr,
         colleges: <Colleges>[],
       ),
     );
+
+    academicProgram.academicProgramAr ??= academicNameAr;
 
     final List<Colleges> colleges = academicProgram.colleges ?? <Colleges>[];
     academicProgram.colleges = colleges;
@@ -337,13 +342,24 @@ class AdminUniversity {
 
 class AcademicList {
   String? academicname;
+  String? academicProgramAr;
   String? college;
   Program? program;
 
-  AcademicList({this.academicname, this.college, this.program});
+  AcademicList({
+    this.academicname,
+    this.academicProgramAr,
+    this.college,
+    this.program,
+  });
 
   AcademicList.fromJson(Map<String, dynamic> json) {
     academicname = json['academicname'];
+    academicProgramAr = _toTrimmedString(json['academicProgramAr']) ??
+        _toTrimmedString(json['academicProgramAR']) ??
+        _toTrimmedString(json['academicProgramArabic']) ??
+        _toTrimmedString(json['academicnameAr']) ??
+        _toTrimmedString(json['academicNameAr']);
     college = json['college'];
     final programJson = _toStringDynamicMap(json['program']);
     program = programJson != null ? Program.fromJson(programJson) : null;
@@ -352,6 +368,7 @@ class AcademicList {
   Map<String, dynamic> toJson() {
     final Map<String, dynamic> data = new Map<String, dynamic>();
     data['academicname'] = this.academicname;
+    data['academicProgramAr'] = this.academicProgramAr;
     data['college'] = this.college;
     if (this.program != null) {
       data['program'] = this.program!.toJson();
@@ -364,6 +381,7 @@ class Program {
   String? id;
   String? name;
   String? academicProgram;
+  String? academicProgramAr;
   String? courseNames;
   List<CourseDetails>? courseDetails;
   String? track;
@@ -391,6 +409,7 @@ class Program {
       {this.id,
       this.name,
       this.academicProgram,
+      this.academicProgramAr,
       this.courseNames,
       this.courseDetails,
       this.track,
@@ -418,6 +437,9 @@ class Program {
     id = json['id'];
     name = json['name'];
     academicProgram = json['academicProgram'];
+    academicProgramAr = _toTrimmedString(json['academicProgramAr']) ??
+        _toTrimmedString(json['academicProgramAR']) ??
+        _toTrimmedString(json['academicProgramArabic']);
     courseNames = json['courseNames'];
     final courseDetailsJson = _toDynamicList(json['courseDetails']);
     if (courseDetailsJson != null) {
@@ -465,6 +487,7 @@ class Program {
     data['id'] = this.id;
     data['name'] = this.name;
     data['academicProgram'] = this.academicProgram;
+    data['academicProgramAr'] = this.academicProgramAr;
     data['courseNames'] = this.courseNames;
     if (this.courseDetails != null) {
       data['courseDetails'] =
@@ -760,12 +783,34 @@ class Student {
 
 class AcademicPrograms {
   String? academicname;
+  String? academicProgramAr;
   List<Colleges>? colleges;
 
-  AcademicPrograms({this.academicname, this.colleges});
+  AcademicPrograms({
+    this.academicname,
+    this.academicProgramAr,
+    this.colleges,
+  });
+
+  String displayName(bool isArabic) {
+    if (isArabic) {
+      return _toTrimmedString(academicProgramAr) ??
+          _toTrimmedString(academicname) ??
+          '';
+    }
+    return _toTrimmedString(academicname) ??
+        _toTrimmedString(academicProgramAr) ??
+        '';
+  }
 
   AcademicPrograms.fromJson(Map<String, dynamic> json) {
-    academicname = json['academicname'];
+    academicname = _toTrimmedString(json['academicname']) ??
+        _toTrimmedString(json['academicProgram']);
+    academicProgramAr = _toTrimmedString(json['academicProgramAr']) ??
+        _toTrimmedString(json['academicProgramAR']) ??
+        _toTrimmedString(json['academicProgramArabic']) ??
+        _toTrimmedString(json['academicnameAr']) ??
+        _toTrimmedString(json['academicNameAr']);
     final collegesJson = _toDynamicList(json['colleges']);
     if (collegesJson != null) {
       colleges = <Colleges>[];
@@ -781,6 +826,7 @@ class AcademicPrograms {
   Map<String, dynamic> toJson() {
     final Map<String, dynamic> data = new Map<String, dynamic>();
     data['academicname'] = this.academicname;
+    data['academicProgramAr'] = this.academicProgramAr;
     if (this.colleges != null) {
       data['colleges'] = this.colleges!.map((v) => v.toJson()).toList();
     }
@@ -822,6 +868,7 @@ class Courses {
   String? programId;
   String? programName;
   String? academicProgram;
+  String? academicProgramAr;
   String? educationInstitute;
   String? name;
   bool? isBooked;
@@ -848,6 +895,7 @@ class Courses {
       {this.programId,
       this.programName,
       this.academicProgram,
+      this.academicProgramAr,
       this.educationInstitute,
       this.name,
       this.isBooked,
@@ -880,6 +928,7 @@ class Courses {
       programId: program?.id,
       programName: program?.name,
       academicProgram: program?.academicProgram ?? academicName,
+      academicProgramAr: program?.academicProgramAr,
       educationInstitute: program?.educationInstitute ?? collegeName,
       name: details.name,
       isBooked: details.isBooked,
@@ -909,6 +958,9 @@ class Courses {
     programId = json['programId'];
     programName = json['programName'];
     academicProgram = json['academicProgram'];
+    academicProgramAr = _toTrimmedString(json['academicProgramAr']) ??
+        _toTrimmedString(json['academicProgramAR']) ??
+        _toTrimmedString(json['academicProgramArabic']);
     educationInstitute = json['educationInstitute'];
     name = json['name'];
     isBooked = json['isBooked'];
@@ -937,6 +989,7 @@ class Courses {
     data['programId'] = this.programId;
     data['programName'] = this.programName;
     data['academicProgram'] = this.academicProgram;
+    data['academicProgramAr'] = this.academicProgramAr;
     data['educationInstitute'] = this.educationInstitute;
     data['name'] = this.name;
     data['isBooked'] = this.isBooked;

@@ -319,11 +319,39 @@ class _UniversityDetailScreenState extends State<UniversityDetailScreen> {
                             crossAxisAlignment: CrossAxisAlignment.start,
                             children: _academicGroups.entries.map((groupEntry) {
                               final String academicName = groupEntry.key;
+                              AcademicPrograms? matchingAcademicProgram;
+                              for (final item in data.academicPrograms ??
+                                  <AcademicPrograms>[]) {
+                                if ((item.academicname ?? '').trim() ==
+                                    academicName.trim()) {
+                                  matchingAcademicProgram = item;
+                                  break;
+                                }
+                              }
+                              String? academicListArabicName;
+                              for (final entry in groupEntry.value) {
+                                final candidate = (entry.academicProgramAr ??
+                                        entry.program?.academicProgramAr)
+                                    ?.trim();
+                                if (candidate != null && candidate.isNotEmpty) {
+                                  academicListArabicName = candidate;
+                                  break;
+                                }
+                              }
+                              final String displayAcademicName =
+                                  matchingAcademicProgram?.displayName(
+                                        context.l10n.isArabic,
+                                      ) ??
+                                      (context.l10n.isArabic
+                                          ? academicListArabicName
+                                          : null) ??
+                                      academicName;
                               final bool isExpanded =
                                   _expandedColleges.contains(academicName);
 
                               return _CollegeAccordion(
                                 academicName: academicName,
+                                displayAcademicName: displayAcademicName,
                                 academicEntries: groupEntry.value,
                                 isExpanded: isExpanded,
                                 selectedCourses: _selectedCourses,
@@ -418,6 +446,7 @@ class _CollegeAccordion extends StatefulWidget {
   const _CollegeAccordion({
     super.key,
     required this.academicName,
+    required this.displayAcademicName,
     required this.academicEntries,
     required this.isExpanded,
     required this.selectedCourses,
@@ -427,6 +456,7 @@ class _CollegeAccordion extends StatefulWidget {
   });
 
   final String academicName;
+  final String displayAcademicName;
   final List<AcademicList> academicEntries;
   final bool isExpanded;
   final Set<String> selectedCourses;
@@ -469,7 +499,9 @@ class _CollegeAccordionState extends State<_CollegeAccordion> {
                 children: [
                   Expanded(
                     child: Text(
-                      widget.academicName.toUpperCase(),
+                      context.l10n.isArabic
+                          ? widget.displayAcademicName
+                          : widget.displayAcademicName.toUpperCase(),
                       style: TextStyle(
                         fontSize: isSmallMobile ? 12.5 : 14,
                         fontWeight: FontWeight.bold,

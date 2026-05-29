@@ -31,7 +31,7 @@ class HomeController extends ChangeNotifier {
   List<AdminUniversity> universities = [];
 
   List<String> trackOptions = [];
-  List<String> academicOptions = [];
+  List<AcademicMasterOption> academicOptions = [];
   List<String> currencyOptions = [];
   List<CountryOption> countryOptions = [];
 
@@ -96,7 +96,9 @@ class HomeController extends ChangeNotifier {
             )
             .catchError((_) => <AdminUniversity>[]),
         _homeApiService.fetchTrackMasters().catchError((_) => <String>[]),
-        _homeApiService.fetchAcademicMasters().catchError((_) => <String>[]),
+        _homeApiService
+            .fetchAcademicMasters()
+            .catchError((_) => <AcademicMasterOption>[]),
         _homeApiService.fetchCountries().catchError((_) => <CountryMaster>[]),
       ]);
 
@@ -104,7 +106,7 @@ class HomeController extends ChangeNotifier {
 
       final tracks = responses[1] as List<String>;
 
-      final academics = responses[2] as List<String>;
+      final academics = responses[2] as List<AcademicMasterOption>;
 
       final countries = responses[3] as List<CountryMaster>;
 
@@ -122,9 +124,9 @@ class HomeController extends ChangeNotifier {
           )
           .toList();
 
-      /// Academic options
-      academicOptions =
-          academics.map((e) => e.trim()).where((e) => e.isNotEmpty).toList();
+      /// Academic options keep English values for filtering/API requests while
+      /// exposing Arabic labels to the UI when Arabic is selected.
+      academicOptions = academics;
 
       /// Country options
       countryOptions = countries
@@ -254,9 +256,12 @@ class HomeController extends ChangeNotifier {
 
     for (final academic in u.academicList ?? const <AcademicList>[]) {
       addValue(academic.academicname);
-
+      addValue(academic.academicProgramAr);
       addValue(
         academic.program?.academicProgram,
+      );
+      addValue(
+        academic.program?.academicProgramAr,
       );
     }
 
@@ -264,14 +269,19 @@ class HomeController extends ChangeNotifier {
       addValue(
         link.program?.academicProgram,
       );
+      addValue(
+        link.program?.academicProgramAr,
+      );
     }
 
     for (final academic in u.academicPrograms ?? const <AcademicPrograms>[]) {
       addValue(academic.academicname);
+      addValue(academic.academicProgramAr);
 
       for (final college in academic.colleges ?? const <Colleges>[]) {
         for (final course in college.courses ?? const <Courses>[]) {
           addValue(course.academicProgram);
+          addValue(course.academicProgramAr);
         }
       }
     }
