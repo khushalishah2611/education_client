@@ -378,8 +378,18 @@ class _GmailPainter extends CustomPainter {
       ..lineTo(size.width - 2, 4);
     canvas.drawPath(flap, red);
 
-    canvas.drawLine(2, 4, 2, size.height - 3, red);
-    canvas.drawLine(size.width - 2, 4, size.width - 2, size.height - 3, red);
+
+    canvas.drawLine(
+      const Offset(2, 4),
+      Offset(2, size.height - 3),
+      red,
+    );
+
+    canvas.drawLine(
+      Offset(size.width - 2, 4),
+      Offset(size.width - 2, size.height - 3),
+      red,
+    );
   }
 
   @override
