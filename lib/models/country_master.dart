@@ -2,6 +2,7 @@ class CountryMaster {
   const CountryMaster({
     required this.id,
     required this.nameEn,
+    required this.nameAr,
     required this.value,
     required this.dialCode,
     required this.flagEmoji,
@@ -10,6 +11,7 @@ class CountryMaster {
 
   final String id;
   final String nameEn;
+  final String nameAr;
   final String value;
   final String dialCode;
   final String flagEmoji;
@@ -19,6 +21,7 @@ class CountryMaster {
     return CountryMaster(
       id: _readString(json, const ['id', '_id']),
       nameEn: _readString(json, const ['nameEn', 'name', 'label']),
+      nameAr: _readString(json, const ['nameAr']),
       value: _readString(json, const ['value', 'code', 'iso2', 'isoCode']),
       dialCode: _readString(json, const ['dialCode', 'countryCode']),
       flagEmoji: _readString(json, const ['flagEmoji', 'emoji']).isNotEmpty

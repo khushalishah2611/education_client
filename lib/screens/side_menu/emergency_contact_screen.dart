@@ -78,67 +78,69 @@ class EmergencyContactCard extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return Column(
-      children: [
-        //   Container(
-        // width: double.infinity,
-        // decoration: BoxDecoration(
-        //   color: Colors.white,
-        //   borderRadius: BorderRadius.circular(12),
-        //   border: Border.all(
-        //     color: Colors.grey.shade300,
-        //   ),
-        // ),
-        // child: Column(
-        //   mainAxisSize: MainAxisSize.min,
-        //   children: [
-        //     ContactInfoField(
-        //       label: context.l10n.text('guardianName'),
-        //       value: 'Arab Education',
-        //       icon: Icons.person_outline_rounded,
-        //     ),
-        //
-        //     const Divider(height: 1),
-        //
-        //     ContactInfoField(
-        //       label: context.l10n.text('relationship'),
-        //       value: 'Support Person',
-        //       icon: Icons.person_outline_rounded,
-        //     ),
-        //
-        //     const Divider(height: 1),
-        //
-        //     ContactInfoField(
-        //       label: context.l10n.text('mobileNumber'),
-        //       value: '+968 7742 8887',
-        //       icon: Icons.call_outlined,
-        //       onTap: () => _makeCall(
-        //         '+96877428887',
-        //       ),
-        //     ),
-        //
-        //     const Divider(height: 1),
-        //
-        //     ContactInfoField(
-        //       label: context.l10n.text('emailAddress'),
-        //       value: 'arabuapp@gmail.com',
-        //       icon: Icons.mail_outline_rounded,
-        //       onTap: () => _sendEmail(
-        //         'arabuapp@gmail.com',
-        //       ),
-        //     ),
-        //   ],
-        // ),
-        //   ),
-        //   const SizedBox(height: 16),
-        ContactSupportSection(
-          onOpenWhatsApp: _openWhatsApp,
-          onOpenInstagram: _openInstagram,
-          onOpenSnapchat: _openSnapchat,
-          onOpenTwitter: _openTwitter,
-          onOpenEmail: _openEmail,
-        ),
-      ],
+    return SingleChildScrollView(
+      child: Column(
+        children: [
+          //   Container(
+          // width: double.infinity,
+          // decoration: BoxDecoration(
+          //   color: Colors.white,
+          //   borderRadius: BorderRadius.circular(12),
+          //   border: Border.all(
+          //     color: Colors.grey.shade300,
+          //   ),
+          // ),
+          // child: Column(
+          //   mainAxisSize: MainAxisSize.min,
+          //   children: [
+          //     ContactInfoField(
+          //       label: context.l10n.text('guardianName'),
+          //       value: 'Arab Education',
+          //       icon: Icons.person_outline_rounded,
+          //     ),
+          //
+          //     const Divider(height: 1),
+          //
+          //     ContactInfoField(
+          //       label: context.l10n.text('relationship'),
+          //       value: 'Support Person',
+          //       icon: Icons.person_outline_rounded,
+          //     ),
+          //
+          //     const Divider(height: 1),
+          //
+          //     ContactInfoField(
+          //       label: context.l10n.text('mobileNumber'),
+          //       value: '+968 7742 8887',
+          //       icon: Icons.call_outlined,
+          //       onTap: () => _makeCall(
+          //         '+96877428887',
+          //       ),
+          //     ),
+          //
+          //     const Divider(height: 1),
+          //
+          //     ContactInfoField(
+          //       label: context.l10n.text('emailAddress'),
+          //       value: 'arabuapp@gmail.com',
+          //       icon: Icons.mail_outline_rounded,
+          //       onTap: () => _sendEmail(
+          //         'arabuapp@gmail.com',
+          //       ),
+          //     ),
+          //   ],
+          // ),
+          //   ),
+          //   const SizedBox(height: 16),
+          ContactSupportSection(
+            onOpenWhatsApp: _openWhatsApp,
+            onOpenInstagram: _openInstagram,
+            onOpenSnapchat: _openSnapchat,
+            onOpenTwitter: _openTwitter,
+            onOpenEmail: _openEmail,
+          ),
+        ],
+      ),
     );
   }
 }

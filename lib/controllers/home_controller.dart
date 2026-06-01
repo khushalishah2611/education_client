@@ -136,12 +136,14 @@ class HomeController extends AppCubit<int> {
       countryOptions = countries
           .where((c) {
             final name = (c.nameEn.isNotEmpty ? c.nameEn : c.value).trim();
-
             return name.isNotEmpty;
           })
           .map(
             (c) => CountryOption(
-              name: c.nameEn.isNotEmpty ? c.nameEn : c.value,
+              nameEn: c.nameEn.isNotEmpty ? c.nameEn : c.value,
+              nameAr: c.nameAr.isNotEmpty
+                  ? c.nameAr
+                  : (c.nameEn.isNotEmpty ? c.nameEn : c.value),
               flagEmoji: c.flagEmoji,
               flagImageUrl: _resolveCountryFlag(c),
               dialCode: c.dialCode,
