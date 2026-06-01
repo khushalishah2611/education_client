@@ -20,6 +20,8 @@ class UniversityDetailScreen extends StatefulWidget {
     this.selectedAcademic,
     this.selectedTrack,
     this.selectedResult,
+    this.academicOptions = const <MasterOption>[],
+    this.trackOptions = const <MasterOption>[],
   });
 
   final AdminUniversity data;
@@ -27,6 +29,8 @@ class UniversityDetailScreen extends StatefulWidget {
   final String? selectedAcademic;
   final String? selectedTrack;
   final String? selectedResult;
+  final List<MasterOption> academicOptions;
+  final List<MasterOption> trackOptions;
 
   @override
   State<UniversityDetailScreen> createState() => _UniversityDetailScreenState();
@@ -365,6 +369,8 @@ class _UniversityDetailScreenState extends State<UniversityDetailScreen>
                                 selectedAcademic: widget.selectedAcademic,
                                 selectedTrack: widget.selectedTrack,
                                 selectedResult: widget.selectedResult,
+                                academicOptions: widget.academicOptions,
+                                trackOptions: widget.trackOptions,
                               );
                             }).toList(),
                           ),
@@ -455,6 +461,8 @@ class _CollegeAccordion extends StatefulWidget {
     required this.selectedAcademic,
     required this.selectedTrack,
     required this.selectedResult,
+    required this.academicOptions,
+    required this.trackOptions,
   });
 
   final String academicName;
@@ -465,6 +473,8 @@ class _CollegeAccordion extends StatefulWidget {
   final String? selectedAcademic;
   final String? selectedTrack;
   final String? selectedResult;
+  final List<MasterOption> academicOptions;
+  final List<MasterOption> trackOptions;
   final VoidCallback onToggleExpand;
   final ValueChanged<String> onToggleCourse;
 

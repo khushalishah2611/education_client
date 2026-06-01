@@ -421,6 +421,10 @@ class _HomeScreenState extends State<HomeScreen> {
                                                         .selectedTrack,
                                                     selectedResult: _controller
                                                         .resultController.text,
+                                                    academicOptions: _controller
+                                                        .academicOptions,
+                                                    trackOptions:
+                                                        _controller.trackOptions,
                                                   ),
                                                 ),
                                               ),
@@ -461,6 +465,10 @@ class _HomeScreenState extends State<HomeScreen> {
                                                         .selectedTrack,
                                                     selectedResult: _controller
                                                         .resultController.text,
+                                                    academicOptions: _controller
+                                                        .academicOptions,
+                                                    trackOptions:
+                                                        _controller.trackOptions,
                                                   ),
                                                 ),
                                               ),
