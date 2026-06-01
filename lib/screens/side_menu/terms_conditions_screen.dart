@@ -16,7 +16,9 @@ class TermsConditionsScreen extends StatefulWidget {
 }
 
 class _TermsConditionsScreenState extends State<TermsConditionsScreen>
-    with SingleTickerProviderStateMixin, CubitStateMixin<TermsConditionsScreen> {
+    with
+        SingleTickerProviderStateMixin,
+        CubitStateMixin<TermsConditionsScreen> {
   final ApplicationApiService _api = const ApplicationApiService();
 
   bool _loading = true;
@@ -121,18 +123,12 @@ class _TermsConditionsScreenState extends State<TermsConditionsScreen>
                     final List<String> bullets = content
                         .split(
                           RegExp(
-                            r'[
-]+|(?<=\.)\s+',
+                            r'[\r\n]+|(?<=\.)\s+',
                           ),
                         )
-                        .map(
-                          (e) => e.trim(),
-                        )
-                        .where(
-                          (e) => e.isNotEmpty,
-                        )
+                        .map((e) => e.trim())
+                        .where((e) => e.isNotEmpty)
                         .toList();
-
                     return SectionCard(
                       title: title,
                       bullets: bullets.isEmpty
