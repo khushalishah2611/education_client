@@ -18,12 +18,14 @@ class UniversityDetailScreen extends StatefulWidget {
     this.initialSelectedCourseKeys = const <String>{},
     this.selectedAcademic,
     this.selectedTrack,
+    this.selectedResult,
   });
 
   final AdminUniversity data;
   final Set<String> initialSelectedCourseKeys;
   final String? selectedAcademic;
   final String? selectedTrack;
+  final String? selectedResult;
 
   @override
   State<UniversityDetailScreen> createState() => _UniversityDetailScreenState();
@@ -361,6 +363,7 @@ class _UniversityDetailScreenState extends State<UniversityDetailScreen>
                                 adminUniversity: data,
                                 selectedAcademic: widget.selectedAcademic,
                                 selectedTrack: widget.selectedTrack,
+                                selectedResult: widget.selectedResult,
                               );
                             }).toList(),
                           ),
@@ -450,6 +453,7 @@ class _CollegeAccordion extends StatefulWidget {
     required this.adminUniversity,
     required this.selectedAcademic,
     required this.selectedTrack,
+    required this.selectedResult,
   });
 
   final String academicName;
@@ -459,6 +463,7 @@ class _CollegeAccordion extends StatefulWidget {
   final AdminUniversity adminUniversity;
   final String? selectedAcademic;
   final String? selectedTrack;
+  final String? selectedResult;
   final VoidCallback onToggleExpand;
   final ValueChanged<String> onToggleCourse;
 
@@ -476,14 +481,30 @@ class _CollegeAccordionState extends State<_CollegeAccordion> {
   bool _matchesSelectedTrack(Courses course) {
     final selected = _normalizeFilterValue(widget.selectedTrack);
     if (selected.isEmpty) return true;
-    return _normalizeFilterValue(course.track) == selected;
+    return _splitFilterValues(course.track).contains(selected);
   }
 
   bool _matchesSelectedAcademic(Courses course) {
     final selected = _normalizeFilterValue(widget.selectedAcademic);
     if (selected.isEmpty) return true;
-    return _normalizeFilterValue(course.academicProgram) == selected ||
+    return _splitFilterValues(course.academicProgram).contains(selected) ||
         _normalizeFilterValue(widget.academicName) == selected;
+  }
+
+  bool _matchesSelectedResult(Courses course) {
+    final selectedResult = double.tryParse(widget.selectedResult?.trim() ?? '');
+    if (selectedResult == null) return true;
+
+    final minAdmissionRate = course.minAdmissionRate?.toDouble();
+    return minAdmissionRate == null || selectedResult >= minAdmissionRate;
+  }
+
+  Set<String> _splitFilterValues(String? value) {
+    return (value ?? '')
+        .split(',')
+        .map(_normalizeFilterValue)
+        .where((entry) => entry.isNotEmpty)
+        .toSet();
   }
 
   @override
@@ -551,6 +572,7 @@ class _CollegeAccordionState extends State<_CollegeAccordion> {
                         (collegeData.courses ?? <Courses>[])
                             .where(_matchesSelectedAcademic)
                             .where(_matchesSelectedTrack)
+                            .where(_matchesSelectedResult)
                             .toList(growable: false);
 
                     return Column(

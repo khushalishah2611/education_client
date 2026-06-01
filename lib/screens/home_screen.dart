@@ -419,6 +419,8 @@ class _HomeScreenState extends State<HomeScreen> {
                                                             .selectedAcademic,
                                                     selectedTrack: _controller
                                                         .selectedTrack,
+                                                    selectedResult: _controller
+                                                        .resultController.text,
                                                   ),
                                                 ),
                                               ),
@@ -457,6 +459,8 @@ class _HomeScreenState extends State<HomeScreen> {
                                                             .selectedAcademic,
                                                     selectedTrack: _controller
                                                         .selectedTrack,
+                                                    selectedResult: _controller
+                                                        .resultController.text,
                                                   ),
                                                 ),
                                               ),

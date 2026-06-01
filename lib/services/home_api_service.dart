@@ -8,6 +8,7 @@ import '../core/api_status.dart';
 import '../models/admin_university.dart';
 import '../models/banner_item.dart';
 import '../models/country_master.dart';
+import '../models/latest_update.dart';
 import '../models/master_option.dart';
 
 class HomeApiService {
@@ -53,19 +54,33 @@ class HomeApiService {
         .toList(growable: false);
   }
 
-  
-
-  Future<Map<String, dynamic>> fetchLatestUpdates({int page = 1, int limit = 10}) async {
+  Future<List<LatestUpdate>> fetchLatestUpdates({
+    int page = 1,
+    int limit = 10,
+  }) async {
     final Uri url = ApiConfig.uri('/api/admin/latest-updates').replace(
       queryParameters: {'page': '$page', 'limit': '$limit'},
     );
     final response = await http.get(url);
     final decoded = _decode(response.body);
-    logApiCall(method: 'GET', url: url.toString(), statusCode: response.statusCode, requestBody: null, responseBody: decoded);
+    logApiCall(
+      method: 'GET',
+      url: url.toString(),
+      statusCode: response.statusCode,
+      requestBody: null,
+      responseBody: decoded,
+    );
     if (!ApiStatus.isSuccess(response.statusCode)) {
-      throw Exception(decoded['message']?.toString() ?? 'Failed to load latest updates.');
+      throw Exception(
+        decoded['message']?.toString() ?? 'Failed to load latest updates.',
+      );
     }
-    return decoded;
+    return _asList(
+      decoded['data'] ?? decoded['items'] ?? decoded['results'] ?? decoded,
+    )
+        .whereType<Map<String, dynamic>>()
+        .map(LatestUpdate.fromJson)
+        .toList(growable: false);
   }
 
   Future<List<AdminUniversity>> fetchUniversities({
