@@ -27,7 +27,7 @@ class ContactSupportSection extends StatelessWidget {
   Widget build(BuildContext context) {
     final items = <_SupportAction>[
       _SupportAction(
-        label: 'Whatsapp',
+        label: context.l10n.text('WhatsApp'),
         backgroundColor: const Color(0xFFE4F4E9),
         onTap: onOpenWhatsApp,
         icon: Image.asset(
@@ -38,7 +38,7 @@ class ContactSupportSection extends StatelessWidget {
         ),
       ),
       _SupportAction(
-        label: 'Instagram',
+        label: context.l10n.text('Instagram'),
         backgroundColor: const Color(0xFFF4E7EF),
         onTap: onOpenInstagram,
         icon:Image.asset(
@@ -49,7 +49,7 @@ class ContactSupportSection extends StatelessWidget {
         ),
       ),
       _SupportAction(
-        label: 'Snapchat',
+        label: context.l10n.text('Snapchat'),
         backgroundColor: const Color(0xFFF7F2C8),
         onTap: onOpenSnapchat,
         icon: Image.asset(
@@ -60,7 +60,7 @@ class ContactSupportSection extends StatelessWidget {
         ),
       ),
       _SupportAction(
-        label: 'Twitter',
+        label: context.l10n.text('Twitter'),
         backgroundColor: Colors.white.withOpacity(.22),
         onTap: onOpenTwitter,
         icon: Image.asset(
@@ -71,7 +71,7 @@ class ContactSupportSection extends StatelessWidget {
         ),
       ),
       _SupportAction(
-        label: 'Email',
+        label: context.l10n.text('email'),
         backgroundColor: const Color(0xFFF7F1E8),
         onTap: onOpenEmail,
         icon:Image.asset(
@@ -82,7 +82,7 @@ class ContactSupportSection extends StatelessWidget {
         ),
       ),
       _SupportAction(
-        label: 'Tik Tok',
+        label: context.l10n.text('TikTok'),
         backgroundColor: Colors.white.withOpacity(.42),
         onTap: onOpenTikTok ?? onOpenWhatsApp,
         icon: Image.asset(
@@ -95,7 +95,7 @@ class ContactSupportSection extends StatelessWidget {
     ];
 
     return Directionality(
-      textDirection: TextDirection.ltr,
+      textDirection: context.l10n.textDirection,
       child: Column(
         children: [
           ...items.map(

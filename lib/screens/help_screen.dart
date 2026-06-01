@@ -215,13 +215,15 @@ class _LanguageDropdownChip extends StatelessWidget {
         child: Row(
           mainAxisSize: MainAxisSize.min,
           children: [
-            const Text(
-              '🇴🇲',
-              style: TextStyle(fontSize: 14),
+            Text(
+              isArabic ? '🇴🇲' : '🇬🇧',
+              style: const TextStyle(
+                fontSize: 14,
+              ),
             ),
             const SizedBox(width: 5),
             Text(
-              isArabic ? 'English' : 'عربي',
+              isArabic ? 'العربية' : 'English',
               style: const TextStyle(
                 fontSize: 13,
                 color: AppColors.text,
