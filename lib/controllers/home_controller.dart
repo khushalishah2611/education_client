@@ -5,6 +5,7 @@ import '../models/admin_university.dart';
 import '../models/banner_item.dart';
 import '../models/country_master.dart';
 import '../models/country_option.dart';
+import '../models/master_option.dart';
 import '../services/home_api_service.dart';
 import '../core/bloc/app_cubit.dart';
 
@@ -32,8 +33,8 @@ class HomeController extends AppCubit<int> {
   List<BannerItem> banners = [];
   List<AdminUniversity> universities = [];
 
-  List<String> trackOptions = [];
-  List<String> academicOptions = [];
+  List<MasterOption> trackOptions = [];
+  List<MasterOption> academicOptions = [];
   List<String> currencyOptions = [];
   List<CountryOption> countryOptions = [];
 
@@ -101,16 +102,20 @@ class HomeController extends AppCubit<int> {
               search: resultController.text.trim(),
             )
             .catchError((_) => <AdminUniversity>[]),
-        _homeApiService.fetchTrackMasters().catchError((_) => <String>[]),
-        _homeApiService.fetchAcademicMasters().catchError((_) => <String>[]),
+        _homeApiService
+            .fetchTrackMasters()
+            .catchError((_) => <MasterOption>[]),
+        _homeApiService
+            .fetchAcademicMasters()
+            .catchError((_) => <MasterOption>[]),
         _homeApiService.fetchCountries().catchError((_) => <CountryMaster>[]),
       ]);
 
       final universitiesResponse = responses[0] as List<AdminUniversity>;
 
-      final tracks = responses[1] as List<String>;
+      final tracks = responses[1] as List<MasterOption>;
 
-      final academics = responses[2] as List<String>;
+      final academics = responses[2] as List<MasterOption>;
 
       final countries = responses[3] as List<CountryMaster>;
 
@@ -122,15 +127,15 @@ class HomeController extends AppCubit<int> {
 
       /// Track options
       trackOptions = tracks
-          .map((e) => e.trim())
           .where(
-            (e) => e.isNotEmpty && !_isScientificAndLiterary(e),
+            (e) => e.key.isNotEmpty && !_isScientificAndLiterary(e.key),
           )
-          .toList();
+          .toList(growable: false);
 
       /// Academic options
-      academicOptions =
-          academics.map((e) => e.trim()).where((e) => e.isNotEmpty).toList();
+      academicOptions = academics
+          .where((e) => e.key.isNotEmpty)
+          .toList(growable: false);
 
       /// Country options
       countryOptions = countries
@@ -248,9 +253,12 @@ class HomeController extends AppCubit<int> {
       return true;
     }
 
-    final selectedAcademic = _normalizeValue(_selectedAcademic);
+    final values = _academicValues(u);
 
-    return _academicValues(u).contains(selectedAcademic);
+    return _selectedAliases(
+      _selectedAcademic,
+      academicOptions,
+    ).any(values.contains);
   }
 
   Set<String> _academicValues(AdminUniversity u) {
@@ -294,9 +302,36 @@ class HomeController extends AppCubit<int> {
 
     final tracks = _trackTypes(u);
 
-    return tracks.contains(
-      _normalizeValue(_selectedTrack),
-    );
+    return _selectedAliases(
+      _selectedTrack,
+      trackOptions,
+    ).any(tracks.contains);
+  }
+
+  Set<String> _selectedAliases(
+    String? selected,
+    List<MasterOption> options,
+  ) {
+    final aliases = <String>{};
+    final normalizedSelected = _normalizeValue(selected);
+    if (normalizedSelected.isEmpty) {
+      return aliases;
+    }
+
+    aliases.add(normalizedSelected);
+    for (final option in options) {
+      final optionValues = <String>[
+        option.nameEn,
+        option.nameAr,
+        option.value,
+        option.key,
+      ].map(_normalizeValue).where((value) => value.isNotEmpty).toSet();
+      if (optionValues.contains(normalizedSelected)) {
+        aliases.addAll(optionValues);
+      }
+    }
+
+    return aliases;
   }
 
   Future<void> _loadSessionDefaults() async {

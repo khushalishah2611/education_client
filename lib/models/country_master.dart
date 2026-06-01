@@ -21,7 +21,7 @@ class CountryMaster {
     return CountryMaster(
       id: _readString(json, const ['id', '_id']),
       nameEn: _readString(json, const ['nameEn', 'name', 'label']),
-      nameAr: _readString(json, const ['nameAr']),
+      nameAr: _readString(json, const ['nameAr', 'nameAR', 'name_ar']),
       value: _readString(json, const ['value', 'code', 'iso2', 'isoCode']),
       dialCode: _readString(json, const ['dialCode', 'countryCode']),
       flagEmoji: _readString(json, const ['flagEmoji', 'emoji']).isNotEmpty

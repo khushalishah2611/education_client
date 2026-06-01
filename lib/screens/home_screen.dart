@@ -15,6 +15,7 @@ import '../core/image_url_helper.dart';
 import '../core/responsive_helper.dart';
 import '../controllers/home_controller.dart';
 import '../models/country_option.dart';
+import '../models/master_option.dart';
 import '../services/home_api_service.dart';
 import '../widgets/app_drawer.dart';
 import '../widgets/common_widgets.dart';
@@ -102,7 +103,7 @@ class _HomeScreenState extends State<HomeScreen> {
       ),
     );
     if (selected == null || !mounted) return;
-    _controller.updateCountry(selected.name);
+    _controller.updateCountry(selected.key);
 
     await _controller.loadUniversities();
   }
@@ -114,9 +115,7 @@ class _HomeScreenState extends State<HomeScreen> {
       useSafeArea: true,
       backgroundColor: Colors.white,
       builder: (_) => _AdvanceSearchDialog(
-        countryOptions: _controller.countryOptions
-            .map((item) => item.name)
-            .toList(growable: false),
+        countryOptions: _controller.countryOptions,
         academicOptions: _controller.academicOptions,
         trackOptions: _controller.trackOptions,
         currencyOptions: _controller.currencyOptions,
@@ -400,6 +399,11 @@ class _HomeScreenState extends State<HomeScreen> {
                                                   builder: (_) =>
                                                       UniversityDetailScreen(
                                                     data: item,
+                                                    selectedAcademic:
+                                                        _controller
+                                                            .selectedAcademic,
+                                                    selectedTrack: _controller
+                                                        .selectedTrack,
                                                   ),
                                                 ),
                                               ),
@@ -433,6 +437,11 @@ class _HomeScreenState extends State<HomeScreen> {
                                                   builder: (_) =>
                                                       UniversityDetailScreen(
                                                     data: item,
+                                                    selectedAcademic:
+                                                        _controller
+                                                            .selectedAcademic,
+                                                    selectedTrack: _controller
+                                                        .selectedTrack,
                                                   ),
                                                 ),
                                               ),
@@ -661,7 +670,7 @@ class _CountrySelectionDialogState extends State<_CountrySelectionDialog>
         return;
       }
       _filteredCountries = widget.countries
-          .where((country) => country.name.toLowerCase().contains(normalized))
+          .where((country) => country.matchesQuery(normalized))
           .toList(growable: false);
     });
   }
@@ -750,9 +759,11 @@ class _CountrySelectionDialogState extends State<_CountrySelectionDialog>
                               contentPadding: EdgeInsets.zero,
                               leading: _CountryFlag(country: country),
                               title: Text(
-                                country.name,
+                                country.displayName(
+                                  isArabic: context.l10n.isArabic,
+                                ),
                                 style: TextStyle(
-                                  fontWeight: widget.selected == country.name
+                                  fontWeight: widget.selected == country.key
                                       ? FontWeight.w700
                                       : FontWeight.w500,
                                 ),
@@ -791,9 +802,9 @@ class _AdvanceSearchDialog extends StatefulWidget {
     required this.onApplyFilters,
   });
 
-  final List<String> countryOptions;
-  final List<String> academicOptions;
-  final List<String> trackOptions;
+  final List<CountryOption> countryOptions;
+  final List<MasterOption> academicOptions;
+  final List<MasterOption> trackOptions;
   final List<String> currencyOptions;
   final String? selectedCountry;
   final String? selectedAcademic;
@@ -814,7 +825,7 @@ class _AdvanceSearchDialogState extends State<_AdvanceSearchDialog>
   String? _selectedCountry;
   String? _selectedAcademic;
   String? _selectedTrack;
-  late List<String> _filteredCountryOptions;
+  late List<CountryOption> _filteredCountryOptions;
 
   @override
   void initState() {
@@ -832,7 +843,7 @@ class _AdvanceSearchDialogState extends State<_AdvanceSearchDialog>
         _filteredCountryOptions = widget.countryOptions;
       } else {
         _filteredCountryOptions = widget.countryOptions
-            .where((country) => country.toLowerCase().contains(normalized))
+            .where((country) => country.matchesQuery(normalized))
             .toList(growable: false);
       }
     });
@@ -854,10 +865,12 @@ class _AdvanceSearchDialogState extends State<_AdvanceSearchDialog>
       required List<String> options,
       required String? value,
       required ValueChanged<String?> onChanged,
+      String Function(String value)? labelBuilder,
       IconData icon = Icons.apartment_outlined,
       bool enabled = true,
     }) {
       final hasValue = value != null && options.contains(value);
+      final effectiveLabelBuilder = labelBuilder ?? ((String value) => value);
       return Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
@@ -906,9 +919,9 @@ class _AdvanceSearchDialogState extends State<_AdvanceSearchDialog>
                         // 👇 FIX
                         Flexible(
                           child: Text(
-                            option,
+                            effectiveLabelBuilder(option),
                             overflow: TextOverflow.ellipsis,
-                            style: TextStyle(fontSize: 14),
+                            style: const TextStyle(fontSize: 14),
                           ),
                         ),
                       ],
@@ -927,6 +940,19 @@ class _AdvanceSearchDialogState extends State<_AdvanceSearchDialog>
     final shouldDisableDetails = _isOnlyCountryAndAcademicAllowed(
       _selectedAcademic,
     );
+    final countryByKey = <String, CountryOption>{
+      for (final option in _filteredCountryOptions)
+        if (option.key.isNotEmpty) option.key: option,
+    };
+    final academicByKey = <String, MasterOption>{
+      for (final option in widget.academicOptions)
+        if (option.key.isNotEmpty) option.key: option,
+    };
+    final trackByKey = <String, MasterOption>{
+      for (final option in widget.trackOptions)
+        if (option.key.isNotEmpty) option.key: option,
+    };
+
 
     return buildCubitView(
       (context) => SafeArea(
@@ -970,8 +996,11 @@ class _AdvanceSearchDialogState extends State<_AdvanceSearchDialog>
               const SizedBox(height: 8),
               dropdownTile(
                 title: context.l10n.text('country'),
-                options: _filteredCountryOptions,
+                options: countryByKey.keys.toList(growable: false),
                 value: _selectedCountry,
+                labelBuilder: (value) => countryByKey[value]?.displayName(
+                      isArabic: context.l10n.isArabic,
+                    ) ?? value,
                 onChanged: (value) async {
                   updateView(() => _selectedCountry = value);
                   widget.onCountryChanged(value);
@@ -981,8 +1010,11 @@ class _AdvanceSearchDialogState extends State<_AdvanceSearchDialog>
               ),
               dropdownTile(
                 title: context.l10n.text('academicQualification'),
-                options: widget.academicOptions,
+                options: academicByKey.keys.toList(growable: false),
                 value: _selectedAcademic,
+                labelBuilder: (value) => academicByKey[value]?.displayName(
+                      isArabic: context.l10n.isArabic,
+                    ) ?? value,
                 onChanged: (value) => updateView(() {
                   _selectedAcademic = value;
                   if (_isOnlyCountryAndAcademicAllowed(value)) {
@@ -996,8 +1028,11 @@ class _AdvanceSearchDialogState extends State<_AdvanceSearchDialog>
                 opacity: shouldDisableDetails ? 0.55 : 1,
                 child: dropdownTile(
                   title: context.l10n.text('secondarySchoolCertificateProgram'),
-                  options: widget.trackOptions,
+                  options: trackByKey.keys.toList(growable: false),
                   value: _selectedTrack,
+                  labelBuilder: (value) => trackByKey[value]?.displayName(
+                        isArabic: context.l10n.isArabic,
+                      ) ?? value,
                   onChanged: (value) => updateView(() => _selectedTrack = value),
                   icon: Icons.menu_book_outlined,
                   enabled: !shouldDisableDetails,

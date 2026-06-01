@@ -1,19 +1,15 @@
-class CountryOption {
-  const CountryOption({
+class MasterOption {
+  const MasterOption({
     required this.nameEn,
     required this.nameAr,
-    required this.flagEmoji,
-    required this.flagImageUrl,
-    required this.dialCode,
+    required this.value,
   });
 
   final String nameEn;
   final String nameAr;
-  final String flagEmoji;
-  final String flagImageUrl;
-  final String dialCode;
+  final String value;
 
-  String get key => nameEn.isNotEmpty ? nameEn : nameAr;
+  String get key => nameEn.isNotEmpty ? nameEn : value;
 
   String displayName({required bool isArabic}) {
     if (isArabic && nameAr.isNotEmpty) {
@@ -22,7 +18,10 @@ class CountryOption {
     if (nameEn.isNotEmpty) {
       return nameEn;
     }
-    return nameAr;
+    if (nameAr.isNotEmpty) {
+      return nameAr;
+    }
+    return value;
   }
 
   bool matchesQuery(String query) {
@@ -30,6 +29,6 @@ class CountryOption {
     if (normalized.isEmpty) return true;
     return nameEn.toLowerCase().contains(normalized) ||
         nameAr.toLowerCase().contains(normalized) ||
-        dialCode.toLowerCase().contains(normalized);
+        value.toLowerCase().contains(normalized);
   }
 }

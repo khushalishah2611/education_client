@@ -8,6 +8,7 @@ import '../core/api_status.dart';
 import '../models/admin_university.dart';
 import '../models/banner_item.dart';
 import '../models/country_master.dart';
+import '../models/master_option.dart';
 
 class HomeApiService {
   const HomeApiService();
@@ -152,11 +153,11 @@ class HomeApiService {
         .toList(growable: false);
   }
 
-  Future<List<String>> fetchAcademicMasters() async {
+  Future<List<MasterOption>> fetchAcademicMasters() async {
     return _fetchMasterValues('/api/admin/masters/academic');
   }
 
-  Future<List<String>> fetchTrackMasters() async {
+  Future<List<MasterOption>> fetchTrackMasters() async {
     return _fetchMasterValues('/api/admin/masters/track');
   }
 
@@ -185,7 +186,7 @@ class HomeApiService {
         .toList(growable: false);
   }
 
-  Future<List<String>> _fetchMasterValues(String path) async {
+  Future<List<MasterOption>> _fetchMasterValues(String path) async {
     final response = await http.get(ApiConfig.uri(path));
     final decoded = _decode(response.body);
     logApiCall(
@@ -200,15 +201,21 @@ class HomeApiService {
       throw Exception('Failed to load master data from $path.');
     }
 
-    final values = _asList(decoded['data'] ?? decoded)
-        .whereType<Map<String, dynamic>>()
-        .map(
-          (item) =>
-              _readString(item, const ['name', 'nameEn', 'value', 'code']),
-        )
-        .where((name) => name.isNotEmpty)
-        .toSet()
-        .toList(growable: false);
+    final seen = <String>{};
+    final values = <MasterOption>[];
+    for (final item in _asList(decoded['data'] ?? decoded)
+        .whereType<Map<String, dynamic>>()) {
+      final nameEn =
+          _readString(item, const ['nameEn', 'name', 'value', 'code']);
+      final nameAr = _readString(item, const ['nameAr', 'nameAR', 'name_ar']);
+      final value =
+          _readString(item, const ['value', 'code', 'nameEn', 'name']);
+      final key = nameEn.isNotEmpty ? nameEn : value;
+      if (key.isEmpty || !seen.add(key.toUpperCase())) {
+        continue;
+      }
+      values.add(MasterOption(nameEn: nameEn, nameAr: nameAr, value: value));
+    }
     return values;
   }
 }

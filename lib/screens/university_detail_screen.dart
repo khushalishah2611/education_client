@@ -16,10 +16,14 @@ class UniversityDetailScreen extends StatefulWidget {
     super.key,
     required this.data,
     this.initialSelectedCourseKeys = const <String>{},
+    this.selectedAcademic,
+    this.selectedTrack,
   });
 
   final AdminUniversity data;
   final Set<String> initialSelectedCourseKeys;
+  final String? selectedAcademic;
+  final String? selectedTrack;
 
   @override
   State<UniversityDetailScreen> createState() => _UniversityDetailScreenState();
@@ -38,10 +42,24 @@ class _UniversityDetailScreenState extends State<UniversityDetailScreen>
 
     for (final AcademicList entry in data.academicList ?? <AcademicList>[]) {
       final String academicName = entry.academicname?.trim() ?? '';
+      if (!_matchesSelectedAcademic(academicName) &&
+          !_matchesSelectedAcademic(entry.program?.academicProgram)) {
+        continue;
+      }
       grouped.putIfAbsent(academicName, () => <AcademicList>[]).add(entry);
     }
 
     return grouped;
+  }
+
+  bool _matchesSelectedAcademic(String? value) {
+    final selected = _normalizeFilterValue(widget.selectedAcademic);
+    if (selected.isEmpty) return true;
+    return _normalizeFilterValue(value) == selected;
+  }
+
+  static String _normalizeFilterValue(String? value) {
+    return (value ?? '').trim().toUpperCase();
   }
 
   String get _universityKey => data.id?.trim().isNotEmpty == true
@@ -341,6 +359,8 @@ class _UniversityDetailScreenState extends State<UniversityDetailScreen>
                                 },
                                 onToggleCourse: _toggleCourseSelection,
                                 adminUniversity: data,
+                                selectedAcademic: widget.selectedAcademic,
+                                selectedTrack: widget.selectedTrack,
                               );
                             }).toList(),
                           ),
@@ -428,6 +448,8 @@ class _CollegeAccordion extends StatefulWidget {
     required this.onToggleExpand,
     required this.onToggleCourse,
     required this.adminUniversity,
+    required this.selectedAcademic,
+    required this.selectedTrack,
   });
 
   final String academicName;
@@ -435,6 +457,8 @@ class _CollegeAccordion extends StatefulWidget {
   final bool isExpanded;
   final Set<String> selectedCourses;
   final AdminUniversity adminUniversity;
+  final String? selectedAcademic;
+  final String? selectedTrack;
   final VoidCallback onToggleExpand;
   final ValueChanged<String> onToggleCourse;
 
@@ -444,6 +468,23 @@ class _CollegeAccordion extends StatefulWidget {
 
 class _CollegeAccordionState extends State<_CollegeAccordion> {
   bool _isSmallMobile(double width) => width <= 360;
+
+  String _normalizeFilterValue(String? value) {
+    return (value ?? '').trim().toUpperCase();
+  }
+
+  bool _matchesSelectedTrack(Courses course) {
+    final selected = _normalizeFilterValue(widget.selectedTrack);
+    if (selected.isEmpty) return true;
+    return _normalizeFilterValue(course.track) == selected;
+  }
+
+  bool _matchesSelectedAcademic(Courses course) {
+    final selected = _normalizeFilterValue(widget.selectedAcademic);
+    if (selected.isEmpty) return true;
+    return _normalizeFilterValue(course.academicProgram) == selected ||
+        _normalizeFilterValue(widget.academicName) == selected;
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -507,7 +548,10 @@ class _CollegeAccordionState extends State<_CollegeAccordion> {
                     final String collegeName = collegeData.college ?? '';
 
                     final List<Courses> collegeCourses =
-                        collegeData.courses ?? [];
+                        (collegeData.courses ?? <Courses>[])
+                            .where(_matchesSelectedAcademic)
+                            .where(_matchesSelectedTrack)
+                            .toList(growable: false);
 
                     return Column(
                       children: [
