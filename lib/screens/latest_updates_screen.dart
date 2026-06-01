@@ -203,7 +203,7 @@ class _LatestUpdateCard extends StatelessWidget {
             children: [
               Expanded(
                 child: Text(
-                  item.title.isEmpty ? '-' : item.title,
+                  item.title.isEmpty ? '-' : item.data,
                   style: const TextStyle(
                     fontWeight: FontWeight.w700,
                     fontSize: 16,

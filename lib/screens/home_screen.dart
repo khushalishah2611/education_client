@@ -161,355 +161,374 @@ class _HomeScreenState extends State<HomeScreen> {
         return Directionality(
           textDirection: context.l10n.textDirection,
           child: Scaffold(
-        key: _scaffoldKey,
-        drawerScrimColor: Colors.black.withOpacity(0.16),
-        drawer: const CommonSideMenu(),
-        body: AppBackground(
-          child: AppPageEntrance(
-            child: SafeArea(
-              child: Column(
-                children: [
-                  if (_activeTab == 0) ...[
-                    SizedBox(
-                      height: MediaQuery.of(context).size.height * 0.50,
-                      child: Stack(
-                        children: [
-                          Image.asset(
-                            'assets/images/img.png',
-                            width: double.infinity,
-                            height: double.infinity,
-                            fit: BoxFit.cover,
-                          ),
-                          Positioned(
-                            top: MediaQuery.of(context).padding.top,
-                            left: horizontalPadding,
-                            right: horizontalPadding,
-                            child: Row(
-                              children: [
-                                _CircleIconButton(
-                                  icon: Icons.menu_rounded,
-                                  onTap: () =>
-                                      _scaffoldKey.currentState?.openDrawer(),
-                                ),
-                                const Spacer(),
-                                const AppLogo(compact: true, center: true),
-                                const Spacer(),
-                                InkWell(
-                                  borderRadius: BorderRadius.circular(20),
-                                  onTap: () {
-                                    Navigator.of(context).push(
-                                      MaterialPageRoute(
-                                        builder: (_) =>
-                                            const NotificationsScreen(),
-                                      ),
-                                    );
-                                  },
-                                  child: ValueListenableBuilder<int>(
-                                    valueListenable: NotificationSyncService
-                                        .instance.unreadCount,
-                                    builder: (_, unread, __) {
-                                      return Stack(
-                                        clipBehavior: Clip.none,
-                                        children: [
-                                          const Icon(
-                                            Icons.notifications_none_rounded,
-                                            size: 26,
+            key: _scaffoldKey,
+            drawerScrimColor: Colors.black.withOpacity(0.16),
+            drawer: const CommonSideMenu(),
+            body: AppBackground(
+              child: AppPageEntrance(
+                child: SafeArea(
+                  child: Column(
+                    children: [
+                      if (_activeTab == 0) ...[
+                        SizedBox(
+                          height: MediaQuery.of(context).size.height * 0.50,
+                          child: Stack(
+                            children: [
+                              Image.asset(
+                                'assets/images/img.png',
+                                width: double.infinity,
+                                height: double.infinity,
+                                fit: BoxFit.cover,
+                              ),
+                              Positioned(
+                                top: MediaQuery.of(context).padding.top,
+                                left: horizontalPadding,
+                                right: horizontalPadding,
+                                child: Row(
+                                  children: [
+                                    _CircleIconButton(
+                                      icon: Icons.menu_rounded,
+                                      onTap: () => _scaffoldKey.currentState
+                                          ?.openDrawer(),
+                                    ),
+                                    const Spacer(),
+                                    const AppLogo(compact: true, center: true),
+                                    const Spacer(),
+                                    InkWell(
+                                      borderRadius: BorderRadius.circular(20),
+                                      onTap: () {
+                                        Navigator.of(context).push(
+                                          MaterialPageRoute(
+                                            builder: (_) =>
+                                                const NotificationsScreen(),
                                           ),
-                                          if (unread > 0)
-                                            Positioned(
-                                              right: 2,
-                                              top: 2,
-                                              child: Container(
-                                                width: 8,
-                                                height: 8,
-                                                decoration: BoxDecoration(
-                                                  color: Colors.red,
-                                                  borderRadius:
-                                                      BorderRadius.circular(
-                                                    10,
+                                        );
+                                      },
+                                      child: ValueListenableBuilder<int>(
+                                        valueListenable: NotificationSyncService
+                                            .instance.unreadCount,
+                                        builder: (_, unread, __) {
+                                          return Stack(
+                                            clipBehavior: Clip.none,
+                                            children: [
+                                              const Icon(
+                                                Icons
+                                                    .notifications_none_rounded,
+                                                size: 26,
+                                              ),
+                                              if (unread > 0)
+                                                Positioned(
+                                                  right: 2,
+                                                  top: 2,
+                                                  child: Container(
+                                                    width: 8,
+                                                    height: 8,
+                                                    decoration: BoxDecoration(
+                                                      color: Colors.red,
+                                                      borderRadius:
+                                                          BorderRadius.circular(
+                                                        10,
+                                                      ),
+                                                    ),
                                                   ),
                                                 ),
+                                            ],
+                                          );
+                                        },
+                                      ),
+                                    ),
+                                  ],
+                                ),
+                              ),
+                              SizedBox(
+                                height: 10,
+                              ),
+                              Positioned(
+                                top: MediaQuery.of(context).size.height * 0.12,
+                                left: horizontalPadding,
+                                right: horizontalPadding,
+                                child: Column(
+                                  mainAxisSize: MainAxisSize.min,
+                                  children: [
+                                    /// Country
+                                    InkWell(
+                                      onTap: _openCountryDialog,
+                                      child: Container(
+                                        height: 44,
+                                        padding: const EdgeInsets.symmetric(
+                                          horizontal: 14,
+                                        ),
+                                        decoration: BoxDecoration(
+                                          color: Colors.white,
+                                          borderRadius:
+                                              BorderRadius.circular(6),
+                                          border: Border.all(
+                                            color: Color(0xFFE4B88B),
+                                          ),
+                                        ),
+                                        child: Row(
+                                          children: [
+                                            Expanded(
+                                              child: Text(
+                                                _localizedSelectedCountryLabel(
+                                                      context,
+                                                    ) ??
+                                                    context.l10n
+                                                        .text('selectCountry'),
+                                                overflow: TextOverflow.ellipsis,
                                               ),
                                             ),
-                                        ],
-                                      );
-                                    },
-                                  ),
-                                ),
-                              ],
-                            ),
-                          ),
-                          SizedBox(
-                            height: 10,
-                          ),
-                          Positioned(
-                            top: MediaQuery.of(context).size.height * 0.12,
-                            left: horizontalPadding,
-                            right: horizontalPadding,
-                            child: Column(
-                              mainAxisSize: MainAxisSize.min,
-                              children: [
-                                /// Country
-                                InkWell(
-                                  onTap: _openCountryDialog,
-                                  child: Container(
-                                    height: 44,
-                                    padding: const EdgeInsets.symmetric(
-                                      horizontal: 14,
-                                    ),
-                                    decoration: BoxDecoration(
-                                      color: Colors.white,
-                                      borderRadius: BorderRadius.circular(6),
-                                      border: Border.all(
-                                        color: Color(0xFFE4B88B),
+                                            const Icon(
+                                              Icons.keyboard_arrow_down_rounded,
+                                            ),
+                                          ],
+                                        ),
                                       ),
                                     ),
-                                    child: Row(
-                                      children: [
-                                        Expanded(
-                                          child: Text(
-                                            _localizedSelectedCountryLabel(
-                                                  context,
-                                                ) ??
-                                                context.l10n
-                                                    .text('selectCountry'),
-                                            overflow: TextOverflow.ellipsis,
+
+                                    const SizedBox(height: 12),
+
+                                    /// Advance Search
+                                    InkWell(
+                                      onTap: _openAdvanceSearchDialog,
+                                      child: Container(
+                                        height: 44,
+                                        alignment: Alignment.center,
+                                        decoration: BoxDecoration(
+                                          borderRadius:
+                                              BorderRadius.circular(6),
+                                          border: Border.all(
+                                            color: Color(0xFFE4B88B),
                                           ),
+                                          color: Colors.white,
                                         ),
-                                        const Icon(
-                                          Icons.keyboard_arrow_down_rounded,
+                                        child: Row(
+                                          mainAxisAlignment:
+                                              MainAxisAlignment.center,
+                                          children: [
+                                            const Icon(
+                                              Icons.tune_rounded,
+                                              color: AppColors.accent,
+                                            ),
+                                            const SizedBox(width: 8),
+                                            Text(
+                                              context.l10n
+                                                  .text('advanceSearch'),
+                                              style: TextStyle(
+                                                color: AppColors.accent,
+                                              ),
+                                            ),
+                                          ],
                                         ),
-                                      ],
-                                    ),
-                                  ),
-                                ),
-
-                                const SizedBox(height: 12),
-
-                                /// Advance Search
-                                InkWell(
-                                  onTap: _openAdvanceSearchDialog,
-                                  child: Container(
-                                    height: 44,
-                                    alignment: Alignment.center,
-                                    decoration: BoxDecoration(
-                                      borderRadius: BorderRadius.circular(6),
-                                      border: Border.all(
-                                        color: Color(0xFFE4B88B),
                                       ),
-                                      color: Colors.white,
                                     ),
-                                    child: Row(
-                                      mainAxisAlignment:
-                                          MainAxisAlignment.center,
-                                      children: [
-                                        const Icon(
-                                          Icons.tune_rounded,
-                                          color: AppColors.accent,
-                                        ),
-                                        const SizedBox(width: 8),
-                                        Text(
-                                          context.l10n.text('advanceSearch'),
-                                          style: TextStyle(
-                                            color: AppColors.accent,
-                                          ),
-                                        ),
-                                      ],
+
+                                    const SizedBox(height: 16),
+
+                                    _DiscoverBanner(
+                                      banners: _controller.banners,
+                                      isLoading: _controller.isLoadingBanners,
+                                      pageController: _bannerPageController,
+                                      onPageChanged: (index) {
+                                        if (!mounted) return;
+                                        _activeBannerIndex = index;
+                                        _controller.refreshView();
+                                      },
                                     ),
-                                  ),
+
+                                    const SizedBox(height: 8),
+
+                                    _BannerIndicator(
+                                      count: _controller.banners.isEmpty
+                                          ? 1
+                                          : _controller.banners.length,
+                                      activeIndex: _activeBannerIndex,
+                                    ),
+                                  ],
                                 ),
-
-                                const SizedBox(height: 16),
-
-                                _DiscoverBanner(
-                                  banners: _controller.banners,
-                                  isLoading: _controller.isLoadingBanners,
-                                  pageController: _bannerPageController,
-                                  onPageChanged: (index) {
-                                    if (!mounted) return;
-                                    _activeBannerIndex = index;
-                                    _controller.refreshView();
-                                  },
-                                ),
-
-                                const SizedBox(height: 8),
-
-                                _BannerIndicator(
-                                  count: _controller.banners.isEmpty
-                                      ? 1
-                                      : _controller.banners.length,
-                                  activeIndex: _activeBannerIndex,
-                                ),
-                              ],
-                            ),
-                          ),
-                        ],
-                      ),
-                    ),
-                    SizedBox(height: 10),
-                    Expanded(
-                      child: RefreshIndicator(
-                        onRefresh: _refreshHomeData,
-                        child: Padding(
-                          padding: const EdgeInsets.only(
-                            left: 16.0,
-                            right: 16.0,
-                            bottom: 16.0,
-                          ),
-                          child: Column(
-                            crossAxisAlignment: CrossAxisAlignment.start,
-                            children: [
-                              SectionTitle(
-                                context.l10n.text('popularUniversities'),
                               ),
-                              const SizedBox(height: 12),
-                              if (!_controller.isLoadingUniversities &&
-                                  _controller.universities.isEmpty)
-                                Container(
-                                  width: double.infinity,
-                                  padding: const EdgeInsets.symmetric(
-                                    vertical: 20,
-                                    horizontal: 12,
-                                  ),
-                                  decoration: BoxDecoration(
-                                    borderRadius: BorderRadius.circular(10),
-                                    border: Border.all(
-                                      color: const Color(0xFFE6E6E6),
-                                    ),
-                                    color: Colors.white,
-                                  ),
-                                  child: Text(
-                                    context.l10n.text(
-                                      'No education institute data available',
-                                    ),
-                                    textAlign: TextAlign.center,
-                                    style: TextStyle(
-                                      color: Color(0xFF616161),
-                                      fontWeight: FontWeight.w500,
-                                    ),
-                                  ),
-                                )
-                              else
-                                Expanded(
-                                  child: context.isSmallMobile
-                                      ? ListView.separated(
-                                          itemCount: _controller
-                                                  .isLoadingUniversities
-                                              ? 4
-                                              : _controller.universities.length,
-                                          separatorBuilder: (_, __) =>
-                                              const SizedBox(height: 8),
-                                          itemBuilder: (context, index) {
-                                            if (_controller
-                                                .isLoadingUniversities) {
-                                              return const _UniversityCardShimmer();
-                                            }
-                                            final item =
-                                                _controller.universities[index];
-                                            return _UniversityCard(
-                                              data: item,
-                                              onTap: () =>
-                                                  Navigator.of(context).push(
-                                                MaterialPageRoute(
-                                                  builder: (_) =>
-                                                      UniversityDetailScreen(
-                                                    data: item,
-                                                    selectedAcademic:
-                                                        _controller
-                                                            .selectedAcademic,
-                                                    selectedTrack: _controller
-                                                        .selectedTrack,
-                                                    selectedResult: _controller
-                                                        .resultController.text,
-                                                    academicOptions: _controller
-                                                        .academicOptions,
-                                                    trackOptions:
-                                                        _controller.trackOptions,
-                                                  ),
-                                                ),
-                                              ),
-                                            );
-                                          },
-                                        )
-                                      : GridView.builder(
-                                          itemCount: _controller
-                                                  .isLoadingUniversities
-                                              ? 4
-                                              : _controller.universities.length,
-                                          gridDelegate:
-                                              SliverGridDelegateWithFixedCrossAxisCount(
-                                            crossAxisCount: gridColumns,
-                                            mainAxisSpacing: 8,
-                                            crossAxisSpacing: 8,
-                                            childAspectRatio: gridAspectRatio,
-                                          ),
-                                          itemBuilder: (context, index) {
-                                            if (_controller
-                                                .isLoadingUniversities) {
-                                              return const _UniversityCardShimmer();
-                                            }
-                                            final item =
-                                                _controller.universities[index];
-                                            return _UniversityCard(
-                                              data: item,
-                                              onTap: () =>
-                                                  Navigator.of(context).push(
-                                                MaterialPageRoute(
-                                                  builder: (_) =>
-                                                      UniversityDetailScreen(
-                                                    data: item,
-                                                    selectedAcademic:
-                                                        _controller
-                                                            .selectedAcademic,
-                                                    selectedTrack: _controller
-                                                        .selectedTrack,
-                                                    selectedResult: _controller
-                                                        .resultController.text,
-                                                    academicOptions: _controller
-                                                        .academicOptions,
-                                                    trackOptions:
-                                                        _controller.trackOptions,
-                                                  ),
-                                                ),
-                                              ),
-                                            );
-                                          },
-                                        ),
-                                ),
                             ],
                           ),
                         ),
+                        SizedBox(height: 10),
+                        Expanded(
+                          child: RefreshIndicator(
+                            onRefresh: _refreshHomeData,
+                            child: Padding(
+                              padding: const EdgeInsets.only(
+                                left: 16.0,
+                                right: 16.0,
+                                bottom: 16.0,
+                              ),
+                              child: Column(
+                                crossAxisAlignment: CrossAxisAlignment.start,
+                                children: [
+                                  SectionTitle(
+                                    context.l10n.text('popularUniversities'),
+                                  ),
+                                  const SizedBox(height: 12),
+                                  if (!_controller.isLoadingUniversities &&
+                                      _controller.universities.isEmpty)
+                                    Container(
+                                      width: double.infinity,
+                                      padding: const EdgeInsets.symmetric(
+                                        vertical: 20,
+                                        horizontal: 12,
+                                      ),
+                                      decoration: BoxDecoration(
+                                        borderRadius: BorderRadius.circular(10),
+                                        border: Border.all(
+                                          color: const Color(0xFFE6E6E6),
+                                        ),
+                                        color: Colors.white,
+                                      ),
+                                      child: Text(
+                                        context.l10n.text(
+                                          'No education institute data available',
+                                        ),
+                                        textAlign: TextAlign.center,
+                                        style: TextStyle(
+                                          color: Color(0xFF616161),
+                                          fontWeight: FontWeight.w500,
+                                        ),
+                                      ),
+                                    )
+                                  else
+                                    Expanded(
+                                      child: context.isSmallMobile
+                                          ? ListView.separated(
+                                              itemCount: _controller
+                                                      .isLoadingUniversities
+                                                  ? 4
+                                                  : _controller
+                                                      .universities.length,
+                                              separatorBuilder: (_, __) =>
+                                                  const SizedBox(height: 8),
+                                              itemBuilder: (context, index) {
+                                                if (_controller
+                                                    .isLoadingUniversities) {
+                                                  return const _UniversityCardShimmer();
+                                                }
+                                                final item = _controller
+                                                    .universities[index];
+                                                return _UniversityCard(
+                                                  data: item,
+                                                  onTap: () =>
+                                                      Navigator.of(context)
+                                                          .push(
+                                                    MaterialPageRoute(
+                                                      builder: (_) =>
+                                                          UniversityDetailScreen(
+                                                        data: item,
+                                                        selectedAcademic:
+                                                            _controller
+                                                                .selectedAcademic,
+                                                        selectedTrack:
+                                                            _controller
+                                                                .selectedTrack,
+                                                        selectedResult:
+                                                            _controller
+                                                                .resultController
+                                                                .text,
+                                                        academicOptions:
+                                                            _controller
+                                                                .academicOptions,
+                                                        trackOptions:
+                                                            _controller
+                                                                .trackOptions,
+                                                      ),
+                                                    ),
+                                                  ),
+                                                );
+                                              },
+                                            )
+                                          : GridView.builder(
+                                              itemCount: _controller
+                                                      .isLoadingUniversities
+                                                  ? 4
+                                                  : _controller
+                                                      .universities.length,
+                                              gridDelegate:
+                                                  SliverGridDelegateWithFixedCrossAxisCount(
+                                                crossAxisCount: gridColumns,
+                                                mainAxisSpacing: 8,
+                                                crossAxisSpacing: 8,
+                                                childAspectRatio:
+                                                    gridAspectRatio,
+                                              ),
+                                              itemBuilder: (context, index) {
+                                                if (_controller
+                                                    .isLoadingUniversities) {
+                                                  return const _UniversityCardShimmer();
+                                                }
+                                                final item = _controller
+                                                    .universities[index];
+                                                return _UniversityCard(
+                                                  data: item,
+                                                  onTap: () =>
+                                                      Navigator.of(context)
+                                                          .push(
+                                                    MaterialPageRoute(
+                                                      builder: (_) =>
+                                                          UniversityDetailScreen(
+                                                        data: item,
+                                                        selectedAcademic:
+                                                            _controller
+                                                                .selectedAcademic,
+                                                        selectedTrack:
+                                                            _controller
+                                                                .selectedTrack,
+                                                        selectedResult:
+                                                            _controller
+                                                                .resultController
+                                                                .text,
+                                                        academicOptions:
+                                                            _controller
+                                                                .academicOptions,
+                                                        trackOptions:
+                                                            _controller
+                                                                .trackOptions,
+                                                      ),
+                                                    ),
+                                                  ),
+                                                );
+                                              },
+                                            ),
+                                    ),
+                                ],
+                              ),
+                            ),
+                          ),
+                        ),
+                      ] else if (_activeTab == 1) ...[
+                        // Expanded(
+                        //   child: TrackMyApplicationsScreen(activeTab: false),
+                        // ),
+                        Expanded(
+                            child: Center(
+                          child: Text(context.l10n.text('ComingSoon')),
+                        ))
+                      ] else if (_activeTab == 2) ...[
+                        // Expanded(child: UploadedDocumentsScreen(activeTab: false)),
+                        Expanded(
+                            child: Center(
+                          child: Text(context.l10n.text('ComingSoon')),
+                        ))
+                      ] else ...[
+                        Expanded(child: LatestUpdatesScreen(activeTab: false)),
+                      ],
+                      BottomTabBarCard(
+                        activeIndex: _activeTab,
+                        onTap: (index) {
+                          _activeTab = index;
+                          _controller.refreshView();
+                        },
                       ),
-                    ),
-                  ] else if (_activeTab == 1) ...[
-                    // Expanded(
-                    //   child: TrackMyApplicationsScreen(activeTab: false),
-                    // ),
-                    Expanded(
-                        child: Center(
-                      child: Text("Coming Soon"),
-                    ))
-                  ] else if (_activeTab == 2) ...[
-                    // Expanded(child: UploadedDocumentsScreen(activeTab: false)),
-                    Expanded(
-                        child: Center(
-                      child: Text("Coming Soon"),
-                    ))
-                  ] else ...[
-                    Expanded(child: LatestUpdatesScreen(activeTab: false)),
-                  ],
-                  BottomTabBarCard(
-                    activeIndex: _activeTab,
-                    onTap: (index) {
-                      _activeTab = index;
-                      _controller.refreshView();
-                    },
+                    ],
                   ),
-                ],
+                ),
               ),
             ),
-          ),
-        ),
           ),
         );
       },
@@ -724,99 +743,99 @@ class _CountrySelectionDialogState extends State<_CountrySelectionDialog>
             color: Colors.white,
             borderRadius: BorderRadius.vertical(top: Radius.circular(20)),
           ),
-        child: Padding(
-          padding: const EdgeInsets.fromLTRB(12, 10, 12, 8),
-          child: Column(
-            mainAxisSize: MainAxisSize.min,
-            children: [
-              Container(
-                width: 44,
-                height: 4,
-                margin: const EdgeInsets.only(bottom: 10),
-                decoration: BoxDecoration(
-                  color: const Color(0xFFD1D1D1),
-                  borderRadius: BorderRadius.circular(99),
-                ),
-              ),
-              Row(
-                children: [
-                  Expanded(
-                    child: Text(
-                      context.l10n.text('selectCountry'),
-                      style: TextStyle(
-                        fontSize: isSmall ? 16 : 18,
-                        fontWeight: FontWeight.w700,
-                        color: AppColors.text,
-                      ),
-                    ),
-                  ),
-                  IconButton(
-                    onPressed: () => Navigator.of(context).pop(),
-                    icon: const Icon(Icons.close),
-                  ),
-                ],
-              ),
-              const SizedBox(height: 8),
-              SizedBox(
-                height: 45,
-                child: TextField(
-                  controller: _searchController,
-                  onChanged: _onSearchChanged,
-                  decoration: InputDecoration(
-                    hintText: context.l10n.text('searchCountry'),
-                    isDense: true,
-                    contentPadding: const EdgeInsets.symmetric(
-                      vertical: 8,
-                      horizontal: 8,
-                    ),
-                    suffixIcon: Icon(Icons.keyboard_arrow_down_rounded),
-                    border: OutlineInputBorder(),
+          child: Padding(
+            padding: const EdgeInsets.fromLTRB(12, 10, 12, 8),
+            child: Column(
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                Container(
+                  width: 44,
+                  height: 4,
+                  margin: const EdgeInsets.only(bottom: 10),
+                  decoration: BoxDecoration(
+                    color: const Color(0xFFD1D1D1),
+                    borderRadius: BorderRadius.circular(99),
                   ),
                 ),
-              ),
-              const SizedBox(height: 8),
-              ConstrainedBox(
-                constraints: const BoxConstraints(maxHeight: 320),
-                child: _filteredCountries.isEmpty
-                    ? Center(
-                        child: Padding(
-                          padding: const EdgeInsets.all(16),
-                          child: Text(context.l10n.text('noCountriesFound')),
+                Row(
+                  children: [
+                    Expanded(
+                      child: Text(
+                        context.l10n.text('selectCountry'),
+                        style: TextStyle(
+                          fontSize: isSmall ? 16 : 18,
+                          fontWeight: FontWeight.w700,
+                          color: AppColors.text,
                         ),
-                      )
-                    : ListView.separated(
-                        shrinkWrap: true,
-                        itemCount: _filteredCountries.length,
-                        separatorBuilder: (_, __) => const Divider(height: 1),
-                        itemBuilder: (_, index) {
-                          final country = _filteredCountries[index];
-
-                          return Material(
-                            color: Colors.transparent,
-                            child: ListTile(
-                              dense: true,
-                              contentPadding: EdgeInsets.zero,
-                              leading: _CountryFlag(country: country),
-                              title: Text(
-                                country.displayName(
-                                  isArabic: context.l10n.isArabic,
-                                ),
-                                style: TextStyle(
-                                  fontWeight: widget.selected == country.key
-                                      ? FontWeight.w700
-                                      : FontWeight.w500,
-                                ),
-                              ),
-                              onTap: () {
-                                Navigator.of(context).pop(country);
-                              },
-                            ),
-                          );
-                        },
                       ),
-              ),
-            ],
-          ),
+                    ),
+                    IconButton(
+                      onPressed: () => Navigator.of(context).pop(),
+                      icon: const Icon(Icons.close),
+                    ),
+                  ],
+                ),
+                const SizedBox(height: 8),
+                SizedBox(
+                  height: 45,
+                  child: TextField(
+                    controller: _searchController,
+                    onChanged: _onSearchChanged,
+                    decoration: InputDecoration(
+                      hintText: context.l10n.text('searchCountry'),
+                      isDense: true,
+                      contentPadding: const EdgeInsets.symmetric(
+                        vertical: 8,
+                        horizontal: 8,
+                      ),
+                      suffixIcon: Icon(Icons.keyboard_arrow_down_rounded),
+                      border: OutlineInputBorder(),
+                    ),
+                  ),
+                ),
+                const SizedBox(height: 8),
+                ConstrainedBox(
+                  constraints: const BoxConstraints(maxHeight: 320),
+                  child: _filteredCountries.isEmpty
+                      ? Center(
+                          child: Padding(
+                            padding: const EdgeInsets.all(16),
+                            child: Text(context.l10n.text('noCountriesFound')),
+                          ),
+                        )
+                      : ListView.separated(
+                          shrinkWrap: true,
+                          itemCount: _filteredCountries.length,
+                          separatorBuilder: (_, __) => const Divider(height: 1),
+                          itemBuilder: (_, index) {
+                            final country = _filteredCountries[index];
+
+                            return Material(
+                              color: Colors.transparent,
+                              child: ListTile(
+                                dense: true,
+                                contentPadding: EdgeInsets.zero,
+                                leading: _CountryFlag(country: country),
+                                title: Text(
+                                  country.displayName(
+                                    isArabic: context.l10n.isArabic,
+                                  ),
+                                  style: TextStyle(
+                                    fontWeight: widget.selected == country.key
+                                        ? FontWeight.w700
+                                        : FontWeight.w500,
+                                  ),
+                                ),
+                                onTap: () {
+                                  Navigator.of(context).pop(country);
+                                },
+                              ),
+                            );
+                          },
+                        ),
+                ),
+              ],
+            ),
           ),
         ),
       ),
@@ -1061,136 +1080,141 @@ class _AdvanceSearchDialogState extends State<_AdvanceSearchDialog>
         if (option.key.isNotEmpty) option.key: option,
     };
 
-
     return buildCubitView(
       (context) => SafeArea(
-      child: Container(
-        decoration: const BoxDecoration(
-          color: Colors.white,
-          borderRadius: BorderRadius.vertical(top: Radius.circular(18)),
-        ),
-        child: Padding(
-          padding: const EdgeInsets.fromLTRB(12, 14, 12, 12),
-          child: Column(
-            mainAxisSize: MainAxisSize.min,
-            children: [
-              Container(
-                width: 44,
-                height: 4,
-                margin: const EdgeInsets.only(bottom: 10),
-                decoration: BoxDecoration(
-                  color: const Color(0xFFD1D1D1),
-                  borderRadius: BorderRadius.circular(99),
+        child: Container(
+          decoration: const BoxDecoration(
+            color: Colors.white,
+            borderRadius: BorderRadius.vertical(top: Radius.circular(18)),
+          ),
+          child: Padding(
+            padding: const EdgeInsets.fromLTRB(12, 14, 12, 12),
+            child: Column(
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                Container(
+                  width: 44,
+                  height: 4,
+                  margin: const EdgeInsets.only(bottom: 10),
+                  decoration: BoxDecoration(
+                    color: const Color(0xFFD1D1D1),
+                    borderRadius: BorderRadius.circular(99),
+                  ),
                 ),
-              ),
-              Row(
-                children: [
-                  Expanded(
-                    child: Text(
-                      context.l10n.text('advanceSearch'),
-                      style: TextStyle(
-                        fontSize: context.isSmallMobile ? 16 : 18,
-                        fontWeight: FontWeight.w700,
-                        color: AppColors.text,
+                Row(
+                  children: [
+                    Expanded(
+                      child: Text(
+                        context.l10n.text('advanceSearch'),
+                        style: TextStyle(
+                          fontSize: context.isSmallMobile ? 16 : 18,
+                          fontWeight: FontWeight.w700,
+                          color: AppColors.text,
+                        ),
                       ),
                     ),
-                  ),
-                  IconButton(
-                    onPressed: () => Navigator.of(context).pop(),
-                    icon: const Icon(Icons.close),
-                  ),
-                ],
-              ),
-              const SizedBox(height: 8),
-              countryDropdownTile(
-                title: context.l10n.text('country'),
-                options: _filteredCountryOptions,
-                value: _selectedCountry,
-                onChanged: (value) async {
-                  updateView(() => _selectedCountry = value);
-                  widget.onCountryChanged(value);
-                  await widget.onApplyFilters();
-                },
-              ),
-              dropdownTile(
-                title: context.l10n.text('academicQualification'),
-                options: academicByKey.keys.toList(growable: false),
-                value: _selectedAcademic,
-                labelBuilder: (value) => academicByKey[value]?.displayName(
-                      isArabic: context.l10n.isArabic,
-                    ) ?? value,
-                onChanged: (value) => updateView(() {
-                  _selectedAcademic = value;
-                  if (_isOnlyCountryAndAcademicAllowed(value)) {
-                    _selectedTrack = null;
-                    widget.resultController.clear();
-                  }
-                }),
-                icon: Icons.school_outlined,
-              ),
-              Opacity(
-                opacity: shouldDisableDetails ? 0.55 : 1,
-                child: dropdownTile(
-                  title: context.l10n.text('secondarySchoolCertificateProgram'),
-                  options: trackByKey.keys.toList(growable: false),
-                  value: _selectedTrack,
-                  labelBuilder: (value) => trackByKey[value]?.displayName(
+                    IconButton(
+                      onPressed: () => Navigator.of(context).pop(),
+                      icon: const Icon(Icons.close),
+                    ),
+                  ],
+                ),
+                const SizedBox(height: 8),
+                countryDropdownTile(
+                  title: context.l10n.text('country'),
+                  options: _filteredCountryOptions,
+                  value: _selectedCountry,
+                  onChanged: (value) async {
+                    updateView(() => _selectedCountry = value);
+                    widget.onCountryChanged(value);
+                    await widget.onApplyFilters();
+                  },
+                ),
+                dropdownTile(
+                  title: context.l10n.text('academicQualification'),
+                  options: academicByKey.keys.toList(growable: false),
+                  value: _selectedAcademic,
+                  labelBuilder: (value) =>
+                      academicByKey[value]?.displayName(
                         isArabic: context.l10n.isArabic,
-                      ) ?? value,
-                  onChanged: (value) => updateView(() => _selectedTrack = value),
-                  icon: Icons.menu_book_outlined,
-                  enabled: !shouldDisableDetails,
+                      ) ??
+                      value,
+                  onChanged: (value) => updateView(() {
+                    _selectedAcademic = value;
+                    if (_isOnlyCountryAndAcademicAllowed(value)) {
+                      _selectedTrack = null;
+                      widget.resultController.clear();
+                    }
+                  }),
+                  icon: Icons.school_outlined,
                 ),
-              ),
-              Opacity(
-                opacity: shouldDisableDetails ? 0.55 : 1,
-                child: IgnorePointer(
-                  ignoring: shouldDisableDetails,
-                  child: AppTextField(
-                    label: widget.currencyOptions.isNotEmpty
-                        ? '${context.l10n.text('highSchoolGraduationRate')} (${widget.currencyOptions.first})'
-                        : context.l10n.text('highSchoolGraduationRate'),
-                    hint: context.l10n.text('enterHighSchoolGraduationRate'),
-                    controller: widget.resultController,
-                    keyboardType: TextInputType.number,
-                    height: 48,
+                Opacity(
+                  opacity: shouldDisableDetails ? 0.55 : 1,
+                  child: dropdownTile(
+                    title:
+                        context.l10n.text('secondarySchoolCertificateProgram'),
+                    options: trackByKey.keys.toList(growable: false),
+                    value: _selectedTrack,
+                    labelBuilder: (value) =>
+                        trackByKey[value]?.displayName(
+                          isArabic: context.l10n.isArabic,
+                        ) ??
+                        value,
+                    onChanged: (value) =>
+                        updateView(() => _selectedTrack = value),
+                    icon: Icons.menu_book_outlined,
+                    enabled: !shouldDisableDetails,
                   ),
                 ),
-              ),
-              const SizedBox(height: 10),
-              Row(
-                children: [
-                  Expanded(
-                    child: AppOutlinedButton(
-                      label: context.l10n.text('reset'),
-                      onPressed: () async {
-                        updateView(() {
-                          _selectedCountry = null;
-                          _selectedAcademic = null;
-                          _selectedTrack = null;
-                          widget.resultController.clear();
-                        });
-                        widget.onResetFilters();
-                      },
+                Opacity(
+                  opacity: shouldDisableDetails ? 0.55 : 1,
+                  child: IgnorePointer(
+                    ignoring: shouldDisableDetails,
+                    child: AppTextField(
+                      label: widget.currencyOptions.isNotEmpty
+                          ? '${context.l10n.text('highSchoolGraduationRate')} (${widget.currencyOptions.first})'
+                          : context.l10n.text('highSchoolGraduationRate'),
+                      hint: context.l10n.text('enterHighSchoolGraduationRate'),
+                      controller: widget.resultController,
+                      keyboardType: TextInputType.number,
+                      height: 48,
                     ),
                   ),
-                  const SizedBox(width: 8),
-                  Expanded(
-                    child: AppPrimaryButton(
-                      label: context.l10n.text('continue'),
-                      onPressed: () async {
-                        widget.onCountryChanged(_selectedCountry);
-                        widget.onAcademicChanged(_selectedAcademic);
-                        widget.onTrackChanged(_selectedTrack);
-                        Navigator.of(context).pop();
-                        await widget.onApplyFilters();
-                      },
+                ),
+                const SizedBox(height: 10),
+                Row(
+                  children: [
+                    Expanded(
+                      child: AppOutlinedButton(
+                        label: context.l10n.text('reset'),
+                        onPressed: () async {
+                          updateView(() {
+                            _selectedCountry = null;
+                            _selectedAcademic = null;
+                            _selectedTrack = null;
+                            widget.resultController.clear();
+                          });
+                          widget.onResetFilters();
+                        },
+                      ),
                     ),
-                  ),
-                ],
-              ),
-            ],
-          ),
+                    const SizedBox(width: 8),
+                    Expanded(
+                      child: AppPrimaryButton(
+                        label: context.l10n.text('continue'),
+                        onPressed: () async {
+                          widget.onCountryChanged(_selectedCountry);
+                          widget.onAcademicChanged(_selectedAcademic);
+                          widget.onTrackChanged(_selectedTrack);
+                          Navigator.of(context).pop();
+                          await widget.onApplyFilters();
+                        },
+                      ),
+                    ),
+                  ],
+                ),
+              ],
+            ),
           ),
         ),
       ),
