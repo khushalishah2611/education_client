@@ -1044,10 +1044,6 @@ class _AdvanceSearchDialogState extends State<_AdvanceSearchDialog>
     final shouldDisableDetails = _isOnlyCountryAndAcademicAllowed(
       _selectedAcademic,
     );
-    final countryByKey = <String, CountryOption>{
-      for (final option in _filteredCountryOptions)
-        if (option.key.isNotEmpty) option.key: option,
-    };
     final academicByKey = <String, MasterOption>{
       for (final option in widget.academicOptions)
         if (option.key.isNotEmpty) option.key: option,
@@ -1100,11 +1096,8 @@ class _AdvanceSearchDialogState extends State<_AdvanceSearchDialog>
               const SizedBox(height: 8),
               countryDropdownTile(
                 title: context.l10n.text('country'),
-                options: countryByKey.keys.toList(growable: false),
+                options: _filteredCountryOptions,
                 value: _selectedCountry,
-                labelBuilder: (value) => countryByKey[value]?.displayName(
-                      isArabic: context.l10n.isArabic,
-                    ) ?? value,
                 onChanged: (value) async {
                   updateView(() => _selectedCountry = value);
                   widget.onCountryChanged(value);

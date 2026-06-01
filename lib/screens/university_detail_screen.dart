@@ -4,6 +4,7 @@ import 'package:education/core/image_url_helper.dart';
 import 'package:education/core/selected_course_storage.dart';
 import 'package:education/models/admin_university.dart';
 import 'package:education/models/selected_course_data.dart';
+import 'package:education/models/master_option.dart';
 import 'package:flutter/material.dart';
 import '../core/app_theme.dart';
 import '../widgets/common_widgets.dart';
@@ -478,6 +479,61 @@ class _CollegeAccordionState extends State<_CollegeAccordion> {
     return (value ?? '').trim().toUpperCase();
   }
 
+  String _localizedMasterLabel(
+    BuildContext context,
+    String? value,
+    List<MasterOption> options, {
+    bool uppercaseEnglish = false,
+  }) {
+    final String normalizedValue = _normalizeFilterValue(value);
+    if (normalizedValue.isEmpty) return '';
+
+    for (final option in options) {
+      final matches = <String>[
+        option.nameEn,
+        option.nameAr,
+        option.value,
+        option.key,
+      ].any((candidate) => _normalizeFilterValue(candidate) == normalizedValue);
+
+      if (matches) {
+        final label = option.displayName(isArabic: context.l10n.isArabic).trim();
+        if (label.isNotEmpty) {
+          return !context.l10n.isArabic && uppercaseEnglish
+              ? label.toUpperCase()
+              : label;
+        }
+      }
+    }
+
+    final fallback = value?.trim() ?? '';
+    return !context.l10n.isArabic && uppercaseEnglish
+        ? fallback.toUpperCase()
+        : fallback;
+  }
+
+  Set<String> _selectedAliases(String? selected, List<MasterOption> options) {
+    final aliases = <String>{};
+    final normalizedSelected = _normalizeFilterValue(selected);
+    if (normalizedSelected.isEmpty) return aliases;
+
+    aliases.add(normalizedSelected);
+    for (final option in options) {
+      final optionValues = <String>[
+        option.nameEn,
+        option.nameAr,
+        option.value,
+        option.key,
+      ].map(_normalizeFilterValue).where((value) => value.isNotEmpty).toSet();
+
+      if (optionValues.contains(normalizedSelected)) {
+        aliases.addAll(optionValues);
+      }
+    }
+
+    return aliases;
+  }
+
   bool _matchesSelectedTrack(Courses course) {
     final selected = _normalizeFilterValue(widget.selectedTrack);
     if (selected.isEmpty) return true;
@@ -535,7 +591,12 @@ class _CollegeAccordionState extends State<_CollegeAccordion> {
                 children: [
                   Expanded(
                     child: Text(
-                      widget.academicName.toUpperCase(),
+                      _localizedMasterLabel(
+                        context,
+                        widget.academicName,
+                        widget.academicOptions,
+                        uppercaseEnglish: true,
+                      ),
                       style: TextStyle(
                         fontSize: isSmallMobile ? 12.5 : 14,
                         fontWeight: FontWeight.bold,
@@ -844,7 +905,11 @@ class _CollegeAccordionState extends State<_CollegeAccordion> {
                 child: Text(
                   details.track == null || details.track!.isEmpty
                       ? details.minBaGpa ?? "-"
-                      : details.track ?? "-",
+                      : _localizedMasterLabel(
+                          context,
+                          details.track,
+                          widget.trackOptions,
+                        ),
                   textAlign: TextAlign.center,
                   style: TextStyle(
                     fontWeight: FontWeight.w400,

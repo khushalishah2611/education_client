@@ -220,11 +220,68 @@ class HomeApiService {
     final values = <MasterOption>[];
     for (final item in _asList(decoded['data'] ?? decoded)
         .whereType<Map<String, dynamic>>()) {
-      final nameEn =
-          _readString(item, const ['nameEn', 'name', 'value', 'code']);
-      final nameAr = _readString(item, const ['nameAr', 'nameAR', 'name_ar']);
-      final value =
-          _readString(item, const ['value', 'code', 'nameEn', 'name']);
+      final rawName = _readString(item, const ['name', 'title', 'label']);
+      final value = _readString(item, const [
+        'value',
+        'code',
+        'key',
+        'slug',
+        'nameEn',
+        'nameEN',
+        'name_en',
+        'englishName',
+        'nameEnglish',
+        'name',
+      ]);
+      final nestedNameEn = _readNestedMasterString(
+        item,
+        const ['name', 'title', 'label'],
+        const ['en', 'en_US', 'english', 'nameEn', 'labelEn', 'titleEn'],
+      );
+      final explicitNameEn = _readMasterString(item, const [
+        'nameEn',
+        'nameEN',
+        'name_en',
+        'englishName',
+        'nameEnglish',
+        'titleEn',
+        'titleEN',
+        'title_en',
+        'labelEn',
+        'label_en',
+        'enName',
+        'en',
+      ]);
+      final nameEn = explicitNameEn.isNotEmpty
+          ? explicitNameEn
+          : (nestedNameEn.isNotEmpty
+              ? nestedNameEn
+              : (!_containsArabic(rawName) ? rawName : value));
+      final nestedNameAr = _readNestedMasterString(
+        item,
+        const ['name', 'title', 'label'],
+        const ['ar', 'ar_SA', 'arabic', 'nameAr', 'labelAr', 'titleAr'],
+      );
+      final explicitNameAr = _readMasterString(item, const [
+        'nameAr',
+        'nameAR',
+        'name_ar',
+        'arabicName',
+        'nameArabic',
+        'titleAr',
+        'titleAR',
+        'title_ar',
+        'labelAr',
+        'label_ar',
+        'arName',
+        'ar',
+        'arabic',
+      ]);
+      final nameAr = explicitNameAr.isNotEmpty
+          ? explicitNameAr
+          : (nestedNameAr.isNotEmpty
+              ? nestedNameAr
+              : (_containsArabic(rawName) ? rawName : ''));
       final key = nameEn.isNotEmpty ? nameEn : value;
       if (key.isEmpty || !seen.add(key.toUpperCase())) {
         continue;
@@ -267,8 +324,45 @@ String _readString(Map<String, dynamic> json, List<String> keys) {
     if (value is String && value.trim().isNotEmpty) {
       return value.trim();
     }
+    if (value is num) {
+      return value.toString();
+    }
   }
   return '';
+}
+
+String _readMasterString(Map<String, dynamic> json, List<String> keys) {
+  for (final key in keys) {
+    final dynamic value = json[key];
+    if (value is String && value.trim().isNotEmpty) {
+      return value.trim();
+    }
+    if (value is num) {
+      return value.toString();
+    }
+  }
+  return '';
+}
+
+String _readNestedMasterString(
+  Map<String, dynamic> json,
+  List<String> keys,
+  List<String> nestedKeys,
+) {
+  for (final key in keys) {
+    final dynamic value = json[key];
+    if (value is Map) {
+      final nested = _readString(Map<String, dynamic>.from(value), nestedKeys);
+      if (nested.isNotEmpty) {
+        return nested;
+      }
+    }
+  }
+  return '';
+}
+
+bool _containsArabic(String value) {
+  return RegExp(r'[\u0600-\u06FF]').hasMatch(value);
 }
 
 String _toAbsoluteUrl(String pathOrUrl) {
