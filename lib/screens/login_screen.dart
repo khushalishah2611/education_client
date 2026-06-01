@@ -154,10 +154,11 @@ class _LoginScreenState extends State<LoginScreen>
 
   AgreementTemplate? _agreementForLanguage(String languageCode) {
     for (final AgreementTemplate agreement in _agreementTemplates) {
-      if (agreement.language.toLowerCase() == languageCode.toLowerCase()) {
+      if (agreement.language?.toLowerCase() == languageCode.toLowerCase()) {
         return agreement;
       }
     }
+    print("agreement-->" + languageCode.toString());
     return _agreementTemplates.isEmpty ? null : _agreementTemplates.first;
   }
 
@@ -166,6 +167,8 @@ class _LoginScreenState extends State<LoginScreen>
       context.l10n.locale.languageCode,
     );
 
+    print("agreement-->" + agreement!.titleAr.toString());
+    print("agreement-->" + agreement!.titleEn.toString());
     if (agreement == null) {
       return;
     }
@@ -199,7 +202,9 @@ class _LoginScreenState extends State<LoginScreen>
                     children: [
                       Expanded(
                         child: Text(
-                          agreement.title,
+                          context.l10n.locale.languageCode == 'ar'
+                              ? agreement.contentAr ?? ''
+                              : agreement.contentEn ?? '',
                           style: const TextStyle(
                             fontSize: 18,
                             fontWeight: FontWeight.w700,
@@ -220,7 +225,9 @@ class _LoginScreenState extends State<LoginScreen>
                   Expanded(
                     child: SingleChildScrollView(
                       child: Text(
-                        agreement.content,
+                        context.l10n.locale.languageCode == 'ar'
+                            ? agreement.contentAr ?? ''
+                            : agreement.contentEn ?? '',
                         style: const TextStyle(
                           height: 1.4,
                           fontSize: 14,
@@ -248,100 +255,103 @@ class _LoginScreenState extends State<LoginScreen>
       (context) => AuthScaffold(
         isLoading: _isLoadingMeta || _isSubmitting,
         child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        mainAxisSize: MainAxisSize.min,
-        children: [
-          Text(
-            context.l10n.text('loginWithOtp'),
-            style: Theme.of(context).textTheme.headlineMedium,
-          ),
-          const SizedBox(height: 20),
-          Text(
-            context.l10n.text('mobileNumber'),
-            style: Theme.of(context).textTheme.titleMedium,
-          ),
-          const SizedBox(height: 10),
-          Container(
-            height: 50,
-            decoration: BoxDecoration(
-              color: Colors.white,
-              borderRadius: BorderRadius.circular(12),
-              border: Border.all(color: AppColors.border),
+          crossAxisAlignment: CrossAxisAlignment.start,
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            Text(
+              context.l10n.text('loginWithOtp'),
+              style: Theme.of(context).textTheme.headlineMedium,
             ),
-            child: Row(
-              children: [
-                const SizedBox(width: 12),
-                DropdownButtonHideUnderline(
-                  child: DropdownButton<CountryMaster>(
-                    value: _selectedCountry,
-                    borderRadius: BorderRadius.circular(12),
-                    icon: const Icon(
-                      Icons.keyboard_arrow_down_rounded,
-                      size: 18,
-                    ),
-                    style: const TextStyle(fontSize: 16, color: AppColors.text),
-                    items: _countries
-                        .map(
-                          (country) => DropdownMenuItem<CountryMaster>(
-                            value: country,
-                            child: Text(
-                              '${country.flagEmoji} ${country.dialCode}',
-                            ),
-                          ),
-                        )
-                        .toList(growable: false),
-                    onChanged: _isLoadingMeta
-                        ? null
-                        : (value) {
-                            if (value == null) return;
-                            updateView(() => _selectedCountry = value);
-                          },
-                  ),
-                ),
-                const SizedBox(width: 10),
-                Container(width: 1, height: 30, color: AppColors.border),
-                Expanded(
-                  child: TextField(
-                    controller: _mobileController,
-                    keyboardType: TextInputType.phone,
-                    decoration:  InputDecoration(
-                      contentPadding: EdgeInsets.all(5),
-                      hintText: context.l10n.text('enterMobileNumber'),
-                      border: InputBorder.none,
-                      focusedBorder: InputBorder.none,
-                      enabledBorder: InputBorder.none,
-                    ),
-                  ),
-                ),
-                const SizedBox(width: 12),
-              ],
+            const SizedBox(height: 20),
+            Text(
+              context.l10n.text('mobileNumber'),
+              style: Theme.of(context).textTheme.titleMedium,
             ),
-          ),
-          const SizedBox(height: 26),
-          AppPrimaryButton(
-            label: context.l10n.text('sendOtp'),
-            onPressed: _isLoadingMeta || _isSubmitting ? null : _onSendOtpTap,
-          ),
-          const SizedBox(height: 14),
-          Material(
-            type: MaterialType.transparency,
-            child: CheckboxListTile(
-              value: _isChecked,
-              onChanged: agreement == null
-                  ? null
-                  : (value) => updateView(() => _isChecked = value ?? false),
-              title: GestureDetector(
-                onTap: agreement == null ? null : _openTermsBottomSheet,
-                child: Text(
-                  agreement?.title ?? context.l10n.text('termsPrivacy'),
-                  style: const TextStyle(color: Colors.blue, fontSize: 14),
-                ),
+            const SizedBox(height: 10),
+            Container(
+              height: 50,
+              decoration: BoxDecoration(
+                color: Colors.white,
+                borderRadius: BorderRadius.circular(12),
+                border: Border.all(color: AppColors.border),
               ),
-              controlAffinity: ListTileControlAffinity.leading,
-              contentPadding: EdgeInsets.zero,
-              activeColor: AppColors.primary,
+              child: Row(
+                children: [
+                  const SizedBox(width: 12),
+                  DropdownButtonHideUnderline(
+                    child: DropdownButton<CountryMaster>(
+                      value: _selectedCountry,
+                      borderRadius: BorderRadius.circular(12),
+                      icon: const Icon(
+                        Icons.keyboard_arrow_down_rounded,
+                        size: 18,
+                      ),
+                      style:
+                          const TextStyle(fontSize: 16, color: AppColors.text),
+                      items: _countries
+                          .map(
+                            (country) => DropdownMenuItem<CountryMaster>(
+                              value: country,
+                              child: Text(
+                                '${country.flagEmoji} ${country.dialCode}',
+                              ),
+                            ),
+                          )
+                          .toList(growable: false),
+                      onChanged: _isLoadingMeta
+                          ? null
+                          : (value) {
+                              if (value == null) return;
+                              updateView(() => _selectedCountry = value);
+                            },
+                    ),
+                  ),
+                  const SizedBox(width: 10),
+                  Container(width: 1, height: 30, color: AppColors.border),
+                  Expanded(
+                    child: TextField(
+                      controller: _mobileController,
+                      keyboardType: TextInputType.phone,
+                      decoration: InputDecoration(
+                        contentPadding: EdgeInsets.all(5),
+                        hintText: context.l10n.text('enterMobileNumber'),
+                        border: InputBorder.none,
+                        focusedBorder: InputBorder.none,
+                        enabledBorder: InputBorder.none,
+                      ),
+                    ),
+                  ),
+                  const SizedBox(width: 12),
+                ],
+              ),
             ),
-          ),
+            const SizedBox(height: 26),
+            AppPrimaryButton(
+              label: context.l10n.text('sendOtp'),
+              onPressed: _isLoadingMeta || _isSubmitting ? null : _onSendOtpTap,
+            ),
+            const SizedBox(height: 14),
+            Material(
+              type: MaterialType.transparency,
+              child: CheckboxListTile(
+                value: _isChecked,
+                onChanged: agreement == null
+                    ? null
+                    : (value) => updateView(() => _isChecked = value ?? false),
+                title: GestureDetector(
+                  onTap: agreement == null ? null : _openTermsBottomSheet,
+                  child: Text(
+                    context.l10n.locale.languageCode == 'ar'
+                        ? agreement?.titleAr ?? ''
+                        : agreement?.titleEn ?? '',
+                    style: const TextStyle(color: Colors.blue, fontSize: 14),
+                  ),
+                ),
+                controlAffinity: ListTileControlAffinity.leading,
+                contentPadding: EdgeInsets.zero,
+                activeColor: AppColors.primary,
+              ),
+            ),
           ],
         ),
       ),

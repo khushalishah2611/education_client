@@ -62,7 +62,7 @@ class AuthApiService {
 
     return items
         .map((item) => AgreementTemplate.fromJson(item as Map<String, dynamic>))
-        .where((item) => item.isActive)
+        .where((item) => item.isAccepted)
         .toList(growable: false);
   }
 
