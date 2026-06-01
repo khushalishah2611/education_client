@@ -401,6 +401,9 @@ class HomeController extends AppCubit<int> {
 
       if (value.isNotEmpty) {
         tracks.add(value);
+        if (_isScientificAndLiterary(value)) {
+          tracks.addAll(const ['SCIENTIFIC', 'LITERARY']);
+        }
       }
     }
 
@@ -411,6 +414,9 @@ class HomeController extends AppCubit<int> {
 
       if (value.isNotEmpty) {
         tracks.add(value);
+        if (_isScientificAndLiterary(value)) {
+          tracks.addAll(const ['SCIENTIFIC', 'LITERARY']);
+        }
       }
     }
 
@@ -421,6 +427,9 @@ class HomeController extends AppCubit<int> {
 
           if (value.isNotEmpty) {
             tracks.add(value);
+            if (_isScientificAndLiterary(value)) {
+              tracks.addAll(const ['SCIENTIFIC', 'LITERARY']);
+            }
           }
         }
       }
@@ -474,7 +483,8 @@ class HomeController extends AppCubit<int> {
   bool _isScientificAndLiterary(
     String value,
   ) {
-    return value.replaceAll(' ', '').toUpperCase() == 'SCIENTIFICANDLITERARY';
+    return value.replaceAll(' ', '').replaceAll('&', 'AND').toUpperCase() ==
+        'SCIENTIFICANDLITERARY';
   }
 
   List<String> _splitCsvValues(
