@@ -5,6 +5,7 @@ import 'package:shared_preferences/shared_preferences.dart';
 import '../../core/app_localizations.dart';
 import '../../core/app_theme.dart';
 import '../../core/bloc/app_cubit.dart';
+import '../../models/student_notification.dart';
 import '../../services/application_api_service.dart';
 import '../../services/notification_sync_service.dart';
 import 'side_menu_common.dart';
@@ -22,7 +23,7 @@ class _NotificationsScreenState extends State<NotificationsScreen>
 
   bool _loading = true;
 
-  List<Map<String, dynamic>> _items = [];
+  List<StudentNotification> _items = [];
 
   late AnimationController _shimmerController;
 
@@ -81,23 +82,23 @@ class _NotificationsScreenState extends State<NotificationsScreen>
       );
 
       if (itemDate == today) {
-        return 'Today';
+        return context.l10n.text('today');
       } else if (itemDate == yesterday) {
-        return 'Yesterday';
+        return context.l10n.text('yesterday');
       } else {
         return DateFormat('dd MMM yyyy').format(date);
       }
     } catch (e) {
-      return 'Others';
+      return context.l10n.text('others');
     }
   }
 
-  Map<String, List<Map<String, dynamic>>> _groupNotifications() {
-    final Map<String, List<Map<String, dynamic>>> grouped = {};
+  Map<String, List<StudentNotification>> _groupNotifications() {
+    final Map<String, List<StudentNotification>> grouped = {};
 
     for (final item in _items) {
       final group = _getGroupTitle(
-        item['createdAt'] ?? '',
+        item.createdAt,
       );
 
       if (!grouped.containsKey(group)) {
@@ -125,26 +126,27 @@ class _NotificationsScreenState extends State<NotificationsScreen>
 
     updateView(() {
       _items = (notifications is List)
-          ? notifications.map<Map<String, dynamic>>((item) {
-              return {
-                'id': item['id'] ?? '',
-                'title': item['title'] ?? '-',
-                'message': item['message'] ?? '',
-                'createdAt': item['createdAt'] ?? '',
-                'isRead': item['isRead'] == true,
-              };
-            }).toList()
+          ? notifications
+              .whereType<Map>()
+              .map(
+                (item) => StudentNotification.fromJson(
+                  item.map(
+                    (key, value) => MapEntry(key.toString(), value),
+                  ),
+                ),
+              )
+              .toList()
           : [];
 
       _items.sort((a, b) {
-        final aDate = DateTime.tryParse(a['createdAt'] ?? '') ?? DateTime.now();
+        final aDate = DateTime.tryParse(a.createdAt) ?? DateTime.now();
 
-        final bDate = DateTime.tryParse(b['createdAt'] ?? '') ?? DateTime.now();
+        final bDate = DateTime.tryParse(b.createdAt) ?? DateTime.now();
 
         return bDate.compareTo(aDate);
       });
 
-      final unread = _items.where((item) => item['isRead'] != true).length;
+      final unread = _items.where((item) => !item.isRead).length;
 
       NotificationSyncService.instance.updateUnreadCount(unread);
 
@@ -155,13 +157,13 @@ class _NotificationsScreenState extends State<NotificationsScreen>
   Future<void> _markAsRead(int index) async {
     final item = _items[index];
 
-    if (item['isRead'] == true) return;
+    if (item.isRead) return;
 
     final prefs = await SharedPreferences.getInstance();
 
     final studentUserId = prefs.getString('studentUserId')?.trim() ?? '';
 
-    final id = (item['id'] ?? '').toString();
+    final id = item.id;
 
     if (id.isEmpty || studentUserId.isEmpty) return;
 
@@ -173,10 +175,10 @@ class _NotificationsScreenState extends State<NotificationsScreen>
     if (!mounted) return;
 
     updateView(() {
-      _items[index]['isRead'] = true;
+      _items[index] = _items[index].copyWith(isRead: true);
     });
 
-    final unread = _items.where((entry) => entry['isRead'] != true).length;
+    final unread = _items.where((entry) => !entry.isRead).length;
 
     NotificationSyncService.instance.updateUnreadCount(unread);
   }
@@ -194,54 +196,54 @@ class _NotificationsScreenState extends State<NotificationsScreen>
     return buildCubitView(
       (context) => SideMenuScaffold(
         title: context.l10n.text('notifications'),
-      child: _loading
-          ? _buildShimmerList()
-          : RefreshIndicator(
-              onRefresh: _refresh,
-              child: _items.isEmpty
-                  ? ListView(
-                      children: [
-                        Container(
-                          margin: const EdgeInsets.all(12),
-                          padding: const EdgeInsets.all(20),
-                          decoration: BoxDecoration(
-                            color: Colors.white,
-                            borderRadius: BorderRadius.circular(10),
-                            border: Border.all(
-                              color: const Color(0xFFE6E6E6),
+        child: _loading
+            ? _buildShimmerList()
+            : RefreshIndicator(
+                onRefresh: _refresh,
+                child: _items.isEmpty
+                    ? ListView(
+                        children: [
+                          Container(
+                            margin: const EdgeInsets.all(12),
+                            padding: const EdgeInsets.all(20),
+                            decoration: BoxDecoration(
+                              color: Colors.white,
+                              borderRadius: BorderRadius.circular(10),
+                              border: Border.all(
+                                color: const Color(0xFFE6E6E6),
+                              ),
                             ),
-                          ),
-                          child: const Text(
-                            'No Notifications Found',
-                            textAlign: TextAlign.center,
-                            style: TextStyle(
-                              color: Color(0xFF616161),
-                              fontWeight: FontWeight.w500,
+                            child: Text(
+                              context.l10n.text('noNotificationsFound'),
+                              textAlign: TextAlign.center,
+                              style: const TextStyle(
+                                color: Color(0xFF616161),
+                                fontWeight: FontWeight.w500,
+                              ),
                             ),
-                          ),
-                        )
-                      ],
-                    )
-                  : ListView(
-                      children: groupedItems.entries.map((entry) {
-                        final groupTitle = entry.key;
-                        final groupItems = entry.value;
+                          )
+                        ],
+                      )
+                    : ListView(
+                        children: groupedItems.entries.map((entry) {
+                          final groupTitle = entry.key;
+                          final groupItems = entry.value;
 
-                        return NotificationSection(
-                          title: groupTitle,
-                          items: groupItems,
-                          formatDate: _formatDate,
-                          formatTime: _formatTime,
-                          onTap: (item) {
-                            final index = _items.indexOf(item);
+                          return NotificationSection(
+                            title: groupTitle,
+                            items: groupItems,
+                            formatDate: _formatDate,
+                            formatTime: _formatTime,
+                            onTap: (item) {
+                              final index = _items.indexOf(item);
 
-                            if (index != -1) {
-                              _markAsRead(index);
-                            }
-                          },
-                        );
-                      }).toList(),
-                    ),
+                              if (index != -1) {
+                                _markAsRead(index);
+                              }
+                            },
+                          );
+                        }).toList(),
+                      ),
               ),
       ),
     );
@@ -382,13 +384,13 @@ class NotificationSection extends StatelessWidget {
 
   final String title;
 
-  final List<Map<String, dynamic>> items;
+  final List<StudentNotification> items;
 
   final String Function(String) formatDate;
 
   final String Function(String) formatTime;
 
-  final Function(Map<String, dynamic>) onTap;
+  final ValueChanged<StudentNotification> onTap;
 
   @override
   Widget build(BuildContext context) {
@@ -434,7 +436,7 @@ class NotificationSection extends StatelessWidget {
                                 width: 12,
                                 height: 12,
                                 decoration: BoxDecoration(
-                                  color: item['isRead'] == true
+                                  color: item.isRead
                                       ? Colors.grey
                                       : AppColors.accent,
                                   shape: BoxShape.circle,
@@ -459,15 +461,15 @@ class NotificationSection extends StatelessWidget {
                           child: GestureDetector(
                             onTap: () => onTap(item),
                             child: NotificationCard(
-                              title: item['title'] ?? '',
-                              description: item['message'] ?? '',
+                              title: item.localizedTitle(context.l10n),
+                              description: item.localizedMessage(context.l10n),
                               time: formatTime(
-                                item['createdAt'] ?? '',
+                                item.createdAt,
                               ),
                               date: formatDate(
-                                item['createdAt'] ?? '',
+                                item.createdAt,
                               ),
-                              isRead: item['isRead'] == true,
+                              isRead: item.isRead,
                             ),
                           ),
                         ),

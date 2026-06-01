@@ -213,11 +213,15 @@
   "Go Back": "Go Back",
   "Credit Fee\\n(Hourly)": "Credit Fee\\n(Hourly)",
   "Min\\nAdmis%": "Min\\nAdmis%",
-  "WhatsApp" : "Whatsapp",
-  "Instagram" : "Instagram",
-  "Snapchat" : "Snapchat",
-  "Twitter" : "Twitter",
-  "TikTok" : "tiktok",
-  "ComingSoon" : "Coming Soon",
-  "TrainingCourse" : "Training Course"
+  "WhatsApp": "Whatsapp",
+  "Instagram": "Instagram",
+  "Snapchat": "Snapchat",
+  "Twitter": "Twitter",
+  "TikTok": "tiktok",
+  "ComingSoon": "Coming Soon",
+  "TrainingCourse": "Training Course",
+  "others": "Others",
+  "noNotificationsFound": "No Notifications Found",
+  "pdfViewer": "PDF Viewer",
+  "imageViewer": "Image Viewer"
 }
