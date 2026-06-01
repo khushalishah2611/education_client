@@ -8,6 +8,7 @@ import 'package:printing/printing.dart';
 
 import '../core/app_localizations.dart';
 import '../core/app_theme.dart';
+import '../core/responsive_helper.dart';
 import '../core/bloc/app_cubit.dart';
 import '../core/api_config.dart';
 import '../models/latest_update.dart';
@@ -406,16 +407,89 @@ class _LatestUpdateAttachmentViewer extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final title = context.l10n.text(isPdf ? 'pdfViewer' : 'imageViewer');
+
     return Scaffold(
-      appBar: AppBar(
-        title: Text(isPdf ? 'PDF Viewer' : 'Image Viewer'),
-        backgroundColor: Colors.white,
-        foregroundColor: AppColors.text,
-        elevation: 0.5,
+      backgroundColor: AppColors.background,
+      body: SafeArea(
+        child: Column(
+          children: [
+            _AttachmentViewerHeader(title: title),
+            Expanded(
+              child: isPdf
+                  ? _PdfAttachmentView(url: url)
+                  : _ImageAttachmentView(url: url),
+            ),
+          ],
+        ),
       ),
-      body: isPdf
-          ? _PdfAttachmentView(url: url)
-          : _ImageAttachmentView(url: url),
+    );
+  }
+}
+
+class _AttachmentViewerHeader extends StatelessWidget {
+  const _AttachmentViewerHeader({required this.title});
+
+  final String title;
+
+  @override
+  Widget build(BuildContext context) {
+    final bool isSmallMobile = context.isSmallMobile;
+    final double titleFontSize = isSmallMobile ? 16 : 18;
+
+    return Container(
+      width: MediaQuery.sizeOf(context).width,
+      height: 50,
+      decoration: const BoxDecoration(
+        color: Colors.white,
+        borderRadius: BorderRadius.vertical(
+          bottom: Radius.circular(22),
+        ),
+      ),
+      child: Stack(
+        alignment: Alignment.center,
+        children: [
+          Align(
+            alignment: Alignment.centerLeft,
+            child: Padding(
+              padding: EdgeInsets.only(
+                left: isSmallMobile ? 12 : 16,
+              ),
+              child: InkWell(
+                onTap: () => Navigator.of(context).pop(),
+                borderRadius: BorderRadius.circular(20),
+                child: Container(
+                  width: 34,
+                  height: 34,
+                  decoration: const BoxDecoration(
+                    color: Color(0xFFF6F6F6),
+                    shape: BoxShape.circle,
+                  ),
+                  child: const Icon(
+                    Icons.arrow_back_ios_new_rounded,
+                    size: 18,
+                  ),
+                ),
+              ),
+            ),
+          ),
+          Padding(
+            padding: EdgeInsets.symmetric(
+              horizontal: isSmallMobile ? 42 : 50,
+            ),
+            child: Text(
+              title,
+              textAlign: TextAlign.center,
+              maxLines: 1,
+              overflow: TextOverflow.ellipsis,
+              style: const TextStyle(
+                fontSize: 18,
+                fontWeight: FontWeight.w700,
+              ).copyWith(fontSize: titleFontSize),
+            ),
+          ),
+        ],
+      ),
     );
   }
 }

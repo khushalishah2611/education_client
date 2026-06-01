@@ -213,11 +213,15 @@
   "Go Back": "رجوع",
   "Credit Fee\\n(Hourly)": "رسوم الساعة\nالمعتمدة",
   "Min\\nAdmis%": "الحد الأدنى\nللقبول %",
-  "WhatsApp" : "واتس اب",
-  "Instagram" : "انستغرام",
-  "Snapchat" : "سناب شات",
-  "Twitter" : "تغريد",
-  "TikTok" : "تيك توك",
-  "ComingSoon" : "قريباً",
-  "TrainingCourse" : "دورة تدريبية"
+  "WhatsApp": "واتس اب",
+  "Instagram": "انستغرام",
+  "Snapchat": "سناب شات",
+  "Twitter": "تغريد",
+  "TikTok": "تيك توك",
+  "ComingSoon": "قريباً",
+  "TrainingCourse": "دورة تدريبية",
+  "others": "أخرى",
+  "noNotificationsFound": "لا توجد إشعارات",
+  "pdfViewer": "عارض PDF",
+  "imageViewer": "عارض الصور"
 }

@@ -271,11 +271,15 @@ class AdminUniversity {
         }
       }
     }
-    if (json['academicListAr'] != null) {
+    final academicListArJson = _toDynamicList(json['academicListAr']);
+    if (academicListArJson != null) {
       academicListAr = <AcademicList>[];
-      json['academicListAr'].forEach((v) {
-        academicListAr!.add(new AcademicList.fromJson(v));
-      });
+      for (final item in academicListArJson) {
+        final itemJson = _toStringDynamicMap(item);
+        if (itemJson != null) {
+          academicListAr!.add(AcademicList.fromJson(itemJson));
+        }
+      }
     }
     logoPath = json['logoPath'];
     coverImagePath = json['coverImagePath'];
@@ -338,6 +342,10 @@ class AdminUniversity {
     data['rating'] = this.rating;
     if (this.academicList != null) {
       data['academicList'] = this.academicList!.map((v) => v.toJson()).toList();
+    }
+    if (this.academicListAr != null) {
+      data['academicListAr'] =
+          this.academicListAr!.map((v) => v.toJson()).toList();
     }
     data['logoPath'] = this.logoPath;
     data['coverImagePath'] = this.coverImagePath;
