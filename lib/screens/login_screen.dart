@@ -49,9 +49,14 @@ class _LoginScreenState extends State<LoginScreen>
       final agreements = await _authApiService.fetchAgreementTemplates();
 
       if (!mounted) return;
-      updateView(() {
+      setState(() {
         _countries = countries;
         _agreementTemplates = agreements;
+        // debug info to confirm agreements loaded
+        debugPrint('_loadMetaData: agreements count=${_agreementTemplates.length}');
+        if (_agreementTemplates.isNotEmpty) {
+          debugPrint('_loadMetaData: first agreement=${_agreementTemplates.first.toJson()}');
+        }
         _selectedCountry = countries.isEmpty ? null : countries.first;
       });
     } catch (_) {
@@ -156,17 +161,49 @@ class _LoginScreenState extends State<LoginScreen>
     return _agreementTemplates.isNotEmpty ? _agreementTemplates.first : null;
   }
 
+  String _localizedAgreementTitle(BuildContext context, AgreementTemplate? agreement) {
+    if (agreement == null) return '';
+
+    String lang;
+    try {
+      lang = Localizations.localeOf(context).languageCode;
+    } catch (_) {
+      // Fallback: try app localizations or default to English
+      try {
+        lang = (context.l10n.locale?.languageCode) ?? 'en';
+      } catch (_) {
+        lang = 'en';
+      }
+    }
+    lang = lang.toLowerCase();
+
+    final String ar = agreement.titleAr.trim();
+    final String en = agreement.titleEn.trim();
+
+    debugPrint('localizedAgreementTitle: locale=$lang, titleAr="$ar", titleEn="$en"');
+
+    if (lang == 'ar') return ar.isNotEmpty ? ar : (en.isNotEmpty ? en : '');
+    return en.isNotEmpty ? en : (ar.isNotEmpty ? ar : '');
+  }
+
+  String _localizedAgreementContent(BuildContext context, AgreementTemplate? agreement) {
+    final lang = Localizations.localeOf(context).languageCode.toLowerCase();
+    final ar = agreement?.contentAr?.trim();
+    final en = agreement?.contentEn?.trim();
+    if (lang == 'ar') {
+      return (ar != null && ar.isNotEmpty) ? ar : (en ?? '');
+    }
+    return (en != null && en.isNotEmpty) ? en : (ar ?? '');
+  }
+
   void _openTermsBottomSheet() {
     final AgreementTemplate? item = agreement;
 
     if (item == null) return;
 
-    final bool isArabic =
-        context.l10n.locale.languageCode.toLowerCase() == 'ar';
+    final String title = _localizedAgreementTitle(context, item);
 
-    final String title = isArabic ? item.titleAr : item.titleEn;
-
-    final String content = isArabic ? item.contentAr : item.contentEn;
+    final String content = _localizedAgreementContent(context, item);
 
     showModalBottomSheet<void>(
       context: context,
@@ -243,6 +280,7 @@ class _LoginScreenState extends State<LoginScreen>
   Widget build(BuildContext context) {
     final AgreementTemplate? agreement =
         _agreementTemplates.isNotEmpty ? _agreementTemplates.first : null;
+    debugPrint('LoginScreen build: agreements=${_agreementTemplates.length}, loading=$_isLoadingMeta');
     return buildCubitView(
       (context) => AuthScaffold(
         isLoading: _isLoadingMeta || _isSubmitting,
@@ -333,9 +371,7 @@ class _LoginScreenState extends State<LoginScreen>
                 title: GestureDetector(
                   onTap: agreement == null ? null : _openTermsBottomSheet,
                   child: Text(
-                    context.l10n.locale.languageCode == 'ar'
-                        ? agreement?.titleAr ?? ''
-                        : agreement?.titleEn ?? '',
+                    _localizedAgreementTitle(context, agreement),
                     style: const TextStyle(color: Colors.blue, fontSize: 14),
                   ),
                 ),

@@ -55,15 +55,50 @@ class AuthApiService {
     }
 
     final dynamic decoded = jsonDecode(response.body);
-    final List<dynamic> items = decoded is List<dynamic>
-        ? decoded
-        : (decoded as Map<String, dynamic>)['data'] as List<dynamic>? ??
-            const <dynamic>[];
 
-    return items
+    // Flexible parsing: handle various API shapes and log for debugging
+    List<dynamic> items = <dynamic>[];
+    try {
+      if (decoded is List<dynamic>) {
+        items = decoded;
+      } else if (decoded is Map<String, dynamic>) {
+        final dynamic data = decoded['data'] ??
+            decoded['templates'] ??
+            decoded['agreements'] ??
+            decoded['result'];
+        if (data is List<dynamic>) {
+          items = data;
+        } else if (data is Map<String, dynamic>) {
+          items = [data];
+        }
+      }
+    } catch (e) {
+      // parsing fallback
+      items = <dynamic>[];
+    }
+
+    print('fetchAgreementTemplates: responseBody=${response.body}');
+    print('fetchAgreementTemplates: parsed items count=${items.length}');
+    if (items.isNotEmpty) print('fetchAgreementTemplates: first item=${items.first}');
+
+    final List<AgreementTemplate> parsed = items
         .map((item) => AgreementTemplate.fromJson(item as Map<String, dynamic>))
-        .where((item) => item.isAccepted)
         .toList(growable: false);
+
+    final List<AgreementTemplate> activeOnly =
+        parsed.where((item) => item.isActive).toList(growable: false);
+
+    if (activeOnly.isNotEmpty) {
+      return activeOnly;
+    }
+
+    // Fallback: if no active templates found but API returned items, return all
+    if (parsed.isNotEmpty) {
+      print('fetchAgreementTemplates: no active templates, returning all parsed templates');
+      return parsed;
+    }
+
+    return const <AgreementTemplate>[];
   }
 
   Future<StudentLoginResponse> createStudentForOtp({
