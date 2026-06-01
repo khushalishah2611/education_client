@@ -407,7 +407,6 @@ class _TrackMyApplicationsScreenState extends State<TrackMyApplicationsScreen>
           fontWeight: FontWeight.w500,
         ),
         ),
-      ),
     );
   }
 }
