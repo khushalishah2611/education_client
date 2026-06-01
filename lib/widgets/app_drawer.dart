@@ -3,6 +3,7 @@ import 'package:flutter/material.dart';
 
 import '../core/app_localizations.dart';
 import '../core/app_theme.dart';
+import '../core/bloc/app_cubit.dart';
 import '../core/student_session.dart';
 import '../screens/side_menu_screens.dart';
 import '../services/application_api_service.dart';
@@ -14,7 +15,8 @@ class CommonSideMenu extends StatefulWidget {
   State<CommonSideMenu> createState() => _CommonSideMenuState();
 }
 
-class _CommonSideMenuState extends State<CommonSideMenu> {
+class _CommonSideMenuState extends State<CommonSideMenu>
+    with CubitStateMixin<CommonSideMenu> {
   final ApplicationApiService _api = const ApplicationApiService();
 
   String _displayName = '';
@@ -48,7 +50,7 @@ class _CommonSideMenuState extends State<CommonSideMenu> {
               ? current['user'] as Map<String, dynamic>
               : <String, dynamic>{};
 
-      setState(() {
+      updateView(() {
         _displayName = fullName;
         _displayEmail = (user['email'] ?? '').toString().trim();
         _profileImageUrl =
@@ -126,7 +128,8 @@ class _CommonSideMenuState extends State<CommonSideMenu> {
       ),
     ];
 
-    return Drawer(
+    return buildCubitView(
+      (context) => Drawer(
       width: MediaQuery.of(context).size.width * 0.88,
       shape: const RoundedRectangleBorder(
         borderRadius: BorderRadius.only(
@@ -251,6 +254,7 @@ class _CommonSideMenuState extends State<CommonSideMenu> {
               ),
             ),
           ],
+        ),
         ),
       ),
     );

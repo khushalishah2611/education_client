@@ -52,7 +52,7 @@ class AppLocalizationScope extends InheritedWidget {
   });
 
   final AppLocalizations localizations;
-  final ValueChanged<Locale> changeLanguage;
+  final Future<void> Function(Locale locale) changeLanguage;
 
   static AppLocalizationScope of(BuildContext context) {
     final result =
@@ -70,9 +70,9 @@ class AppLocalizationScope extends InheritedWidget {
 extension AppLocalizationX on BuildContext {
   AppLocalizations get l10n => AppLocalizationScope.of(this).localizations;
 
-  void toggleLanguage() {
+  Future<void> toggleLanguage() {
     final scope = AppLocalizationScope.of(this);
-    scope.changeLanguage(scope.localizations.alternateLocale);
+    return scope.changeLanguage(scope.localizations.alternateLocale);
   }
 }
 

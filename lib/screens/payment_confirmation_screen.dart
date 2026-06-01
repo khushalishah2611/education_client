@@ -8,6 +8,7 @@ import 'package:printing/printing.dart';
 import '../core/app_localizations.dart';
 import '../core/responsive_helper.dart';
 import '../core/app_theme.dart';
+import '../core/bloc/app_cubit.dart';
 import '../services/application_api_service.dart';
 import '../widgets/common_widgets.dart';
 import '../widgets/flow_widgets.dart';
@@ -36,7 +37,8 @@ class PaymentConfirmationScreen extends StatefulWidget {
       _PaymentConfirmationScreenState();
 }
 
-class _PaymentConfirmationScreenState extends State<PaymentConfirmationScreen> {
+class _PaymentConfirmationScreenState extends State<PaymentConfirmationScreen>
+    with CubitStateMixin<PaymentConfirmationScreen> {
   bool _isDownloadingReceipt = false;
   final ApplicationApiService _applicationApiService =
       const ApplicationApiService();
@@ -283,7 +285,7 @@ class _PaymentConfirmationScreenState extends State<PaymentConfirmationScreen> {
       return;
     }
 
-    setState(() => _isDownloadingReceipt = true);
+    updateView(() => _isDownloadingReceipt = true);
     try {
       final String receiptHtml =
           await _applicationApiService.fetchPaymentReceiptHtml(
@@ -302,7 +304,7 @@ class _PaymentConfirmationScreenState extends State<PaymentConfirmationScreen> {
         message: e.toString(),
       );
     } finally {
-      if (mounted) setState(() => _isDownloadingReceipt = false);
+      if (mounted) updateView(() => _isDownloadingReceipt = false);
     }
   }
 
@@ -482,8 +484,9 @@ class _PaymentConfirmationScreenState extends State<PaymentConfirmationScreen> {
     final String resolvedCourseTitle = _displayCourseTitle;
     final String resolvedUniversityName = _displayUniversityName;
 
-    return WillPopScope(
-      onWillPop: () async {
+    return buildCubitView(
+      (context) => WillPopScope(
+        onWillPop: () async {
         _goHome(context);
         return false;
       },
@@ -642,6 +645,7 @@ class _PaymentConfirmationScreenState extends State<PaymentConfirmationScreen> {
                   ),
               ],
             ),
+          ),
           ),
         ),
       ),

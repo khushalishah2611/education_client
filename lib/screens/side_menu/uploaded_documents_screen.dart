@@ -3,6 +3,7 @@ import 'package:flutter/material.dart';
 import 'package:url_launcher/url_launcher.dart';
 import '../../core/app_localizations.dart';
 import '../../core/app_theme.dart';
+import '../../core/bloc/app_cubit.dart';
 import '../../core/student_session.dart';
 import '../../widgets/common_widgets.dart';
 import '../../services/application_api_service.dart';
@@ -34,7 +35,8 @@ class UploadedDocumentsContent extends StatefulWidget {
       _UploadedDocumentsContentState();
 }
 
-class _UploadedDocumentsContentState extends State<UploadedDocumentsContent> {
+class _UploadedDocumentsContentState extends State<UploadedDocumentsContent>
+    with CubitStateMixin<UploadedDocumentsContent> {
   final ApplicationApiService _api = const ApplicationApiService();
 
   List<Map<String, dynamic>> _documents = [];
@@ -121,7 +123,7 @@ class _UploadedDocumentsContentState extends State<UploadedDocumentsContent> {
   }
 
   Future<void> _load() async {
-    setState(() => _loading = true);
+    updateView(() => _loading = true);
 
     try {
       final studentUserId = await StudentSession.currentStudentUserId();
@@ -134,7 +136,7 @@ class _UploadedDocumentsContentState extends State<UploadedDocumentsContent> {
 
       if (!mounted) return;
 
-      setState(() {
+      updateView(() {
         _documents = docs is List ? _mergeDocumentsByType(docs) : [];
 
         _loading = false;
@@ -144,7 +146,7 @@ class _UploadedDocumentsContentState extends State<UploadedDocumentsContent> {
 
       if (!mounted) return;
 
-      setState(() => _loading = false);
+      updateView(() => _loading = false);
 
       showAppSnackBar(
         context,
@@ -197,7 +199,7 @@ class _UploadedDocumentsContentState extends State<UploadedDocumentsContent> {
         return;
       }
 
-      setState(() {
+      updateView(() {
         _openingDocumentId = documentId;
       });
 
@@ -231,7 +233,7 @@ class _UploadedDocumentsContentState extends State<UploadedDocumentsContent> {
       }
     } finally {
       if (mounted) {
-        setState(() {
+        updateView(() {
           _openingDocumentId = null;
         });
       }
@@ -240,7 +242,8 @@ class _UploadedDocumentsContentState extends State<UploadedDocumentsContent> {
 
   @override
   Widget build(BuildContext context) {
-    if (_loading) {
+    return buildCubitView((context) {
+      if (_loading) {
       return _buildShimmerList();
     }
 
@@ -333,7 +336,9 @@ class _UploadedDocumentsContentState extends State<UploadedDocumentsContent> {
         },
       ),
     );
+    });
   }
+
   Widget _buildShimmerList() {
     return ListView.separated(
       padding: const EdgeInsets.all(12),
@@ -352,7 +357,7 @@ class _UploadedDocumentsContentState extends State<UploadedDocumentsContent> {
           },
           onEnd: () {
             if (mounted) {
-              setState(() {});
+              refreshView();
             }
           },
           child: Container(

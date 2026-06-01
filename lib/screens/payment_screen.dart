@@ -4,6 +4,7 @@ import 'package:shared_preferences/shared_preferences.dart';
 import '../core/app_localizations.dart';
 import '../core/responsive_helper.dart';
 import '../core/app_theme.dart';
+import '../core/bloc/app_cubit.dart';
 import '../core/selected_course_storage.dart';
 import '../services/application_api_service.dart';
 import '../widgets/common_widgets.dart';
@@ -28,7 +29,8 @@ class PaymentScreen extends StatefulWidget {
   State<PaymentScreen> createState() => _PaymentScreenState();
 }
 
-class _PaymentScreenState extends State<PaymentScreen> {
+class _PaymentScreenState extends State<PaymentScreen>
+    with CubitStateMixin<PaymentScreen> {
   int selected = 0;
   bool _isSubmitting = false;
 
@@ -100,7 +102,7 @@ class _PaymentScreenState extends State<PaymentScreen> {
   Future<void> _submitApplicationsAndContinue() async {
     if (_isSubmitting) return;
 
-    setState(() => _isSubmitting = true);
+    updateView(() => _isSubmitting = true);
 
     Map<String, dynamic>? createdApplicationsResponse;
     Map<String, dynamic>? studentOverview;
@@ -175,7 +177,7 @@ class _PaymentScreenState extends State<PaymentScreen> {
       );
     } finally {
       if (mounted) {
-        setState(() => _isSubmitting = false);
+        updateView(() => _isSubmitting = false);
       }
     }
   }
@@ -187,8 +189,9 @@ class _PaymentScreenState extends State<PaymentScreen> {
     final double horizontalPadding =
         context.responsiveHorizontalPadding;
 
-    return Scaffold(
-      body: AppBackground(
+    return buildCubitView(
+      (context) => Scaffold(
+        body: AppBackground(
         child: AppPageEntrance(
           child: Stack(
             children: [
@@ -306,7 +309,7 @@ class _PaymentScreenState extends State<PaymentScreen> {
                           iconText: 'COD',
                           selected: selected == 0,
                           onTap: () =>
-                              setState(() => selected = 0),
+                              updateView(() => selected = 0),
                         ),
 
                         const SizedBox(height: 30),
@@ -338,6 +341,7 @@ class _PaymentScreenState extends State<PaymentScreen> {
                 ),
             ],
           ),
+        ),
         ),
       ),
     );

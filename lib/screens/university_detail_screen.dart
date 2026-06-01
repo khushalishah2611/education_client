@@ -1,4 +1,5 @@
 import 'package:education/core/app_localizations.dart';
+import 'package:education/core/bloc/app_cubit.dart';
 import 'package:education/core/image_url_helper.dart';
 import 'package:education/core/selected_course_storage.dart';
 import 'package:education/models/admin_university.dart';
@@ -24,7 +25,8 @@ class UniversityDetailScreen extends StatefulWidget {
   State<UniversityDetailScreen> createState() => _UniversityDetailScreenState();
 }
 
-class _UniversityDetailScreenState extends State<UniversityDetailScreen> {
+class _UniversityDetailScreenState extends State<UniversityDetailScreen>
+    with CubitStateMixin<UniversityDetailScreen> {
   final Set<String> _expandedColleges = <String>{};
   final Set<String> _selectedCourses = <String>{};
 
@@ -64,7 +66,7 @@ class _UniversityDetailScreenState extends State<UniversityDetailScreen> {
     }
 
     if (!mounted) return;
-    setState(() {});
+    refreshView();
   }
 
   Future<void> _syncSelectedCourses() async {
@@ -98,7 +100,7 @@ class _UniversityDetailScreenState extends State<UniversityDetailScreen> {
       await SelectedCourseStorage.clear();
     }
 
-    setState(() {
+    updateView(() {
       if (_selectedCourses.contains(courseKey)) {
         _selectedCourses.remove(courseKey);
       } else {
@@ -123,8 +125,9 @@ class _UniversityDetailScreenState extends State<UniversityDetailScreen> {
     final double topGap = isSmallMobile ? 52 : 60;
     final double sectionPadding = isSmallMobile ? 14 : 16;
 
-    return Directionality(
-      textDirection: Directionality.of(context),
+    return buildCubitView(
+      (context) => Directionality(
+        textDirection: Directionality.of(context),
       child: Scaffold(
         body: AppBackground(
           child: Column(
@@ -328,7 +331,7 @@ class _UniversityDetailScreenState extends State<UniversityDetailScreen> {
                                 isExpanded: isExpanded,
                                 selectedCourses: _selectedCourses,
                                 onToggleExpand: () {
-                                  setState(() {
+                                  updateView(() {
                                     if (isExpanded) {
                                       _expandedColleges.remove(academicName);
                                     } else {
@@ -408,6 +411,7 @@ class _UniversityDetailScreenState extends State<UniversityDetailScreen> {
               // ),
             ],
           ),
+        ),
         ),
       ),
     );
@@ -909,13 +913,15 @@ class ReadMoreText extends StatefulWidget {
   State<ReadMoreText> createState() => _ReadMoreTextState();
 }
 
-class _ReadMoreTextState extends State<ReadMoreText> {
+class _ReadMoreTextState extends State<ReadMoreText>
+    with CubitStateMixin<ReadMoreText> {
   bool isExpanded = false;
 
   @override
   Widget build(BuildContext context) {
-    return LayoutBuilder(
-      builder: (context, size) {
+    return buildCubitView(
+      (context) => LayoutBuilder(
+        builder: (context, size) {
         final textSpan = TextSpan(
           text: widget.text,
           style: const TextStyle(
@@ -950,7 +956,7 @@ class _ReadMoreTextState extends State<ReadMoreText> {
             if (isOverflowing)
               GestureDetector(
                 onTap: () {
-                  setState(() => isExpanded = !isExpanded);
+                  updateView(() => isExpanded = !isExpanded);
                 },
                 child: Padding(
                   padding: const EdgeInsets.only(top: 4),
@@ -967,7 +973,8 @@ class _ReadMoreTextState extends State<ReadMoreText> {
               ),
           ],
         );
-      },
+        },
+      ),
     );
   }
 }

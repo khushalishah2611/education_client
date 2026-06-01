@@ -6,13 +6,15 @@ import '../models/banner_item.dart';
 import '../models/country_master.dart';
 import '../models/country_option.dart';
 import '../services/home_api_service.dart';
+import '../core/bloc/app_cubit.dart';
 
-class HomeController extends ChangeNotifier {
+class HomeController extends AppCubit<int> {
   HomeController({
     required HomeApiService homeApiService,
     String? initialCountry,
     String? initialDialCode,
-  }) : _homeApiService = homeApiService {
+  })  : _homeApiService = homeApiService,
+        super(0) {
     _selectedCountry = initialCountry?.trim().isNotEmpty == true
         ? initialCountry!.trim()
         : null;
@@ -48,6 +50,10 @@ class HomeController extends ChangeNotifier {
 
   String? get selectedTrack => _selectedTrack;
 
+  void refreshView() {
+    emit(state + 1);
+  }
+
   Future<void> initialize() async {
     await _loadSessionDefaults();
 
@@ -66,7 +72,7 @@ class HomeController extends ChangeNotifier {
 
   Future<void> loadBanners() async {
     isLoadingBanners = true;
-    notifyListeners();
+    refreshView();
 
     try {
       banners = await _homeApiService.fetchBanners(
@@ -78,12 +84,12 @@ class HomeController extends ChangeNotifier {
     }
 
     isLoadingBanners = false;
-    notifyListeners();
+    refreshView();
   }
 
   Future<void> loadUniversities() async {
     isLoadingUniversities = true;
-    notifyListeners();
+    refreshView();
 
     try {
       final responses = await Future.wait<Object>([
@@ -152,7 +158,7 @@ class HomeController extends ChangeNotifier {
     }
 
     isLoadingUniversities = false;
-    notifyListeners();
+    refreshView();
   }
 
   /// MAIN FILTER APPLY
@@ -162,17 +168,17 @@ class HomeController extends ChangeNotifier {
 
   void updateCountry(String? value) {
     _selectedCountry = value?.trim();
-    notifyListeners();
+    refreshView();
   }
 
   void updateAcademic(String? value) {
     _selectedAcademic = value?.trim();
-    notifyListeners();
+    refreshView();
   }
 
   void updateTrack(String? value) {
     _selectedTrack = value?.trim();
-    notifyListeners();
+    refreshView();
   }
 
   void resetFilters() {
@@ -182,7 +188,7 @@ class HomeController extends ChangeNotifier {
 
     resultController.clear();
 
-    notifyListeners();
+    refreshView();
 
     loadUniversities();
   }
@@ -427,9 +433,8 @@ class HomeController extends ChangeNotifier {
     return code.length == 2 ? 'https://flagcdn.com/w40/$code.png' : '';
   }
 
-  @override
   void dispose() {
     resultController.dispose();
-    super.dispose();
+    close();
   }
 }

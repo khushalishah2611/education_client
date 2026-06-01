@@ -5,6 +5,7 @@ import 'package:flutter/services.dart';
 
 import '../core/app_localizations.dart';
 import '../core/app_theme.dart';
+import '../core/bloc/app_cubit.dart';
 import '../core/responsive_helper.dart';
 import '../core/url_launcher_helper.dart';
 import '../core/student_session.dart';
@@ -33,7 +34,8 @@ class VerifyOtpScreen extends StatefulWidget {
   State<VerifyOtpScreen> createState() => _VerifyOtpScreenState();
 }
 
-class _VerifyOtpScreenState extends State<VerifyOtpScreen> {
+class _VerifyOtpScreenState extends State<VerifyOtpScreen>
+    with CubitStateMixin<VerifyOtpScreen> {
   static const int _initialSeconds = 60;
   static const _verifyCardShade = Colors.white;
 
@@ -77,20 +79,20 @@ class _VerifyOtpScreenState extends State<VerifyOtpScreen> {
         timer.cancel();
         return;
       }
-      setState(() {
+      updateView(() {
         _secondsRemaining--;
       });
     });
   }
 
   Future<void> _resendOtp() async {
-    setState(() => _isSubmitting = true);
+    updateView(() => _isSubmitting = true);
     try {
       final response = await _authApiService.resendStudentOtp(
         studentId: widget.studentId,
       );
       if (!mounted) return;
-      setState(() {
+      updateView(() {
         _currentExpectedOtp = response.otp;
         _currentWhatsappOtpLink = response.whatsappOtpLink;
       });
@@ -119,7 +121,7 @@ class _VerifyOtpScreenState extends State<VerifyOtpScreen> {
       return;
     } finally {
       if (mounted) {
-        setState(() => _isSubmitting = false);
+        updateView(() => _isSubmitting = false);
       }
     }
 
@@ -160,7 +162,7 @@ class _VerifyOtpScreenState extends State<VerifyOtpScreen> {
       return;
     }
 
-    setState(() => _isSubmitting = true);
+    updateView(() => _isSubmitting = true);
     try {
       final response = await _authApiService.verifyStudentOtp(
         studentId: widget.studentId,
@@ -206,7 +208,7 @@ class _VerifyOtpScreenState extends State<VerifyOtpScreen> {
       );
     } finally {
       if (mounted) {
-        setState(() => _isSubmitting = false);
+        updateView(() => _isSubmitting = false);
       }
     }
   }
@@ -214,8 +216,9 @@ class _VerifyOtpScreenState extends State<VerifyOtpScreen> {
   @override
   Widget build(BuildContext context) {
     final bool isSmallMobile = context.isSmallMobile;
-    return AuthScaffold(
-      isLoading: _isSubmitting,
+    return buildCubitView(
+      (context) => AuthScaffold(
+        isLoading: _isSubmitting,
       bottomCardColor: _verifyCardShade,
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
@@ -255,6 +258,7 @@ class _VerifyOtpScreenState extends State<VerifyOtpScreen> {
             onPressed: _isSubmitting ? null : () => _verifyOtp(context),
           ),
         ],
+        ),
       ),
     );
   }

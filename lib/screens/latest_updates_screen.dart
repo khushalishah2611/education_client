@@ -3,6 +3,7 @@ import 'package:flutter/material.dart';
 
 import '../core/app_localizations.dart';
 import '../core/app_theme.dart';
+import '../core/bloc/app_cubit.dart';
 import '../services/home_api_service.dart';
 
 class LatestUpdatesScreen extends StatefulWidget {
@@ -18,8 +19,8 @@ class LatestUpdatesScreen extends StatefulWidget {
       _LatestUpdatesScreenState();
 }
 
-class _LatestUpdatesScreenState
-    extends State<LatestUpdatesScreen> {
+class _LatestUpdatesScreenState extends State<LatestUpdatesScreen>
+    with CubitStateMixin<LatestUpdatesScreen> {
   final HomeApiService _homeApiService =
   const HomeApiService();
 
@@ -35,7 +36,7 @@ class _LatestUpdatesScreenState
   }
 
   Future<void> _fetchUpdates() async {
-    setState(() => _isLoading = true);
+    updateView(() => _isLoading = true);
 
     try {
       final response =
@@ -46,7 +47,7 @@ class _LatestUpdatesScreenState
 
       final data = response['data'];
 
-      setState(() {
+      updateView(() {
         _updates = data is List
             ? data
             .whereType<Map>()
@@ -63,17 +64,19 @@ class _LatestUpdatesScreenState
       _updates = const <Map<String, dynamic>>[];
     } finally {
       if (mounted) {
-        setState(() => _isLoading = false);
+        updateView(() => _isLoading = false);
       }
     }
   }
 
   @override
   Widget build(BuildContext context) {
-    return SideMenuScaffold(
-      title: context.l10n.text('latestUpdates'),
-      showBackButton: widget.activeTab,
-      child: _buildBody(),
+    return buildCubitView(
+      (context) => SideMenuScaffold(
+        title: context.l10n.text('latestUpdates'),
+        showBackButton: widget.activeTab,
+        child: _buildBody(),
+      ),
     );
   }
 

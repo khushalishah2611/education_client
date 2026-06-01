@@ -17,18 +17,22 @@ class ChangeLanguageScreen extends StatelessWidget {
             flag: '🇺🇸',
             label: 'English',
             selected: context.l10n.textDirection == TextDirection.ltr,
-            onTap: () => AppLocalizationScope.of(
-              context,
-            ).changeLanguage(const Locale('en')),
+            onTap: () {
+              AppLocalizationScope.of(
+                context,
+              ).changeLanguage(const Locale('en'));
+            },
           ),
           const SizedBox(height: 8),
           LanguageTile(
             flag: '🇴🇲',
             label: 'العربية',
             selected: context.l10n.textDirection == TextDirection.rtl,
-            onTap: () => AppLocalizationScope.of(
-              context,
-            ).changeLanguage(const Locale('ar')),
+            onTap: () {
+              AppLocalizationScope.of(
+                context,
+              ).changeLanguage(const Locale('ar'));
+            },
           ),
         ],
       ),

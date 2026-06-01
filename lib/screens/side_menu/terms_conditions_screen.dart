@@ -3,6 +3,7 @@ import 'package:shared_preferences/shared_preferences.dart';
 
 import '../../core/app_localizations.dart';
 import '../../core/app_theme.dart';
+import '../../core/bloc/app_cubit.dart';
 import '../../services/application_api_service.dart';
 import '../../widgets/common_widgets.dart';
 import 'side_menu_common.dart';
@@ -15,7 +16,7 @@ class TermsConditionsScreen extends StatefulWidget {
 }
 
 class _TermsConditionsScreenState extends State<TermsConditionsScreen>
-    with SingleTickerProviderStateMixin {
+    with SingleTickerProviderStateMixin, CubitStateMixin<TermsConditionsScreen> {
   final ApplicationApiService _api = const ApplicationApiService();
 
   bool _loading = true;
@@ -43,7 +44,7 @@ class _TermsConditionsScreenState extends State<TermsConditionsScreen>
   }
 
   Future<void> _load() async {
-    setState(() => _loading = true);
+    updateView(() => _loading = true);
 
     try {
       final SharedPreferences prefs = await SharedPreferences.getInstance();
@@ -59,7 +60,7 @@ class _TermsConditionsScreenState extends State<TermsConditionsScreen>
 
       if (!mounted) return;
 
-      setState(() {
+      updateView(() {
         _agreements = templates is List
             ? templates
                 .whereType<Map>()
@@ -79,7 +80,7 @@ class _TermsConditionsScreenState extends State<TermsConditionsScreen>
     } catch (_) {
       if (!mounted) return;
 
-      setState(() => _loading = false);
+      updateView(() => _loading = false);
 
       showAppSnackBar(
         context,
@@ -91,54 +92,57 @@ class _TermsConditionsScreenState extends State<TermsConditionsScreen>
 
   @override
   Widget build(BuildContext context) {
-    return SideMenuScaffold(
-      title: context.l10n.text(
-        'termsAndConditions',
-      ),
-      child: _loading
-          ? _buildShimmerList()
-          : RefreshIndicator(
-              color: AppColors.primary,
-              onRefresh: _load,
-              child: ListView.separated(
-                physics: const AlwaysScrollableScrollPhysics(),
-                padding: const EdgeInsets.all(12),
-                itemCount: _agreements.length,
-                separatorBuilder: (_, __) => const SizedBox(height: 10),
-                itemBuilder: (_, index) {
-                  final Map<String, dynamic> item = _agreements[index];
+    return buildCubitView(
+      (context) => SideMenuScaffold(
+        title: context.l10n.text(
+          'termsAndConditions',
+        ),
+        child: _loading
+            ? _buildShimmerList()
+            : RefreshIndicator(
+                color: AppColors.primary,
+                onRefresh: _load,
+                child: ListView.separated(
+                  physics: const AlwaysScrollableScrollPhysics(),
+                  padding: const EdgeInsets.all(12),
+                  itemCount: _agreements.length,
+                  separatorBuilder: (_, __) => const SizedBox(height: 10),
+                  itemBuilder: (_, index) {
+                    final Map<String, dynamic> item = _agreements[index];
 
-                  final String title =
-                      item['title']?.toString().trim().isNotEmpty == true
-                          ? item['title'].toString()
-                          : context.l10n.text('terms');
+                    final String title =
+                        item['title']?.toString().trim().isNotEmpty == true
+                            ? item['title'].toString()
+                            : context.l10n.text('terms');
 
-                  final String content =
-                      item['content']?.toString().trim() ?? '';
+                    final String content =
+                        item['content']?.toString().trim() ?? '';
 
-                  final List<String> bullets = content
-                      .split(
-                        RegExp(
-                          r'[\n\r]+|(?<=\.)\s+',
-                        ),
-                      )
-                      .map(
-                        (e) => e.trim(),
-                      )
-                      .where(
-                        (e) => e.isNotEmpty,
-                      )
-                      .toList();
+                    final List<String> bullets = content
+                        .split(
+                          RegExp(
+                            r'[
+]+|(?<=\.)\s+',
+                          ),
+                        )
+                        .map(
+                          (e) => e.trim(),
+                        )
+                        .where(
+                          (e) => e.isNotEmpty,
+                        )
+                        .toList();
 
-                  return SectionCard(
-                    title: title,
-                    bullets: bullets.isEmpty
-                        ? <String>['No details available.']
-                        : bullets,
-                  );
-                },
+                    return SectionCard(
+                      title: title,
+                      bullets: bullets.isEmpty
+                          ? <String>['No details available.']
+                          : bullets,
+                    );
+                  },
+                ),
               ),
-            ),
+      ),
     );
   }
 

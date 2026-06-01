@@ -196,7 +196,9 @@ class _LanguageDropdownChip extends StatelessWidget {
     final isArabic = context.l10n.isArabic;
 
     return InkWell(
-      onTap: context.toggleLanguage,
+      onTap: () {
+        context.toggleLanguage();
+      },
       borderRadius: BorderRadius.circular(8),
       child: Container(
         padding: const EdgeInsets.symmetric(

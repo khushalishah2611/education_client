@@ -9,6 +9,7 @@ import 'package:flutter/material.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'dart:async';
 import '../core/app_localizations.dart';
+import '../core/bloc/app_cubit.dart';
 import '../core/app_theme.dart';
 import '../core/image_url_helper.dart';
 import '../core/responsive_helper.dart';
@@ -49,7 +50,7 @@ class _HomeScreenState extends State<HomeScreen> {
       homeApiService: const HomeApiService(),
       initialCountry: widget.initialCountry,
       initialDialCode: widget.initialDialCode,
-    )..addListener(_onControllerChanged);
+    );
     _controller.initialize();
     _refreshUnreadNotifications();
     _notificationTimer = Timer.periodic(
@@ -60,9 +61,7 @@ class _HomeScreenState extends State<HomeScreen> {
 
   @override
   void dispose() {
-    _controller
-      ..removeListener(_onControllerChanged)
-      ..dispose();
+    _controller.dispose();
     _bannerPageController.dispose();
     _notificationTimer?.cancel();
     super.dispose();
@@ -84,13 +83,11 @@ class _HomeScreenState extends State<HomeScreen> {
     } catch (_) {}
   }
 
-  void _onControllerChanged() {
-    if (!mounted) return;
+  void _syncBannerIndex() {
     if (_activeBannerIndex >= _controller.banners.length &&
         _controller.banners.isNotEmpty) {
       _activeBannerIndex = 0;
     }
-    setState(() {});
   }
 
   Future<void> _openCountryDialog() async {
@@ -144,9 +141,14 @@ class _HomeScreenState extends State<HomeScreen> {
     final int gridColumns = context.responsiveGridColumns;
     final double gridAspectRatio = context.isSmallMobile ? 0.92 : 0.8;
 
-    return Directionality(
-      textDirection: context.l10n.textDirection,
-      child: Scaffold(
+    return AppCubitBuilder<HomeController, int>(
+      cubit: _controller,
+      builder: (context, _) {
+        _syncBannerIndex();
+
+        return Directionality(
+          textDirection: context.l10n.textDirection,
+          child: Scaffold(
         key: _scaffoldKey,
         drawerScrimColor: Colors.black.withOpacity(0.16),
         drawer: const CommonSideMenu(),
@@ -311,7 +313,8 @@ class _HomeScreenState extends State<HomeScreen> {
                                   pageController: _bannerPageController,
                                   onPageChanged: (index) {
                                     if (!mounted) return;
-                                    setState(() => _activeBannerIndex = index);
+                                    _activeBannerIndex = index;
+                                    _controller.refreshView();
                                   },
                                 ),
 
@@ -462,7 +465,8 @@ class _HomeScreenState extends State<HomeScreen> {
                   BottomTabBarCard(
                     activeIndex: _activeTab,
                     onTap: (index) {
-                      setState(() => _activeTab = index);
+                      _activeTab = index;
+                      _controller.refreshView();
                     },
                   ),
                 ],
@@ -470,7 +474,9 @@ class _HomeScreenState extends State<HomeScreen> {
             ),
           ),
         ),
-      ),
+          ),
+        );
+      },
     );
   }
 }
@@ -630,7 +636,8 @@ class _CountrySelectionDialog extends StatefulWidget {
       _CountrySelectionDialogState();
 }
 
-class _CountrySelectionDialogState extends State<_CountrySelectionDialog> {
+class _CountrySelectionDialogState extends State<_CountrySelectionDialog>
+    with CubitStateMixin<_CountrySelectionDialog> {
   final TextEditingController _searchController = TextEditingController();
   late List<CountryOption> _filteredCountries;
 
@@ -648,7 +655,7 @@ class _CountrySelectionDialogState extends State<_CountrySelectionDialog> {
 
   void _onSearchChanged(String query) {
     final normalized = query.trim().toLowerCase();
-    setState(() {
+    updateView(() {
       if (normalized.isEmpty) {
         _filteredCountries = widget.countries;
         return;
@@ -662,12 +669,13 @@ class _CountrySelectionDialogState extends State<_CountrySelectionDialog> {
   @override
   Widget build(BuildContext context) {
     final bool isSmall = context.isSmallMobile;
-    return SafeArea(
-      child: Container(
-        decoration: const BoxDecoration(
-          color: Colors.white,
-          borderRadius: BorderRadius.vertical(top: Radius.circular(20)),
-        ),
+    return buildCubitView(
+      (context) => SafeArea(
+        child: Container(
+          decoration: const BoxDecoration(
+            color: Colors.white,
+            borderRadius: BorderRadius.vertical(top: Radius.circular(20)),
+          ),
         child: Padding(
           padding: const EdgeInsets.fromLTRB(12, 10, 12, 8),
           child: Column(
@@ -759,6 +767,7 @@ class _CountrySelectionDialogState extends State<_CountrySelectionDialog> {
               ),
             ],
           ),
+          ),
         ),
       ),
     );
@@ -800,7 +809,8 @@ class _AdvanceSearchDialog extends StatefulWidget {
   State<_AdvanceSearchDialog> createState() => _AdvanceSearchDialogState();
 }
 
-class _AdvanceSearchDialogState extends State<_AdvanceSearchDialog> {
+class _AdvanceSearchDialogState extends State<_AdvanceSearchDialog>
+    with CubitStateMixin<_AdvanceSearchDialog> {
   String? _selectedCountry;
   String? _selectedAcademic;
   String? _selectedTrack;
@@ -817,7 +827,7 @@ class _AdvanceSearchDialogState extends State<_AdvanceSearchDialog> {
 
   void _filterCountryOptions(String query) {
     final normalized = query.trim().toLowerCase();
-    setState(() {
+    updateView(() {
       if (normalized.isEmpty) {
         _filteredCountryOptions = widget.countryOptions;
       } else {
@@ -918,7 +928,8 @@ class _AdvanceSearchDialogState extends State<_AdvanceSearchDialog> {
       _selectedAcademic,
     );
 
-    return SafeArea(
+    return buildCubitView(
+      (context) => SafeArea(
       child: Container(
         decoration: const BoxDecoration(
           color: Colors.white,
@@ -962,7 +973,7 @@ class _AdvanceSearchDialogState extends State<_AdvanceSearchDialog> {
                 options: _filteredCountryOptions,
                 value: _selectedCountry,
                 onChanged: (value) async {
-                  setState(() => _selectedCountry = value);
+                  updateView(() => _selectedCountry = value);
                   widget.onCountryChanged(value);
                   await widget.onApplyFilters();
                 },
@@ -972,7 +983,7 @@ class _AdvanceSearchDialogState extends State<_AdvanceSearchDialog> {
                 title: context.l10n.text('academicQualification'),
                 options: widget.academicOptions,
                 value: _selectedAcademic,
-                onChanged: (value) => setState(() {
+                onChanged: (value) => updateView(() {
                   _selectedAcademic = value;
                   if (_isOnlyCountryAndAcademicAllowed(value)) {
                     _selectedTrack = null;
@@ -987,7 +998,7 @@ class _AdvanceSearchDialogState extends State<_AdvanceSearchDialog> {
                   title: context.l10n.text('secondarySchoolCertificateProgram'),
                   options: widget.trackOptions,
                   value: _selectedTrack,
-                  onChanged: (value) => setState(() => _selectedTrack = value),
+                  onChanged: (value) => updateView(() => _selectedTrack = value),
                   icon: Icons.menu_book_outlined,
                   enabled: !shouldDisableDetails,
                 ),
@@ -1014,7 +1025,7 @@ class _AdvanceSearchDialogState extends State<_AdvanceSearchDialog> {
                     child: AppOutlinedButton(
                       label: context.l10n.text('reset'),
                       onPressed: () async {
-                        setState(() {
+                        updateView(() {
                           _selectedCountry = null;
                           _selectedAcademic = null;
                           _selectedTrack = null;
@@ -1040,6 +1051,7 @@ class _AdvanceSearchDialogState extends State<_AdvanceSearchDialog> {
                 ],
               ),
             ],
+          ),
           ),
         ),
       ),

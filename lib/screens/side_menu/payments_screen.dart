@@ -4,6 +4,7 @@ import 'package:shared_preferences/shared_preferences.dart';
 
 import '../../core/app_localizations.dart';
 import '../../core/app_theme.dart';
+import '../../core/bloc/app_cubit.dart';
 import '../../widgets/common_widgets.dart';
 import '../../services/application_api_service.dart';
 import 'side_menu_common.dart';
@@ -28,7 +29,7 @@ class PaymentsContent extends StatefulWidget {
 }
 
 class _PaymentsContentState extends State<PaymentsContent>
-    with SingleTickerProviderStateMixin {
+    with SingleTickerProviderStateMixin, CubitStateMixin<PaymentsContent> {
   final ApplicationApiService _api = const ApplicationApiService();
 
   bool _loading = true;
@@ -56,7 +57,7 @@ class _PaymentsContentState extends State<PaymentsContent>
   }
 
   Future<void> _load() async {
-    setState(() => _loading = true);
+    updateView(() => _loading = true);
 
     try {
       final SharedPreferences prefs = await SharedPreferences.getInstance();
@@ -67,7 +68,7 @@ class _PaymentsContentState extends State<PaymentsContent>
       if (studentUserId.isEmpty) {
         if (!mounted) return;
 
-        setState(() {
+        updateView(() {
           _payments = <Map<String, dynamic>>[];
           _loading = false;
         });
@@ -83,7 +84,7 @@ class _PaymentsContentState extends State<PaymentsContent>
 
       if (!mounted) return;
 
-      setState(() {
+      updateView(() {
         _payments = payments is List
             ? payments
                 .whereType<Map>()
@@ -103,7 +104,7 @@ class _PaymentsContentState extends State<PaymentsContent>
     } catch (e) {
       if (!mounted) return;
 
-      setState(() => _loading = false);
+      updateView(() => _loading = false);
 
       showAppSnackBar(
         context,
@@ -127,15 +128,16 @@ class _PaymentsContentState extends State<PaymentsContent>
 
   @override
   Widget build(BuildContext context) {
-    if (_loading) {
-      return _buildShimmerList();
-    }
+    return buildCubitView((context) {
+      if (_loading) {
+        return _buildShimmerList();
+      }
 
-    if (_payments.isEmpty) {
-      return _emptyState(context);
-    }
+      if (_payments.isEmpty) {
+        return _emptyState(context);
+      }
 
-    return RefreshIndicator(
+      return RefreshIndicator(
       color: AppColors.primary,
       onRefresh: _load,
       child: ListView.separated(
@@ -197,6 +199,7 @@ class _PaymentsContentState extends State<PaymentsContent>
         },
       ),
     );
+    });
   }
 
   Widget _buildShimmerList() {

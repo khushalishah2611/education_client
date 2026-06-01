@@ -4,6 +4,7 @@ import 'package:shared_preferences/shared_preferences.dart';
 
 import '../../core/app_localizations.dart';
 import '../../core/app_theme.dart';
+import '../../core/bloc/app_cubit.dart';
 import '../../services/application_api_service.dart';
 import '../../services/notification_sync_service.dart';
 import 'side_menu_common.dart';
@@ -16,7 +17,7 @@ class NotificationsScreen extends StatefulWidget {
 }
 
 class _NotificationsScreenState extends State<NotificationsScreen>
-    with SingleTickerProviderStateMixin {
+    with SingleTickerProviderStateMixin, CubitStateMixin<NotificationsScreen> {
   final ApplicationApiService _api = ApplicationApiService();
 
   bool _loading = true;
@@ -122,7 +123,7 @@ class _NotificationsScreenState extends State<NotificationsScreen>
 
     if (!mounted) return;
 
-    setState(() {
+    updateView(() {
       _items = (notifications is List)
           ? notifications.map<Map<String, dynamic>>((item) {
               return {
@@ -171,7 +172,7 @@ class _NotificationsScreenState extends State<NotificationsScreen>
 
     if (!mounted) return;
 
-    setState(() {
+    updateView(() {
       _items[index]['isRead'] = true;
     });
 
@@ -181,7 +182,7 @@ class _NotificationsScreenState extends State<NotificationsScreen>
   }
 
   Future<void> _refresh() async {
-    setState(() => _loading = true);
+    updateView(() => _loading = true);
 
     await _load();
   }
@@ -190,8 +191,9 @@ class _NotificationsScreenState extends State<NotificationsScreen>
   Widget build(BuildContext context) {
     final groupedItems = _groupNotifications();
 
-    return SideMenuScaffold(
-      title: context.l10n.text('notifications'),
+    return buildCubitView(
+      (context) => SideMenuScaffold(
+        title: context.l10n.text('notifications'),
       child: _loading
           ? _buildShimmerList()
           : RefreshIndicator(
@@ -240,7 +242,8 @@ class _NotificationsScreenState extends State<NotificationsScreen>
                         );
                       }).toList(),
                     ),
-            ),
+              ),
+      ),
     );
   }
 

@@ -5,6 +5,7 @@ import '../core/app_localizations.dart';
 import '../core/image_url_helper.dart';
 import '../core/responsive_helper.dart';
 import '../core/app_theme.dart';
+import '../core/bloc/app_cubit.dart';
 import '../services/application_api_service.dart';
 import '../widgets/common_widgets.dart';
 import '../widgets/flow_widgets.dart';
@@ -30,7 +31,8 @@ class TrackApplicationScreen extends StatefulWidget {
   State<TrackApplicationScreen> createState() => _TrackApplicationScreenState();
 }
 
-class _TrackApplicationScreenState extends State<TrackApplicationScreen> {
+class _TrackApplicationScreenState extends State<TrackApplicationScreen>
+    with CubitStateMixin<TrackApplicationScreen> {
   final ApplicationApiService _applicationApiService =
       const ApplicationApiService();
 
@@ -58,7 +60,7 @@ class _TrackApplicationScreenState extends State<TrackApplicationScreen> {
   }) async {
     if (!mounted) return;
 
-    setState(() => _isLoading = true);
+    updateView(() => _isLoading = true);
 
     try {
       final SharedPreferences prefs = await SharedPreferences.getInstance();
@@ -77,7 +79,7 @@ class _TrackApplicationScreenState extends State<TrackApplicationScreen> {
 
       if (!mounted) return;
 
-      setState(() {
+      updateView(() {
         _studentOverview = overview;
       });
 
@@ -98,7 +100,7 @@ class _TrackApplicationScreenState extends State<TrackApplicationScreen> {
       );
     } finally {
       if (mounted) {
-        setState(() => _isLoading = false);
+        updateView(() => _isLoading = false);
       }
     }
   }
@@ -381,8 +383,9 @@ class _TrackApplicationScreenState extends State<TrackApplicationScreen> {
 
     final double horizontalPadding = context.responsiveHorizontalPadding;
 
-    return WillPopScope(
-      onWillPop: () async {
+    return buildCubitView(
+      (context) => WillPopScope(
+        onWillPop: () async {
         _goHome();
         return false;
       },
@@ -483,6 +486,7 @@ class _TrackApplicationScreenState extends State<TrackApplicationScreen> {
                 ),
               ],
             ),
+          ),
           ),
         ),
       ),

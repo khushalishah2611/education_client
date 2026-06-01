@@ -5,6 +5,7 @@ import 'package:shared_preferences/shared_preferences.dart';
 
 import '../../core/app_localizations.dart';
 import '../../core/app_theme.dart';
+import '../../core/bloc/app_cubit.dart';
 import '../track_application_screen.dart';
 import 'side_menu_common.dart';
 
@@ -21,7 +22,8 @@ class TrackMyApplicationsScreen extends StatefulWidget {
       _TrackMyApplicationsScreenState();
 }
 
-class _TrackMyApplicationsScreenState extends State<TrackMyApplicationsScreen> {
+class _TrackMyApplicationsScreenState extends State<TrackMyApplicationsScreen>
+    with CubitStateMixin<TrackMyApplicationsScreen> {
   final ApplicationApiService _api = const ApplicationApiService();
 
   bool _loading = true;
@@ -35,7 +37,7 @@ class _TrackMyApplicationsScreenState extends State<TrackMyApplicationsScreen> {
   }
 
   Future<void> _load() async {
-    setState(() => _loading = true);
+    updateView(() => _loading = true);
 
     try {
       final prefs = await SharedPreferences.getInstance();
@@ -50,7 +52,7 @@ class _TrackMyApplicationsScreenState extends State<TrackMyApplicationsScreen> {
 
       if (!mounted) return;
 
-      setState(() {
+      updateView(() {
         _apps = [];
 
         if (apps is List) {
@@ -94,7 +96,7 @@ class _TrackMyApplicationsScreenState extends State<TrackMyApplicationsScreen> {
     } catch (e) {
       if (!mounted) return;
 
-      setState(() {
+      updateView(() {
         _apps = [];
         _loading = false;
       });
@@ -128,30 +130,32 @@ class _TrackMyApplicationsScreenState extends State<TrackMyApplicationsScreen> {
 
   @override
   Widget build(BuildContext context) {
-    return SideMenuScaffold(
-      title: context.l10n.text('trackApplications'),
-      showBackButton: widget.activeTab,
-      child: RefreshIndicator(
-        onRefresh: _load,
-        child: _loading
-            ? _shimmerList()
-            : _apps.isEmpty
-                ? ListView(
-                    children: [
-                      _emptyState(context),
-                    ],
-                  )
-                : ListView.separated(
-                    physics: const AlwaysScrollableScrollPhysics(),
-                    padding: const EdgeInsets.all(12),
-                    itemCount: _apps.length,
-                    separatorBuilder: (_, __) => const SizedBox(height: 8),
-                    itemBuilder: (context, index) {
-                      return _buildCard(
-                        _apps[index],
-                      );
-                    },
-                  ),
+    return buildCubitView(
+      (context) => SideMenuScaffold(
+        title: context.l10n.text('trackApplications'),
+        showBackButton: widget.activeTab,
+        child: RefreshIndicator(
+          onRefresh: _load,
+          child: _loading
+              ? _shimmerList()
+              : _apps.isEmpty
+                  ? ListView(
+                      children: [
+                        _emptyState(context),
+                      ],
+                    )
+                  : ListView.separated(
+                      physics: const AlwaysScrollableScrollPhysics(),
+                      padding: const EdgeInsets.all(12),
+                      itemCount: _apps.length,
+                      separatorBuilder: (_, __) => const SizedBox(height: 8),
+                      itemBuilder: (context, index) {
+                        return _buildCard(
+                          _apps[index],
+                        );
+                      },
+                    ),
+        ),
       ),
     );
   }
@@ -401,6 +405,7 @@ class _TrackMyApplicationsScreenState extends State<TrackMyApplicationsScreen> {
         style: TextStyle(
           color: Color(0xFF616161),
           fontWeight: FontWeight.w500,
+        ),
         ),
       ),
     );

@@ -156,7 +156,9 @@ class LanguageButton extends StatelessWidget {
     return Align(
       alignment: AlignmentDirectional.topEnd,
       child: TextButton.icon(
-        onPressed: context.toggleLanguage,
+        onPressed: () {
+          context.toggleLanguage();
+        },
         style: TextButton.styleFrom(
           foregroundColor: AppColors.logo,
           backgroundColor: Colors.white.withOpacity(.92),
@@ -179,7 +181,9 @@ class LanguageDropdownChip extends StatelessWidget {
   Widget build(BuildContext context) {
     final isArabic = context.l10n.isArabic;
     return InkWell(
-      onTap: context.toggleLanguage,
+      onTap: () {
+        context.toggleLanguage();
+      },
       borderRadius: BorderRadius.circular(10),
       child: Container(
         padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 5),

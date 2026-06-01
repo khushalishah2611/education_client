@@ -3,6 +3,7 @@ import 'package:flutter/material.dart';
 
 import '../core/app_localizations.dart';
 import '../core/app_theme.dart';
+import '../core/bloc/app_cubit.dart';
 import '../core/responsive_helper.dart';
 import '../core/student_session.dart';
 import '../models/document_type.dart';
@@ -35,7 +36,8 @@ class UploadDocumentsScreen extends StatefulWidget {
   State<UploadDocumentsScreen> createState() => _UploadDocumentsScreenState();
 }
 
-class _UploadDocumentsScreenState extends State<UploadDocumentsScreen> {
+class _UploadDocumentsScreenState extends State<UploadDocumentsScreen>
+    with CubitStateMixin<UploadDocumentsScreen> {
   static const int _maxUploadBytes = 5 * 1024 * 1024;
   static const Set<String> _requiredDocumentKeys = <String>{
     'passport',
@@ -50,7 +52,9 @@ class _UploadDocumentsScreenState extends State<UploadDocumentsScreen> {
       const ApplicationApiService();
 
   bool _isUploading = false;
+  String? _lastLanguageCode;
 
+  List<DocumentTypeItem> _documentTypes = const <DocumentTypeItem>[];
   List<_DocumentDefinition> _docs = const <_DocumentDefinition>[];
 
   @override
@@ -59,8 +63,28 @@ class _UploadDocumentsScreenState extends State<UploadDocumentsScreen> {
     _initializeScreen();
   }
 
+  @override
+  void didChangeDependencies() {
+    super.didChangeDependencies();
+
+    final String languageCode = context.l10n.locale.languageCode;
+    if (_lastLanguageCode == languageCode) return;
+
+    _lastLanguageCode = languageCode;
+    if (_documentTypes.isEmpty) return;
+
+    updateView(() {
+      _docs = _documentDefinitionsFromTypes(
+        _documentTypes,
+        isArabic: context.l10n.isArabic,
+      );
+    });
+  }
+
   Future<void> _initializeScreen() async {
-    setState(() {
+    final bool isArabic = context.l10n.isArabic;
+
+    updateView(() {
       _isUploading = true;
     });
 
@@ -75,10 +99,6 @@ class _UploadDocumentsScreenState extends State<UploadDocumentsScreen> {
               studentUserId: studentUserId,
             );
 
-      final bool isArabic =
-          WidgetsBinding.instance.platformDispatcher.locale.languageCode ==
-              'ar';
-
       final List<_DocumentDefinition> docs = _documentDefinitionsFromTypes(
         types,
         isArabic: isArabic,
@@ -90,14 +110,15 @@ class _UploadDocumentsScreenState extends State<UploadDocumentsScreen> {
 
       if (!mounted) return;
 
-      setState(() {
+      updateView(() {
+        _documentTypes = types;
         _docs = docs;
       });
     } catch (e) {
       debugPrint(e.toString());
     } finally {
       if (mounted) {
-        setState(() {
+        updateView(() {
           _isUploading = false;
         });
       }
@@ -137,7 +158,7 @@ class _UploadDocumentsScreenState extends State<UploadDocumentsScreen> {
       return;
     }
 
-    setState(() {
+    updateView(() {
       _isUploading = true;
     });
 
@@ -169,7 +190,7 @@ class _UploadDocumentsScreenState extends State<UploadDocumentsScreen> {
               fileName: file.name,
             );
 
-      setState(() {
+      updateView(() {
         _selectedFiles[documentKey] = file;
         _selectedFileNames[documentKey] = file.name;
         final String responseDocumentId = _extractDocumentIdFromUploadResponse(
@@ -197,7 +218,7 @@ class _UploadDocumentsScreenState extends State<UploadDocumentsScreen> {
       );
     } finally {
       if (mounted) {
-        setState(() {
+        updateView(() {
           _isUploading = false;
         });
       }
@@ -488,8 +509,9 @@ class _UploadDocumentsScreenState extends State<UploadDocumentsScreen> {
 
     final double horizontalPadding = context.responsiveHorizontalPadding;
 
-    return Scaffold(
-      body: AppBackground(
+    return buildCubitView(
+      (context) => Scaffold(
+        body: AppBackground(
         child: AppPageEntrance(
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
@@ -637,6 +659,7 @@ class _UploadDocumentsScreenState extends State<UploadDocumentsScreen> {
               ),
             ],
           ),
+        ),
         ),
       ),
     );

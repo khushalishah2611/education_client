@@ -1,6 +1,7 @@
 import 'dart:io';
 
 import 'package:education/core/app_localizations.dart';
+import 'package:education/core/bloc/app_cubit.dart';
 import 'package:education/core/student_session.dart';
 import 'package:education/models/country_master.dart';
 import 'package:education/screens/home_screen.dart';
@@ -34,7 +35,8 @@ class ProfileBody extends StatefulWidget {
   State<ProfileBody> createState() => _ProfileBodyState();
 }
 
-class _ProfileBodyState extends State<ProfileBody> {
+class _ProfileBodyState extends State<ProfileBody>
+    with CubitStateMixin<ProfileBody> {
   final ApplicationApiService _api = const ApplicationApiService();
   final AuthApiService _authApi = const AuthApiService();
 
@@ -85,7 +87,7 @@ class _ProfileBodyState extends State<ProfileBody> {
       await _loadProfile();
     } finally {
       if (mounted) {
-        setState(() {
+        updateView(() {
           _isLoading = false;
         });
       }
@@ -108,7 +110,7 @@ class _ProfileBodyState extends State<ProfileBody> {
 
   Future<void> _loadCountries() async {
     try {
-      setState(() {
+      updateView(() {
         _isLoadingCountries = true;
       });
 
@@ -126,7 +128,7 @@ class _ProfileBodyState extends State<ProfileBody> {
       debugPrint(e.toString());
     } finally {
       if (mounted) {
-        setState(() {
+        updateView(() {
           _isLoadingCountries = false;
         });
       }
@@ -231,7 +233,7 @@ class _ProfileBodyState extends State<ProfileBody> {
       }
 
       if (mounted) {
-        setState(() {});
+        refreshView();
       }
     } catch (e) {
       if (mounted) {
@@ -302,7 +304,7 @@ class _ProfileBodyState extends State<ProfileBody> {
     );
 
     if (date != null) {
-      setState(() {
+      updateView(() {
         _dobController.text =
             DateFormat('dd-MM-yyyy')
                 .format(date);
@@ -322,7 +324,7 @@ class _ProfileBodyState extends State<ProfileBody> {
       return;
     }
 
-    setState(() {
+    updateView(() {
       _selectedProfileImage =
           result.files.first;
     });
@@ -356,7 +358,7 @@ class _ProfileBodyState extends State<ProfileBody> {
     final String mobile =
         '${_selectedCountry?.dialCode ?? ''}${_phoneController.text.trim()}';
 
-    setState(() {
+    updateView(() {
       _isSaving = true;
     });
 
@@ -420,7 +422,7 @@ class _ProfileBodyState extends State<ProfileBody> {
       }
     } finally {
       if (mounted) {
-        setState(() {
+        updateView(() {
           _isSaving = false;
         });
       }
@@ -493,7 +495,8 @@ class _ProfileBodyState extends State<ProfileBody> {
 
   @override
   Widget build(BuildContext context) {
-    if (_isLoading) {
+    return buildCubitView((context) {
+      if (_isLoading) {
       return const _ProfileShimmer();
     }
 
@@ -532,7 +535,7 @@ class _ProfileBodyState extends State<ProfileBody> {
           GenderSelector(
             selected: _gender,
             onChanged: (v) {
-              setState(() {
+              updateView(() {
                 _gender = v;
               });
             },
@@ -560,7 +563,7 @@ class _ProfileBodyState extends State<ProfileBody> {
             selectedCountry: _selectedCountry,
             isLoading: _isLoadingCountries,
             onCountryChanged: (v) {
-              setState(() {
+              updateView(() {
                 _selectedCountry = v;
               });
             },
@@ -668,8 +671,9 @@ class _ProfileBodyState extends State<ProfileBody> {
 
           const SizedBox(height: 20),
         ],
-      ),
-    );
+        ),
+      );
+    });
   }
 }
 

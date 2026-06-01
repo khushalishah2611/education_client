@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 
 import '../core/app_localizations.dart';
 import '../core/app_theme.dart';
+import '../core/bloc/app_cubit.dart';
 import '../core/url_launcher_helper.dart';
 import '../models/agreement_template.dart';
 import '../models/country_master.dart';
@@ -17,7 +18,8 @@ class LoginScreen extends StatefulWidget {
   State<LoginScreen> createState() => _LoginScreenState();
 }
 
-class _LoginScreenState extends State<LoginScreen> {
+class _LoginScreenState extends State<LoginScreen>
+    with CubitStateMixin<LoginScreen> {
   final TextEditingController _mobileController = TextEditingController();
   final AuthApiService _authApiService = const AuthApiService();
 
@@ -41,13 +43,13 @@ class _LoginScreenState extends State<LoginScreen> {
   }
 
   Future<void> _loadMetaData() async {
-    setState(() => _isLoadingMeta = true);
+    updateView(() => _isLoadingMeta = true);
     try {
       final countries = await _authApiService.fetchCountries();
       final agreements = await _authApiService.fetchAgreementTemplates();
 
       if (!mounted) return;
-      setState(() {
+      updateView(() {
         _countries = countries;
         _agreementTemplates = agreements;
         _selectedCountry = countries.isEmpty ? null : countries.first;
@@ -61,7 +63,7 @@ class _LoginScreenState extends State<LoginScreen> {
       );
     } finally {
       if (mounted) {
-        setState(() => _isLoadingMeta = false);
+        updateView(() => _isLoadingMeta = false);
       }
     }
   }
@@ -71,8 +73,7 @@ class _LoginScreenState extends State<LoginScreen> {
       showAppSnackBar(
         context,
         type: AppSnackBarType.error,
-        message:
-            context.l10n.text('enterMobileNumber'),
+        message: context.l10n.text('enterMobileNumber'),
       );
       return;
     }
@@ -95,7 +96,7 @@ class _LoginScreenState extends State<LoginScreen> {
       return;
     }
 
-    setState(() => _isSubmitting = true);
+    updateView(() => _isSubmitting = true);
     try {
       final StudentLoginResponse response =
           await _authApiService.createStudentForOtp(
@@ -146,14 +147,24 @@ class _LoginScreenState extends State<LoginScreen> {
       );
     } finally {
       if (mounted) {
-        setState(() => _isSubmitting = false);
+        updateView(() => _isSubmitting = false);
       }
     }
   }
 
+  AgreementTemplate? _agreementForLanguage(String languageCode) {
+    for (final AgreementTemplate agreement in _agreementTemplates) {
+      if (agreement.language.toLowerCase() == languageCode.toLowerCase()) {
+        return agreement;
+      }
+    }
+    return _agreementTemplates.isEmpty ? null : _agreementTemplates.first;
+  }
+
   void _openTermsBottomSheet() {
-    final AgreementTemplate? agreement =
-        _agreementTemplates.isEmpty ? null : _agreementTemplates.first;
+    final AgreementTemplate? agreement = _agreementForLanguage(
+      context.l10n.locale.languageCode,
+    );
 
     if (agreement == null) {
       return;
@@ -229,12 +240,14 @@ class _LoginScreenState extends State<LoginScreen> {
 
   @override
   Widget build(BuildContext context) {
-    final AgreementTemplate? agreement =
-        _agreementTemplates.isEmpty ? null : _agreementTemplates.first;
+    final AgreementTemplate? agreement = _agreementForLanguage(
+      context.l10n.locale.languageCode,
+    );
 
-    return AuthScaffold(
-      isLoading: _isLoadingMeta || _isSubmitting,
-      child: Column(
+    return buildCubitView(
+      (context) => AuthScaffold(
+        isLoading: _isLoadingMeta || _isSubmitting,
+        child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         mainAxisSize: MainAxisSize.min,
         children: [
@@ -281,7 +294,7 @@ class _LoginScreenState extends State<LoginScreen> {
                         ? null
                         : (value) {
                             if (value == null) return;
-                            setState(() => _selectedCountry = value);
+                            updateView(() => _selectedCountry = value);
                           },
                   ),
                 ),
@@ -316,7 +329,7 @@ class _LoginScreenState extends State<LoginScreen> {
               value: _isChecked,
               onChanged: agreement == null
                   ? null
-                  : (value) => setState(() => _isChecked = value ?? false),
+                  : (value) => updateView(() => _isChecked = value ?? false),
               title: GestureDetector(
                 onTap: agreement == null ? null : _openTermsBottomSheet,
                 child: Text(
@@ -329,7 +342,8 @@ class _LoginScreenState extends State<LoginScreen> {
               activeColor: AppColors.primary,
             ),
           ),
-        ],
+          ],
+        ),
       ),
     );
   }
