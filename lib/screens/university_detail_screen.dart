@@ -4,6 +4,7 @@ import 'package:education/core/image_url_helper.dart';
 import 'package:education/core/selected_course_storage.dart';
 import 'package:education/models/admin_university.dart';
 import 'package:education/models/selected_course_data.dart';
+import 'package:education/models/master_option.dart';
 import 'package:flutter/material.dart';
 import '../core/app_theme.dart';
 import '../widgets/common_widgets.dart';
@@ -18,12 +19,16 @@ class UniversityDetailScreen extends StatefulWidget {
     this.initialSelectedCourseKeys = const <String>{},
     this.selectedAcademic,
     this.selectedTrack,
+    this.academicOptions = const <MasterOption>[],
+    this.trackOptions = const <MasterOption>[],
   });
 
   final AdminUniversity data;
   final Set<String> initialSelectedCourseKeys;
   final String? selectedAcademic;
   final String? selectedTrack;
+  final List<MasterOption> academicOptions;
+  final List<MasterOption> trackOptions;
 
   @override
   State<UniversityDetailScreen> createState() => _UniversityDetailScreenState();
@@ -361,6 +366,8 @@ class _UniversityDetailScreenState extends State<UniversityDetailScreen>
                                 adminUniversity: data,
                                 selectedAcademic: widget.selectedAcademic,
                                 selectedTrack: widget.selectedTrack,
+                                academicOptions: widget.academicOptions,
+                                trackOptions: widget.trackOptions,
                               );
                             }).toList(),
                           ),
@@ -450,6 +457,8 @@ class _CollegeAccordion extends StatefulWidget {
     required this.adminUniversity,
     required this.selectedAcademic,
     required this.selectedTrack,
+    required this.academicOptions,
+    required this.trackOptions,
   });
 
   final String academicName;
@@ -459,6 +468,8 @@ class _CollegeAccordion extends StatefulWidget {
   final AdminUniversity adminUniversity;
   final String? selectedAcademic;
   final String? selectedTrack;
+  final List<MasterOption> academicOptions;
+  final List<MasterOption> trackOptions;
   final VoidCallback onToggleExpand;
   final ValueChanged<String> onToggleCourse;
 
@@ -473,17 +484,73 @@ class _CollegeAccordionState extends State<_CollegeAccordion> {
     return (value ?? '').trim().toUpperCase();
   }
 
+  String _localizedMasterLabel(
+    BuildContext context,
+    String? value,
+    List<MasterOption> options, {
+    bool uppercaseEnglish = false,
+  }) {
+    final String normalizedValue = _normalizeFilterValue(value);
+    if (normalizedValue.isEmpty) return '';
+
+    for (final option in options) {
+      final matches = <String>[
+        option.nameEn,
+        option.nameAr,
+        option.value,
+        option.key,
+      ].any((candidate) => _normalizeFilterValue(candidate) == normalizedValue);
+
+      if (matches) {
+        final label = option.displayName(isArabic: context.l10n.isArabic).trim();
+        if (label.isNotEmpty) {
+          return !context.l10n.isArabic && uppercaseEnglish
+              ? label.toUpperCase()
+              : label;
+        }
+      }
+    }
+
+    final fallback = value?.trim() ?? '';
+    return !context.l10n.isArabic && uppercaseEnglish
+        ? fallback.toUpperCase()
+        : fallback;
+  }
+
+  Set<String> _selectedAliases(String? selected, List<MasterOption> options) {
+    final aliases = <String>{};
+    final normalizedSelected = _normalizeFilterValue(selected);
+    if (normalizedSelected.isEmpty) return aliases;
+
+    aliases.add(normalizedSelected);
+    for (final option in options) {
+      final optionValues = <String>[
+        option.nameEn,
+        option.nameAr,
+        option.value,
+        option.key,
+      ].map(_normalizeFilterValue).where((value) => value.isNotEmpty).toSet();
+
+      if (optionValues.contains(normalizedSelected)) {
+        aliases.addAll(optionValues);
+      }
+    }
+
+    return aliases;
+  }
+
   bool _matchesSelectedTrack(Courses course) {
-    final selected = _normalizeFilterValue(widget.selectedTrack);
-    if (selected.isEmpty) return true;
-    return _normalizeFilterValue(course.track) == selected;
+    final aliases = _selectedAliases(widget.selectedTrack, widget.trackOptions);
+    if (aliases.isEmpty) return true;
+    return aliases.contains(_normalizeFilterValue(course.track));
   }
 
   bool _matchesSelectedAcademic(Courses course) {
-    final selected = _normalizeFilterValue(widget.selectedAcademic);
-    if (selected.isEmpty) return true;
-    return _normalizeFilterValue(course.academicProgram) == selected ||
-        _normalizeFilterValue(widget.academicName) == selected;
+    final aliases =
+        _selectedAliases(widget.selectedAcademic, widget.academicOptions);
+    if (aliases.isEmpty) return true;
+    return aliases.contains(_normalizeFilterValue(course.academicProgram)) ||
+        aliases.contains(_normalizeFilterValue(widget.academicName));
   }
 
   @override
@@ -514,7 +581,12 @@ class _CollegeAccordionState extends State<_CollegeAccordion> {
                 children: [
                   Expanded(
                     child: Text(
-                      widget.academicName.toUpperCase(),
+                      _localizedMasterLabel(
+                        context,
+                        widget.academicName,
+                        widget.academicOptions,
+                        uppercaseEnglish: true,
+                      ),
                       style: TextStyle(
                         fontSize: isSmallMobile ? 12.5 : 14,
                         fontWeight: FontWeight.bold,
@@ -822,7 +894,11 @@ class _CollegeAccordionState extends State<_CollegeAccordion> {
                 child: Text(
                   details.track == null || details.track!.isEmpty
                       ? details.minBaGpa ?? "-"
-                      : details.track ?? "-",
+                      : _localizedMasterLabel(
+                          context,
+                          details.track,
+                          widget.trackOptions,
+                        ),
                   textAlign: TextAlign.center,
                   style: TextStyle(
                     fontWeight: FontWeight.w400,
