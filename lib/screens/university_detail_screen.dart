@@ -43,11 +43,36 @@ class _UniversityDetailScreenState extends State<UniversityDetailScreen>
 
   AdminUniversity get data => widget.data;
 
+  String _localizedText(String? englishValue, String? arabicValue) {
+    final localized = context.l10n.isArabic ? arabicValue : englishValue;
+    if ((localized ?? '').trim().isNotEmpty) return localized!.trim();
+
+    final fallback = context.l10n.isArabic ? englishValue : arabicValue;
+    return (fallback ?? '').trim();
+  }
+
+  List<AcademicList> get _localizedAcademicList {
+    if (context.l10n.isArabic && (data.academicListAr?.isNotEmpty ?? false)) {
+      return data.academicListAr!;
+    }
+    return data.academicList ?? <AcademicList>[];
+  }
+
+  List<AcademicPrograms> get _localizedAcademicPrograms {
+    if (context.l10n.isArabic && (data.academicListAr?.isNotEmpty ?? false)) {
+      return _academicProgramsFromEntries(data.academicListAr!);
+    }
+    if (data.academicPrograms?.isNotEmpty ?? false) {
+      return data.academicPrograms!;
+    }
+    return _academicProgramsFromEntries(_localizedAcademicList);
+  }
+
   Map<String, List<AcademicList>> get _academicGroups {
     final Map<String, List<AcademicList>> grouped =
         <String, List<AcademicList>>{};
 
-    for (final AcademicList entry in data.academicList ?? <AcademicList>[]) {
+    for (final AcademicList entry in _localizedAcademicList) {
       final String academicName = entry.academicname?.trim() ?? '';
       if (!_matchesSelectedAcademic(academicName) &&
           !_matchesSelectedAcademic(entry.program?.academicProgram)) {
@@ -59,10 +84,119 @@ class _UniversityDetailScreenState extends State<UniversityDetailScreen>
     return grouped;
   }
 
+  List<AcademicPrograms> _academicProgramsFromEntries(
+    List<AcademicList> entries,
+  ) {
+    final grouped = <String, AcademicPrograms>{};
+
+    for (final entry in entries) {
+      final program = entry.program;
+      final academicName = (entry.academicname ??
+              program?.academicProgram ??
+              program?.name ??
+              '')
+          .trim();
+      final collegeName =
+          (entry.college ?? program?.educationInstitute ?? '').trim();
+
+      if (academicName.isEmpty && collegeName.isEmpty && program == null) {
+        continue;
+      }
+
+      final academicProgram = grouped.putIfAbsent(
+        academicName,
+        () => AcademicPrograms(academicname: academicName, colleges: []),
+      );
+      final colleges = academicProgram.colleges ?? <Colleges>[];
+      academicProgram.colleges = colleges;
+
+      final college = colleges.firstWhere(
+        (item) => (item.college ?? '') == collegeName,
+        orElse: () {
+          final created = Colleges(college: collegeName, courses: []);
+          colleges.add(created);
+          return created;
+        },
+      );
+      final courses = college.courses ?? <Courses>[];
+      college.courses = courses;
+
+      final details = program?.courseDetails ?? <CourseDetails>[];
+      if (details.isNotEmpty) {
+        courses.addAll(details.map(
+          (course) => Courses.fromCourseDetails(
+            course,
+            program: program,
+            academicName: academicName,
+            collegeName: collegeName,
+          ),
+        ));
+        continue;
+      }
+
+      final courseNames = program?.courses?.isNotEmpty == true
+          ? program?.courses
+          : program?.courseNames;
+      for (final courseName in _splitCourseNames(courseNames)) {
+        courses.add(Courses.fromCourseDetails(
+          CourseDetails(name: courseName),
+          program: program,
+          academicName: academicName,
+          collegeName: collegeName,
+        ));
+      }
+    }
+
+    return grouped.values.toList(growable: false);
+  }
+
+  List<String> _splitCourseNames(dynamic value) {
+    if (value == null) return const [];
+    if (value is Iterable) {
+      return value
+          .whereType<String>()
+          .map((item) => item.trim())
+          .where((item) => item.isNotEmpty)
+          .toList(growable: false);
+    }
+    return value
+        .toString()
+        .split(RegExp(r'[\n,]'))
+        .map((item) => item.trim())
+        .where((item) => item.isNotEmpty)
+        .toList(growable: false);
+  }
+
   bool _matchesSelectedAcademic(String? value) {
     final selected = _normalizeFilterValue(widget.selectedAcademic);
     if (selected.isEmpty) return true;
-    return _normalizeFilterValue(value) == selected;
+    final aliases = _selectedAliases(
+      widget.selectedAcademic,
+      widget.academicOptions,
+    );
+    return aliases.contains(_normalizeFilterValue(value));
+  }
+
+  Set<String> _selectedAliases(String? selected, List<MasterOption> options) {
+    final aliases = <String>{};
+    final normalizedSelected = _normalizeFilterValue(selected);
+    if (normalizedSelected.isEmpty) return aliases;
+
+    aliases.add(normalizedSelected);
+    for (final option in options) {
+      final optionValues = <String>[
+        option.nameEn,
+        option.nameAr,
+        option.value,
+        option.key,
+      ].map(_normalizeFilterValue).where((value) => value.isNotEmpty).toSet();
+
+      if (optionValues.contains(normalizedSelected)) {
+        aliases.addAll(optionValues);
+      }
+    }
+
+    return aliases;
   }
 
   static String _normalizeFilterValue(String? value) {
@@ -81,7 +215,10 @@ class _UniversityDetailScreenState extends State<UniversityDetailScreen>
   }
 
   void _showAddressDialog() {
-    showAddressBottomSheet(context: context, address: data.address);
+    showAddressBottomSheet(
+      context: context,
+      address: _localizedText(data.address, data.addressAr),
+    );
   }
 
   Future<void> _restoreSelectedCourses() async {
@@ -249,7 +386,7 @@ class _UniversityDetailScreenState extends State<UniversityDetailScreen>
                                     ),
                                     const SizedBox(height: 8),
                                     Text(
-                                      data.name ?? "",
+                                      _localizedText(data.name, data.nameAr),
                                       style: const TextStyle(
                                         fontSize: 14,
                                         fontWeight: FontWeight.w700,
@@ -268,7 +405,10 @@ class _UniversityDetailScreenState extends State<UniversityDetailScreen>
                                         const SizedBox(width: 4),
                                         Expanded(
                                           child: Text(
-                                            data.address ?? "",
+                                            _localizedText(
+                                              data.address,
+                                              data.addressAr,
+                                            ),
                                             maxLines: 1,
                                             overflow: TextOverflow.ellipsis,
                                             style: const TextStyle(
@@ -286,7 +426,7 @@ class _UniversityDetailScreenState extends State<UniversityDetailScreen>
                         ),
                       ),
                     ),
-                    TopRoundedHeader(title: data.name ?? ""),
+                    TopRoundedHeader(title: _localizedText(data.name, data.nameAr)),
                   ],
                 ),
 
@@ -318,7 +458,9 @@ class _UniversityDetailScreenState extends State<UniversityDetailScreen>
                             sectionPadding + 4,
                             0,
                           ),
-                          child: ReadMoreText(text: data.aboutUs.toString()),
+                          child: ReadMoreText(
+                            text: _localizedText(data.aboutUs, data.aboutUsAr),
+                          ),
                         ),
                         SizedBox(height: 10),
                         if (_selectedCourses.isNotEmpty)
@@ -340,7 +482,7 @@ class _UniversityDetailScreenState extends State<UniversityDetailScreen>
                               ),
                             ),
                           ),
-                        if (data.academicList?.isNotEmpty ?? false)
+                        if (_localizedAcademicList.isNotEmpty)
                           Padding(
                             padding: EdgeInsets.symmetric(
                               horizontal: sectionPadding,
@@ -374,6 +516,8 @@ class _UniversityDetailScreenState extends State<UniversityDetailScreen>
                                   selectedResult: widget.selectedResult,
                                   academicOptions: widget.academicOptions,
                                   trackOptions: widget.trackOptions,
+                                  academicPrograms:
+                                      _localizedAcademicPrograms,
                                 );
                               }).toList(),
                             ),
@@ -466,6 +610,7 @@ class _CollegeAccordion extends StatefulWidget {
     required this.selectedResult,
     required this.academicOptions,
     required this.trackOptions,
+    required this.academicPrograms,
   });
 
   final String academicName;
@@ -478,6 +623,7 @@ class _CollegeAccordion extends StatefulWidget {
   final String? selectedResult;
   final List<MasterOption> academicOptions;
   final List<MasterOption> trackOptions;
+  final List<AcademicPrograms> academicPrograms;
   final VoidCallback onToggleExpand;
   final ValueChanged<String> onToggleCourse;
 
@@ -557,8 +703,12 @@ class _CollegeAccordionState extends State<_CollegeAccordion> {
   bool _matchesSelectedAcademic(Courses course) {
     final selected = _normalizeFilterValue(widget.selectedAcademic);
     if (selected.isEmpty) return true;
-    return _splitFilterValues(course.academicProgram).contains(selected) ||
-        _normalizeFilterValue(widget.academicName) == selected;
+    final aliases = _selectedAliases(
+      widget.selectedAcademic,
+      widget.academicOptions,
+    );
+    return _splitFilterValues(course.academicProgram).any(aliases.contains) ||
+        aliases.contains(_normalizeFilterValue(widget.academicName));
   }
 
   bool _matchesSelectedResult(Courses course) {
@@ -570,11 +720,22 @@ class _CollegeAccordionState extends State<_CollegeAccordion> {
   }
 
   Set<String> _splitFilterValues(String? value) {
-    return (value ?? '')
+    final values = (value ?? '')
         .split(',')
         .map(_normalizeFilterValue)
         .where((entry) => entry.isNotEmpty)
         .toSet();
+
+    if (values.any(_isScientificAndLiterary)) {
+      values.addAll(const {'SCIENTIFIC', 'LITERARY'});
+    }
+
+    return values;
+  }
+
+  bool _isScientificAndLiterary(String value) {
+    return value.replaceAll(' ', '').replaceAll('&', 'AND') ==
+        'SCIENTIFICANDLITERARY';
   }
 
   @override
@@ -629,7 +790,7 @@ class _CollegeAccordionState extends State<_CollegeAccordion> {
           ),
           if (widget.isExpanded)
             Column(
-              children: (widget.adminUniversity.academicPrograms ?? [])
+              children: widget.academicPrograms
                   .where(
                 (academicProgram) =>
                     (academicProgram.academicname ?? '').trim() ==
@@ -649,7 +810,6 @@ class _CollegeAccordionState extends State<_CollegeAccordion> {
                             .where(_matchesSelectedTrack)
                             .where(_matchesSelectedResult)
                             .toList(growable: false);
-                    print("collegeCourses--->" + collegeCourses.toString());
                     return Column(
                       children: [
                         _buildTableHeader(
