@@ -153,295 +153,298 @@ class _UniversityDetailScreenState extends State<UniversityDetailScreen>
     return buildCubitView(
       (context) => Directionality(
         textDirection: Directionality.of(context),
-      child: Scaffold(
-        body: AppBackground(
-          child: Column(
-            children: [
-              /// 🔹 TOP HEADER
-              Stack(
-                clipBehavior: Clip.none,
-                children: [
-                  ClipRRect(
-                    borderRadius: const BorderRadius.vertical(
-                      bottom: Radius.circular(20),
-                    ),
-                    child: SizedBox(
-                      height: headerHeight,
-                      width: double.infinity,
-                      child: Image.network(
-                        ImageUrlHelper.resolveUploadUrl(data.coverImagePath),
-                        fit: BoxFit.fill,
-                        errorBuilder: (_, __, ___) => Center(
-                          child: Image.asset('assets/images/logo.webp'),
+        child: Scaffold(
+          body: AppBackground(
+            child: Column(
+              children: [
+                /// 🔹 TOP HEADER
+                Stack(
+                  clipBehavior: Clip.none,
+                  children: [
+                    ClipRRect(
+                      borderRadius: const BorderRadius.vertical(
+                        bottom: Radius.circular(20),
+                      ),
+                      child: SizedBox(
+                        height: headerHeight,
+                        width: double.infinity,
+                        child: Image.network(
+                          ImageUrlHelper.resolveUploadUrl(data.coverImagePath),
+                          fit: BoxFit.fill,
+                          errorBuilder: (_, __, ___) => Center(
+                            child: Image.asset('assets/images/logo.webp'),
+                          ),
                         ),
                       ),
                     ),
-                  ),
-                  Positioned(
-                    left: 20,
-                    right: 20,
-                    bottom: -40,
-                    child: InkWell(
-                      onTap: _showAddressDialog,
-                      child: Container(
-                        padding: const EdgeInsets.all(12),
-                        decoration: BoxDecoration(
-                          color: Colors.white,
-                          borderRadius: BorderRadius.circular(12),
-                          boxShadow: const [
-                            BoxShadow(
-                              color: AppColors.shadow,
-                              blurRadius: 18,
-                              offset: Offset(0, 8),
-                            ),
-                          ],
-                        ),
-                        child: Row(
-                          children: [
-                            Container(
-                              width: 64,
-                              height: 64,
-                              decoration: BoxDecoration(
-                                color: const Color(0xFFF3F3F3),
-                                borderRadius: BorderRadius.circular(10),
+                    Positioned(
+                      left: 20,
+                      right: 20,
+                      bottom: -40,
+                      child: InkWell(
+                        onTap: _showAddressDialog,
+                        child: Container(
+                          padding: const EdgeInsets.all(12),
+                          decoration: BoxDecoration(
+                            color: Colors.white,
+                            borderRadius: BorderRadius.circular(12),
+                            boxShadow: const [
+                              BoxShadow(
+                                color: AppColors.shadow,
+                                blurRadius: 18,
+                                offset: Offset(0, 8),
                               ),
-                              alignment: Alignment.center,
-                              child: Image.network(
-                                ImageUrlHelper.resolveUploadUrl(data.logoPath),
-                                fit: BoxFit.cover,
-                                errorBuilder: (_, __, ___) => Center(
-                                  child: Image.asset('assets/images/logo.webp'),
+                            ],
+                          ),
+                          child: Row(
+                            children: [
+                              Container(
+                                width: 64,
+                                height: 64,
+                                decoration: BoxDecoration(
+                                  color: const Color(0xFFF3F3F3),
+                                  borderRadius: BorderRadius.circular(10),
+                                ),
+                                alignment: Alignment.center,
+                                child: Image.network(
+                                  ImageUrlHelper.resolveUploadUrl(
+                                      data.logoPath),
+                                  fit: BoxFit.cover,
+                                  errorBuilder: (_, __, ___) => Center(
+                                    child:
+                                        Image.asset('assets/images/logo.webp'),
+                                  ),
                                 ),
                               ),
-                            ),
-                            const SizedBox(width: 12),
-                            Expanded(
-                              child: Column(
-                                crossAxisAlignment: CrossAxisAlignment.start,
-                                children: [
-                                  Row(
-                                    children: [
-                                      Icon(
-                                        Icons.star,
-                                        color: Color(0xFFFFB300),
-                                        size: 16,
-                                      ),
-                                      SizedBox(width: 4),
-                                      Text(
-                                        data.averageRating!
-                                            .toDouble()
-                                            .toString(),
-                                        style: TextStyle(
-                                          fontWeight: FontWeight.w700,
+                              const SizedBox(width: 12),
+                              Expanded(
+                                child: Column(
+                                  crossAxisAlignment: CrossAxisAlignment.start,
+                                  children: [
+                                    Row(
+                                      children: [
+                                        Icon(
+                                          Icons.star,
+                                          color: Color(0xFFFFB300),
+                                          size: 16,
                                         ),
-                                      ),
-                                      SizedBox(width: 4),
-                                      Text(
-                                        '(${data.ratingCount!.toDouble().toString()} reviews)',
-                                        style: TextStyle(
-                                          fontSize: isSmallMobile ? 11 : 12,
-                                          color: AppColors.textMuted,
+                                        SizedBox(width: 4),
+                                        Text(
+                                          data.averageRating!
+                                              .toDouble()
+                                              .toString(),
+                                          style: TextStyle(
+                                            fontWeight: FontWeight.w700,
+                                          ),
                                         ),
-                                      ),
-                                    ],
-                                  ),
-                                  const SizedBox(height: 8),
-                                  Text(
-                                    data.name ?? "",
-                                    style: const TextStyle(
-                                      fontSize: 14,
-                                      fontWeight: FontWeight.w700,
-                                    ),
-                                  ),
-                                  const SizedBox(height: 4),
-                                  Row(
-                                    crossAxisAlignment:
-                                        CrossAxisAlignment.start,
-                                    children: [
-                                      const Icon(
-                                        Icons.location_on_outlined,
-                                        size: 15,
-                                        color: AppColors.textMuted,
-                                      ),
-                                      const SizedBox(width: 4),
-                                      Expanded(
-                                        child: Text(
-                                          data.address ?? "",
-                                          maxLines: 1,
-                                          overflow: TextOverflow.ellipsis,
-                                          style: const TextStyle(
+                                        SizedBox(width: 4),
+                                        Text(
+                                          '(${data.ratingCount!.toDouble().toString()} reviews)',
+                                          style: TextStyle(
+                                            fontSize: isSmallMobile ? 11 : 12,
                                             color: AppColors.textMuted,
                                           ),
                                         ),
+                                      ],
+                                    ),
+                                    const SizedBox(height: 8),
+                                    Text(
+                                      data.name ?? "",
+                                      style: const TextStyle(
+                                        fontSize: 14,
+                                        fontWeight: FontWeight.w700,
                                       ),
-                                    ],
-                                  ),
-                                ],
+                                    ),
+                                    const SizedBox(height: 4),
+                                    Row(
+                                      crossAxisAlignment:
+                                          CrossAxisAlignment.start,
+                                      children: [
+                                        const Icon(
+                                          Icons.location_on_outlined,
+                                          size: 15,
+                                          color: AppColors.textMuted,
+                                        ),
+                                        const SizedBox(width: 4),
+                                        Expanded(
+                                          child: Text(
+                                            data.address ?? "",
+                                            maxLines: 1,
+                                            overflow: TextOverflow.ellipsis,
+                                            style: const TextStyle(
+                                              color: AppColors.textMuted,
+                                            ),
+                                          ),
+                                        ),
+                                      ],
+                                    ),
+                                  ],
+                                ),
                               ),
-                            ),
-                          ],
+                            ],
+                          ),
                         ),
                       ),
                     ),
-                  ),
-                  TopRoundedHeader(title: data.name ?? ""),
-                ],
-              ),
+                    TopRoundedHeader(title: data.name ?? ""),
+                  ],
+                ),
 
-              SizedBox(height: topGap),
+                SizedBox(height: topGap),
 
-              /// 🔥 SCROLL CONTENT
-              Expanded(
-                child: SingleChildScrollView(
-                  padding: const EdgeInsets.only(bottom: 10),
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      Padding(
-                        padding: EdgeInsets.symmetric(
-                          horizontal: sectionPadding + 4,
-                        ),
-                        child: Text(
-                          'About',
-                          style: TextStyle(
-                            fontSize: isSmallMobile ? 16 : 18,
-                            fontWeight: FontWeight.w700,
+                /// 🔥 SCROLL CONTENT
+                Expanded(
+                  child: SingleChildScrollView(
+                    padding: const EdgeInsets.only(bottom: 10),
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        Padding(
+                          padding: EdgeInsets.symmetric(
+                            horizontal: sectionPadding + 4,
+                          ),
+                          child: Text(
+                            'About',
+                            style: TextStyle(
+                              fontSize: isSmallMobile ? 16 : 18,
+                              fontWeight: FontWeight.w700,
+                            ),
                           ),
                         ),
-                      ),
-                      Padding(
-                        padding: EdgeInsets.fromLTRB(
-                          sectionPadding + 4,
-                          10,
-                          sectionPadding + 4,
-                          0,
-                        ),
-                        child: ReadMoreText(text: data.aboutUs.toString()),
-                      ),
-                      SizedBox(height: 10),
-                      if (_selectedCourses.isNotEmpty)
                         Padding(
                           padding: EdgeInsets.fromLTRB(
                             sectionPadding + 4,
-                            0,
-                            sectionPadding + 4,
                             10,
+                            sectionPadding + 4,
+                            0,
                           ),
-                          child: Align(
-                            alignment: Alignment.centerLeft,
-                            child: Text(
-                              'Selected Courses: ${_selectedCourses.length}',
-                              style: const TextStyle(
-                                fontWeight: FontWeight.w600,
-                                color: AppColors.textMuted,
+                          child: ReadMoreText(text: data.aboutUs.toString()),
+                        ),
+                        SizedBox(height: 10),
+                        if (_selectedCourses.isNotEmpty)
+                          Padding(
+                            padding: EdgeInsets.fromLTRB(
+                              sectionPadding + 4,
+                              0,
+                              sectionPadding + 4,
+                              10,
+                            ),
+                            child: Align(
+                              alignment: Alignment.centerLeft,
+                              child: Text(
+                                'Selected Courses: ${_selectedCourses.length}',
+                                style: const TextStyle(
+                                  fontWeight: FontWeight.w600,
+                                  color: AppColors.textMuted,
+                                ),
                               ),
                             ),
                           ),
-                        ),
-                      if (data.academicList?.isNotEmpty ?? false)
-                        Padding(
-                          padding: EdgeInsets.symmetric(
-                            horizontal: sectionPadding,
-                          ),
-                          child: Column(
-                            crossAxisAlignment: CrossAxisAlignment.start,
-                            children: _academicGroups.entries.map((groupEntry) {
-                              final String academicName = groupEntry.key;
-                              final bool isExpanded =
-                                  _expandedColleges.contains(academicName);
+                        if (data.academicList?.isNotEmpty ?? false)
+                          Padding(
+                            padding: EdgeInsets.symmetric(
+                              horizontal: sectionPadding,
+                            ),
+                            child: Column(
+                              crossAxisAlignment: CrossAxisAlignment.start,
+                              children:
+                                  _academicGroups.entries.map((groupEntry) {
+                                final String academicName = groupEntry.key;
+                                final bool isExpanded =
+                                    _expandedColleges.contains(academicName);
 
-                              return _CollegeAccordion(
-                                academicName: academicName,
-                                academicEntries: groupEntry.value,
-                                isExpanded: isExpanded,
-                                selectedCourses: _selectedCourses,
-                                onToggleExpand: () {
-                                  updateView(() {
-                                    if (isExpanded) {
-                                      _expandedColleges.remove(academicName);
-                                    } else {
-                                      _expandedColleges.add(academicName);
-                                    }
-                                  });
-                                },
-                                onToggleCourse: _toggleCourseSelection,
-                                adminUniversity: data,
-                                selectedAcademic: widget.selectedAcademic,
-                                selectedTrack: widget.selectedTrack,
-                                selectedResult: widget.selectedResult,
-                                academicOptions: widget.academicOptions,
-                                trackOptions: widget.trackOptions,
-                              );
-                            }).toList(),
-                          ),
-                        )
-                      else
-                        Padding(
-                          padding: const EdgeInsets.all(16.0),
-                          child: Container(
-                            width: double.infinity,
-                            padding: const EdgeInsets.symmetric(
-                              vertical: 20,
-                              horizontal: 12,
+                                return _CollegeAccordion(
+                                  academicName: academicName,
+                                  academicEntries: groupEntry.value,
+                                  isExpanded: isExpanded,
+                                  selectedCourses: _selectedCourses,
+                                  onToggleExpand: () {
+                                    updateView(() {
+                                      if (isExpanded) {
+                                        _expandedColleges.remove(academicName);
+                                      } else {
+                                        _expandedColleges.add(academicName);
+                                      }
+                                    });
+                                  },
+                                  onToggleCourse: _toggleCourseSelection,
+                                  adminUniversity: data,
+                                  selectedAcademic: widget.selectedAcademic,
+                                  selectedTrack: widget.selectedTrack,
+                                  selectedResult: widget.selectedResult,
+                                  academicOptions: widget.academicOptions,
+                                  trackOptions: widget.trackOptions,
+                                );
+                              }).toList(),
                             ),
-                            decoration: BoxDecoration(
-                              borderRadius: BorderRadius.circular(10),
-                              border: Border.all(
-                                color: const Color(0xFFE6E6E6),
+                          )
+                        else
+                          Padding(
+                            padding: const EdgeInsets.all(16.0),
+                            child: Container(
+                              width: double.infinity,
+                              padding: const EdgeInsets.symmetric(
+                                vertical: 20,
+                                horizontal: 12,
                               ),
-                              color: Colors.white,
-                            ),
-                            child: Text(
-                              context.l10n.text('No courses available'),
-                              textAlign: TextAlign.center,
-                              style: TextStyle(
-                                color: Color(0xFF616161),
-                                fontWeight: FontWeight.w500,
+                              decoration: BoxDecoration(
+                                borderRadius: BorderRadius.circular(10),
+                                border: Border.all(
+                                  color: const Color(0xFFE6E6E6),
+                                ),
+                                color: Colors.white,
+                              ),
+                              child: Text(
+                                context.l10n.text('No courses available'),
+                                textAlign: TextAlign.center,
+                                style: TextStyle(
+                                  color: Color(0xFF616161),
+                                  fontWeight: FontWeight.w500,
+                                ),
                               ),
                             ),
                           ),
-                        ),
-                    ],
+                      ],
+                    ),
                   ),
                 ),
-              ),
 
-              // SafeArea(
-              //   top: false,
-              //   child: Padding(
-              //     padding: EdgeInsets.fromLTRB(
-              //       sectionPadding,
-              //       8,
-              //       sectionPadding,
-              //       isSmallMobile ? 12 : 16,
-              //     ),
-              //     child: AppPrimaryButton(
-              //       label: 'View Courses (${_selectedCourses.length})',
-              //       onPressed: _selectedCourses.isEmpty
-              //           ? null
-              //           : () {
-              //               final String selectedCourseTitle =
-              //                   _selectedCourses.first.split('-').last.trim();
-              //               Navigator.push(
-              //                 context,
-              //                 MaterialPageRoute(
-              //                   builder: (_) => UploadDocumentsScreen(
-              //                     universityName: data.name,
-              //                     universityHeroImage:
-              //                         ImageUrlHelper.resolveUploadUrl(
-              //                           data.coverImagePath,
-              //                         ),
-              //                     courseTitle: selectedCourseTitle,
-              //                   ),
-              //                 ),
-              //               );
-              //             },
-              //     ),
-              //   ),
-              // ),
-            ],
+                // SafeArea(
+                //   top: false,
+                //   child: Padding(
+                //     padding: EdgeInsets.fromLTRB(
+                //       sectionPadding,
+                //       8,
+                //       sectionPadding,
+                //       isSmallMobile ? 12 : 16,
+                //     ),
+                //     child: AppPrimaryButton(
+                //       label: 'View Courses (${_selectedCourses.length})',
+                //       onPressed: _selectedCourses.isEmpty
+                //           ? null
+                //           : () {
+                //               final String selectedCourseTitle =
+                //                   _selectedCourses.first.split('-').last.trim();
+                //               Navigator.push(
+                //                 context,
+                //                 MaterialPageRoute(
+                //                   builder: (_) => UploadDocumentsScreen(
+                //                     universityName: data.name,
+                //                     universityHeroImage:
+                //                         ImageUrlHelper.resolveUploadUrl(
+                //                           data.coverImagePath,
+                //                         ),
+                //                     courseTitle: selectedCourseTitle,
+                //                   ),
+                //                 ),
+                //               );
+                //             },
+                //     ),
+                //   ),
+                // ),
+              ],
+            ),
           ),
-        ),
         ),
       ),
     );
@@ -507,7 +510,8 @@ class _CollegeAccordionState extends State<_CollegeAccordion> {
       ].any((candidate) => _normalizeFilterValue(candidate) == normalizedValue);
 
       if (matches) {
-        final label = option.displayName(isArabic: context.l10n.isArabic).trim();
+        final label =
+            option.displayName(isArabic: context.l10n.isArabic).trim();
         if (label.isNotEmpty) {
           return !context.l10n.isArabic && uppercaseEnglish
               ? label.toUpperCase()
@@ -645,7 +649,7 @@ class _CollegeAccordionState extends State<_CollegeAccordion> {
                             .where(_matchesSelectedTrack)
                             .where(_matchesSelectedResult)
                             .toList(growable: false);
-
+                    print("collegeCourses--->" + collegeCourses.toString());
                     return Column(
                       children: [
                         _buildTableHeader(
@@ -655,7 +659,19 @@ class _CollegeAccordionState extends State<_CollegeAccordion> {
                           isEmpty: false,
                           collegeName: collegeName,
                         ),
-                        ...collegeCourses.asMap().entries.map((entry) {
+                        ...(collegeCourses.isEmpty
+                            ? [
+                          Padding(
+                            padding: const EdgeInsets.all(16),
+                            child: Center(
+                              child: Text(
+                                'No courses available',
+                                style: Theme.of(context).textTheme.bodyMedium,
+                              ),
+                            ),
+                          ),
+                        ]
+                            : collegeCourses.asMap().entries.map((entry) {
                           final int index = entry.key;
                           final Courses details = entry.value;
 
@@ -667,7 +683,7 @@ class _CollegeAccordionState extends State<_CollegeAccordion> {
                           ].map((e) => e.trim()).join('-');
 
                           final bool isSelected =
-                              widget.selectedCourses.contains(courseKey);
+                          widget.selectedCourses.contains(courseKey);
 
                           return _buildCourseRow(
                             index: index,
@@ -681,7 +697,7 @@ class _CollegeAccordionState extends State<_CollegeAccordion> {
                             isSmallMobile: isSmallMobile,
                             tableWidth: tableWidth,
                           );
-                        }).toList(),
+                        }).toList()),
                       ],
                     );
                   }).toList(),
@@ -1063,57 +1079,57 @@ class _ReadMoreTextState extends State<ReadMoreText>
     return buildCubitView(
       (context) => LayoutBuilder(
         builder: (context, size) {
-        final textSpan = TextSpan(
-          text: widget.text,
-          style: const TextStyle(
-            fontSize: 15,
-            color: AppColors.textMuted,
-            height: 1.35,
-          ),
-        );
-
-        final tp = TextPainter(
-          text: textSpan,
-          maxLines: widget.trimLines,
-          textDirection: TextDirection.ltr,
-        )..layout(maxWidth: size.maxWidth);
-
-        final isOverflowing = tp.didExceedMaxLines;
-
-        return Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            Text(
-              widget.text,
-              maxLines: isExpanded ? null : widget.trimLines,
-              overflow:
-                  isExpanded ? TextOverflow.visible : TextOverflow.ellipsis,
-              style: const TextStyle(
-                fontSize: 15,
-                color: AppColors.textMuted,
-                height: 1.35,
-              ),
+          final textSpan = TextSpan(
+            text: widget.text,
+            style: const TextStyle(
+              fontSize: 15,
+              color: AppColors.textMuted,
+              height: 1.35,
             ),
-            if (isOverflowing)
-              GestureDetector(
-                onTap: () {
-                  updateView(() => isExpanded = !isExpanded);
-                },
-                child: Padding(
-                  padding: const EdgeInsets.only(top: 4),
-                  child: Text(
-                    isExpanded
-                        ? context.l10n.text('readLess')
-                        : context.l10n.text('readMore'),
-                    style: const TextStyle(
-                      color: AppColors.primaryDark,
-                      fontWeight: FontWeight.w600,
+          );
+
+          final tp = TextPainter(
+            text: textSpan,
+            maxLines: widget.trimLines,
+            textDirection: TextDirection.ltr,
+          )..layout(maxWidth: size.maxWidth);
+
+          final isOverflowing = tp.didExceedMaxLines;
+
+          return Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Text(
+                widget.text,
+                maxLines: isExpanded ? null : widget.trimLines,
+                overflow:
+                    isExpanded ? TextOverflow.visible : TextOverflow.ellipsis,
+                style: const TextStyle(
+                  fontSize: 15,
+                  color: AppColors.textMuted,
+                  height: 1.35,
+                ),
+              ),
+              if (isOverflowing)
+                GestureDetector(
+                  onTap: () {
+                    updateView(() => isExpanded = !isExpanded);
+                  },
+                  child: Padding(
+                    padding: const EdgeInsets.only(top: 4),
+                    child: Text(
+                      isExpanded
+                          ? context.l10n.text('readLess')
+                          : context.l10n.text('readMore'),
+                      style: const TextStyle(
+                        color: AppColors.primaryDark,
+                        fontWeight: FontWeight.w600,
+                      ),
                     ),
                   ),
                 ),
-              ),
-          ],
-        );
+            ],
+          );
         },
       ),
     );
