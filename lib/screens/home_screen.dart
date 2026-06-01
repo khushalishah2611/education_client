@@ -792,7 +792,7 @@ class _AdvanceSearchDialog extends StatefulWidget {
   });
 
   final List<String> countryOptions;
-  final List<String> academicOptions;
+  final List<AcademicMasterOption> academicOptions;
   final List<String> trackOptions;
   final List<String> currencyOptions;
   final String? selectedCountry;
@@ -924,6 +924,80 @@ class _AdvanceSearchDialogState extends State<_AdvanceSearchDialog>
       );
     }
 
+    Widget academicDropdownTile({
+      required String title,
+      required List<AcademicMasterOption> options,
+      required String? value,
+      required ValueChanged<String?> onChanged,
+      IconData icon = Icons.school_outlined,
+      bool enabled = true,
+    }) {
+      final hasValue = value != null &&
+          options.any((option) => option.value == value);
+      return Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Text(
+            title,
+            style: const TextStyle(fontSize: 14, fontWeight: FontWeight.w600),
+          ),
+          const SizedBox(height: 8),
+          Container(
+            height: 45,
+            padding: const EdgeInsets.symmetric(horizontal: 12),
+            decoration: BoxDecoration(
+              border: Border.all(color: const Color(0xFFD7D7D7)),
+              borderRadius: BorderRadius.circular(10),
+              color: Colors.white,
+            ),
+            child: DropdownButtonHideUnderline(
+              child: DropdownButton<String>(
+                isExpanded: true,
+                value: hasValue ? value : null,
+                borderRadius: BorderRadius.circular(12),
+                menuMaxHeight: 250,
+                icon: const Icon(
+                  Icons.keyboard_arrow_down_rounded,
+                  color: Color(0xFF757575),
+                ),
+                hint: Text(
+                  options.isEmpty
+                      ? context.l10n.text('noOptionsFound')
+                      : context.l10n
+                          .text('selectOption')
+                          .replaceAll('{title}', title),
+                  style: const TextStyle(
+                    color: Color(0xFF8A8A8A),
+                    fontSize: 14,
+                  ),
+                ),
+                items: options.map((option) {
+                  return DropdownMenuItem<String>(
+                    value: option.value,
+                    child: Row(
+                      children: [
+                        Icon(icon, color: const Color(0xFF8A8A8A), size: 18),
+                        const SizedBox(width: 8),
+                        Flexible(
+                          child: Text(
+                            option.label(context.l10n.isArabic),
+                            overflow: TextOverflow.ellipsis,
+                            style: const TextStyle(fontSize: 14),
+                          ),
+                        ),
+                      ],
+                    ),
+                  );
+                }).toList(),
+                onChanged: !enabled || options.isEmpty ? null : onChanged,
+              ),
+            ),
+          ),
+          const SizedBox(height: 12),
+        ],
+      );
+    }
+
     final shouldDisableDetails = _isOnlyCountryAndAcademicAllowed(
       _selectedAcademic,
     );
@@ -979,7 +1053,7 @@ class _AdvanceSearchDialogState extends State<_AdvanceSearchDialog>
                 },
                 icon: Icons.flag_outlined,
               ),
-              dropdownTile(
+              academicDropdownTile(
                 title: context.l10n.text('academicQualification'),
                 options: widget.academicOptions,
                 value: _selectedAcademic,

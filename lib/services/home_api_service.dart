@@ -152,8 +152,36 @@ class HomeApiService {
         .toList(growable: false);
   }
 
-  Future<List<String>> fetchAcademicMasters() async {
-    return _fetchMasterValues('/api/admin/masters/academic');
+  Future<List<AcademicMasterOption>> fetchAcademicMasters() async {
+    final response = await http.get(
+      ApiConfig.uri('/api/admin/masters/academic'),
+    );
+    final decoded = _decode(response.body);
+    logApiCall(
+      method: 'GET',
+      url: ApiConfig.uri('/api/admin/masters/academic').toString(),
+      statusCode: response.statusCode,
+      requestBody: null,
+      responseBody: decoded,
+    );
+
+    if (!ApiStatus.isSuccess(response.statusCode)) {
+      throw Exception('Failed to load academic master data.');
+    }
+
+    return _asList(decoded['data'] ?? decoded)
+        .map(AcademicMasterOption.fromValue)
+        .where((item) => item.value.isNotEmpty)
+        .fold<List<AcademicMasterOption>>(<AcademicMasterOption>[],
+            (items, option) {
+      final exists = items.any(
+        (item) => item.value.toLowerCase() == option.value.toLowerCase(),
+      );
+      if (!exists) {
+        items.add(option);
+      }
+      return items;
+    });
   }
 
   Future<List<String>> fetchTrackMasters() async {
@@ -211,6 +239,61 @@ class HomeApiService {
         .toList(growable: false);
     return values;
   }
+}
+
+class AcademicMasterOption {
+  const AcademicMasterOption({
+    required this.value,
+    required this.englishLabel,
+    required this.arabicLabel,
+  });
+
+  factory AcademicMasterOption.fromValue(dynamic value) {
+    if (value is Map<String, dynamic>) {
+      return AcademicMasterOption.fromJson(value);
+    }
+    if (value is Map) {
+      return AcademicMasterOption.fromJson(
+        value.map((key, value) => MapEntry(key.toString(), value)),
+      );
+    }
+
+    final label = value?.toString().trim() ?? '';
+    return AcademicMasterOption(
+      value: label,
+      englishLabel: label,
+      arabicLabel: label,
+    );
+  }
+
+  factory AcademicMasterOption.fromJson(Map<String, dynamic> json) {
+    final english = _readString(json, const [
+      'academicProgram',
+      'nameEn',
+      'name',
+      'value',
+      'code',
+    ]);
+    final arabic = _readString(json, const [
+      'academicProgramAr',
+      'academicProgramAR',
+      'academicProgramArabic',
+      'nameAr',
+      'arabicName',
+    ]);
+
+    return AcademicMasterOption(
+      value: english.isNotEmpty ? english : arabic,
+      englishLabel: english.isNotEmpty ? english : arabic,
+      arabicLabel: arabic.isNotEmpty ? arabic : english,
+    );
+  }
+
+  final String value;
+  final String englishLabel;
+  final String arabicLabel;
+
+  String label(bool isArabic) => isArabic ? arabicLabel : englishLabel;
 }
 
 Map<String, dynamic> _decode(String body) {
