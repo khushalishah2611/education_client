@@ -114,6 +114,8 @@ class HomeController extends AppCubit<int> {
 
       final countries = responses[3] as List<CountryMaster>;
 
+      _selectedCountry = _canonicalCountryName(_selectedCountry, countries);
+
       /// Auto Oman selection
       _selectedCountry = _resolveAutoCountry(countries) ?? _selectedCountry;
 
@@ -168,8 +170,43 @@ class HomeController extends AppCubit<int> {
     await loadUniversities();
   }
 
+  String? _canonicalCountryName(
+    String? value,
+    List<CountryMaster> countries,
+  ) {
+    final normalizedValue = _normalizeValue(value);
+    if (normalizedValue.isEmpty) return null;
+
+    for (final country in countries) {
+      final names = [country.nameEn, country.nameAr, country.value];
+      if (names.any((name) => _normalizeValue(name) == normalizedValue)) {
+        return (country.nameEn.isNotEmpty ? country.nameEn : country.value)
+            .trim();
+      }
+    }
+
+    return value?.trim();
+  }
+
+  String? _canonicalCountryOptionName(String? value) {
+    final normalizedValue = _normalizeValue(value);
+    if (normalizedValue.isEmpty) return null;
+
+    for (final country in countryOptions) {
+      final names = [country.nameEn, country.nameAr];
+      if (names.any((name) => _normalizeValue(name) == normalizedValue)) {
+        return country.nameEn.trim();
+      }
+    }
+
+    return value?.trim();
+  }
+
   void updateCountry(String? value) {
     _selectedCountry = value?.trim();
+    if (countryOptions.isNotEmpty) {
+      _selectedCountry = _canonicalCountryOptionName(_selectedCountry);
+    }
     refreshView();
   }
 

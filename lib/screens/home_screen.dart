@@ -102,7 +102,7 @@ class _HomeScreenState extends State<HomeScreen> {
       ),
     );
     if (selected == null || !mounted) return;
-    _controller.updateCountry(selected.name);
+    _controller.updateCountry(selected.nameEn);
 
     await _controller.loadUniversities();
   }
@@ -114,9 +114,7 @@ class _HomeScreenState extends State<HomeScreen> {
       useSafeArea: true,
       backgroundColor: Colors.white,
       builder: (_) => _AdvanceSearchDialog(
-        countryOptions: _controller.countryOptions
-            .map((item) => item.name)
-            .toList(growable: false),
+        countryOptions: _controller.countryOptions,
         academicOptions: _controller.academicOptions,
         trackOptions: _controller.trackOptions,
         currencyOptions: _controller.currencyOptions,
@@ -134,6 +132,19 @@ class _HomeScreenState extends State<HomeScreen> {
   }
 
   Future<void> _refreshHomeData() => _controller.refreshHomeData();
+
+  String? _localizedSelectedCountryLabel(BuildContext context) {
+    final selectedCountry = _controller.selectedCountry?.trim();
+    if (selectedCountry == null || selectedCountry.isEmpty) return null;
+
+    for (final country in _controller.countryOptions) {
+      if (country.nameEn == selectedCountry) {
+        return _localizedCountryName(context, country);
+      }
+    }
+
+    return selectedCountry;
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -256,7 +267,9 @@ class _HomeScreenState extends State<HomeScreen> {
                                       children: [
                                         Expanded(
                                           child: Text(
-                                            _controller.selectedCountry ??
+                                            _localizedSelectedCountryLabel(
+                                                  context,
+                                                ) ??
                                                 context.l10n
                                                     .text('selectCountry'),
                                             overflow: TextOverflow.ellipsis,
@@ -481,6 +494,14 @@ class _HomeScreenState extends State<HomeScreen> {
   }
 }
 
+String _localizedCountryName(BuildContext context, CountryOption country) {
+  final localizedName = context.l10n.isArabic ? country.nameAr : country.nameEn;
+  if (localizedName.trim().isNotEmpty) return localizedName.trim();
+
+  final fallbackName = context.l10n.isArabic ? country.nameEn : country.nameAr;
+  return fallbackName.trim();
+}
+
 class _CircleIconButton extends StatelessWidget {
   const _CircleIconButton({required this.icon, required this.onTap});
 
@@ -661,7 +682,11 @@ class _CountrySelectionDialogState extends State<_CountrySelectionDialog>
         return;
       }
       _filteredCountries = widget.countries
-          .where((country) => country.name.toLowerCase().contains(normalized))
+          .where(
+            (country) =>
+                country.nameEn.toLowerCase().contains(normalized) ||
+                country.nameAr.toLowerCase().contains(normalized),
+          )
           .toList(growable: false);
     });
   }
@@ -750,11 +775,12 @@ class _CountrySelectionDialogState extends State<_CountrySelectionDialog>
                               contentPadding: EdgeInsets.zero,
                               leading: _CountryFlag(country: country),
                               title: Text(
-                                country.name,
+                                _localizedCountryName(context, country),
                                 style: TextStyle(
-                                  fontWeight: widget.selected == country.name
-                                      ? FontWeight.w700
-                                      : FontWeight.w500,
+                                  fontWeight:
+                                      widget.selected == country.nameEn
+                                          ? FontWeight.w700
+                                          : FontWeight.w500,
                                 ),
                               ),
                               onTap: () {
@@ -791,7 +817,7 @@ class _AdvanceSearchDialog extends StatefulWidget {
     required this.onApplyFilters,
   });
 
-  final List<String> countryOptions;
+  final List<CountryOption> countryOptions;
   final List<String> academicOptions;
   final List<String> trackOptions;
   final List<String> currencyOptions;
@@ -814,7 +840,7 @@ class _AdvanceSearchDialogState extends State<_AdvanceSearchDialog>
   String? _selectedCountry;
   String? _selectedAcademic;
   String? _selectedTrack;
-  late List<String> _filteredCountryOptions;
+  late List<CountryOption> _filteredCountryOptions;
 
   @override
   void initState() {
@@ -832,7 +858,11 @@ class _AdvanceSearchDialogState extends State<_AdvanceSearchDialog>
         _filteredCountryOptions = widget.countryOptions;
       } else {
         _filteredCountryOptions = widget.countryOptions
-            .where((country) => country.toLowerCase().contains(normalized))
+            .where(
+              (country) =>
+                  country.nameEn.toLowerCase().contains(normalized) ||
+                  country.nameAr.toLowerCase().contains(normalized),
+            )
             .toList(growable: false);
       }
     });
@@ -924,6 +954,79 @@ class _AdvanceSearchDialogState extends State<_AdvanceSearchDialog>
       );
     }
 
+    Widget countryDropdownTile({
+      required String title,
+      required List<CountryOption> options,
+      required String? value,
+      required ValueChanged<String?> onChanged,
+      bool enabled = true,
+    }) {
+      final optionValues = options.map((option) => option.nameEn).toSet();
+      final hasValue = value != null && optionValues.contains(value);
+      return Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Text(
+            title,
+            style: const TextStyle(fontSize: 14, fontWeight: FontWeight.w600),
+          ),
+          const SizedBox(height: 8),
+          Container(
+            height: 45,
+            padding: const EdgeInsets.symmetric(horizontal: 12),
+            decoration: BoxDecoration(
+              border: Border.all(color: const Color(0xFFD7D7D7)),
+              borderRadius: BorderRadius.circular(10),
+              color: Colors.white,
+            ),
+            child: DropdownButtonHideUnderline(
+              child: DropdownButton<String>(
+                isExpanded: true,
+                value: hasValue ? value : null,
+                borderRadius: BorderRadius.circular(12),
+                menuMaxHeight: 250,
+                icon: const Icon(
+                  Icons.keyboard_arrow_down_rounded,
+                  color: Color(0xFF757575),
+                ),
+                hint: Text(
+                  options.isEmpty
+                      ? context.l10n.text('noOptionsFound')
+                      : context.l10n
+                          .text('selectOption')
+                          .replaceAll('{title}', title),
+                  style: const TextStyle(
+                    color: Color(0xFF8A8A8A),
+                    fontSize: 14,
+                  ),
+                ),
+                items: options.map((option) {
+                  return DropdownMenuItem<String>(
+                    value: option.nameEn,
+                    child: Row(
+                      children: [
+                        _CountryFlag(country: option),
+                        const SizedBox(width: 8),
+                        Flexible(
+                          child: Text(
+                            _localizedCountryName(context, option),
+                            overflow: TextOverflow.ellipsis,
+                            style: const TextStyle(fontSize: 14),
+                          ),
+                        ),
+                      ],
+                    ),
+                  );
+                }).toList(),
+                onChanged: !enabled || options.isEmpty ? null : onChanged,
+              ),
+            ),
+          ),
+          const SizedBox(height: 12),
+        ],
+      );
+    }
+
     final shouldDisableDetails = _isOnlyCountryAndAcademicAllowed(
       _selectedAcademic,
     );
@@ -968,7 +1071,7 @@ class _AdvanceSearchDialogState extends State<_AdvanceSearchDialog>
                 ],
               ),
               const SizedBox(height: 8),
-              dropdownTile(
+              countryDropdownTile(
                 title: context.l10n.text('country'),
                 options: _filteredCountryOptions,
                 value: _selectedCountry,
@@ -977,7 +1080,6 @@ class _AdvanceSearchDialogState extends State<_AdvanceSearchDialog>
                   widget.onCountryChanged(value);
                   await widget.onApplyFilters();
                 },
-                icon: Icons.flag_outlined,
               ),
               dropdownTile(
                 title: context.l10n.text('academicQualification'),
