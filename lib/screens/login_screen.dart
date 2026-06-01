@@ -152,42 +152,43 @@ class _LoginScreenState extends State<LoginScreen>
     }
   }
 
-  AgreementTemplate? _agreementForLanguage(String languageCode) {
-    for (final AgreementTemplate agreement in _agreementTemplates) {
-      if (agreement.language?.toLowerCase() == languageCode.toLowerCase()) {
-        return agreement;
-      }
-    }
-    print("agreement-->" + languageCode.toString());
-    return _agreementTemplates.isEmpty ? null : _agreementTemplates.first;
+  AgreementTemplate? get agreement {
+    return _agreementTemplates.isNotEmpty ? _agreementTemplates.first : null;
   }
 
   void _openTermsBottomSheet() {
-    final AgreementTemplate? agreement = _agreementForLanguage(
-      context.l10n.locale.languageCode,
-    );
+    final AgreementTemplate? item = agreement;
 
-    print("agreement-->" + agreement!.titleAr.toString());
-    print("agreement-->" + agreement!.titleEn.toString());
-    if (agreement == null) {
-      return;
-    }
+    if (item == null) return;
+
+    final bool isArabic =
+        context.l10n.locale.languageCode.toLowerCase() == 'ar';
+
+    final String title = isArabic ? item.titleAr : item.titleEn;
+
+    final String content = isArabic ? item.contentAr : item.contentEn;
 
     showModalBottomSheet<void>(
       context: context,
       isScrollControlled: true,
       backgroundColor: AppColors.white,
       shape: const RoundedRectangleBorder(
-        borderRadius: BorderRadius.vertical(top: Radius.circular(20)),
+        borderRadius: BorderRadius.vertical(
+          top: Radius.circular(20),
+        ),
       ),
       builder: (context) {
         return SafeArea(
           child: SizedBox(
-            height: MediaQuery.of(context).size.height * 0.85, // limit height
+            height: MediaQuery.of(context).size.height * 0.85,
             child: Padding(
-              padding: const EdgeInsets.fromLTRB(12, 10, 12, 8),
+              padding: const EdgeInsets.fromLTRB(
+                12,
+                10,
+                12,
+                8,
+              ),
               child: Column(
-                crossAxisAlignment: CrossAxisAlignment.center,
                 children: [
                   Container(
                     width: 44,
@@ -202,9 +203,7 @@ class _LoginScreenState extends State<LoginScreen>
                     children: [
                       Expanded(
                         child: Text(
-                          context.l10n.locale.languageCode == 'ar'
-                              ? agreement.contentAr ?? ''
-                              : agreement.contentEn ?? '',
+                          title,
                           style: const TextStyle(
                             fontSize: 18,
                             fontWeight: FontWeight.w700,
@@ -218,16 +217,11 @@ class _LoginScreenState extends State<LoginScreen>
                       ),
                     ],
                   ),
-
                   const SizedBox(height: 8),
-
-                  /// Scrollable content
                   Expanded(
                     child: SingleChildScrollView(
                       child: Text(
-                        context.l10n.locale.languageCode == 'ar'
-                            ? agreement.contentAr ?? ''
-                            : agreement.contentEn ?? '',
+                        content,
                         style: const TextStyle(
                           height: 1.4,
                           fontSize: 14,
@@ -247,10 +241,8 @@ class _LoginScreenState extends State<LoginScreen>
 
   @override
   Widget build(BuildContext context) {
-    final AgreementTemplate? agreement = _agreementForLanguage(
-      context.l10n.locale.languageCode,
-    );
-
+    final AgreementTemplate? agreement =
+        _agreementTemplates.isNotEmpty ? _agreementTemplates.first : null;
     return buildCubitView(
       (context) => AuthScaffold(
         isLoading: _isLoadingMeta || _isSubmitting,

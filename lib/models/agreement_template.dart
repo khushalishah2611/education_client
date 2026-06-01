@@ -1,6 +1,5 @@
 class AgreementTemplate {
   final String id;
-  final String language;
   final String titleEn;
   final String titleAr;
   final String contentEn;
@@ -12,7 +11,6 @@ class AgreementTemplate {
 
   AgreementTemplate({
     required this.id,
-    required this.language,
     required this.titleEn,
     required this.titleAr,
     required this.contentEn,
@@ -26,7 +24,6 @@ class AgreementTemplate {
   factory AgreementTemplate.fromJson(Map<String, dynamic> json) {
     return AgreementTemplate(
       id: json['id'] ?? '',
-      language: json['language'] ?? '',
       titleEn: json['titleEn'] ?? '',
       titleAr: json['titleAr'] ?? '',
       contentEn: json['contentEn'] ?? '',
@@ -41,7 +38,6 @@ class AgreementTemplate {
   Map<String, dynamic> toJson() {
     return {
       'id': id,
-      'language': language,
       'titleEn': titleEn,
       'titleAr': titleAr,
       'contentEn': contentEn,
