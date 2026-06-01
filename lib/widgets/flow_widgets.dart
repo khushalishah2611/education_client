@@ -253,7 +253,7 @@ class BottomTabBarCard extends StatelessWidget {
   Widget build(BuildContext context) {
     final items = [
       ("assets/images/home.svg", context.l10n.text('university')),
-      ("assets/images/application.svg", context.l10n.text('Training Course')),
+      ("assets/images/application.svg", context.l10n.text('TrainingCourse')),
       ("assets/images/documents.svg", context.l10n.text('privateSchool')),
       ("assets/images/updates.svg", context.l10n.text('Lates Updates')),
     ];
