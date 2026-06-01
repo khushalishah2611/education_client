@@ -24,34 +24,105 @@ class LatestUpdatesScreen extends StatefulWidget {
 
 class _LatestUpdatesScreenState extends State<LatestUpdatesScreen>
     with CubitStateMixin<LatestUpdatesScreen> {
+  static const int _pageLimit = 10;
+
   final HomeApiService _homeApiService = const HomeApiService();
+  final ScrollController _scrollController = ScrollController();
 
   bool _isLoading = true;
+  bool _isLoadingMore = false;
+  bool _hasMoreUpdates = true;
+  int _currentPage = 1;
   List<LatestUpdate> _updates = const <LatestUpdate>[];
 
   @override
   void initState() {
     super.initState();
+    _scrollController.addListener(_loadMoreWhenNeeded);
     _fetchUpdates();
   }
 
+  @override
+  void dispose() {
+    _scrollController
+      ..removeListener(_loadMoreWhenNeeded)
+      ..dispose();
+    super.dispose();
+  }
+
   Future<void> _fetchUpdates() async {
-    updateView(() => _isLoading = true);
+    updateView(() {
+      _isLoading = true;
+      _isLoadingMore = false;
+    });
 
     try {
-      final updates = await _homeApiService.fetchLatestUpdates(
+      final response = await _homeApiService.fetchLatestUpdatesPage(
         page: 1,
-        limit: 10,
+        limit: _pageLimit,
       );
 
+      if (!mounted) return;
+
       updateView(() {
-        _updates = updates;
+        _updates = response.data;
+        _currentPage = response.pagination.page;
+        _hasMoreUpdates = response.pagination.hasNextPage;
       });
     } catch (_) {
-      _updates = const <LatestUpdate>[];
+      if (!mounted) return;
+
+      updateView(() {
+        _updates = const <LatestUpdate>[];
+        _currentPage = 1;
+        _hasMoreUpdates = false;
+      });
     } finally {
       if (mounted) {
         updateView(() => _isLoading = false);
+      }
+    }
+  }
+
+  void _loadMoreWhenNeeded() {
+    if (!_scrollController.hasClients ||
+        _isLoading ||
+        _isLoadingMore ||
+        !_hasMoreUpdates) {
+      return;
+    }
+
+    final position = _scrollController.position;
+    if (position.pixels >= position.maxScrollExtent - 240) {
+      _fetchMoreUpdates();
+    }
+  }
+
+  Future<void> _fetchMoreUpdates() async {
+    if (_isLoadingMore || !_hasMoreUpdates) return;
+
+    updateView(() => _isLoadingMore = true);
+
+    try {
+      final response = await _homeApiService.fetchLatestUpdatesPage(
+        page: _currentPage + 1,
+        limit: _pageLimit,
+      );
+
+      if (!mounted) return;
+
+      updateView(() {
+        _updates = <LatestUpdate>[..._updates, ...response.data];
+        _currentPage = response.pagination.page;
+        _hasMoreUpdates = response.pagination.hasNextPage;
+      });
+    } catch (_) {
+      if (!mounted) return;
+
+      updateView(() => _hasMoreUpdates = false);
+    } finally {
+      if (mounted) {
+        updateView(() => _isLoadingMore = false);
       }
     }
   }
@@ -119,6 +190,7 @@ class _LatestUpdatesScreenState extends State<LatestUpdatesScreen>
       color: AppColors.primary,
       onRefresh: _fetchUpdates,
       child: ListView(
+        controller: _scrollController,
         physics: const AlwaysScrollableScrollPhysics(),
         padding: const EdgeInsets.fromLTRB(16, 16, 16, 16),
         children: [
@@ -153,6 +225,22 @@ class _LatestUpdatesScreenState extends State<LatestUpdatesScreen>
               onOpenAttachment: _openAttachment,
             ),
           ),
+          if (_isLoadingMore) ...[
+            const SizedBox(height: 6),
+            const Center(
+              child: Padding(
+                padding: EdgeInsets.symmetric(vertical: 14),
+                child: SizedBox(
+                  width: 24,
+                  height: 24,
+                  child: CircularProgressIndicator(
+                    strokeWidth: 2.5,
+                    color: AppColors.primary,
+                  ),
+                ),
+              ),
+            ),
+          ],
         ],
       ),
     );
@@ -182,8 +270,18 @@ class _LatestUpdateCard extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final imagePath = item.imagePath?.trim() ?? '';
+    final imagePath = item.imagePath.trim();
     final hasAttachment = imagePath.isNotEmpty;
+    final title = _localizedValue(
+      context: context,
+      englishValue: item.title,
+      arabicValue: item.titleAr,
+    );
+    final description = _localizedValue(
+      context: context,
+      englishValue: item.description,
+      arabicValue: item.descriptionAr,
+    );
 
     return Container(
       margin: const EdgeInsets.only(bottom: 10),
@@ -203,7 +301,7 @@ class _LatestUpdateCard extends StatelessWidget {
             children: [
               Expanded(
                 child: Text(
-                  item.title.isEmpty ? '-' : item.data,
+                  title.isEmpty ? '-' : title,
                   style: const TextStyle(
                     fontWeight: FontWeight.w700,
                     fontSize: 16,
@@ -248,7 +346,7 @@ class _LatestUpdateCard extends StatelessWidget {
           ],
           const SizedBox(height: 6),
           Text(
-            item.description,
+            description,
             style: const TextStyle(
               color: AppColors.text,
               fontSize: 14,
@@ -258,6 +356,24 @@ class _LatestUpdateCard extends StatelessWidget {
         ],
       ),
     );
+  }
+
+  static String _localizedValue({
+    required BuildContext context,
+    required String englishValue,
+    required String arabicValue,
+  }) {
+    final languageCode = Localizations.localeOf(context)
+        .languageCode
+        .toLowerCase();
+    final english = englishValue.trim();
+    final arabic = arabicValue.trim();
+
+    if (languageCode == 'ar') {
+      return arabic.isNotEmpty ? arabic : english;
+    }
+
+    return english.isNotEmpty ? english : arabic;
   }
 
   static bool _isPdf(String path) {

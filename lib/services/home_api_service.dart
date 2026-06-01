@@ -58,6 +58,14 @@ class HomeApiService {
     int page = 1,
     int limit = 10,
   }) async {
+    final response = await fetchLatestUpdatesPage(page: page, limit: limit);
+    return response.data;
+  }
+
+  Future<LatestUpdatesResponse> fetchLatestUpdatesPage({
+    int page = 1,
+    int limit = 10,
+  }) async {
     final Uri url = ApiConfig.uri('/api/admin/latest-updates').replace(
       queryParameters: {'page': '$page', 'limit': '$limit'},
     );
@@ -75,12 +83,7 @@ class HomeApiService {
         decoded['message']?.toString() ?? 'Failed to load latest updates.',
       );
     }
-    return _asList(
-      decoded['data'] ?? decoded['items'] ?? decoded['results'] ?? decoded,
-    )
-        .whereType<Map<String, dynamic>>()
-        .map(LatestUpdate.fromJson)
-        .toList(growable: false);
+    return LatestUpdatesResponse.fromJson(decoded);
   }
 
   Future<List<AdminUniversity>> fetchUniversities({

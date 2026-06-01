@@ -112,13 +112,23 @@ class _TermsConditionsScreenState extends State<TermsConditionsScreen>
                   itemBuilder: (_, index) {
                     final Map<String, dynamic> item = _agreements[index];
 
-                    final String title =
-                        item['title']?.toString().trim().isNotEmpty == true
-                            ? item['title'].toString()
-                            : context.l10n.text('terms');
+                    final String title = _localizedAgreementField(
+                      context,
+                      item,
+                      englishKeys: const <String>['titleEn', 'title'],
+                      arabicKeys: const <String>['titleAr'],
+                    );
 
-                    final String content =
-                        item['content']?.toString().trim() ?? '';
+                    final String content = _localizedAgreementField(
+                      context,
+                      item,
+                      englishKeys: const <String>['contentEn', 'content'],
+                      arabicKeys: const <String>['contentAr'],
+                    );
+
+                    final String displayTitle = title.isNotEmpty
+                        ? title
+                        : context.l10n.text('terms');
 
                     final List<String> bullets = content
                         .split(
@@ -130,7 +140,7 @@ class _TermsConditionsScreenState extends State<TermsConditionsScreen>
                         .where((e) => e.isNotEmpty)
                         .toList();
                     return SectionCard(
-                      title: title,
+                      title: displayTitle,
                       bullets: bullets.isEmpty
                           ? <String>['No details available.']
                           : bullets,
@@ -140,6 +150,33 @@ class _TermsConditionsScreenState extends State<TermsConditionsScreen>
               ),
       ),
     );
+  }
+
+  String _localizedAgreementField(
+    BuildContext context,
+    Map<String, dynamic> item, {
+    required List<String> englishKeys,
+    required List<String> arabicKeys,
+  }) {
+    final languageCode = Localizations.localeOf(context)
+        .languageCode
+        .toLowerCase();
+    final english = _firstNonEmptyValue(item, englishKeys);
+    final arabic = _firstNonEmptyValue(item, arabicKeys);
+
+    if (languageCode == 'ar') {
+      return arabic.isNotEmpty ? arabic : english;
+    }
+
+    return english.isNotEmpty ? english : arabic;
+  }
+
+  String _firstNonEmptyValue(Map<String, dynamic> item, List<String> keys) {
+    for (final key in keys) {
+      final value = item[key]?.toString().trim() ?? '';
+      if (value.isNotEmpty) return value;
+    }
+    return '';
   }
 
   Widget _buildShimmerList() {

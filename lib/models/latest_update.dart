@@ -1,102 +1,142 @@
-class LatestUpdate {
-  List<Data>? data;
-  Pagination? pagination;
-  String? message;
+class LatestUpdatesResponse {
+  final List<LatestUpdate> data;
+  final Pagination pagination;
+  final String message;
 
-  LatestUpdate({this.data, this.pagination, this.message});
+  const LatestUpdatesResponse({
+    this.data = const <LatestUpdate>[],
+    this.pagination = const Pagination(),
+    this.message = '',
+  });
 
-  LatestUpdate.fromJson(Map<String, dynamic> json) {
-    if (json['data'] != null) {
-      data = <Data>[];
-      json['data'].forEach((v) {
-        data!.add(new Data.fromJson(v));
-      });
-    }
-    pagination = json['pagination'] != null
-        ? new Pagination.fromJson(json['pagination'])
-        : null;
-    message = json['message'];
+  factory LatestUpdatesResponse.fromJson(Map<String, dynamic> json) {
+    final Object? rawItems = json['data'] ?? json['items'] ?? json['results'];
+    final List<LatestUpdate> updates = rawItems is List<dynamic>
+        ? rawItems
+            .whereType<Map>()
+            .map((item) => LatestUpdate.fromJson(
+                  Map<String, dynamic>.from(item),
+                ))
+            .toList(growable: false)
+        : const <LatestUpdate>[];
+
+    final Object? rawPagination = json['pagination'];
+
+    return LatestUpdatesResponse(
+      data: updates,
+      pagination: rawPagination is Map
+          ? Pagination.fromJson(
+              Map<String, dynamic>.from(rawPagination),
+            )
+          : Pagination.fromItems(updates.length),
+      message: (json['message'] ?? '').toString(),
+    );
   }
 
   Map<String, dynamic> toJson() {
-    final Map<String, dynamic> data = new Map<String, dynamic>();
-    if (this.data != null) {
-      data['data'] = this.data!.map((v) => v.toJson()).toList();
-    }
-    if (this.pagination != null) {
-      data['pagination'] = this.pagination!.toJson();
-    }
-    data['message'] = this.message;
-    return data;
+    return <String, dynamic>{
+      'data': data.map((item) => item.toJson()).toList(growable: false),
+      'pagination': pagination.toJson(),
+      'message': message,
+    };
   }
 }
 
-class Data {
-  String? id;
-  String? title;
-  String? titleAr;
-  String? description;
-  String? descriptionAr;
-  String? imagePath;
-  String? createdAt;
-  String? updatedAt;
+class LatestUpdate {
+  final String id;
+  final String title;
+  final String titleAr;
+  final String description;
+  final String descriptionAr;
+  final String imagePath;
+  final String createdAt;
+  final String updatedAt;
 
-  Data(
-      {this.id,
-        this.title,
-        this.titleAr,
-        this.description,
-        this.descriptionAr,
-        this.imagePath,
-        this.createdAt,
-        this.updatedAt});
+  const LatestUpdate({
+    this.id = '',
+    this.title = '',
+    this.titleAr = '',
+    this.description = '',
+    this.descriptionAr = '',
+    this.imagePath = '',
+    this.createdAt = '',
+    this.updatedAt = '',
+  });
 
-  Data.fromJson(Map<String, dynamic> json) {
-    id = json['id'];
-    title = json['title'];
-    titleAr = json['titleAr'];
-    description = json['description'];
-    descriptionAr = json['descriptionAr'];
-    imagePath = json['imagePath'];
-    createdAt = json['createdAt'];
-    updatedAt = json['updatedAt'];
+  factory LatestUpdate.fromJson(Map<String, dynamic> json) {
+    return LatestUpdate(
+      id: (json['id'] ?? '').toString(),
+      title: (json['title'] ?? json['titleEn'] ?? '').toString(),
+      titleAr: (json['titleAr'] ?? '').toString(),
+      description: (json['description'] ?? json['descriptionEn'] ?? '')
+          .toString(),
+      descriptionAr: (json['descriptionAr'] ?? '').toString(),
+      imagePath: (json['imagePath'] ?? json['imageUrl'] ?? json['image'] ?? '')
+          .toString(),
+      createdAt: (json['createdAt'] ?? '').toString(),
+      updatedAt: (json['updatedAt'] ?? '').toString(),
+    );
   }
 
   Map<String, dynamic> toJson() {
-    final Map<String, dynamic> data = new Map<String, dynamic>();
-    data['id'] = this.id;
-    data['title'] = this.title;
-    data['titleAr'] = this.titleAr;
-    data['description'] = this.description;
-    data['descriptionAr'] = this.descriptionAr;
-    data['imagePath'] = this.imagePath;
-    data['createdAt'] = this.createdAt;
-    data['updatedAt'] = this.updatedAt;
-    return data;
+    return <String, dynamic>{
+      'id': id,
+      'title': title,
+      'titleAr': titleAr,
+      'description': description,
+      'descriptionAr': descriptionAr,
+      'imagePath': imagePath,
+      'createdAt': createdAt,
+      'updatedAt': updatedAt,
+    };
   }
 }
 
 class Pagination {
-  int? page;
-  int? limit;
-  int? total;
-  int? totalPages;
+  final int page;
+  final int limit;
+  final int total;
+  final int totalPages;
 
-  Pagination({this.page, this.limit, this.total, this.totalPages});
+  const Pagination({
+    this.page = 1,
+    this.limit = 10,
+    this.total = 0,
+    this.totalPages = 1,
+  });
 
-  Pagination.fromJson(Map<String, dynamic> json) {
-    page = json['page'];
-    limit = json['limit'];
-    total = json['total'];
-    totalPages = json['totalPages'];
+  factory Pagination.fromJson(Map<String, dynamic> json) {
+    return Pagination(
+      page: _readInt(json['page'], fallback: 1),
+      limit: _readInt(json['limit'], fallback: 10),
+      total: _readInt(json['total'], fallback: 0),
+      totalPages: _readInt(json['totalPages'], fallback: 1),
+    );
   }
 
+  factory Pagination.fromItems(int itemCount) {
+    return Pagination(
+      page: 1,
+      limit: itemCount,
+      total: itemCount,
+      totalPages: 1,
+    );
+  }
+
+  bool get hasNextPage => page < totalPages;
+
   Map<String, dynamic> toJson() {
-    final Map<String, dynamic> data = new Map<String, dynamic>();
-    data['page'] = this.page;
-    data['limit'] = this.limit;
-    data['total'] = this.total;
-    data['totalPages'] = this.totalPages;
-    return data;
+    return <String, dynamic>{
+      'page': page,
+      'limit': limit,
+      'total': total,
+      'totalPages': totalPages,
+    };
+  }
+
+  static int _readInt(Object? value, {required int fallback}) {
+    if (value is int) return value;
+    if (value is num) return value.toInt();
+    return int.tryParse(value?.toString() ?? '') ?? fallback;
   }
 }
