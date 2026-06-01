@@ -185,19 +185,27 @@ List<AcademicPrograms>? _academicProgramsFromAcademicList(
 class AdminUniversity {
   String? id;
   String? name;
+  String? nameAr;
   String? country;
+  String? countryAr;
   String? state;
+  String? stateAr;
   String? city;
+  String? cityAr;
   String? email;
   String? mobile;
   double? rating;
   List<AcademicList>? academicList;
+  List<AcademicList>? academicListAr;
   String? logoPath;
   String? coverImagePath;
   String? address;
+  String? addressAr;
   String? aboutUs;
+  String? aboutUsAr;
   bool? accredited;
   String? status;
+  String? statusAr;
   bool? isEnabled;
   String? createdAt;
   String? updatedAt;
@@ -210,19 +218,27 @@ class AdminUniversity {
   AdminUniversity(
       {this.id,
       this.name,
+      this.nameAr,
       this.country,
+      this.countryAr,
       this.state,
+      this.stateAr,
       this.city,
+      this.cityAr,
       this.email,
       this.mobile,
       this.rating,
       this.academicList,
+      this.academicListAr,
       this.logoPath,
       this.coverImagePath,
       this.address,
+      this.addressAr,
       this.aboutUs,
+      this.aboutUsAr,
       this.accredited,
       this.status,
+      this.statusAr,
       this.isEnabled,
       this.createdAt,
       this.updatedAt,
@@ -235,9 +251,13 @@ class AdminUniversity {
   AdminUniversity.fromJson(Map<String, dynamic> json) {
     id = json['id'];
     name = json['name'];
+    nameAr = json['nameAr'];
     country = json['country'];
+    countryAr = json['countryAr'];
     state = json['state'];
+    stateAr = json['stateAr'];
     city = json['city'];
+    cityAr = json['cityAr'];
     email = json['email'];
     mobile = json['mobile'];
     rating = _toDouble(json['rating']);
@@ -251,12 +271,21 @@ class AdminUniversity {
         }
       }
     }
+    if (json['academicListAr'] != null) {
+      academicListAr = <AcademicList>[];
+      json['academicListAr'].forEach((v) {
+        academicListAr!.add(new AcademicList.fromJson(v));
+      });
+    }
     logoPath = json['logoPath'];
     coverImagePath = json['coverImagePath'];
     address = json['address'];
+    addressAr = json['addressAr'];
     aboutUs = json['aboutUs'];
+    aboutUsAr = json['aboutUsAr'];
     accredited = json['accredited'];
     status = json['status'];
+    statusAr = json['statusAr'];
     isEnabled = json['isEnabled'];
     createdAt = json['createdAt'];
     updatedAt = json['updatedAt'];
