@@ -1,7 +1,10 @@
+import 'dart:typed_data';
+
 import 'package:education/screens/side_menu/side_menu_common.dart';
 import 'package:flutter/material.dart';
+import 'package:http/http.dart' as http;
 import 'package:intl/intl.dart';
-import 'package:url_launcher/url_launcher.dart';
+import 'package:printing/printing.dart';
 
 import '../core/app_localizations.dart';
 import '../core/app_theme.dart';
@@ -127,14 +130,18 @@ class _LatestUpdatesScreenState extends State<LatestUpdatesScreen>
     }
   }
 
-  Future<void> _openAttachment(String imagePath) async {
+  void _openAttachment(String imagePath) {
     final url = _resolveLatestUpdateUrl(imagePath);
     if (url.isEmpty) return;
 
-    final uri = Uri.tryParse(url);
-    if (uri == null) return;
-
-    await launchUrl(uri, mode: LaunchMode.externalApplication);
+    Navigator.of(context).push(
+      MaterialPageRoute<void>(
+        builder: (_) => _LatestUpdateAttachmentViewer(
+          url: url,
+          isPdf: _LatestUpdateCard.isPdfPath(imagePath),
+        ),
+      ),
+    );
   }
 
   String _resolveLatestUpdateUrl(String imagePath) {
@@ -320,10 +327,10 @@ class _LatestUpdateCard extends StatelessWidget {
                       borderRadius: BorderRadius.circular(18),
                     ),
                     child: Icon(
-                      _isPdf(imagePath)
+                      isPdfPath(imagePath)
                           ? Icons.picture_as_pdf_outlined
                           : Icons.image_outlined,
-                      color: _isPdf(imagePath)
+                      color: isPdfPath(imagePath)
                           ? const Color(0xFFD32F2F)
                           : AppColors.primary,
                       size: 20,
@@ -376,7 +383,7 @@ class _LatestUpdateCard extends StatelessWidget {
     return english.isNotEmpty ? english : arabic;
   }
 
-  static bool _isPdf(String path) {
+  static bool isPdfPath(String path) {
     final normalized = path.split('?').first.toLowerCase();
     return normalized.endsWith('.pdf');
   }
@@ -386,6 +393,139 @@ class _LatestUpdateCard extends StatelessWidget {
     if (date == null) return value;
     return DateFormat('dd MMMM yyyy hh:mm a').format(date.toLocal());
   }
+}
+
+class _LatestUpdateAttachmentViewer extends StatelessWidget {
+  const _LatestUpdateAttachmentViewer({
+    required this.url,
+    required this.isPdf,
+  });
+
+  final String url;
+  final bool isPdf;
+
+  @override
+  Widget build(BuildContext context) {
+    return Scaffold(
+      appBar: AppBar(
+        title: Text(isPdf ? 'PDF Viewer' : 'Image Viewer'),
+        backgroundColor: Colors.white,
+        foregroundColor: AppColors.text,
+        elevation: 0.5,
+      ),
+      body: isPdf
+          ? _PdfAttachmentView(url: url)
+          : _ImageAttachmentView(url: url),
+    );
+  }
+}
+
+class _PdfAttachmentView extends StatelessWidget {
+  const _PdfAttachmentView({required this.url});
+
+  final String url;
+
+  @override
+  Widget build(BuildContext context) {
+    return FutureBuilder<Uint8List>(
+      future: _downloadPdfBytes(url),
+      builder: (context, snapshot) {
+        if (snapshot.connectionState != ConnectionState.done) {
+          return const Center(
+            child: CircularProgressIndicator(color: AppColors.primary),
+          );
+        }
+
+        if (snapshot.hasError || !snapshot.hasData) {
+          return const _AttachmentError(message: 'Unable to load PDF.');
+        }
+
+        return PdfPreview(
+          build: (_) async => snapshot.data!,
+          canChangeOrientation: false,
+          canChangePageFormat: false,
+          canDebug: false,
+          pdfFileName: _attachmentFileName(url, fallback: 'latest_update.pdf'),
+        );
+      },
+    );
+  }
+
+  static Future<Uint8List> _downloadPdfBytes(String url) async {
+    final uri = Uri.parse(url);
+    final response = await http.get(uri);
+
+    if (response.statusCode < 200 || response.statusCode >= 300) {
+      throw Exception('Failed to load PDF: ${response.statusCode}');
+    }
+
+    return response.bodyBytes;
+  }
+}
+
+class _ImageAttachmentView extends StatelessWidget {
+  const _ImageAttachmentView({required this.url});
+
+  final String url;
+
+  @override
+  Widget build(BuildContext context) {
+    return Container(
+      color: Colors.black,
+      alignment: Alignment.center,
+      child: InteractiveViewer(
+        minScale: 0.5,
+        maxScale: 4,
+        child: Image.network(
+          url,
+          fit: BoxFit.contain,
+          loadingBuilder: (context, child, loadingProgress) {
+            if (loadingProgress == null) return child;
+
+            return const Center(
+              child: CircularProgressIndicator(color: AppColors.primary),
+            );
+          },
+          errorBuilder: (_, __, ___) {
+            return const _AttachmentError(message: 'Unable to load image.');
+          },
+        ),
+      ),
+    );
+  }
+}
+
+class _AttachmentError extends StatelessWidget {
+  const _AttachmentError({required this.message});
+
+  final String message;
+
+  @override
+  Widget build(BuildContext context) {
+    return Center(
+      child: Padding(
+        padding: const EdgeInsets.all(24),
+        child: Text(
+          message,
+          textAlign: TextAlign.center,
+          style: const TextStyle(
+            color: AppColors.textMuted,
+            fontWeight: FontWeight.w600,
+          ),
+        ),
+      ),
+    );
+  }
+}
+
+String _attachmentFileName(String url, {required String fallback}) {
+  final uri = Uri.tryParse(url);
+  final pathSegments = uri?.pathSegments ?? const <String>[];
+  if (pathSegments.isEmpty || pathSegments.last.trim().isEmpty) {
+    return fallback;
+  }
+
+  return pathSegments.last;
 }
 
 class _ShimmerUpdateCard extends StatefulWidget {
