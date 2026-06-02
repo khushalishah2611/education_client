@@ -1,3 +1,5 @@
+import 'dart:convert';
+
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
 import 'package:shared_preferences/shared_preferences.dart';
@@ -98,16 +100,24 @@ class _NotificationsScreenState extends State<NotificationsScreen>
   Map<String, List<StudentNotification>> _groupNotifications() {
     final Map<String, List<StudentNotification>> grouped = {};
 
+    debugPrint('GROUP START => items=${_items.length}');
+
     for (final item in _items) {
-      final group = _getGroupTitle(item.createdAt).trim();
-      final groupTitle = group.isEmpty ? 'Others' : group;
+      debugPrint(
+        'ITEM => ${item.title} | ${item.createdAt}',
+      );
+
+      final groupTitle = _getGroupTitle(item.createdAt);
+
+      debugPrint('GROUP TITLE => $groupTitle');
 
       grouped.putIfAbsent(groupTitle, () => <StudentNotification>[]).add(item);
     }
 
     debugPrint(
-      'Grouped notifications: ${grouped.length} groups, Total items: ${_items.length}',
+      'GROUP END => count=${grouped.length} keys=${grouped.keys.toList()}',
     );
+
     return grouped;
   }
 
@@ -121,8 +131,27 @@ class _NotificationsScreenState extends State<NotificationsScreen>
         studentUserId: studentUserId,
       );
 
-      final List<StudentNotification> parsedItems =
-          StudentNotification.listFromResponse(data);
+      final Object? rawNotifications = data['notifications'];
+
+      List<StudentNotification> parsedItems = <StudentNotification>[];
+
+      if (rawNotifications is List) {
+        parsedItems = rawNotifications.map<StudentNotification>((item) {
+          return StudentNotification.fromJson(
+            Map<String, dynamic>.from(item as Map),
+          );
+        }).toList();
+      } else if (rawNotifications is String) {
+        final Object? decoded = jsonDecode(rawNotifications);
+
+        if (decoded is List) {
+          parsedItems = decoded.map<StudentNotification>((item) {
+            return StudentNotification.fromJson(
+              Map<String, dynamic>.from(item as Map),
+            );
+          }).toList();
+        }
+      }
 
       parsedItems.sort((a, b) {
         final aDate = DateTime.tryParse(a.createdAt) ?? DateTime.now();
@@ -196,7 +225,13 @@ class _NotificationsScreenState extends State<NotificationsScreen>
 
   @override
   Widget build(BuildContext context) {
+    debugPrint('BUILD ITEMS => ${_items.length}');
+
     final groupedItems = _groupNotifications();
+
+    debugPrint(
+      'BUILD GROUPED => ${groupedItems.length}',
+    );
 
     return buildCubitView(
       (context) => SideMenuScaffold(
