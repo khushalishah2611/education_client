@@ -102,8 +102,9 @@ List<String> _splitCourseNames(dynamic value) {
 }
 
 List<AcademicPrograms>? _academicProgramsFromAcademicList(
-  List<AcademicList>? academicList,
-) {
+  List<AcademicList>? academicList, {
+  bool preferArabic = false,
+}) {
   if (academicList == null || academicList.isEmpty) {
     return null;
   }
@@ -114,11 +115,22 @@ List<AcademicPrograms>? _academicProgramsFromAcademicList(
   for (final AcademicList entry in academicList) {
     final Program? program = entry.program;
     final String academicName = _toTrimmedString(entry.academicname) ??
-        _toTrimmedString(program?.academicProgram) ??
-        _toTrimmedString(program?.name) ??
+        (preferArabic
+            ? (_toTrimmedString(program?.academicProgramAr) ??
+                _toTrimmedString(program?.academicProgram) ??
+                _toTrimmedString(program?.nameAr) ??
+                _toTrimmedString(program?.name))
+            : (_toTrimmedString(program?.academicProgram) ??
+                _toTrimmedString(program?.name) ??
+                _toTrimmedString(program?.academicProgramAr) ??
+                _toTrimmedString(program?.nameAr))) ??
         '';
     final String collegeName = _toTrimmedString(entry.college) ??
-        _toTrimmedString(program?.educationInstitute) ??
+        (preferArabic
+            ? (_toTrimmedString(program?.educationInstituteAr) ??
+                _toTrimmedString(program?.educationInstitute))
+            : (_toTrimmedString(program?.educationInstitute) ??
+                _toTrimmedString(program?.educationInstituteAr))) ??
         '';
 
     if (academicName.isEmpty && collegeName.isEmpty && program == null) {
@@ -148,8 +160,11 @@ List<AcademicPrograms>? _academicProgramsFromAcademicList(
     final List<Courses> courses = college.courses ?? <Courses>[];
     college.courses = courses;
 
-    final List<CourseDetails> details =
-        program?.courseDetails ?? <CourseDetails>[];
+    final List<CourseDetails> details = preferArabic
+        ? (program?.courseDetailsAr?.isNotEmpty == true
+            ? program!.courseDetailsAr!
+            : program?.courseDetails ?? <CourseDetails>[])
+        : program?.courseDetails ?? <CourseDetails>[];
     if (details.isNotEmpty) {
       courses.addAll(
         details.map(
@@ -158,15 +173,20 @@ List<AcademicPrograms>? _academicProgramsFromAcademicList(
             program: program,
             academicName: academicName,
             collegeName: collegeName,
+            preferArabic: preferArabic,
           ),
         ),
       );
       continue;
     }
 
-    final dynamic courseNames = program?.courses?.isNotEmpty == true
-        ? program?.courses
-        : program?.courseNames;
+    final dynamic courseNames = preferArabic
+        ? (_toTrimmedString(program?.courseNamesAr) ??
+            (program?.courses?.isNotEmpty == true ? program?.courses : null) ??
+            program?.courseNames)
+        : (program?.courses?.isNotEmpty == true
+            ? program?.courses
+            : program?.courseNames);
     for (final String courseName in _splitCourseNames(courseNames)) {
       courses.add(
         Courses.fromCourseDetails(
@@ -174,12 +194,50 @@ List<AcademicPrograms>? _academicProgramsFromAcademicList(
           program: program,
           academicName: academicName,
           collegeName: collegeName,
+          preferArabic: preferArabic,
         ),
       );
     }
   }
 
   return groupedPrograms.values.toList(growable: false);
+}
+
+List<AcademicPrograms>? _academicProgramsFromProgramLinks(
+  List<ProgramLinks>? programLinks, {
+  bool preferArabic = false,
+}) {
+  if (programLinks == null || programLinks.isEmpty) {
+    return null;
+  }
+
+  final List<AcademicList> entries = programLinks
+      .where((link) => link.isEnabled != false && link.program != null)
+      .map(
+        (link) => AcademicList(
+          academicname: preferArabic
+              ? (_toTrimmedString(link.program?.academicProgramAr) ??
+                  _toTrimmedString(link.program?.academicProgram) ??
+                  _toTrimmedString(link.program?.nameAr) ??
+                  _toTrimmedString(link.program?.name))
+              : (_toTrimmedString(link.program?.academicProgram) ??
+                  _toTrimmedString(link.program?.name) ??
+                  _toTrimmedString(link.program?.academicProgramAr) ??
+                  _toTrimmedString(link.program?.nameAr)),
+          college: preferArabic
+              ? (_toTrimmedString(link.program?.educationInstituteAr) ??
+                  _toTrimmedString(link.program?.educationInstitute))
+              : (_toTrimmedString(link.program?.educationInstitute) ??
+                  _toTrimmedString(link.program?.educationInstituteAr)),
+          program: link.program,
+        ),
+      )
+      .toList(growable: false);
+
+  return _academicProgramsFromAcademicList(
+    entries,
+    preferArabic: preferArabic,
+  );
 }
 
 class AdminUniversity {
@@ -326,7 +384,8 @@ class AdminUniversity {
       }
     }
     if (academicPrograms == null || academicPrograms!.isEmpty) {
-      academicPrograms = _academicProgramsFromAcademicList(academicList);
+      academicPrograms = _academicProgramsFromAcademicList(academicList) ??
+          _academicProgramsFromProgramLinks(programLinks);
     }
   }
 
@@ -353,6 +412,7 @@ class AdminUniversity {
     data['aboutUs'] = this.aboutUs;
     data['accredited'] = this.accredited;
     data['status'] = this.status;
+    data['statusAr'] = this.statusAr;
     data['isEnabled'] = this.isEnabled;
     data['createdAt'] = this.createdAt;
     data['updatedAt'] = this.updatedAt;
@@ -400,10 +460,15 @@ class AcademicList {
 class Program {
   String? id;
   String? name;
+  String? nameAr;
   String? academicProgram;
+  String? academicProgramAr;
   String? courseNames;
+  String? courseNamesAr;
   List<CourseDetails>? courseDetails;
+  List<CourseDetails>? courseDetailsAr;
   String? track;
+  String? trackAr;
   dynamic description;
   dynamic durationMonths;
   double? minAdmissionRate;
@@ -411,6 +476,7 @@ class Program {
   dynamic requiredScore;
   dynamic discountedScore;
   String? status;
+  String? statusAr;
   bool? isEnabled;
   double? basePrice;
   String? currency;
@@ -422,15 +488,21 @@ class Program {
   String? updatedAt;
   List<UniversityLinks>? universityLinks;
   String? educationInstitute;
+  String? educationInstituteAr;
   List<String>? courses;
 
   Program(
       {this.id,
       this.name,
+      this.nameAr,
       this.academicProgram,
+      this.academicProgramAr,
       this.courseNames,
+      this.courseNamesAr,
       this.courseDetails,
+      this.courseDetailsAr,
       this.track,
+      this.trackAr,
       this.description,
       this.durationMonths,
       this.minAdmissionRate,
@@ -438,6 +510,7 @@ class Program {
       this.requiredScore,
       this.discountedScore,
       this.status,
+      this.statusAr,
       this.isEnabled,
       this.basePrice,
       this.currency,
@@ -449,13 +522,17 @@ class Program {
       this.updatedAt,
       this.universityLinks,
       this.educationInstitute,
+      this.educationInstituteAr,
       this.courses});
 
   Program.fromJson(Map<String, dynamic> json) {
     id = json['id'];
     name = json['name'];
+    nameAr = json['nameAr'];
     academicProgram = json['academicProgram'];
+    academicProgramAr = json['academicProgramAr'];
     courseNames = json['courseNames'];
+    courseNamesAr = json['courseNamesAr'];
     final courseDetailsJson = _toDynamicList(json['courseDetails']);
     if (courseDetailsJson != null) {
       courseDetails = <CourseDetails>[];
@@ -466,7 +543,18 @@ class Program {
         }
       }
     }
+    final courseDetailsArJson = _toDynamicList(json['courseDetailsAr']);
+    if (courseDetailsArJson != null) {
+      courseDetailsAr = <CourseDetails>[];
+      for (final item in courseDetailsArJson) {
+        final itemJson = _toStringDynamicMap(item);
+        if (itemJson != null) {
+          courseDetailsAr!.add(CourseDetails.fromJson(itemJson));
+        }
+      }
+    }
     track = json['track'];
+    trackAr = json['trackAr'];
     description = json['description'];
     durationMonths = json['durationMonths'];
     minAdmissionRate = _toDouble(json['minAdmissionRate']);
@@ -474,6 +562,7 @@ class Program {
     requiredScore = json['requiredScore'];
     discountedScore = json['discountedScore'];
     status = json['status'];
+    statusAr = json['statusAr'];
     isEnabled = json['isEnabled'];
     basePrice = _toDouble(json['basePrice']);
     currency = json['currency'];
@@ -494,6 +583,7 @@ class Program {
       }
     }
     educationInstitute = json['educationInstitute'];
+    educationInstituteAr = json['educationInstituteAr'];
     courses = _toStringList(json['courses']);
   }
 
@@ -501,13 +591,21 @@ class Program {
     final Map<String, dynamic> data = new Map<String, dynamic>();
     data['id'] = this.id;
     data['name'] = this.name;
+    data['nameAr'] = this.nameAr;
     data['academicProgram'] = this.academicProgram;
+    data['academicProgramAr'] = this.academicProgramAr;
     data['courseNames'] = this.courseNames;
+    data['courseNamesAr'] = this.courseNamesAr;
     if (this.courseDetails != null) {
       data['courseDetails'] =
           this.courseDetails!.map((v) => v.toJson()).toList();
     }
+    if (this.courseDetailsAr != null) {
+      data['courseDetailsAr'] =
+          this.courseDetailsAr!.map((v) => v.toJson()).toList();
+    }
     data['track'] = this.track;
+    data['trackAr'] = this.trackAr;
     data['description'] = this.description;
     data['durationMonths'] = this.durationMonths;
     data['minAdmissionRate'] = this.minAdmissionRate;
@@ -515,6 +613,7 @@ class Program {
     data['requiredScore'] = this.requiredScore;
     data['discountedScore'] = this.discountedScore;
     data['status'] = this.status;
+    data['statusAr'] = this.statusAr;
     data['isEnabled'] = this.isEnabled;
     data['basePrice'] = this.basePrice;
     data['currency'] = this.currency;
@@ -529,6 +628,7 @@ class Program {
           this.universityLinks!.map((v) => v.toJson()).toList();
     }
     data['educationInstitute'] = this.educationInstitute;
+    data['educationInstituteAr'] = this.educationInstituteAr;
     data['courses'] = this.courses;
     return data;
   }
@@ -912,15 +1012,27 @@ class Courses {
     Program? program,
     String? academicName,
     String? collegeName,
+    bool preferArabic = false,
   }) {
     return Courses(
       programId: program?.id,
-      programName: program?.name,
-      academicProgram: program?.academicProgram ?? academicName,
-      educationInstitute: program?.educationInstitute ?? collegeName,
+      programName:
+          preferArabic ? (program?.nameAr ?? program?.name) : program?.name,
+      academicProgram: preferArabic
+          ? (program?.academicProgramAr ??
+              program?.academicProgram ??
+              academicName)
+          : (program?.academicProgram ?? academicName),
+      educationInstitute: preferArabic
+          ? (program?.educationInstituteAr ??
+              program?.educationInstitute ??
+              collegeName)
+          : (program?.educationInstitute ?? collegeName),
       name: details.name,
       isBooked: details.isBooked,
-      track: details.track ?? program?.track,
+      track: preferArabic
+          ? (details.track ?? program?.trackAr ?? program?.track)
+          : (details.track ?? program?.track),
       duration: details.duration,
       creditHours: details.creditHours,
       totalFees: details.totalFees,
@@ -936,7 +1048,9 @@ class Courses {
           details.otherRequirements ?? program?.scholarshipInfoTitle,
       currency: details.currency ?? program?.currency,
       applicationFee: details.applicationFee,
-      status: details.status ?? program?.status,
+      status: preferArabic
+          ? (details.status ?? program?.statusAr ?? program?.status)
+          : (details.status ?? program?.status),
       commissionPercent: program?.commissionPercent,
       minBaGpa: details.minBaGpa ?? program?.minBaGpa,
     );

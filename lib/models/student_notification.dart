@@ -20,18 +20,57 @@ class StudentNotification {
   final bool isRead;
 
   factory StudentNotification.fromJson(Map<String, dynamic> json) {
-    String _safeString(dynamic value) {
+    String safeString(dynamic value) {
       if (value == null) return '';
+      if (value is Map) return '';
       final str = value.toString().trim();
       return str == 'null' ? '' : str;
     }
+
+    String localizedString(
+      List<String> directKeys, {
+      required List<String> nestedKeys,
+    }) {
+      for (final key in directKeys) {
+        final value = json[key];
+        final directValue = safeString(value);
+        if (directValue.isNotEmpty) return directValue;
+
+        if (value is Map) {
+          for (final nestedKey in nestedKeys) {
+            final nestedValue = safeString(value[nestedKey]);
+            if (nestedValue.isNotEmpty) return nestedValue;
+          }
+        }
+      }
+      return '';
+    }
+
     return StudentNotification(
-      id: _safeString(json['id']),
-      title: _safeString(json['title']),
-      titleAr: _safeString(json['titleAr']),
-      message: _safeString(json['message']),
-      messageAr: _safeString(json['messageAr']),
-      createdAt: _safeString(json['createdAt']),
+      id: safeString(json['id']),
+      title: localizedString(
+        const ['title', 'titleEn', 'titleEnglish', 'subject', 'subjectEn'],
+        nestedKeys: const ['en', 'en_US', 'english', 'value'],
+      ),
+      titleAr: localizedString(
+        const ['titleAr', 'titleArabic', 'arabicTitle', 'title', 'subjectAr'],
+        nestedKeys: const ['ar', 'ar_SA', 'arabic', 'value'],
+      ),
+      message: localizedString(
+        const ['message', 'messageEn', 'messageEnglish', 'body', 'bodyEn'],
+        nestedKeys: const ['en', 'en_US', 'english', 'value'],
+      ),
+      messageAr: localizedString(
+        const [
+          'messageAr',
+          'messageArabic',
+          'arabicMessage',
+          'bodyAr',
+          'message',
+        ],
+        nestedKeys: const ['ar', 'ar_SA', 'arabic', 'value'],
+      ),
+      createdAt: safeString(json['createdAt']),
       isRead: json['isRead'] == true,
     );
   }

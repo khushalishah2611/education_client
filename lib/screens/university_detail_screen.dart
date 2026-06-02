@@ -52,8 +52,17 @@ class _UniversityDetailScreenState extends State<UniversityDetailScreen>
   }
 
   List<AcademicList> get _localizedAcademicList {
-    if (context.l10n.isArabic && (data.academicListAr?.isNotEmpty ?? false)) {
+    final bool preferArabic = context.l10n.isArabic;
+    if (preferArabic && (data.academicListAr?.isNotEmpty ?? false)) {
       return data.academicListAr!;
+    }
+    if (!preferArabic && (data.academicList?.isNotEmpty ?? false)) {
+      return data.academicList!;
+    }
+    final linkedAcademicList =
+        _academicListFromProgramLinks(preferArabic: preferArabic);
+    if (linkedAcademicList.isNotEmpty) {
+      return linkedAcademicList;
     }
     if (data.academicList?.isNotEmpty ?? false) {
       return data.academicList!;
@@ -62,13 +71,20 @@ class _UniversityDetailScreenState extends State<UniversityDetailScreen>
   }
 
   List<AcademicPrograms> get _localizedAcademicPrograms {
-    if (data.academicPrograms?.isNotEmpty ?? false) {
+    final bool preferArabic = context.l10n.isArabic;
+    if (preferArabic && (data.academicListAr?.isNotEmpty ?? false)) {
+      return _academicProgramsFromEntries(
+        data.academicListAr!,
+        preferArabic: true,
+      );
+    }
+    if (!preferArabic && (data.academicPrograms?.isNotEmpty ?? false)) {
       return data.academicPrograms!;
     }
-    if (context.l10n.isArabic && (data.academicListAr?.isNotEmpty ?? false)) {
-      return _academicProgramsFromEntries(data.academicListAr!);
-    }
-    return _academicProgramsFromEntries(_localizedAcademicList);
+    return _academicProgramsFromEntries(
+      _localizedAcademicList,
+      preferArabic: preferArabic,
+    );
   }
 
   Map<String, List<AcademicList>> get _academicGroups {
@@ -78,7 +94,8 @@ class _UniversityDetailScreenState extends State<UniversityDetailScreen>
     for (final AcademicList entry in _localizedAcademicList) {
       final String academicName = entry.academicname?.trim() ?? '';
       if (!_matchesSelectedAcademic(academicName) &&
-          !_matchesSelectedAcademic(entry.program?.academicProgram)) {
+          !_matchesSelectedAcademic(entry.program?.academicProgram) &&
+          !_matchesSelectedAcademic(entry.program?.academicProgramAr)) {
         continue;
       }
       grouped.putIfAbsent(academicName, () => <AcademicList>[]).add(entry);
@@ -87,20 +104,61 @@ class _UniversityDetailScreenState extends State<UniversityDetailScreen>
     return grouped;
   }
 
+  List<AcademicList> _academicListFromProgramLinks({
+    required bool preferArabic,
+  }) {
+    final programLinks = data.programLinks ?? <ProgramLinks>[];
+    return programLinks
+        .where((link) => link.isEnabled != false && link.program != null)
+        .map((link) {
+      final program = link.program;
+      return AcademicList(
+        academicname: preferArabic
+            ? ((program?.academicProgramAr ?? '').trim().isNotEmpty
+                ? program?.academicProgramAr
+                : (program?.academicProgram ?? program?.nameAr ?? program?.name))
+            : (program?.academicProgram ??
+                program?.name ??
+                program?.academicProgramAr ??
+                program?.nameAr),
+        college: preferArabic
+            ? ((program?.educationInstituteAr ?? '').trim().isNotEmpty
+                ? program?.educationInstituteAr
+                : program?.educationInstitute)
+            : (program?.educationInstitute ?? program?.educationInstituteAr),
+        program: program,
+      );
+    }).toList(growable: false);
+  }
+
   List<AcademicPrograms> _academicProgramsFromEntries(
-    List<AcademicList> entries,
-  ) {
+    List<AcademicList> entries, {
+    bool preferArabic = false,
+  }) {
     final grouped = <String, AcademicPrograms>{};
 
     for (final entry in entries) {
       final program = entry.program;
       final academicName = (entry.academicname ??
-              program?.academicProgram ??
-              program?.name ??
+              (preferArabic
+                  ? (program?.academicProgramAr ??
+                      program?.academicProgram ??
+                      program?.nameAr ??
+                      program?.name)
+                  : (program?.academicProgram ??
+                      program?.name ??
+                      program?.academicProgramAr ??
+                      program?.nameAr)) ??
               '')
           .trim();
-      final collegeName =
-          (entry.college ?? program?.educationInstitute ?? '').trim();
+      final collegeName = (entry.college ??
+              (preferArabic
+                  ? (program?.educationInstituteAr ??
+                      program?.educationInstitute)
+                  : (program?.educationInstitute ??
+                      program?.educationInstituteAr)) ??
+              '')
+          .trim();
 
       if (academicName.isEmpty && collegeName.isEmpty && program == null) {
         continue;
@@ -124,7 +182,11 @@ class _UniversityDetailScreenState extends State<UniversityDetailScreen>
       final courses = college.courses ?? <Courses>[];
       college.courses = courses;
 
-      final details = program?.courseDetails ?? <CourseDetails>[];
+      final details = preferArabic
+          ? (program?.courseDetailsAr?.isNotEmpty == true
+              ? program!.courseDetailsAr!
+              : program?.courseDetails ?? <CourseDetails>[])
+          : program?.courseDetails ?? <CourseDetails>[];
       if (details.isNotEmpty) {
         courses.addAll(details.map(
           (course) => Courses.fromCourseDetails(
@@ -132,20 +194,28 @@ class _UniversityDetailScreenState extends State<UniversityDetailScreen>
             program: program,
             academicName: academicName,
             collegeName: collegeName,
+            preferArabic: preferArabic,
           ),
         ));
         continue;
       }
 
-      final courseNames = program?.courses?.isNotEmpty == true
-          ? program?.courses
-          : program?.courseNames;
+      final courseNames = preferArabic
+          ? ((program?.courseNamesAr ?? '').trim().isNotEmpty
+              ? program?.courseNamesAr
+              : (program?.courses?.isNotEmpty == true
+                  ? program?.courses
+                  : program?.courseNames))
+          : (program?.courses?.isNotEmpty == true
+              ? program?.courses
+              : program?.courseNames);
       for (final courseName in _splitCourseNames(courseNames)) {
         courses.add(Courses.fromCourseDetails(
           CourseDetails(name: courseName),
           program: program,
           academicName: academicName,
           collegeName: collegeName,
+          preferArabic: preferArabic,
         ));
       }
     }
