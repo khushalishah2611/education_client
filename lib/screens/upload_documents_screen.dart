@@ -95,6 +95,12 @@ class _UploadDocumentsScreenState extends State<UploadDocumentsScreen>
 
       final List<DocumentTypeItem> types =
           await _applicationApiService.fetchDocumentTypes();
+      for (final item in types) {
+        debugPrint('--------------------------------');
+        debugPrint('value    : ${item.value}');
+        debugPrint('labelEn  : ${item.labelEn}');
+        debugPrint('labelAr  : ${item.labelAr}');
+      }
       final Map<String, dynamic> overview = studentUserId.isEmpty
           ? <String, dynamic>{}
           : await _applicationApiService.fetchStudentOverview(
@@ -474,7 +480,7 @@ class _UploadDocumentsScreenState extends State<UploadDocumentsScreen>
         (
           type: type,
           title: localizedTitle.ifEmpty(fallbackTitle).ifEmpty(type),
-          subtitle: type,
+          subtitle: localizedTitle.ifEmpty(fallbackTitle).ifEmpty(type),
         ),
       );
     }
@@ -515,154 +521,154 @@ class _UploadDocumentsScreenState extends State<UploadDocumentsScreen>
     return buildCubitView(
       (context) => Scaffold(
         body: AppBackground(
-        child: AppPageEntrance(
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              FlowStepHeader(
-                currentStep: 0,
-                title: context.l10n.text(
-                  'uploadDocuments',
+          child: AppPageEntrance(
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                FlowStepHeader(
+                  currentStep: 0,
+                  title: context.l10n.text(
+                    'uploadDocuments',
+                  ),
                 ),
-              ),
-              Expanded(
-                child: Stack(
-                  children: [
-                    Builder(
-                      builder: (context) {
-                        if (_docs.isEmpty) {
-                          return Padding(
-                            padding: const EdgeInsets.symmetric(
-                              horizontal: 16,
-                              vertical: 20,
-                            ),
-                            child: Container(
-                              width: double.infinity,
+                Expanded(
+                  child: Stack(
+                    children: [
+                      Builder(
+                        builder: (context) {
+                          if (_docs.isEmpty) {
+                            return Padding(
                               padding: const EdgeInsets.symmetric(
+                                horizontal: 16,
                                 vertical: 20,
-                                horizontal: 12,
                               ),
-                              decoration: BoxDecoration(
-                                borderRadius: BorderRadius.circular(
-                                  10,
+                              child: Container(
+                                width: double.infinity,
+                                padding: const EdgeInsets.symmetric(
+                                  vertical: 20,
+                                  horizontal: 12,
                                 ),
-                                border: Border.all(
-                                  color: const Color(
-                                    0xFFE6E6E6,
+                                decoration: BoxDecoration(
+                                  borderRadius: BorderRadius.circular(
+                                    10,
+                                  ),
+                                  border: Border.all(
+                                    color: const Color(
+                                      0xFFE6E6E6,
+                                    ),
+                                  ),
+                                  color: Colors.white,
+                                ),
+                                child: Text(
+                                  context.l10n.text(
+                                    'No document types found',
+                                  ),
+                                  textAlign: TextAlign.center,
+                                  style: const TextStyle(
+                                    color: Color(
+                                      0xFF616161,
+                                    ),
+                                    fontWeight: FontWeight.w500,
                                   ),
                                 ),
-                                color: Colors.white,
                               ),
-                              child: Text(
-                                context.l10n.text(
-                                  'No document types found',
-                                ),
-                                textAlign: TextAlign.center,
-                                style: const TextStyle(
-                                  color: Color(
-                                    0xFF616161,
-                                  ),
-                                  fontWeight: FontWeight.w500,
-                                ),
-                              ),
-                            ),
-                          );
-                        }
+                            );
+                          }
 
-                        return ListView(
-                          padding: EdgeInsets.fromLTRB(
-                            horizontalPadding,
-                            isSmallMobile ? 14 : 20,
-                            horizontalPadding,
-                            20,
-                          ),
-                          children: [
-                            Text(
-                              context.l10n.text(
-                                'requiredDocuments',
-                              ),
-                              style: TextStyle(
-                                fontSize: isSmallMobile ? 16 : 18,
-                                fontWeight: FontWeight.w700,
-                              ),
+                          return ListView(
+                            padding: EdgeInsets.fromLTRB(
+                              horizontalPadding,
+                              isSmallMobile ? 14 : 20,
+                              horizontalPadding,
+                              20,
                             ),
-                            const SizedBox(
-                              height: 14,
-                            ),
-                            _UploadDropZone(
-                              title: _documentDisplayTitle(_docs.first),
-                              subtitle: _docs.first.subtitle,
-                              selectedFileName: _selectedFileLabel(
-                                _docs.first.type,
+                            children: [
+                              Text(
+                                context.l10n.text(
+                                  'requiredDocuments',
+                                ),
+                                style: TextStyle(
+                                  fontSize: isSmallMobile ? 16 : 18,
+                                  fontWeight: FontWeight.w700,
+                                ),
                               ),
-                              onTap: _isUploading
-                                  ? () {}
-                                  : () => _handleDocumentTap(
-                                        _docs.first,
+                              const SizedBox(
+                                height: 14,
+                              ),
+                              _UploadDropZone(
+                                title: _documentDisplayTitle(_docs.first),
+                                subtitle: _docs.first.subtitle,
+                                selectedFileName: _selectedFileLabel(
+                                  _docs.first.type,
+                                ),
+                                onTap: _isUploading
+                                    ? () {}
+                                    : () => _handleDocumentTap(
+                                          _docs.first,
+                                        ),
+                              ),
+                              const SizedBox(
+                                height: 10,
+                              ),
+                              ..._docs.skip(1).map(
+                                    (doc) => Padding(
+                                      padding: const EdgeInsets.only(
+                                        bottom: 10,
                                       ),
-                            ),
-                            const SizedBox(
-                              height: 10,
-                            ),
-                            ..._docs.skip(1).map(
-                                  (doc) => Padding(
-                                    padding: const EdgeInsets.only(
-                                      bottom: 10,
-                                    ),
-                                    child: _UploadListTile(
-                                      title: _documentDisplayTitle(doc),
-                                      subtitle: doc.subtitle,
-                                      selectedFileName: _selectedFileLabel(
-                                        doc.type,
+                                      child: _UploadListTile(
+                                        title: _documentDisplayTitle(doc),
+                                        subtitle: doc.subtitle,
+                                        selectedFileName: _selectedFileLabel(
+                                          doc.type,
+                                        ),
+                                        onTap: _isUploading
+                                            ? () {}
+                                            : () => _handleDocumentTap(
+                                                  doc,
+                                                ),
                                       ),
-                                      onTap: _isUploading
-                                          ? () {}
-                                          : () => _handleDocumentTap(
-                                                doc,
-                                              ),
                                     ),
                                   ),
-                                ),
-                          ],
-                        );
-                      },
-                    ),
-                    if (_isUploading)
-                      const Positioned.fill(
-                        child: ColoredBox(
-                          color: Color.fromRGBO(
-                            0,
-                            0,
-                            0,
-                            0.25,
-                          ),
-                          child: Center(
-                            child: CircularProgressIndicator(
-                              color: AppColors.primary,
+                            ],
+                          );
+                        },
+                      ),
+                      if (_isUploading)
+                        const Positioned.fill(
+                          child: ColoredBox(
+                            color: Color.fromRGBO(
+                              0,
+                              0,
+                              0,
+                              0.25,
+                            ),
+                            child: Center(
+                              child: CircularProgressIndicator(
+                                color: AppColors.primary,
+                              ),
                             ),
                           ),
                         ),
-                      ),
-                  ],
-                ),
-              ),
-              SafeArea(
-                top: false,
-                child: Padding(
-                  padding: const EdgeInsets.all(
-                    16,
+                    ],
                   ),
-                  child: AppPrimaryButton(
-                    label: context.l10n.text(
-                      'saveContinue',
+                ),
+                SafeArea(
+                  top: false,
+                  child: Padding(
+                    padding: const EdgeInsets.all(
+                      16,
                     ),
-                    onPressed: _isUploading ? null : () => _onContinue(),
+                    child: AppPrimaryButton(
+                      label: context.l10n.text(
+                        'saveContinue',
+                      ),
+                      onPressed: _isUploading ? null : () => _onContinue(),
+                    ),
                   ),
                 ),
-              ),
-            ],
+              ],
+            ),
           ),
-        ),
         ),
       ),
     );

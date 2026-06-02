@@ -131,9 +131,9 @@ class _NotificationsScreenState extends State<NotificationsScreen>
           ? notifications.map<Map<String, dynamic>>((item) {
               return {
                 'id': item['id'] ?? '',
-                'titleEn': item['titleEn'] ?? '',
+                'titleEn': item['title'] ?? '',
                 'titleAr': item['titleAr'] ?? '',
-                'messageEn': item['messageEn'] ?? '',
+                'messageEn': item['message'] ?? '',
                 'messageAr': item['messageAr'] ?? '',
                 'createdAt': item['createdAt'] ?? '',
                 'isRead': item['isRead'] == true,
@@ -545,12 +545,10 @@ class NotificationCard extends StatelessWidget {
             ),
           ),
           const SizedBox(height: 4),
-          Text(
-            description.isEmpty
-                ? context.l10n.text(
-                    'notificationDescription',
-                  )
-                : description,
+          description.trim().isEmpty
+              ? const SizedBox.shrink()
+              : Text(
+            description,
             style: const TextStyle(
               fontSize: 12,
               color: AppColors.textMuted,
