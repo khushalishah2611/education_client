@@ -223,5 +223,9 @@
   "others": "Others",
   "noNotificationsFound": "No Notifications Found",
   "pdfViewer": "PDF Viewer",
-  "imageViewer": "Image Viewer"
+  "imageViewer": "Image Viewer",
+  "Unable to load image": "Unable to load image",
+  "Unable to load PDF" : "Unable to load PDF",
+  "Please upload Passport and Secondary School Certificate before continuing" : "Please upload Passport and Secondary School Certificate before continuing",
+  "Not mandatory": "Not mandatory"
 }
