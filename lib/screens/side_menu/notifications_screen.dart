@@ -65,35 +65,29 @@ class _NotificationsScreenState extends State<NotificationsScreen>
     }
   }
 
+  String _localizedGroupLabel(String key, String fallback) {
+    final label = context.l10n.text(key).trim();
+    return label.isEmpty ? fallback : label;
+  }
+
   String _getGroupTitle(String dateStr) {
     if (dateStr.trim().isEmpty) {
       return 'Others';
     }
+
     try {
       final date = DateTime.parse(dateStr).toLocal();
-
       final now = DateTime.now();
-
       final today = DateTime(now.year, now.month, now.day);
-
-      final yesterday = today.subtract(
-        const Duration(days: 1),
-      );
-
-      final itemDate = DateTime(
-        date.year,
-        date.month,
-        date.day,
-      );
+      final yesterday = today.subtract(const Duration(days: 1));
+      final itemDate = DateTime(date.year, date.month, date.day);
 
       if (itemDate == today) {
-        final todayText = context.l10n.text('today');
-        return todayText.isEmpty ? 'Today' : todayText;
+        return _localizedGroupLabel('today', 'Today');
       }
 
       if (itemDate == yesterday) {
-        final yesterdayText = context.l10n.text('yesterday');
-        return yesterdayText.isEmpty ? 'Yesterday' : yesterdayText;
+        return _localizedGroupLabel('yesterday', 'Yesterday');
       }
 
       return DateFormat('dd MMM yyyy').format(date);
@@ -107,22 +101,15 @@ class _NotificationsScreenState extends State<NotificationsScreen>
     final Map<String, List<StudentNotification>> grouped = {};
 
     for (final item in _items) {
-      final group = _getGroupTitle(
-        item.createdAt,
-      );
+      final group = _getGroupTitle(item.createdAt).trim();
+      final groupTitle = group.isEmpty ? 'Others' : group;
 
-      if (group.trim().isEmpty) {
-        continue;
-      }
-
-      if (!grouped.containsKey(group)) {
-        grouped[group] = [];
-      }
-
-      grouped[group]!.add(item);
+      grouped.putIfAbsent(groupTitle, () => <StudentNotification>[]).add(item);
     }
 
-    debugPrint('Grouped notifications: ${grouped.length} groups, Total items: ${_items.length}');
+    debugPrint(
+      'Grouped notifications: ${grouped.length} groups, Total items: ${_items.length}',
+    );
     return grouped;
   }
 

@@ -52,38 +52,40 @@ class _UploadDocumentsScreenState extends State<UploadDocumentsScreen>
       const ApplicationApiService();
 
   bool _isUploading = false;
+  bool _didInitializeScreen = false;
   String? _lastLanguageCode;
 
   List<DocumentTypeItem> _documentTypes = const <DocumentTypeItem>[];
   List<_DocumentDefinition> _docs = const <_DocumentDefinition>[];
 
   @override
-  void initState() {
-    super.initState();
-    _initializeScreen();
-  }
-
-  @override
   void didChangeDependencies() {
     super.didChangeDependencies();
 
-    final String languageCode = context.l10n.locale.languageCode;
-    if (_lastLanguageCode == languageCode) return;
+    final AppLocalizations l10n = context.l10n;
+    final String languageCode = l10n.locale.languageCode;
+    final bool languageChanged = _lastLanguageCode != languageCode;
 
     _lastLanguageCode = languageCode;
-    if (_documentTypes.isEmpty) return;
 
-    updateView(() {
-      _docs = _documentDefinitionsFromTypes(
-        _documentTypes,
-        isArabic: context.l10n.isArabic,
-      );
-    });
+    if (languageChanged && _documentTypes.isNotEmpty) {
+      updateView(() {
+        _docs = _documentDefinitionsFromTypes(
+          _documentTypes,
+          isArabic: l10n.isArabic,
+        );
+      });
+    }
+
+    if (_didInitializeScreen) return;
+
+    _didInitializeScreen = true;
+    _initializeScreen(isArabic: l10n.isArabic);
   }
 
-  Future<void> _initializeScreen() async {
-    final bool isArabic = context.l10n.isArabic;
-
+  Future<void> _initializeScreen({
+    required bool isArabic,
+  }) async {
     updateView(() {
       _isUploading = true;
     });
