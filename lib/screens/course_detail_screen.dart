@@ -65,7 +65,7 @@ class _CourseDetailScreenState extends State<CourseDetailScreen> {
   void _showAddressDialog() {
     showAddressBottomSheet(
       context: context,
-      address: widget.university.address,
+      address: _localizedText(data.address, data.addressAr),
     );
   }
 
@@ -83,10 +83,6 @@ class _CourseDetailScreenState extends State<CourseDetailScreen> {
 
     final double topGap = isSmallMobile ? 52 : 60;
 
-    final String courseTitle = selectedCourseTitle.isNotEmpty
-        ? selectedCourseTitle
-        : context.l10n.text('courseDetails');
-
     return Scaffold(
       body: AppBackground(
         child: Column(
@@ -103,29 +99,20 @@ class _CourseDetailScreenState extends State<CourseDetailScreen> {
                     height: headerHeight,
                     width: double.infinity,
                     child: Image.network(
-                      ImageUrlHelper.resolveUploadUrl(
-                        widget.university.coverImagePath,
+                      ImageUrlHelper.resolveUploadUrl(data.coverImagePath),
+                      fit: BoxFit.fill,
+                      errorBuilder: (_, __, ___) => Center(
+                        child: Image.asset('assets/images/logo.webp'),
                       ),
-                      fit: BoxFit.cover,
-                      errorBuilder: (_, __, ___) {
-                        return Center(
-                          child: Image.asset(
-                            'assets/images/logo.webp',
-                          ),
-                        );
-                      },
                     ),
                   ),
                 ),
-
-                /// 🔷 UNIVERSITY CARD
                 Positioned(
-                  left: horizontalPadding,
-                  right: horizontalPadding,
+                  left: 20,
+                  right: 20,
                   bottom: -40,
                   child: InkWell(
                     onTap: _showAddressDialog,
-                    borderRadius: BorderRadius.circular(12),
                     child: Container(
                       padding: const EdgeInsets.all(12),
                       decoration: BoxDecoration(
@@ -150,17 +137,11 @@ class _CourseDetailScreenState extends State<CourseDetailScreen> {
                             ),
                             alignment: Alignment.center,
                             child: Image.network(
-                              ImageUrlHelper.resolveUploadUrl(
-                                widget.university.logoPath,
-                              ),
+                              ImageUrlHelper.resolveUploadUrl(data.logoPath),
                               fit: BoxFit.cover,
-                              errorBuilder: (_, __, ___) {
-                                return Center(
-                                  child: Image.asset(
-                                    'assets/images/logo.webp',
-                                  ),
-                                );
-                              },
+                              errorBuilder: (_, __, ___) => Center(
+                                child: Image.asset('assets/images/logo.webp'),
+                              ),
                             ),
                           ),
                           const SizedBox(width: 12),
@@ -170,26 +151,23 @@ class _CourseDetailScreenState extends State<CourseDetailScreen> {
                               children: [
                                 Row(
                                   children: [
-                                    const Icon(
+                                    Icon(
                                       Icons.star,
                                       color: Color(0xFFFFB300),
                                       size: 16,
                                     ),
-                                    const SizedBox(width: 4),
+                                    SizedBox(width: 4),
                                     Text(
-                                      widget.university.averageRating
-                                              ?.toDouble()
-                                              .toStringAsFixed(1) ??
-                                          '0.0',
-                                      style: const TextStyle(
+                                      data.averageRating!.toDouble().toString(),
+                                      style: TextStyle(
                                         fontWeight: FontWeight.w700,
                                       ),
                                     ),
-                                    const SizedBox(width: 4),
+                                    SizedBox(width: 4),
                                     Text(
-                                      '(${widget.university.averageRating?.round() ?? 0} reviews)',
-                                      style: const TextStyle(
-                                        fontSize: 12,
+                                      '(${data.ratingCount!.toDouble().toString()} reviews)',
+                                      style: TextStyle(
+                                        fontSize: isSmallMobile ? 11 : 12,
                                         color: AppColors.textMuted,
                                       ),
                                     ),
@@ -197,7 +175,7 @@ class _CourseDetailScreenState extends State<CourseDetailScreen> {
                                 ),
                                 const SizedBox(height: 8),
                                 Text(
-                                  widget.university.name ?? "",
+                                  _localizedText(data.name, data.nameAr),
                                   style: const TextStyle(
                                     fontSize: 14,
                                     fontWeight: FontWeight.w700,
@@ -215,7 +193,10 @@ class _CourseDetailScreenState extends State<CourseDetailScreen> {
                                     const SizedBox(width: 4),
                                     Expanded(
                                       child: Text(
-                                        widget.university.address ?? "",
+                                        _localizedText(
+                                          data.address,
+                                          data.addressAr,
+                                        ),
                                         maxLines: 1,
                                         overflow: TextOverflow.ellipsis,
                                         style: const TextStyle(
@@ -233,8 +214,7 @@ class _CourseDetailScreenState extends State<CourseDetailScreen> {
                     ),
                   ),
                 ),
-
-                TopRoundedHeader(title: courseTitle),
+                TopRoundedHeader(title: _localizedText(data.name, data.nameAr)),
               ],
             ),
 
@@ -297,6 +277,14 @@ class _CourseDetailScreenState extends State<CourseDetailScreen> {
         ),
       ),
     );
+  }
+
+  String _localizedText(String? englishValue, String? arabicValue) {
+    final localized = context.l10n.isArabic ? arabicValue : englishValue;
+    if ((localized ?? '').trim().isNotEmpty) return localized!.trim();
+
+    final fallback = context.l10n.isArabic ? englishValue : arabicValue;
+    return (fallback ?? '').trim();
   }
 }
 
