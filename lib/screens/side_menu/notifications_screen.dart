@@ -1,13 +1,9 @@
-import 'dart:convert';
-
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
 import '../../core/app_localizations.dart';
 import '../../core/app_theme.dart';
-import '../../core/bloc/app_cubit.dart';
-import '../../models/student_notification.dart';
 import '../../services/application_api_service.dart';
 import '../../services/notification_sync_service.dart';
 import 'side_menu_common.dart';
@@ -20,12 +16,12 @@ class NotificationsScreen extends StatefulWidget {
 }
 
 class _NotificationsScreenState extends State<NotificationsScreen>
-    with SingleTickerProviderStateMixin, CubitStateMixin<NotificationsScreen> {
+    with SingleTickerProviderStateMixin {
   final ApplicationApiService _api = ApplicationApiService();
 
   bool _loading = true;
 
-  List<StudentNotification> _items = [];
+  List<Map<String, dynamic>> _items = [];
 
   late AnimationController _shimmerController;
 
@@ -65,139 +61,108 @@ class _NotificationsScreenState extends State<NotificationsScreen>
     }
   }
 
-  String _localizedGroupLabel(String key, String fallback) {
-    final label = context.l10n.text(key).trim();
-    return label.isEmpty ? fallback : label;
-  }
-
   String _getGroupTitle(String dateStr) {
-    if (dateStr.trim().isEmpty) {
-      return 'Others';
-    }
-
     try {
       final date = DateTime.parse(dateStr).toLocal();
+
       final now = DateTime.now();
+
       final today = DateTime(now.year, now.month, now.day);
-      final yesterday = today.subtract(const Duration(days: 1));
-      final itemDate = DateTime(date.year, date.month, date.day);
+
+      final yesterday = today.subtract(
+        const Duration(days: 1),
+      );
+
+      final itemDate = DateTime(
+        date.year,
+        date.month,
+        date.day,
+      );
 
       if (itemDate == today) {
-        return _localizedGroupLabel('today', 'Today');
+        return 'Today';
+      } else if (itemDate == yesterday) {
+        return 'Yesterday';
+      } else {
+        return DateFormat('dd MMM yyyy').format(date);
       }
-
-      if (itemDate == yesterday) {
-        return _localizedGroupLabel('yesterday', 'Yesterday');
-      }
-
-      return DateFormat('dd MMM yyyy').format(date);
     } catch (e) {
-      debugPrint('Error parsing date: $dateStr, Error: $e');
       return 'Others';
     }
   }
 
-  Map<String, List<StudentNotification>> _groupNotifications() {
-    final Map<String, List<StudentNotification>> grouped = {};
-
-    debugPrint('GROUP START => items=${_items.length}');
+  Map<String, List<Map<String, dynamic>>> _groupNotifications() {
+    final Map<String, List<Map<String, dynamic>>> grouped = {};
 
     for (final item in _items) {
-      debugPrint(
-        'ITEM => ${item.title} | ${item.createdAt}',
+      final group = _getGroupTitle(
+        item['createdAt'] ?? '',
       );
 
-      final groupTitle = _getGroupTitle(item.createdAt);
+      if (!grouped.containsKey(group)) {
+        grouped[group] = [];
+      }
 
-      debugPrint('GROUP TITLE => $groupTitle');
-
-      grouped.putIfAbsent(groupTitle, () => <StudentNotification>[]).add(item);
+      grouped[group]!.add(item);
     }
-
-    debugPrint(
-      'GROUP END => count=${grouped.length} keys=${grouped.keys.toList()}',
-    );
 
     return grouped;
   }
 
   Future<void> _load() async {
-    try {
-      final prefs = await SharedPreferences.getInstance();
+    final prefs = await SharedPreferences.getInstance();
 
-      final studentUserId = prefs.getString('studentUserId')?.trim() ?? '';
+    final studentUserId = prefs.getString('studentUserId')?.trim() ?? '';
 
-      final data = await _api.fetchStudentOverview(
-        studentUserId: studentUserId,
-      );
+    final data = await _api.fetchStudentOverview(
+      studentUserId: studentUserId,
+    );
 
-      final Object? rawNotifications = data['notifications'];
+    final notifications = data['notifications'];
 
-      List<StudentNotification> parsedItems = <StudentNotification>[];
+    if (!mounted) return;
 
-      if (rawNotifications is List) {
-        parsedItems = rawNotifications.map<StudentNotification>((item) {
-          return StudentNotification.fromJson(
-            Map<String, dynamic>.from(item as Map),
-          );
-        }).toList();
-      } else if (rawNotifications is String) {
-        final Object? decoded = jsonDecode(rawNotifications);
+    setState(() {
+      _items = (notifications is List)
+          ? notifications.map<Map<String, dynamic>>((item) {
+              return {
+                'id': item['id'] ?? '',
+                'titleEn': item['titleEn'] ?? '',
+                'titleAr': item['titleAr'] ?? '',
+                'messageEn': item['messageEn'] ?? '',
+                'messageAr': item['messageAr'] ?? '',
+                'createdAt': item['createdAt'] ?? '',
+                'isRead': item['isRead'] == true,
+              };
+            }).toList()
+          : [];
 
-        if (decoded is List) {
-          parsedItems = decoded.map<StudentNotification>((item) {
-            return StudentNotification.fromJson(
-              Map<String, dynamic>.from(item as Map),
-            );
-          }).toList();
-        }
-      }
+      _items.sort((a, b) {
+        final aDate = DateTime.tryParse(a['createdAt'] ?? '') ?? DateTime.now();
 
-      parsedItems.sort((a, b) {
-        final aDate = DateTime.tryParse(a.createdAt) ?? DateTime.now();
-
-        final bDate = DateTime.tryParse(b.createdAt) ?? DateTime.now();
+        final bDate = DateTime.tryParse(b['createdAt'] ?? '') ?? DateTime.now();
 
         return bDate.compareTo(aDate);
       });
 
-      if (!mounted) return;
+      final unread = _items.where((item) => item['isRead'] != true).length;
 
-      updateView(() {
-        _items = parsedItems;
+      NotificationSyncService.instance.updateUnreadCount(unread);
 
-        final unread = _items.where((item) => !item.isRead).length;
-
-        NotificationSyncService.instance.updateUnreadCount(unread);
-
-        _loading = false;
-      });
-
-      debugPrint(
-        'Notifications Loaded: ${_items.length}',
-      );
-    } catch (e) {
-      debugPrint('Notification Error: $e');
-
-      if (!mounted) return;
-
-      updateView(() {
-        _items = [];
-        _loading = false;
-      });
-    }
+      _loading = false;
+    });
   }
 
   Future<void> _markAsRead(int index) async {
     final item = _items[index];
 
-    if (item.isRead) return;
+    if (item['isRead'] == true) return;
 
     final prefs = await SharedPreferences.getInstance();
 
     final studentUserId = prefs.getString('studentUserId')?.trim() ?? '';
 
-    final id = item.id;
+    final id = (item['id'] ?? '').toString();
 
     if (id.isEmpty || studentUserId.isEmpty) return;
 
@@ -208,121 +173,76 @@ class _NotificationsScreenState extends State<NotificationsScreen>
 
     if (!mounted) return;
 
-    updateView(() {
-      _items[index] = _items[index].copyWith(isRead: true);
+    setState(() {
+      _items[index]['isRead'] = true;
     });
 
-    final unread = _items.where((entry) => !entry.isRead).length;
+    final unread = _items.where((entry) => entry['isRead'] != true).length;
 
     NotificationSyncService.instance.updateUnreadCount(unread);
   }
 
   Future<void> _refresh() async {
-    updateView(() => _loading = true);
+    setState(() => _loading = true);
 
     await _load();
   }
 
   @override
   Widget build(BuildContext context) {
-    debugPrint('BUILD ITEMS => ${_items.length}');
-
     final groupedItems = _groupNotifications();
 
-    debugPrint(
-      'BUILD GROUPED => ${groupedItems.length}',
-    );
-
-    return buildCubitView(
-      (context) => SideMenuScaffold(
-        title: context.l10n.text('notifications'),
-        child: _loading
-            ? _buildShimmerList()
-            : RefreshIndicator(
-                onRefresh: _refresh,
-                child: _items.isEmpty
-                    ? ListView(
-                        children: [
-                          Container(
-                            margin: const EdgeInsets.all(12),
-                            padding: const EdgeInsets.all(20),
-                            decoration: BoxDecoration(
-                              color: Colors.white,
-                              borderRadius: BorderRadius.circular(10),
-                              border: Border.all(
-                                color: const Color(0xFFE6E6E6),
-                              ),
-                            ),
-                            child: Text(
-                              context.l10n.text('noNotificationsFound'),
-                              textAlign: TextAlign.center,
-                              style: const TextStyle(
-                                color: Color(0xFF616161),
-                                fontWeight: FontWeight.w500,
-                              ),
-                            ),
-                          )
-                        ],
-                      )
-                    : groupedItems.isEmpty
-                    ? ListView(
-                        children: [
-                          Container(
-                            margin: const EdgeInsets.all(12),
-                            padding: const EdgeInsets.all(20),
-                            decoration: BoxDecoration(
-                              color: Colors.white,
-                              borderRadius: BorderRadius.circular(10),
-                              border: Border.all(
-                                color: const Color(0xFFE6E6E6),
-                              ),
-                            ),
-                            child: Column(
-                              children: [
-                                Text(
-                                  'Unable to display notifications',
-                                  textAlign: TextAlign.center,
-                                  style: const TextStyle(
-                                    color: Color(0xFF616161),
-                                    fontWeight: FontWeight.w500,
-                                  ),
-                                ),
-                                const SizedBox(height: 8),
-                                Text(
-                                  '(Loaded: ${_items.length}, Grouped: ${groupedItems.length})',
-                                  textAlign: TextAlign.center,
-                                  style: const TextStyle(
-                                    color: Color(0xFF999999),
-                                    fontSize: 12,
-                                  ),
-                                ),
-                              ],
+    return SideMenuScaffold(
+      title: context.l10n.text('notifications'),
+      child: _loading
+          ? _buildShimmerList()
+          : RefreshIndicator(
+              onRefresh: _refresh,
+              child: _items.isEmpty
+                  ? ListView(
+                      children: [
+                        Container(
+                          margin: const EdgeInsets.all(12),
+                          padding: const EdgeInsets.all(20),
+                          decoration: BoxDecoration(
+                            color: Colors.white,
+                            borderRadius: BorderRadius.circular(10),
+                            border: Border.all(
+                              color: const Color(0xFFE6E6E6),
                             ),
                           ),
-                        ],
-                      )
-                    : ListView(
-                        children: groupedItems.entries.map((entry) {
-                          final groupTitle = entry.key;
-                          final groupItems = entry.value;
+                          child: const Text(
+                            'No Notifications Found',
+                            textAlign: TextAlign.center,
+                            style: TextStyle(
+                              color: Color(0xFF616161),
+                              fontWeight: FontWeight.w500,
+                            ),
+                          ),
+                        )
+                      ],
+                    )
+                  : ListView(
+                      children: groupedItems.entries.map((entry) {
+                        final groupTitle = entry.key;
+                        final groupItems = entry.value;
 
-                          return NotificationSection(
-                            title: groupTitle,
-                            items: groupItems,
-                            formatDate: _formatDate,
-                            formatTime: _formatTime,
-                            onTap: (item) {
-                              final index = _items.indexOf(item);
+                        return NotificationSection(
+                          title: groupTitle,
+                          items: groupItems,
+                          formatDate: _formatDate,
+                          formatTime: _formatTime,
+                          onTap: (item) {
+                            final index = _items.indexOf(item);
 
-                              if (index != -1) {
-                                _markAsRead(index);
-                              }
-                            },
-                          );
-                        }).toList(),
-                      ),
-              ),
-      ),
+                            if (index != -1) {
+                              _markAsRead(index);
+                            }
+                          },
+                        );
+                      }).toList(),
+                    ),
+            ),
     );
   }
 
@@ -461,16 +381,17 @@ class NotificationSection extends StatelessWidget {
 
   final String title;
 
-  final List<StudentNotification> items;
+  final List<Map<String, dynamic>> items;
 
   final String Function(String) formatDate;
 
   final String Function(String) formatTime;
 
-  final ValueChanged<StudentNotification> onTap;
+  final Function(Map<String, dynamic>) onTap;
 
   @override
   Widget build(BuildContext context) {
+    final isArabic = Localizations.localeOf(context).languageCode == 'ar';
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
@@ -513,7 +434,7 @@ class NotificationSection extends StatelessWidget {
                                 width: 12,
                                 height: 12,
                                 decoration: BoxDecoration(
-                                  color: item.isRead
+                                  color: item['isRead'] == true
                                       ? Colors.grey
                                       : AppColors.accent,
                                   shape: BoxShape.circle,
@@ -538,15 +459,19 @@ class NotificationSection extends StatelessWidget {
                           child: GestureDetector(
                             onTap: () => onTap(item),
                             child: NotificationCard(
-                              title: item.localizedTitle(context.l10n),
-                              description: item.localizedMessage(context.l10n),
+                              title: isArabic
+                                  ? (item['titleAr'] ?? '')
+                                  : (item['titleEn'] ?? ''),
+                              description: isArabic
+                                  ? (item['messageAr'] ?? '')
+                                  : (item['messageEn'] ?? ''),
                               time: formatTime(
-                                item.createdAt,
+                                item['createdAt'] ?? '',
                               ),
                               date: formatDate(
-                                item.createdAt,
+                                item['createdAt'] ?? '',
                               ),
-                              isRead: item.isRead,
+                              isRead: item['isRead'] == true,
                             ),
                           ),
                         ),
