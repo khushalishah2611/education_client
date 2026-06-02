@@ -282,8 +282,9 @@ class _UploadDocumentsScreenState extends State<UploadDocumentsScreen>
       showAppSnackBar(
         context,
         type: AppSnackBarType.error,
-        message:
-            'Please upload Passport and Secondary School Certificate before continuing.',
+        message: context.l10n.text(
+          'Please upload Passport and Secondary School Certificate before continuing',
+        ),
       );
       return;
     }
@@ -502,7 +503,7 @@ class _UploadDocumentsScreenState extends State<UploadDocumentsScreen>
   String _documentDisplayTitle(_DocumentDefinition doc) {
     return _isMandatoryDocument(doc)
         ? doc.title
-        : '${doc.title} (Not mandatory)';
+        : '${doc.title} (${context.l10n.text('Not mandatory')})';
   }
 
   @override

@@ -223,5 +223,10 @@
   "others": "أخرى",
   "noNotificationsFound": "لا توجد إشعارات",
   "pdfViewer": "عارض PDF",
-  "imageViewer": "عارض الصور"
+  "imageViewer": "عارض الصور",
+  "Unable to load image": "تعذر تحميل الصورة",
+  "Unable to load PDF": "تعذر تحميل ملف PDF",
+  "Please upload Passport and Secondary School Certificate before continuing": "يرجى رفع جواز السفر وشهادة الثانوية العامة قبل المتابعة",
+  "Not mandatory": "غير إلزامي",
+  "Booked": "محجوز"
 }

@@ -2,9 +2,11 @@ import 'package:education/core/app_localizations.dart';
 import 'package:education/core/bloc/app_cubit.dart';
 import 'package:education/core/image_url_helper.dart';
 import 'package:education/core/selected_course_storage.dart';
+import 'package:education/core/student_session.dart';
 import 'package:education/models/admin_university.dart';
 import 'package:education/models/selected_course_data.dart';
 import 'package:education/models/master_option.dart';
+import 'package:education/services/application_api_service.dart';
 import 'package:flutter/material.dart';
 import '../core/app_theme.dart';
 import '../widgets/common_widgets.dart';
@@ -40,6 +42,9 @@ class _UniversityDetailScreenState extends State<UniversityDetailScreen>
     with CubitStateMixin<UniversityDetailScreen> {
   final Set<String> _expandedColleges = <String>{};
   final Set<String> _selectedCourses = <String>{};
+  final Set<String> _bookedCourseKeys = <String>{};
+  final ApplicationApiService _applicationApiService =
+      const ApplicationApiService();
 
   AdminUniversity get data => widget.data;
 
@@ -287,6 +292,7 @@ class _UniversityDetailScreenState extends State<UniversityDetailScreen>
     super.initState();
     _selectedCourses.addAll(widget.initialSelectedCourseKeys);
     _restoreSelectedCourses();
+    _loadBookedCourses();
   }
 
   void _showAddressDialog() {
@@ -304,6 +310,95 @@ class _UniversityDetailScreenState extends State<UniversityDetailScreen>
 
     if (!mounted) return;
     refreshView();
+  }
+
+  Future<void> _loadBookedCourses() async {
+    try {
+      final String studentUserId = await StudentSession.currentStudentUserId();
+      if (studentUserId.isEmpty) return;
+
+      final Map<String, dynamic> overview =
+          await _applicationApiService.fetchStudentOverview(
+        studentUserId: studentUserId,
+      );
+      final Set<String> bookedKeys = _bookedCourseKeysFromOverview(overview);
+
+      if (!mounted || bookedKeys.isEmpty) return;
+
+      updateView(() {
+        _bookedCourseKeys
+          ..clear()
+          ..addAll(bookedKeys);
+        _selectedCourses.removeWhere(bookedKeys.contains);
+      });
+      await _syncSelectedCourses();
+    } catch (e) {
+      debugPrint(e.toString());
+    }
+  }
+
+  Set<String> _bookedCourseKeysFromOverview(Map<String, dynamic> overview) {
+    final Object? applicationsRaw = overview['applications'];
+    if (applicationsRaw is! List) {
+      return <String>{};
+    }
+
+    final Set<String> keys = <String>{};
+    for (final Object? item in applicationsRaw) {
+      if (item is! Map) continue;
+
+      final Map application = item;
+      final Object? selectedCourseKeys = application['selectedCourseKeys'];
+      if (selectedCourseKeys is List) {
+        keys.addAll(
+          selectedCourseKeys
+              .map((key) => key.toString().trim())
+              .where((key) => key.isNotEmpty),
+        );
+      }
+
+      final Object? selectedCourses = application['selectedCourses'];
+      if (selectedCourses is List) {
+        for (final Object? selectedCourse in selectedCourses) {
+          if (selectedCourse is! Map) continue;
+
+          final String directKey =
+              (selectedCourse['key'] ?? '').toString().trim();
+          if (directKey.isNotEmpty) {
+            keys.add(directKey);
+            continue;
+          }
+
+          final String collegeName = (selectedCourse['college'] ??
+                  selectedCourse['educationInstitute'] ??
+                  '')
+              .toString()
+              .trim();
+          final String courseName =
+              (selectedCourse['name'] ?? '').toString().trim();
+          final Map program = application['program'] is Map
+              ? application['program'] as Map
+              : <String, dynamic>{};
+          final String academicName =
+              (program['academicProgram'] ?? '').toString().trim();
+          final String programId = (program['id'] ?? program['programId'] ?? '')
+              .toString()
+              .trim();
+
+          final String fallbackKey = <String>[
+            academicName,
+            collegeName,
+            programId,
+            courseName,
+          ].map((value) => value.trim()).join('-');
+          if (fallbackKey.replaceAll('-', '').trim().isNotEmpty) {
+            keys.add(fallbackKey);
+          }
+        }
+      }
+    }
+
+    return keys;
   }
 
   Future<void> _syncSelectedCourses() async {
@@ -324,6 +419,7 @@ class _UniversityDetailScreenState extends State<UniversityDetailScreen>
   }
 
   Future<void> _toggleCourseSelection(String courseKey) async {
+    if (_bookedCourseKeys.contains(courseKey)) return;
     final SelectedCourseData? savedData = await SelectedCourseStorage.load();
     final bool selectingNewCourse = !_selectedCourses.contains(courseKey);
     final bool hasDifferentUniversitySelection = selectingNewCourse &&
@@ -576,6 +672,7 @@ class _UniversityDetailScreenState extends State<UniversityDetailScreen>
                                   academicEntries: groupEntry.value,
                                   isExpanded: isExpanded,
                                   selectedCourses: _selectedCourses,
+                                  bookedCourseKeys: _bookedCourseKeys,
                                   onToggleExpand: () {
                                     updateView(() {
                                       if (isExpanded) {
@@ -677,6 +774,7 @@ class _CollegeAccordion extends StatefulWidget {
     required this.academicEntries,
     required this.isExpanded,
     required this.selectedCourses,
+    required this.bookedCourseKeys,
     required this.onToggleExpand,
     required this.onToggleCourse,
     required this.adminUniversity,
@@ -692,6 +790,7 @@ class _CollegeAccordion extends StatefulWidget {
   final List<AcademicList> academicEntries;
   final bool isExpanded;
   final Set<String> selectedCourses;
+  final Set<String> bookedCourseKeys;
   final AdminUniversity adminUniversity;
   final String? selectedAcademic;
   final String? selectedTrack;
@@ -923,12 +1022,17 @@ class _CollegeAccordionState extends State<_CollegeAccordion> {
 
                                 final bool isSelected =
                                     widget.selectedCourses.contains(courseKey);
+                                final bool isBooked = details.isBooked == true ||
+                                    widget.bookedCourseKeys.contains(courseKey);
 
                                 return _buildCourseRow(
                                   index: index,
                                   details: details,
                                   isSelected: isSelected,
-                                  onTap: () => widget.onToggleCourse(courseKey),
+                                  isBooked: isBooked,
+                                  onTap: isBooked
+                                      ? () {}
+                                      : () => widget.onToggleCourse(courseKey),
                                   context: context,
                                   adminUniversity: widget.adminUniversity,
                                   academicProgram: academicProgram,
@@ -1090,6 +1194,7 @@ class _CollegeAccordionState extends State<_CollegeAccordion> {
     required int index,
     required Courses details,
     required bool isSelected,
+    required bool isBooked,
     required VoidCallback onTap,
     required BuildContext context,
     required AdminUniversity adminUniversity,
@@ -1113,12 +1218,18 @@ class _CollegeAccordionState extends State<_CollegeAccordion> {
           vertical: isSmallMobile ? 4 : 5,
         ),
         decoration: BoxDecoration(
-          color: isSelected
-              ? AppColors.primaryDark.withOpacity(0.2)
-              : (index % 2 == 0 ? Colors.white : AppColors.peachSoft),
+          color: isBooked
+              ? const Color(0xFFECECEC)
+              : isSelected
+                  ? AppColors.primaryDark.withOpacity(0.2)
+                  : (index % 2 == 0 ? Colors.white : AppColors.peachSoft),
           border: Border(
             left: BorderSide(
-              color: isSelected ? AppColors.primaryDark : Colors.transparent,
+              color: isBooked
+                  ? AppColors.textMuted
+                  : isSelected
+                      ? AppColors.primaryDark
+                      : Colors.transparent,
               width: 3,
             ),
             bottom: const BorderSide(
@@ -1189,11 +1300,7 @@ class _CollegeAccordionState extends State<_CollegeAccordion> {
                   crossAxisAlignment: CrossAxisAlignment.center,
                   children: [
                     InkWell(
-                      onTap: () async {
-                        widget.onToggleCourse(courseKey);
-
-                        if (!context.mounted) return;
-
+                      onTap: () {
                         Navigator.of(context).push(
                           MaterialPageRoute(
                             builder: (_) => CourseDetailScreen(
@@ -1212,57 +1319,62 @@ class _CollegeAccordionState extends State<_CollegeAccordion> {
                         ),
                       ),
                     ),
-                    // Visibility(
-                    //   visible: !(details.isBooked ?? false),
-                    //   child:
                     InkWell(
-                      onTap: () async {
-                        widget.onToggleCourse(courseKey);
+                      onTap: isBooked
+                          ? null
+                          : () async {
+                              widget.onToggleCourse(courseKey);
 
-                        if (!context.mounted) return;
+                              if (!context.mounted) return;
 
-                        Navigator.push(
-                          context,
-                          MaterialPageRoute(
-                            builder: (_) => UploadDocumentsScreen(
-                              universityName: adminUniversity.name,
-                              universityHeroImage:
-                                  ImageUrlHelper.resolveUploadUrl(
-                                adminUniversity.coverImagePath,
-                              ),
-                              courseTitle: details.name,
-                              applicationsPayload: <Map<String, dynamic>>[
-                                _buildApplicationPayload(
-                                  adminUniversity: adminUniversity,
-                                  collegeName: collegeName,
-                                  courseDetails: details,
-                                  courseKey: courseKey,
+                              Navigator.push(
+                                context,
+                                MaterialPageRoute(
+                                  builder: (_) => UploadDocumentsScreen(
+                                    universityName: adminUniversity.name,
+                                    universityHeroImage:
+                                        ImageUrlHelper.resolveUploadUrl(
+                                      adminUniversity.coverImagePath,
+                                    ),
+                                    courseTitle: details.name,
+                                    applicationsPayload: <Map<String, dynamic>>[
+                                      _buildApplicationPayload(
+                                        adminUniversity: adminUniversity,
+                                        collegeName: collegeName,
+                                        courseDetails: details,
+                                        courseKey: courseKey,
+                                      ),
+                                    ],
+                                  ),
                                 ),
-                              ],
-                            ),
-                          ),
-                        );
-                      },
+                              );
+                            },
                       child: Container(
                         alignment: Alignment.center,
-                        margin: EdgeInsets.symmetric(vertical: 5),
+                        margin: const EdgeInsets.symmetric(vertical: 5),
                         padding: const EdgeInsets.symmetric(
                           horizontal: 4,
                           vertical: 3,
                         ),
                         decoration: BoxDecoration(
-                          color: const Color(0xFF0070e2),
+                          color: isBooked
+                              ? AppColors.textMuted
+                              : const Color(0xFF0070e2),
                           borderRadius: BorderRadius.circular(4),
                           border: Border.all(
-                            color: const Color(0xFF0070e2),
+                            color: isBooked
+                                ? AppColors.textMuted
+                                : const Color(0xFF0070e2),
                           ),
                         ),
                         child: Text(
-                          context.l10n.text(
-                            'Apply & Pay\nApplication Fee',
-                          ),
+                          isBooked
+                              ? context.l10n.text('Booked')
+                              : context.l10n.text(
+                                  'Apply & Pay\nApplication Fee',
+                                ),
                           textAlign: TextAlign.center,
-                          style: TextStyle(
+                          style: const TextStyle(
                             fontSize: 8.6,
                             fontWeight: FontWeight.w600,
                             color: AppColors.white,
@@ -1271,7 +1383,6 @@ class _CollegeAccordionState extends State<_CollegeAccordion> {
                         ),
                       ),
                     ),
-                    // )
                   ],
                 ),
               ),

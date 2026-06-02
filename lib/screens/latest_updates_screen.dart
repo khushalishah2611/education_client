@@ -511,7 +511,9 @@ class _PdfAttachmentView extends StatelessWidget {
         }
 
         if (snapshot.hasError || !snapshot.hasData) {
-          return const _AttachmentError(message: 'Unable to load PDF.');
+          return _AttachmentError(
+            message: context.l10n.text('Unable to load PDF'),
+          );
         }
 
         return PdfPreview(
@@ -561,7 +563,9 @@ class _ImageAttachmentView extends StatelessWidget {
             );
           },
           errorBuilder: (_, __, ___) {
-            return const _AttachmentError(message: 'Unable to load image.');
+            return _AttachmentError(
+              message: context.l10n.text('Unable to load image'),
+            );
           },
         ),
       ),

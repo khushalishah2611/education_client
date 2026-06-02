@@ -203,6 +203,12 @@ const Map<String, Map<String, dynamic>> _fallbackValues = {
     'noNotificationsFound': 'No Notifications Found',
     'pdfViewer': 'PDF Viewer',
     'imageViewer': 'Image Viewer',
+    'Unable to load image': 'Unable to load image',
+    'Unable to load PDF': 'Unable to load PDF',
+    'Please upload Passport and Secondary School Certificate before continuing':
+        'Please upload Passport and Secondary School Certificate before continuing',
+    'Not mandatory': 'Not mandatory',
+    'Booked': 'Booked',
     'notificationDescription':
         'Short description explaining the notification details\nin a compact way...',
     'notificationTime': '10:00 PM',
@@ -345,6 +351,12 @@ const Map<String, Map<String, dynamic>> _fallbackValues = {
     'noNotificationsFound': 'لا توجد إشعارات',
     'pdfViewer': 'عارض PDF',
     'imageViewer': 'عارض الصور',
+    'Unable to load image': 'تعذر تحميل الصورة',
+    'Unable to load PDF': 'تعذر تحميل ملف PDF',
+    'Please upload Passport and Secondary School Certificate before continuing':
+        'يرجى رفع جواز السفر وشهادة الثانوية العامة قبل المتابعة',
+    'Not mandatory': 'غير إلزامي',
+    'Booked': 'محجوز',
     'notificationDescription': 'وصف مختصر يوضح تفاصيل الإشعار\nبطريقة موجزة...',
     'notificationTime': '10:00 مساءً',
     'notificationDate': '03 مارس 2026',
