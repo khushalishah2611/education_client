@@ -20,13 +20,18 @@ class StudentNotification {
   final bool isRead;
 
   factory StudentNotification.fromJson(Map<String, dynamic> json) {
+    String _safeString(dynamic value) {
+      if (value == null) return '';
+      final str = value.toString().trim();
+      return str == 'null' ? '' : str;
+    }
     return StudentNotification(
-      id: (json['id'] ?? '').toString(),
-      title: (json['title'] ?? '').toString(),
-      titleAr: (json['titleAr'] ?? '').toString(),
-      message: (json['message'] ?? '').toString(),
-      messageAr: (json['messageAr'] ?? '').toString(),
-      createdAt: (json['createdAt'] ?? '').toString(),
+      id: _safeString(json['id']),
+      title: _safeString(json['title']),
+      titleAr: _safeString(json['titleAr']),
+      message: _safeString(json['message']),
+      messageAr: _safeString(json['messageAr']),
+      createdAt: _safeString(json['createdAt']),
       isRead: json['isRead'] == true,
     );
   }

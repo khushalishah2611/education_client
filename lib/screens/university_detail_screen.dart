@@ -55,15 +55,18 @@ class _UniversityDetailScreenState extends State<UniversityDetailScreen>
     if (context.l10n.isArabic && (data.academicListAr?.isNotEmpty ?? false)) {
       return data.academicListAr!;
     }
-    return data.academicList ?? <AcademicList>[];
+    if (data.academicList?.isNotEmpty ?? false) {
+      return data.academicList!;
+    }
+    return <AcademicList>[];
   }
 
   List<AcademicPrograms> get _localizedAcademicPrograms {
-    if (context.l10n.isArabic && (data.academicListAr?.isNotEmpty ?? false)) {
-      return _academicProgramsFromEntries(data.academicListAr!);
-    }
     if (data.academicPrograms?.isNotEmpty ?? false) {
       return data.academicPrograms!;
+    }
+    if (context.l10n.isArabic && (data.academicListAr?.isNotEmpty ?? false)) {
+      return _academicProgramsFromEntries(data.academicListAr!);
     }
     return _academicProgramsFromEntries(_localizedAcademicList);
   }
@@ -426,7 +429,8 @@ class _UniversityDetailScreenState extends State<UniversityDetailScreen>
                         ),
                       ),
                     ),
-                    TopRoundedHeader(title: _localizedText(data.name, data.nameAr)),
+                    TopRoundedHeader(
+                        title: _localizedText(data.name, data.nameAr)),
                   ],
                 ),
 
@@ -444,7 +448,7 @@ class _UniversityDetailScreenState extends State<UniversityDetailScreen>
                             horizontal: sectionPadding + 4,
                           ),
                           child: Text(
-                            'About',
+                            context.l10n.text('about'),
                             style: TextStyle(
                               fontSize: isSmallMobile ? 16 : 18,
                               fontWeight: FontWeight.w700,
@@ -516,8 +520,7 @@ class _UniversityDetailScreenState extends State<UniversityDetailScreen>
                                   selectedResult: widget.selectedResult,
                                   academicOptions: widget.academicOptions,
                                   trackOptions: widget.trackOptions,
-                                  academicPrograms:
-                                      _localizedAcademicPrograms,
+                                  academicPrograms: _localizedAcademicPrograms,
                                 );
                               }).toList(),
                             ),
@@ -821,43 +824,47 @@ class _CollegeAccordionState extends State<_CollegeAccordion> {
                         ),
                         ...(collegeCourses.isEmpty
                             ? [
-                          Padding(
-                            padding: const EdgeInsets.all(16),
-                            child: Center(
-                              child: Text(
-                                'No courses available',
-                                style: Theme.of(context).textTheme.bodyMedium,
-                              ),
-                            ),
-                          ),
-                        ]
+                                Padding(
+                                  padding: const EdgeInsets.all(16),
+                                  child: Center(
+                                    child: Text(
+                                      'No courses available',
+                                      style: Theme.of(context)
+                                          .textTheme
+                                          .bodyMedium,
+                                    ),
+                                  ),
+                                ),
+                              ]
                             : collegeCourses.asMap().entries.map((entry) {
-                          final int index = entry.key;
-                          final Courses details = entry.value;
+                                final int index = entry.key;
+                                final Courses details = entry.value;
 
-                          final String courseKey = [
-                            academicName,
-                            collegeName,
-                            details.programId ?? details.programName ?? '',
-                            details.name ?? '',
-                          ].map((e) => e.trim()).join('-');
+                                final String courseKey = [
+                                  academicName,
+                                  collegeName,
+                                  details.programId ??
+                                      details.programName ??
+                                      '',
+                                  details.name ?? '',
+                                ].map((e) => e.trim()).join('-');
 
-                          final bool isSelected =
-                          widget.selectedCourses.contains(courseKey);
+                                final bool isSelected =
+                                    widget.selectedCourses.contains(courseKey);
 
-                          return _buildCourseRow(
-                            index: index,
-                            details: details,
-                            isSelected: isSelected,
-                            onTap: () => widget.onToggleCourse(courseKey),
-                            context: context,
-                            adminUniversity: widget.adminUniversity,
-                            academicProgram: academicProgram,
-                            collegeName: collegeName,
-                            isSmallMobile: isSmallMobile,
-                            tableWidth: tableWidth,
-                          );
-                        }).toList()),
+                                return _buildCourseRow(
+                                  index: index,
+                                  details: details,
+                                  isSelected: isSelected,
+                                  onTap: () => widget.onToggleCourse(courseKey),
+                                  context: context,
+                                  adminUniversity: widget.adminUniversity,
+                                  academicProgram: academicProgram,
+                                  collegeName: collegeName,
+                                  isSmallMobile: isSmallMobile,
+                                  tableWidth: tableWidth,
+                                );
+                              }).toList()),
                       ],
                     );
                   }).toList(),

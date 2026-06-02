@@ -827,7 +827,7 @@ class _CountrySelectionDialogState extends State<_CountrySelectionDialog>
                               child: ListTile(
                                 dense: true,
                                 contentPadding: EdgeInsets.zero,
-                                leading: _CountryFlag(country: country),
+                                // leading: _CountryFlag(country: country),
                                 title: Text(
                                   country.displayName(
                                     isArabic: context.l10n.isArabic,
@@ -1071,10 +1071,10 @@ class _AdvanceSearchDialogState extends State<_AdvanceSearchDialog>
               ),
               child: Row(
                 children: [
-                  if (selectedOption != null) ...[
-                    _CountryFlag(country: selectedOption),
-                    const SizedBox(width: 8),
-                  ],
+                  // if (selectedOption != null) ...[
+                  //   _CountryFlag(country: selectedOption),
+                  //   const SizedBox(width: 8),
+                  // ],
                   Expanded(
                     child: Text(
                       displayValue.isEmpty
@@ -1255,32 +1255,6 @@ class _AdvanceSearchDialogState extends State<_AdvanceSearchDialog>
             ),
           ),
         ),
-      ),
-    );
-  }
-}
-
-class _CountryFlag extends StatelessWidget {
-  const _CountryFlag({required this.country});
-
-  final CountryOption country;
-
-  @override
-  Widget build(BuildContext context) {
-    final hasImage = country.flagImageUrl.startsWith('http://') ||
-        country.flagImageUrl.startsWith('https://');
-    if (!hasImage) {
-      return Text(country.flagEmoji, style: const TextStyle(fontSize: 18));
-    }
-    return ClipRRect(
-      borderRadius: BorderRadius.circular(2),
-      child: Image.network(
-        country.flagImageUrl,
-        width: 22,
-        height: 16,
-        fit: BoxFit.cover,
-        errorBuilder: (_, __, ___) =>
-            Text(country.flagEmoji, style: const TextStyle(fontSize: 18)),
       ),
     );
   }
