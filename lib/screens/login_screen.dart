@@ -107,6 +107,7 @@ class _LoginScreenState extends State<LoginScreen>
           await _authApiService.createStudentForOtp(
         country: _selectedCountry!.nameEn,
         phone: _mobileController.text.trim(),
+        preferredLanguage: context.l10n.locale.languageCode,
       );
       if (response.whatsappOtpLink.trim().isNotEmpty) {
         await openExternalLink(response.whatsappOtpLink);

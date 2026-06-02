@@ -104,12 +104,14 @@ class AuthApiService {
   Future<StudentLoginResponse> createStudentForOtp({
     required String country,
     required String phone,
+    required String preferredLanguage,
   }) async {
     const path = '/api/admin/students';
     final requestBody = <String, dynamic>{
       'country': country,
       'phone': phone,
       'isActive': true,
+      'preferredLanguage': preferredLanguage,
     };
     final response = await http.post(
       ApiConfig.uri(path),
