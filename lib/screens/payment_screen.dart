@@ -48,6 +48,8 @@ class _PaymentScreenState extends State<PaymentScreen>
   String _gender = 'FEMALE';
   List<CountryMaster> _countries = const [];
   bool _isLoadingCountries = true;
+  String _studentUserId = '';
+  bool _profileLoaded = false;
 
   @override
   void initState() {
@@ -58,6 +60,7 @@ class _PaymentScreenState extends State<PaymentScreen>
   Future<void> _initializePaymentScreen() async {
     await _loadLoginSessionData();
     await _loadCountryOptions();
+    await _loadStudentProfile();
   }
 
   Future<void> _loadLoginSessionData() async {
@@ -118,6 +121,93 @@ class _PaymentScreenState extends State<PaymentScreen>
       }
     }
     return null;
+  }
+
+  Future<void> _loadStudentProfile() async {
+    if (_profileLoaded || _isSubmitting) return;
+
+    final SharedPreferences prefs = await SharedPreferences.getInstance();
+    final String studentUserId = prefs.getString('studentUserId')?.trim() ?? '';
+    if (studentUserId.isEmpty) return;
+
+    try {
+      final List<Map<String, dynamic>> students =
+          await _applicationApiService.fetchStudents();
+      final Map<String, dynamic>? current = students
+          .cast<Map<String, dynamic>?>()
+          .firstWhere(
+            (item) =>
+                (item?['userId'] ?? '').toString() == studentUserId,
+            orElse: () => students.isNotEmpty ? students.first : null,
+          );
+
+      if (current == null) {
+        return;
+      }
+
+      _studentUserId = studentUserId;
+      _profileLoaded = true;
+
+      final Map<String, dynamic> user =
+          (current['user'] is Map<String, dynamic>)
+              ? current['user'] as Map<String, dynamic>
+              : <String, dynamic>{};
+
+      final String first =
+          (current['firstName'] ?? '').toString().trim();
+      final String middle =
+          (current['middleName'] ?? '').toString().trim();
+      final String last =
+          (current['lastName'] ?? '').toString().trim();
+
+      final String country =
+          (current['country'] ?? '').toString().trim();
+      final String fullPhone =
+          (current['phone'] ?? '').toString().trim();
+
+      updateView(() {
+        _fullNameController.text = [first, middle, last]
+            .where((e) => e.isNotEmpty)
+            .join(' ');
+        _emailController.text = (user['email'] ?? '').toString().trim();
+        _phoneController.text = _phoneWithoutCode(fullPhone);
+        _gender = (current['gender'] ?? 'FEMALE').toString().trim();
+
+        if (country.isNotEmpty && _countries.isNotEmpty) {
+          try {
+            final CountryMaster matchedCountry = _countries.firstWhere(
+              (c) =>
+                  c.value.toLowerCase() == country.toLowerCase() ||
+                  c.nameEn.toLowerCase() == country.toLowerCase(),
+            );
+            _selectedCountry = matchedCountry.nameEn;
+            _selectedCountryDialCode = matchedCountry.dialCode;
+          } catch (_) {
+            // preserve login country if no match
+          }
+        }
+      });
+    } catch (_) {
+      // ignore profile load failures here; keep login session defaults
+    }
+  }
+
+  String _phoneWithoutCode(String full) {
+    final String dial = _selectedCountryDialCode;
+    if (dial.isNotEmpty && full.startsWith(dial)) {
+      return full.substring(dial.length).trim();
+    }
+    return full;
+  }
+
+  Future<void> _handlePayNow() async {
+    if (_isSubmitting) return;
+    if (_emailController.text.trim().isEmpty) {
+      await _openUpdateProfileBottomSheet();
+      return;
+    }
+
+    await _submitApplicationsAndContinue();
   }
 
   @override
@@ -297,257 +387,270 @@ class _PaymentScreenState extends State<PaymentScreen>
                 top: 20,
                 bottom: MediaQuery.of(context).viewInsets.bottom + 20,
               ),
-              child: Column(
-                mainAxisSize: MainAxisSize.min,
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  Container(
-                    width: 44,
-                    height: 4,
-                    margin: const EdgeInsets.only(bottom: 10),
-                    decoration: BoxDecoration(
-                      color: const Color(0xFFD1D1D1),
-                      borderRadius: BorderRadius.circular(99),
+              child: SingleChildScrollView(
+                child: Column(
+                  mainAxisSize: MainAxisSize.min,
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Align(
+                      alignment: Alignment.center,
+                      child: Container(
+                        width: 44,
+                        height: 4,
+                        margin: const EdgeInsets.only(bottom: 10),
+                        decoration: BoxDecoration(
+                          color: const Color(0xFFD1D1D1),
+                          borderRadius: BorderRadius.circular(99),
+                        ),
+                      ),
                     ),
-                  ),
-                  Text(
-                    context.l10n.text('updateProfile'),
-                    style: const TextStyle(
-                      fontSize: 18,
-                      fontWeight: FontWeight.w700,
+                    Text(
+                      context.l10n.text('updateProfile'),
+                      style: const TextStyle(
+                        fontSize: 18,
+                        fontWeight: FontWeight.w700,
+                      ),
                     ),
-                  ),
-                  const SizedBox(height: 16),
-                  TextFormField(
-                    controller: _fullNameController,
-                    textInputAction: TextInputAction.next,
-                    decoration: InputDecoration(
-                      labelText: context.l10n.text('fullName'),
-                      border: const OutlineInputBorder(),
+                    const SizedBox(height: 16),
+                    TextFormField(
+                      controller: _fullNameController,
+                      textInputAction: TextInputAction.next,
+                      decoration: InputDecoration(
+                        labelText: context.l10n.text('fullName'),
+                        border: const OutlineInputBorder(),
+                      ),
                     ),
-                  ),
-                  const SizedBox(height: 12),
-                  TextFormField(
-                    controller: _emailController,
-                    keyboardType: TextInputType.emailAddress,
-                    textInputAction: TextInputAction.next,
-                    decoration: InputDecoration(
-                      labelText: context.l10n.text('email'),
-                      border: const OutlineInputBorder(),
+                    const SizedBox(height: 12),
+                    TextFormField(
+                      controller: _emailController,
+                      keyboardType: TextInputType.emailAddress,
+                      textInputAction: TextInputAction.next,
+                      decoration: InputDecoration(
+                        labelText: context.l10n.text('email'),
+                        border: const OutlineInputBorder(),
+                      ),
                     ),
-                  ),
-                  const SizedBox(height: 12),
-                  Text(
-                    context.l10n.text('mobileNumber'),
-                    style: Theme.of(context).textTheme.titleMedium,
-                  ),
-                  const SizedBox(height: 10),
-                  Container(
-                    height: 50,
-                    decoration: BoxDecoration(
-                      color: Colors.white,
-                      borderRadius: BorderRadius.circular(12),
-                      border: Border.all(color: AppColors.border),
+                    const SizedBox(height: 12),
+                    Text(
+                      context.l10n.text('mobileNumber'),
+                      style: Theme.of(context).textTheme.titleMedium,
                     ),
-                    child: Row(
-                      children: [
-                        const SizedBox(width: 12),
-                        Builder(
-                          builder: (BuildContext context) {
-                            final List<CountryMaster> countryOptions =
-                                <CountryMaster>[..._countries];
-                            if (_selectedCountry.isNotEmpty &&
-                                countryOptions.every((entry) =>
-                                    entry.nameEn != _selectedCountry)) {
-                              countryOptions.insert(
-                                0,
-                                CountryMaster(
-                                  id: 'fallback',
-                                  nameEn: _selectedCountry,
-                                  nameAr: '',
-                                  value: '',
-                                  dialCode: _selectedCountryDialCode,
-                                  flagEmoji: '🌍',
-                                  isActive: true,
+                    const SizedBox(height: 10),
+                    Container(
+                      height: 50,
+                      decoration: BoxDecoration(
+                        color: Colors.white,
+                        borderRadius: BorderRadius.circular(12),
+                        border: Border.all(color: AppColors.border),
+                      ),
+                      child: Row(
+                        children: [
+                          const SizedBox(width: 12),
+                          Builder(
+                            builder: (BuildContext context) {
+                              final List<CountryMaster> countryOptions =
+                                  <CountryMaster>[..._countries];
+                              if (_selectedCountry.isNotEmpty &&
+                                  countryOptions.every((entry) =>
+                                      entry.nameEn != _selectedCountry)) {
+                                countryOptions.insert(
+                                  0,
+                                  CountryMaster(
+                                    id: 'fallback',
+                                    nameEn: _selectedCountry,
+                                    nameAr: '',
+                                    value: '',
+                                    dialCode: _selectedCountryDialCode,
+                                    flagEmoji: '🌍',
+                                    isActive: true,
+                                  ),
+                                );
+                              }
+                
+                              return Expanded(
+                                child: DropdownButtonHideUnderline(
+                                  child: DropdownButton<String>(
+                                    value: _selectedCountry.isNotEmpty
+                                        ? _selectedCountry
+                                        : null,
+                                    hint: Text(_isLoadingCountries
+                                        ? 'Loading countries...'
+                                        : context.l10n.text('selectCountry')),
+                                    isExpanded: true,
+                                    borderRadius: BorderRadius.circular(12),
+                                    icon: const Icon(
+                                      Icons.keyboard_arrow_down_rounded,
+                                      size: 18,
+                                    ),
+                                    style: const TextStyle(
+                                      fontSize: 16,
+                                      color: AppColors.text,
+                                    ),
+                                    items: countryOptions
+                                        .map(
+                                          (country) => DropdownMenuItem<String>(
+                                            value: country.nameEn,
+                                            child: Text(
+                                              '${country.nameEn} ${country.dialCode}',
+                                            ),
+                                          ),
+                                        )
+                                        .toList(growable: false),
+                                    onChanged: countryOptions.isEmpty
+                                        ? null
+                                        : (value) {
+                                            if (value == null) return;
+                                            final CountryMaster selectedCountry =
+                                                countryOptions.firstWhere(
+                                              (country) => country.nameEn == value,
+                                              orElse: () => CountryMaster(
+                                                id: 'fallback',
+                                                nameEn: value,
+                                                nameAr: '',
+                                                value: '',
+                                                dialCode: _selectedCountryDialCode,
+                                                flagEmoji: '🌍',
+                                                isActive: true,
+                                              ),
+                                            );
+                                            setState(() {
+                                              _selectedCountry = value;
+                                              _selectedCountryDialCode =
+                                                  selectedCountry.dialCode;
+                                            });
+                                          },
+                                  ),
                                 ),
                               );
-                            }
-
-                            return DropdownButtonHideUnderline(
-                              child: DropdownButton<String>(
-                                value: _selectedCountry.isNotEmpty
-                                    ? _selectedCountry
+                            },
+                          ),
+                          const SizedBox(width: 10),
+                          Container(
+                              width: 1, height: 30, color: AppColors.border),
+                          Expanded(
+                            child: TextField(
+                              controller: _phoneController,
+                              keyboardType: TextInputType.phone,
+                              readOnly: true,
+                              decoration: InputDecoration(
+                                contentPadding: const EdgeInsets.all(5),
+                                hintText: _phoneController.text.isEmpty
+                                    ? context.l10n.text('enterMobileNumber')
                                     : null,
-                                hint: Text(_isLoadingCountries
-                                    ? 'Loading countries...'
-                                    : context.l10n.text('selectCountry')),
-                                isExpanded: true,
-                                borderRadius: BorderRadius.circular(12),
-                                icon: const Icon(
-                                  Icons.keyboard_arrow_down_rounded,
-                                  size: 18,
-                                ),
-                                style: const TextStyle(
-                                  fontSize: 16,
-                                  color: AppColors.text,
-                                ),
-                                items: countryOptions
-                                    .map(
-                                      (country) => DropdownMenuItem<String>(
-                                        value: country.nameEn,
-                                        child: Text(
-                                          '${country.nameEn} ${country.dialCode}',
-                                        ),
-                                      ),
-                                    )
-                                    .toList(growable: false),
-                                onChanged: countryOptions.isEmpty
-                                    ? null
-                                    : (value) {
-                                        if (value == null) return;
-                                        final CountryMaster selectedCountry =
-                                            countryOptions.firstWhere(
-                                          (country) => country.nameEn == value,
-                                          orElse: () => CountryMaster(
-                                            id: 'fallback',
-                                            nameEn: value,
-                                            nameAr: '',
-                                            value: '',
-                                            dialCode: _selectedCountryDialCode,
-                                            flagEmoji: '🌍',
-                                            isActive: true,
-                                          ),
-                                        );
-                                        setState(() {
-                                          _selectedCountry = value;
-                                          _selectedCountryDialCode =
-                                              selectedCountry.dialCode;
-                                        });
-                                      },
+                                border: InputBorder.none,
+                                focusedBorder: InputBorder.none,
+                                enabledBorder: InputBorder.none,
                               ),
-                            );
-                          },
-                        ),
-                        const SizedBox(width: 10),
-                        Container(
-                            width: 1, height: 30, color: AppColors.border),
-                        Expanded(
-                          child: TextField(
-                            controller: _phoneController,
-                            keyboardType: TextInputType.phone,
-                            decoration: InputDecoration(
-                              contentPadding: const EdgeInsets.all(5),
-                              hintText: context.l10n.text('enterMobileNumber'),
-                              border: InputBorder.none,
-                              focusedBorder: InputBorder.none,
-                              enabledBorder: InputBorder.none,
                             ),
                           ),
-                        ),
-                        const SizedBox(width: 12),
-                      ],
+                          const SizedBox(width: 12),
+                        ],
+                      ),
                     ),
-                  ),
-                  const SizedBox(height: 12),
-                  DropdownButtonFormField<String>(
-                    value: gender,
-                    decoration: InputDecoration(
-                      labelText: context.l10n.text('gender'),
-                      border: const OutlineInputBorder(),
+                    const SizedBox(height: 12),
+                    DropdownButtonFormField<String>(
+                      value: gender,
+                      decoration: InputDecoration(
+                        labelText: context.l10n.text('gender'),
+                        border: const OutlineInputBorder(),
+                      ),
+                      items: <String>['FEMALE', 'MALE']
+                          .map(
+                            (String value) => DropdownMenuItem<String>(
+                              value: value,
+                              child: Text(value),
+                            ),
+                          )
+                          .toList(),
+                      onChanged: (String? value) {
+                        if (value != null) {
+                          setState(() {
+                            gender = value;
+                          });
+                        }
+                      },
                     ),
-                    items: <String>['FEMALE', 'MALE']
-                        .map(
-                          (String value) => DropdownMenuItem<String>(
-                            value: value,
-                            child: Text(value),
-                          ),
-                        )
-                        .toList(),
-                    onChanged: (String? value) {
-                      if (value != null) {
-                        setState(() {
-                          gender = value;
-                        });
-                      }
-                    },
-                  ),
-                  const SizedBox(height: 20),
-                  AppPrimaryButton(
-                    label: context.l10n.text('updateProfile'),
-                    onPressed: isUpdating
-                        ? null
-                        : () async {
-                            final String fullName =
-                                _fullNameController.text.trim();
-                            final String email = _emailController.text.trim();
-                            final String phone = _phoneController.text.trim();
-                            final String country = _selectedCountry.trim();
-
-                            if (fullName.isEmpty ||
-                                email.isEmpty ||
-                                phone.isEmpty ||
-                                country.isEmpty) {
-                              showAppSnackBar(
-                                context,
-                                type: AppSnackBarType.error,
-                                message: 'Please fill all fields.',
-                              );
-                              return;
-                            }
-
-                            setState(() => isUpdating = true);
-
-                            final List<String> parts = fullName
-                                .split(RegExp(r'\s+'))
-                                .where((e) => e.isNotEmpty)
-                                .toList(growable: false);
-                            final String firstName =
-                                parts.isNotEmpty ? parts.first : fullName;
-                            final String lastName =
-                                parts.length > 1 ? parts.last : fullName;
-
-                            try {
-                              await _applicationApiService
-                                  .updateStudentProfileQuick(
-                                studentUserId: studentUserId,
-                                fullName: fullName,
-                                firstName: firstName,
-                                lastName: lastName,
-                                email: email,
-                                country: country,
-                                phone: phone,
-                                gender: gender,
-                                preferredLanguage:
-                                    context.l10n.locale.languageCode,
-                                isActive: true,
-                              );
-
-                              if (!mounted) return;
-                              Navigator.of(context).pop(true);
-                              await _submitApplicationsAndContinue();
-                            } on ApplicationApiException catch (e) {
-                              if (!mounted) return;
-                              showAppSnackBar(
-                                context,
-                                type: AppSnackBarType.error,
-                                message: e.message,
-                              );
-                            } catch (e) {
-                              if (!mounted) return;
-                              showAppSnackBar(
-                                context,
-                                type: AppSnackBarType.error,
-                                message: e.toString(),
-                              );
-                            } finally {
-                              if (mounted) {
-                                setState(() => isUpdating = false);
+                    const SizedBox(height: 20),
+                    AppPrimaryButton(
+                      label: context.l10n.text('updateProfile'),
+                      onPressed: isUpdating
+                          ? null
+                          : () async {
+                              final String fullName =
+                                  _fullNameController.text.trim();
+                              final String email = _emailController.text.trim();
+                              final String phone = _phoneController.text.trim();
+                              final String country = _selectedCountry.trim();
+                
+                              if (fullName.isEmpty ||
+                                  email.isEmpty ||
+                                  phone.isEmpty ||
+                                  country.isEmpty) {
+                                showAppSnackBar(
+                                  context,
+                                  type: AppSnackBarType.error,
+                                  message: 'Please fill all fields.',
+                                );
+                                return;
                               }
-                            }
-                          },
-                  ),
-                  const SizedBox(height: 12),
-                ],
+                
+                              setState(() => isUpdating = true);
+                
+                              final List<String> parts = fullName
+                                  .split(RegExp(r'\s+'))
+                                  .where((e) => e.isNotEmpty)
+                                  .toList(growable: false);
+                              final String firstName =
+                                  parts.isNotEmpty ? parts.first : fullName;
+                              final String lastName =
+                                  parts.length > 1 ? parts.last : fullName;
+                
+                              try {
+                                if (!context.mounted) return;
+                                setState(() => isUpdating = true);
+
+                                await _applicationApiService
+                                    .updateStudentProfileQuick(
+                                  studentUserId: studentUserId,
+                                  fullName: fullName,
+                                  firstName: firstName,
+                                  lastName: lastName,
+                                  email: email,
+                                  country: country,
+                                  phone: phone,
+                                  gender: gender,
+                                  preferredLanguage:
+                                      context.l10n.locale.languageCode,
+                                  isActive: true,
+                                );
+
+                                if (!mounted) return;
+                                Navigator.of(context).pop(true);
+                                await _submitApplicationsAndContinue();
+                              } on ApplicationApiException catch (e) {
+                                if (!mounted) return;
+                                showAppSnackBar(
+                                  context,
+                                  type: AppSnackBarType.error,
+                                  message: e.message,
+                                );
+                              } catch (e) {
+                                if (!mounted) return;
+                                showAppSnackBar(
+                                  context,
+                                  type: AppSnackBarType.error,
+                                  message: e.toString(),
+                                );
+                              } finally {
+                                if (context.mounted) {
+                                  setState(() => isUpdating = false);
+                                }
+                              }
+                            },
+                    ),
+                    const SizedBox(height: 12),
+                  ],
+                ),
               ),
             );
           },
@@ -663,7 +766,7 @@ class _PaymentScreenState extends State<PaymentScreen>
                             label: context.l10n.text('payNow'),
                             onPressed: _isSubmitting
                                 ? null
-                                : _openUpdateProfileBottomSheet,
+                                : _handlePayNow,
                           ),
                         ],
                       ),
