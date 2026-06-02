@@ -116,7 +116,9 @@ class _UniversityDetailScreenState extends State<UniversityDetailScreen>
         academicname: preferArabic
             ? ((program?.academicProgramAr ?? '').trim().isNotEmpty
                 ? program?.academicProgramAr
-                : (program?.academicProgram ?? program?.nameAr ?? program?.name))
+                : (program?.academicProgram ??
+                    program?.nameAr ??
+                    program?.name))
             : (program?.academicProgram ??
                 program?.name ??
                 program?.academicProgramAr ??
@@ -895,10 +897,10 @@ class _CollegeAccordionState extends State<_CollegeAccordion> {
                         ...(collegeCourses.isEmpty
                             ? [
                                 Padding(
-                                  padding: const EdgeInsets.all(16),
+                                  padding: EdgeInsets.all(16),
                                   child: Center(
                                     child: Text(
-                                      'No courses available',
+                                      context.l10n.text('No courses available'),
                                       style: Theme.of(context)
                                           .textTheme
                                           .bodyMedium,

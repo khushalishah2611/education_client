@@ -1,3 +1,5 @@
+import 'dart:convert';
+
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
 import 'package:shared_preferences/shared_preferences.dart';
@@ -64,6 +66,9 @@ class _NotificationsScreenState extends State<NotificationsScreen>
   }
 
   String _getGroupTitle(String dateStr) {
+    if (dateStr.trim().isEmpty) {
+      return 'Others';
+    }
     try {
       final date = DateTime.parse(dateStr).toLocal();
 
@@ -82,14 +87,19 @@ class _NotificationsScreenState extends State<NotificationsScreen>
       );
 
       if (itemDate == today) {
-        return context.l10n.text('today');
-      } else if (itemDate == yesterday) {
-        return context.l10n.text('yesterday');
-      } else {
-        return DateFormat('dd MMM yyyy').format(date);
+        final todayText = context.l10n.text('today');
+        return todayText.isEmpty ? 'Today' : todayText;
       }
+
+      if (itemDate == yesterday) {
+        final yesterdayText = context.l10n.text('yesterday');
+        return yesterdayText.isEmpty ? 'Yesterday' : yesterdayText;
+      }
+
+      return DateFormat('dd MMM yyyy').format(date);
     } catch (e) {
-      return context.l10n.text('others');
+      debugPrint('Error parsing date: $dateStr, Error: $e');
+      return 'Others';
     }
   }
 
@@ -101,6 +111,10 @@ class _NotificationsScreenState extends State<NotificationsScreen>
         item.createdAt,
       );
 
+      if (group.trim().isEmpty) {
+        continue;
+      }
+
       if (!grouped.containsKey(group)) {
         grouped[group] = [];
       }
@@ -108,52 +122,83 @@ class _NotificationsScreenState extends State<NotificationsScreen>
       grouped[group]!.add(item);
     }
 
+    debugPrint('Grouped notifications: ${grouped.length} groups, Total items: ${_items.length}');
     return grouped;
   }
 
   Future<void> _load() async {
-    final prefs = await SharedPreferences.getInstance();
+    try {
+      final prefs = await SharedPreferences.getInstance();
 
-    final studentUserId = prefs.getString('studentUserId')?.trim() ?? '';
+      final studentUserId =
+          prefs.getString('studentUserId')?.trim() ?? '';
 
-    final data = await _api.fetchStudentOverview(
-      studentUserId: studentUserId,
-    );
+      final data = await _api.fetchStudentOverview(
+        studentUserId: studentUserId,
+      );
 
-    final notifications = data['notifications'];
+      final rawNotifications = data['notifications'];
 
-    if (!mounted) return;
+      List<StudentNotification> parsedItems = [];
 
-    updateView(() {
-      _items = (notifications is List)
-          ? notifications
-              .whereType<Map>()
-              .map(
-                (item) => StudentNotification.fromJson(
-                  item.map(
-                    (key, value) => MapEntry(key.toString(), value),
-                  ),
-                ),
-              )
-              .toList()
-          : [];
+      if (rawNotifications is List) {
+        parsedItems = rawNotifications
+            .map<StudentNotification>((item) {
+          return StudentNotification.fromJson(
+            Map<String, dynamic>.from(item as Map),
+          );
+        }).toList();
+      } else if (rawNotifications is String) {
+        final decoded = jsonDecode(rawNotifications);
 
-      _items.sort((a, b) {
-        final aDate = DateTime.tryParse(a.createdAt) ?? DateTime.now();
+        if (decoded is List) {
+          parsedItems = decoded
+              .map<StudentNotification>((item) {
+            return StudentNotification.fromJson(
+              Map<String, dynamic>.from(item as Map),
+            );
+          }).toList();
+        }
+      }
 
-        final bDate = DateTime.tryParse(b.createdAt) ?? DateTime.now();
+      parsedItems.sort((a, b) {
+        final aDate =
+            DateTime.tryParse(a.createdAt) ?? DateTime.now();
+
+        final bDate =
+            DateTime.tryParse(b.createdAt) ?? DateTime.now();
 
         return bDate.compareTo(aDate);
       });
 
-      final unread = _items.where((item) => !item.isRead).length;
+      if (!mounted) return;
 
-      NotificationSyncService.instance.updateUnreadCount(unread);
+      updateView(() {
+        _items = parsedItems;
 
-      _loading = false;
-    });
+        final unread =
+            _items.where((item) => !item.isRead).length;
+
+        NotificationSyncService.instance
+            .updateUnreadCount(unread);
+
+        _loading = false;
+      });
+
+      debugPrint(
+        'Notifications Loaded: ${_items.length}',
+      );
+    } catch (e) {
+      debugPrint('Notification Error: $e');
+
+      if (!mounted) return;
+
+      updateView(() {
+        _items = [];
+        _loading = false;
+      });
+    }
   }
-
   Future<void> _markAsRead(int index) async {
     final item = _items[index];
 
@@ -222,6 +267,43 @@ class _NotificationsScreenState extends State<NotificationsScreen>
                               ),
                             ),
                           )
+                        ],
+                      )
+                    : groupedItems.isEmpty
+                    ? ListView(
+                        children: [
+                          Container(
+                            margin: const EdgeInsets.all(12),
+                            padding: const EdgeInsets.all(20),
+                            decoration: BoxDecoration(
+                              color: Colors.white,
+                              borderRadius: BorderRadius.circular(10),
+                              border: Border.all(
+                                color: const Color(0xFFE6E6E6),
+                              ),
+                            ),
+                            child: Column(
+                              children: [
+                                Text(
+                                  'Unable to display notifications',
+                                  textAlign: TextAlign.center,
+                                  style: const TextStyle(
+                                    color: Color(0xFF616161),
+                                    fontWeight: FontWeight.w500,
+                                  ),
+                                ),
+                                const SizedBox(height: 8),
+                                Text(
+                                  '(Loaded: ${_items.length}, Grouped: ${groupedItems.length})',
+                                  textAlign: TextAlign.center,
+                                  style: const TextStyle(
+                                    color: Color(0xFF999999),
+                                    fontSize: 12,
+                                  ),
+                                ),
+                              ],
+                            ),
+                          ),
                         ],
                       )
                     : ListView(

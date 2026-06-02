@@ -217,10 +217,12 @@ const Map<String, Map<String, dynamic>> _fallbackValues = {
     'Details / Apply': 'Details / Apply',
     'Details': 'Details',
     'Apply & Pay\nApplication Fee': 'Apply & Pay\nApplication Fee',
+    'No courses available': 'No courses available',
     'No data available': 'No data available',
   },
   'ar': {
     'appName': 'جامعات العرب',
+    'No courses available': 'لا توجد دورات متاحة',
     'langLabel': 'EN',
     'welcomeTitle': 'مرحبًا بك في\nجامعات العرب',
     'welcomeSubtitle': 'اكتشف أفضل الكليات والجامعات لصناعة مستقبلك',

@@ -27,52 +27,27 @@ class StudentNotification {
       return str == 'null' ? '' : str;
     }
 
-    String localizedString(
-      List<String> directKeys, {
-      required List<String> nestedKeys,
-    }) {
-      for (final key in directKeys) {
-        final value = json[key];
-        final directValue = safeString(value);
-        if (directValue.isNotEmpty) return directValue;
-
-        if (value is Map) {
-          for (final nestedKey in nestedKeys) {
-            final nestedValue = safeString(value[nestedKey]);
-            if (nestedValue.isNotEmpty) return nestedValue;
-          }
-        }
-      }
-      return '';
-    }
-
     return StudentNotification(
       id: safeString(json['id']),
-      title: localizedString(
-        const ['title', 'titleEn', 'titleEnglish', 'subject', 'subjectEn'],
-        nestedKeys: const ['en', 'en_US', 'english', 'value'],
-      ),
-      titleAr: localizedString(
-        const ['titleAr', 'titleArabic', 'arabicTitle', 'title', 'subjectAr'],
-        nestedKeys: const ['ar', 'ar_SA', 'arabic', 'value'],
-      ),
-      message: localizedString(
-        const ['message', 'messageEn', 'messageEnglish', 'body', 'bodyEn'],
-        nestedKeys: const ['en', 'en_US', 'english', 'value'],
-      ),
-      messageAr: localizedString(
-        const [
-          'messageAr',
-          'messageArabic',
-          'arabicMessage',
-          'bodyAr',
-          'message',
-        ],
-        nestedKeys: const ['ar', 'ar_SA', 'arabic', 'value'],
-      ),
-      createdAt: safeString(json['createdAt']),
+      title: safeString(json['title'] ?? json['titleEn'] ?? json['subject'] ?? ''),
+      titleAr: safeString(json['titleAr'] ?? json['title_ar'] ?? json['titleArabic'] ?? ''),
+      message: safeString(json['message'] ?? json['messageEn'] ?? json['body'] ?? ''),
+      messageAr: safeString(json['messageAr'] ?? json['message_ar'] ?? json['messageArabic'] ?? ''),
+      createdAt: _ensureValidDateTime(safeString(json['createdAt'])),
       isRead: json['isRead'] == true,
     );
+  }
+
+  static String _ensureValidDateTime(String dateStr) {
+    if (dateStr.isEmpty) {
+      return DateTime.now().toIso8601String();
+    }
+    try {
+      DateTime.parse(dateStr);
+      return dateStr;
+    } catch (_) {
+      return DateTime.now().toIso8601String();
+    }
   }
 
   StudentNotification copyWith({bool? isRead}) {
