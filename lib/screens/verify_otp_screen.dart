@@ -12,7 +12,6 @@ import '../core/student_session.dart';
 import '../services/auth_api_service.dart';
 import '../widgets/common_widgets.dart';
 import 'home_screen.dart';
-import 'login_screen.dart';
 
 class VerifyOtpScreen extends StatefulWidget {
   const VerifyOtpScreen({
@@ -22,6 +21,7 @@ class VerifyOtpScreen extends StatefulWidget {
     required this.whatsappOtpLink,
     required this.loginCountry,
     required this.loginDialCode,
+    required this.loginPhone,
   });
 
   final String studentId;
@@ -29,6 +29,7 @@ class VerifyOtpScreen extends StatefulWidget {
   final String whatsappOtpLink;
   final String loginCountry;
   final String loginDialCode;
+  final String loginPhone;
 
   @override
   State<VerifyOtpScreen> createState() => _VerifyOtpScreenState();
@@ -172,6 +173,7 @@ class _VerifyOtpScreenState extends State<VerifyOtpScreen>
         studentUserId: response.id.isNotEmpty ? response.id : widget.studentId,
         loginCountry: widget.loginCountry,
         loginDialCode: widget.loginDialCode,
+        loginPhone: widget.loginPhone,
         authToken: response.accessToken,
       );
       if (!mounted) return;

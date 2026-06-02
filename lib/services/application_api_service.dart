@@ -414,6 +414,61 @@ extension ApplicationApiStudents on ApplicationApiService {
 
     return decoded;
   }
+
+  Future<Map<String, dynamic>> updateStudentProfileQuick({
+    required String studentUserId,
+    required String fullName,
+    required String firstName,
+    required String lastName,
+    required String email,
+    required String country,
+    required String phone,
+    required String gender,
+    required String preferredLanguage,
+    required bool isActive,
+  }) async {
+    final Uri uri = ApiConfig.uri(
+      '/api/admin/students/${Uri.encodeComponent(studentUserId)}',
+    );
+
+    final Map<String, dynamic> body = <String, dynamic>{
+      'fullName': fullName,
+      'firstName': firstName,
+      'lastName': lastName,
+      'email': email,
+      'country': country,
+      'phone': phone,
+      'gender': gender,
+      'preferredLanguage': preferredLanguage,
+      'isActive': isActive,
+    };
+
+    final response = await http.put(
+      uri,
+      headers: const <String, String>{
+        'Content-Type': 'application/json',
+      },
+      body: jsonEncode(body),
+    );
+
+    final decoded = _decodeMap(response.body);
+    logApiCall(
+      method: 'PUT',
+      url: uri.toString(),
+      statusCode: response.statusCode,
+      requestBody: body,
+      responseBody: decoded,
+    );
+
+    if (!ApiStatus.isSuccess(response.statusCode)) {
+      throw ApplicationApiException(
+        statusCode: response.statusCode,
+        message: decoded['message']?.toString() ?? 'Failed to update student',
+      );
+    }
+
+    return decoded;
+  }
 }
 
 Map<String, dynamic> _decodeMap(String body) {

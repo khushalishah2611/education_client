@@ -73,7 +73,7 @@
   "payNow": "ادفع الآن",
   "paymentConfirmation": "تأكيد الدفع",
   "applicationSubmitted": "تم تقديم الطلب",
-  "applicationIdValue": "رقم الطلب : #12345",
+  "applicationIdValue": "رقم الطلب :",
   "paymentProcessedPrefix": "تمت معالجة دفعتك للبرنامج",
   "paymentProcessedSuffix": ". طلبك الآن في قائمة المراجعة.",
   "trackApplication": "تتبع الطلب",
@@ -228,5 +228,7 @@
   "Unable to load PDF": "تعذر تحميل ملف PDF",
   "Please upload Passport and Secondary School Certificate before continuing": "يرجى رفع جواز السفر وشهادة الثانوية العامة قبل المتابعة",
   "Not mandatory": "غير إلزامي",
-  "Booked": "محجوز"
+  "Booked": "محجوز",
+  "facebook" : "فيسبوك",
+  "updateProfile" : "حساب تعريفي"
 }

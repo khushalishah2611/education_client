@@ -160,7 +160,7 @@ const Map<String, Map<String, dynamic>> _fallbackValues = {
     'payNow': 'Pay Now',
     'paymentConfirmation': 'Payment Confirmation',
     'applicationSubmitted': 'Application Submitted',
-    'applicationIdValue': 'Application ID : #12345',
+    'applicationIdValue': 'Application ID :',
     'paymentProcessedPrefix': 'Your payment of ₹1,500.00 for the Fall 2026',
     'paymentProcessedSuffix':
         'program has been processed. Your application is now in the review queue.',
@@ -309,7 +309,7 @@ const Map<String, Map<String, dynamic>> _fallbackValues = {
     'payNow': 'ادفع الآن',
     'paymentConfirmation': 'تأكيد الدفع',
     'applicationSubmitted': 'تم إرسال الطلب',
-    'applicationIdValue': 'رقم الطلب : #12345',
+    'applicationIdValue': 'رقم الطلب :',
     'paymentProcessedPrefix':
         'تمت معالجة دفعتك بقيمة ₹1,500.00 لبرنامج خريف 2026',
     'paymentProcessedSuffix': 'وأصبح طلبك الآن في قائمة المراجعة.',

@@ -13,10 +13,11 @@ class HelpScreen extends StatelessWidget {
   static const String emailAddress = 'arabuapp@gmail.com';
 
   // Social usernames
-  static const String instagramUsername = 'instagram';
-  static const String snapchatUsername = 'snapchat';
-  static const String twitterUsername = 'twitter';
-  static const String tiktokUsername = 'tiktok';
+  static const String instagramUrl = 'https://www.instagram.com/universities_arab?utm_source=qr&igsh=dHJydWx3Nm5taTNr';
+  static const String facebookUrl = 'https://www.facebook.com/arabeducation';
+  static const String snapchatUrl = 'https://www.snapchat.com/add/universitiesara?share_id=C2ct2Rm65l8&locale=ar-AE';
+  static const String twitterUrl = 'https://x.com/universities_ar';
+  static const String tiktokUrl = 'https://www.tiktok.com/@tiktok';
 
   Future<void> _launch(Uri uri) async {
     try {
@@ -38,34 +39,27 @@ class HelpScreen extends StatelessWidget {
   }
 
   Future<void> _openInstagram() async {
-    final Uri uri = Uri.parse(
-      'https://instagram.com/$instagramUsername',
-    );
-
+    final Uri uri = Uri.parse(instagramUrl);
     await _launch(uri);
   }
 
   Future<void> _openSnapchat() async {
-    final Uri uri = Uri.parse(
-      'https://snapchat.com/add/$snapchatUsername',
-    );
+    final Uri uri = Uri.parse(snapchatUrl);
+    await _launch(uri);
+  }
 
+  Future<void> _openFacebook() async {
+    final Uri uri = Uri.parse(facebookUrl);
     await _launch(uri);
   }
 
   Future<void> _openTwitter() async {
-    final Uri uri = Uri.parse(
-      'https://twitter.com/$twitterUsername',
-    );
-
+    final Uri uri = Uri.parse(twitterUrl);
     await _launch(uri);
   }
 
   Future<void> _openTikTok() async {
-    final Uri uri = Uri.parse(
-      'https://www.tiktok.com/@$tiktokUsername',
-    );
-
+    final Uri uri = Uri.parse(tiktokUrl);
     await _launch(uri);
   }
 
@@ -120,6 +114,7 @@ class HelpScreen extends StatelessWidget {
                         ContactSupportSection(
                           onOpenWhatsApp: _openWhatsApp,
                           onOpenInstagram: _openInstagram,
+                          onOpenFacebook: _openFacebook,
                           onOpenSnapchat: _openSnapchat,
                           onOpenTwitter: _openTwitter,
                           onOpenEmail: _openEmail,

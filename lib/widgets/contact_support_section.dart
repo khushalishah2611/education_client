@@ -10,6 +10,7 @@ class ContactSupportSection extends StatelessWidget {
     super.key,
     required this.onOpenWhatsApp,
     required this.onOpenInstagram,
+    required this.onOpenFacebook,
     required this.onOpenSnapchat,
     required this.onOpenTwitter,
     required this.onOpenEmail,
@@ -18,6 +19,7 @@ class ContactSupportSection extends StatelessWidget {
 
   final Future<void> Function() onOpenWhatsApp;
   final Future<void> Function() onOpenInstagram;
+  final Future<void> Function() onOpenFacebook;
   final Future<void> Function() onOpenSnapchat;
   final Future<void> Function() onOpenTwitter;
   final Future<void> Function() onOpenEmail;
@@ -41,8 +43,19 @@ class ContactSupportSection extends StatelessWidget {
         label: context.l10n.text('Instagram'),
         backgroundColor: const Color(0xFFF4E7EF),
         onTap: onOpenInstagram,
-        icon:Image.asset(
+        icon: Image.asset(
           'assets/images/instagram.png',
+          width: 36,
+          height: 36,
+          fit: BoxFit.contain,
+        ),
+      ),
+      _SupportAction(
+        label: context.l10n.text('facebook'),
+        backgroundColor: const Color(0xFFF7F2C8),
+        onTap: onOpenFacebook,
+        icon: Image.asset(
+          'assets/images/facebook.png',
           width: 36,
           height: 36,
           fit: BoxFit.contain,

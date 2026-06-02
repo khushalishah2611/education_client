@@ -8,11 +8,13 @@ class StudentSession {
   static const String _authTokenKey = 'authToken';
   static const String _loginCountryKey = 'loginCountry';
   static const String _loginDialCodeKey = 'loginDialCode';
+  static const String _loginPhoneKey = 'loginPhone';
 
   static Future<void> saveLogin({
     required String studentUserId,
     required String loginCountry,
     required String loginDialCode,
+    required String loginPhone,
     required String authToken,
   }) async {
     final SharedPreferences prefs = await SharedPreferences.getInstance();
@@ -24,9 +26,17 @@ class StudentSession {
     if (loginDialCode.trim().isNotEmpty) {
       await prefs.setString(_loginDialCodeKey, loginDialCode.trim());
     }
+    if (loginPhone.trim().isNotEmpty) {
+      await prefs.setString(_loginPhoneKey, loginPhone.trim());
+    }
     if (authToken.trim().isNotEmpty) {
       await prefs.setString(_authTokenKey, authToken.trim());
     }
+  }
+
+  static Future<String> currentLoginPhone() async {
+    final SharedPreferences prefs = await SharedPreferences.getInstance();
+    return prefs.getString(_loginPhoneKey)?.trim() ?? '';
   }
 
   static Future<String> currentStudentUserId() async {

@@ -131,9 +131,15 @@ class _PaymentConfirmationScreenState extends State<PaymentConfirmationScreen>
 
   String get _applicationId => _textFrom(_primaryApplication?['id']);
 
-  String get _applicationIdText {
-    if (_applicationId.isEmpty) return 'Application ID: -';
-    return 'Application ID: ${_shortId(_applicationId)}';
+  String _applicationIdText(BuildContext context) {
+    final String applicationId = _shortId(_applicationId);
+    final String template = context.l10n.text('applicationIdValue');
+
+    if (applicationId.isEmpty) {
+      return template;
+    }
+
+    return '$template $applicationId';
   }
 
   String get _paymentId => _resolvePaymentId(_primaryPayment);
@@ -547,7 +553,7 @@ class _PaymentConfirmationScreenState extends State<PaymentConfirmationScreen>
                               borderRadius: BorderRadius.circular(8),
                             ),
                             child: Text(
-                              _applicationIdText,
+                              _applicationIdText(context),
                               textAlign: TextAlign.center,
                             ),
                           ),

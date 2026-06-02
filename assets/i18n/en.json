@@ -73,7 +73,7 @@
   "payNow": "Pay Now",
   "paymentConfirmation": "Payment Confirmation",
   "applicationSubmitted": "Application Submitted",
-  "applicationIdValue": "Application ID : #12345",
+  "applicationIdValue": "Application ID :",
   "paymentProcessedPrefix": "Your payment of",
   "paymentProcessedSuffix": "program has been processed. Your application is now in the review queue.",
   "trackApplication": "Track Application",
@@ -228,5 +228,7 @@
   "Unable to load PDF": "Unable to load PDF",
   "Please upload Passport and Secondary School Certificate before continuing": "Please upload Passport and Secondary School Certificate before continuing",
   "Not mandatory": "Not mandatory",
-  "Booked": "Booked"
+  "Booked": "Booked",
+  "facebook": "Facebook",
+  "updateProfile": "Profile"
 }

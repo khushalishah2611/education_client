@@ -133,6 +133,7 @@ class _LoginScreenState extends State<LoginScreen>
             loginDialCode: response.dialCode.isNotEmpty
                 ? response.dialCode
                 : _selectedCountry!.dialCode,
+            loginPhone: _mobileController.text.trim(),
           ),
         ),
       );
@@ -171,7 +172,7 @@ class _LoginScreenState extends State<LoginScreen>
     } catch (_) {
       // Fallback: try app localizations or default to English
       try {
-        lang = (context.l10n.locale?.languageCode) ?? 'en';
+        lang = context.l10n.locale.languageCode;
       } catch (_) {
         lang = 'en';
       }
@@ -189,12 +190,14 @@ class _LoginScreenState extends State<LoginScreen>
 
   String _localizedAgreementContent(BuildContext context, AgreementTemplate? agreement) {
     final lang = Localizations.localeOf(context).languageCode.toLowerCase();
-    final ar = agreement?.contentAr?.trim();
-    final en = agreement?.contentEn?.trim();
+    final String? ar = agreement?.contentAr;
+    final String? en = agreement?.contentEn;
+    final String? arText = ar?.trim();
+    final String? enText = en?.trim();
     if (lang == 'ar') {
-      return (ar != null && ar.isNotEmpty) ? ar : (en ?? '');
+      return (arText != null && arText.isNotEmpty) ? arText : (enText ?? '');
     }
-    return (en != null && en.isNotEmpty) ? en : (ar ?? '');
+    return (enText != null && enText.isNotEmpty) ? enText : (arText ?? '');
   }
 
   void _openTermsBottomSheet() {
