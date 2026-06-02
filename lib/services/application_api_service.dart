@@ -172,13 +172,16 @@ extension ApplicationApiDocumentTypes on ApplicationApiService {
       );
     }
 
-    final List<dynamic> items = decoded['items'] is List<dynamic>
-        ? decoded['items'] as List<dynamic>
-        : <dynamic>[];
+    final List<dynamic> items = _readList(
+      decoded,
+      const ['items', 'data', 'documentTypes', 'document_types', 'results'],
+    );
     return items
-        .whereType<Map<String, dynamic>>()
-        .map(DocumentTypeItem.fromJson)
-        .where((e) => e.id.isNotEmpty && e.value.isNotEmpty)
+        .whereType<Map>()
+        .map((item) => DocumentTypeItem.fromJson(
+              Map<String, dynamic>.from(item),
+            ))
+        .where((e) => e.value.isNotEmpty)
         .toList(growable: false);
   }
 }
@@ -309,7 +312,6 @@ extension ApplicationApiDocuments on ApplicationApiService {
   }
 }
 
-
 extension ApplicationApiStudents on ApplicationApiService {
   Future<List<Map<String, dynamic>>> fetchStudents() async {
     final Uri uri = ApiConfig.uri('/api/admin/students');
@@ -417,9 +419,31 @@ extension ApplicationApiStudents on ApplicationApiService {
 Map<String, dynamic> _decodeMap(String body) {
   try {
     final Object? parsed = jsonDecode(body);
-    if (parsed is Map<String, dynamic>) {
-      return parsed;
+    if (parsed is Map) {
+      return Map<String, dynamic>.from(parsed);
+    }
+    if (parsed is List<dynamic>) {
+      return <String, dynamic>{'data': parsed};
     }
   } catch (_) {}
   return <String, dynamic>{};
+}
+
+List<dynamic> _readList(Map<String, dynamic> json, List<String> keys) {
+  for (final String key in keys) {
+    final Object? value = json[key];
+    if (value is List<dynamic>) {
+      return value;
+    }
+    if (value is Map) {
+      final List<dynamic> nested = _readList(
+        Map<String, dynamic>.from(value),
+        const ['items', 'data', 'results'],
+      );
+      if (nested.isNotEmpty) {
+        return nested;
+      }
+    }
+  }
+  return const <dynamic>[];
 }

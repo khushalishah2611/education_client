@@ -1,5 +1,8 @@
+import 'dart:async';
+
 import 'package:education/models/admin_university.dart';
 import 'package:education/models/banner_item.dart';
+import 'package:education/models/student_notification.dart';
 import 'package:education/screens/latest_updates_screen.dart';
 import 'package:education/services/application_api_service.dart';
 import 'package:education/services/notification_sync_service.dart';
@@ -7,7 +10,7 @@ import 'package:education/screens/side_menu/track_my_applications_screen.dart';
 import 'package:education/screens/side_menu/uploaded_documents_screen.dart';
 import 'package:flutter/material.dart';
 import 'package:shared_preferences/shared_preferences.dart';
-import 'dart:async';
+
 import '../core/app_localizations.dart';
 import '../core/bloc/app_cubit.dart';
 import '../core/app_theme.dart';
@@ -76,10 +79,9 @@ class _HomeScreenState extends State<HomeScreen> {
       final data = await _applicationApi.fetchStudentOverview(
         studentUserId: studentUserId,
       );
-      final notifications = data['notifications'];
-      final unread = notifications is List
-          ? notifications.where((item) => item['isRead'] != true).length
-          : 0;
+      final unread = StudentNotification.listFromResponse(data)
+          .where((item) => !item.isRead)
+          .length;
       NotificationSyncService.instance.updateUnreadCount(unread);
     } catch (_) {}
   }

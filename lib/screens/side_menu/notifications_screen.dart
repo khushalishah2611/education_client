@@ -1,5 +1,3 @@
-import 'dart:convert';
-
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
 import 'package:shared_preferences/shared_preferences.dart';
@@ -117,43 +115,19 @@ class _NotificationsScreenState extends State<NotificationsScreen>
     try {
       final prefs = await SharedPreferences.getInstance();
 
-      final studentUserId =
-          prefs.getString('studentUserId')?.trim() ?? '';
+      final studentUserId = prefs.getString('studentUserId')?.trim() ?? '';
 
       final data = await _api.fetchStudentOverview(
         studentUserId: studentUserId,
       );
 
-      final rawNotifications = data['notifications'];
-
-      List<StudentNotification> parsedItems = [];
-
-      if (rawNotifications is List) {
-        parsedItems = rawNotifications
-            .map<StudentNotification>((item) {
-          return StudentNotification.fromJson(
-            Map<String, dynamic>.from(item as Map),
-          );
-        }).toList();
-      } else if (rawNotifications is String) {
-        final decoded = jsonDecode(rawNotifications);
-
-        if (decoded is List) {
-          parsedItems = decoded
-              .map<StudentNotification>((item) {
-            return StudentNotification.fromJson(
-              Map<String, dynamic>.from(item as Map),
-            );
-          }).toList();
-        }
-      }
+      final List<StudentNotification> parsedItems =
+          StudentNotification.listFromResponse(data);
 
       parsedItems.sort((a, b) {
-        final aDate =
-            DateTime.tryParse(a.createdAt) ?? DateTime.now();
+        final aDate = DateTime.tryParse(a.createdAt) ?? DateTime.now();
 
-        final bDate =
-            DateTime.tryParse(b.createdAt) ?? DateTime.now();
+        final bDate = DateTime.tryParse(b.createdAt) ?? DateTime.now();
 
         return bDate.compareTo(aDate);
       });
@@ -163,11 +137,9 @@ class _NotificationsScreenState extends State<NotificationsScreen>
       updateView(() {
         _items = parsedItems;
 
-        final unread =
-            _items.where((item) => !item.isRead).length;
+        final unread = _items.where((item) => !item.isRead).length;
 
-        NotificationSyncService.instance
-            .updateUnreadCount(unread);
+        NotificationSyncService.instance.updateUnreadCount(unread);
 
         _loading = false;
       });
@@ -186,6 +158,7 @@ class _NotificationsScreenState extends State<NotificationsScreen>
       });
     }
   }
+
   Future<void> _markAsRead(int index) async {
     final item = _items[index];
 

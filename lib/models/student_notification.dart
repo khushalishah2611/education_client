@@ -1,3 +1,5 @@
+import 'dart:convert';
+
 import '../core/app_localizations.dart';
 
 class StudentNotification {
@@ -20,22 +22,52 @@ class StudentNotification {
   final bool isRead;
 
   factory StudentNotification.fromJson(Map<String, dynamic> json) {
-    String safeString(dynamic value) {
-      if (value == null) return '';
-      if (value is Map) return '';
-      final str = value.toString().trim();
-      return str == 'null' ? '' : str;
-    }
-
     return StudentNotification(
-      id: safeString(json['id']),
-      title: safeString(json['title'] ?? json['titleEn'] ?? json['subject'] ?? ''),
-      titleAr: safeString(json['titleAr'] ?? json['title_ar'] ?? json['titleArabic'] ?? ''),
-      message: safeString(json['message'] ?? json['messageEn'] ?? json['body'] ?? ''),
-      messageAr: safeString(json['messageAr'] ?? json['message_ar'] ?? json['messageArabic'] ?? ''),
-      createdAt: _ensureValidDateTime(safeString(json['createdAt'])),
-      isRead: json['isRead'] == true,
+      id: _safeString(json['id'] ?? json['_id']),
+      title: _firstNonEmpty(<String>[
+        _safeString(json['title']),
+        _safeString(json['titleEn']),
+        _safeString(json['title_en']),
+        _safeString(json['subject']),
+      ]),
+      titleAr: _firstNonEmpty(<String>[
+        _safeString(json['titleAr']),
+        _safeString(json['title_ar']),
+        _safeString(json['titleArabic']),
+      ]),
+      message: _firstNonEmpty(<String>[
+        _safeString(json['message']),
+        _safeString(json['messageEn']),
+        _safeString(json['message_en']),
+        _safeString(json['body']),
+        _safeString(json['description']),
+      ]),
+      messageAr: _firstNonEmpty(<String>[
+        _safeString(json['messageAr']),
+        _safeString(json['message_ar']),
+        _safeString(json['messageArabic']),
+        _safeString(json['bodyAr']),
+        _safeString(json['descriptionAr']),
+      ]),
+      createdAt: _ensureValidDateTime(
+        _firstNonEmpty(<String>[
+          _safeString(json['createdAt']),
+          _safeString(json['created_at']),
+          _safeString(json['date']),
+        ]),
+      ),
+      isRead: _readBool(json['isRead'] ?? json['is_read'] ?? json['read']),
     );
+  }
+
+  static List<StudentNotification> listFromResponse(Object? response) {
+    final List<dynamic> rawItems = _readNotificationList(response);
+    return rawItems
+        .whereType<Map>()
+        .map((item) => StudentNotification.fromJson(
+              Map<String, dynamic>.from(item),
+            ))
+        .toList(growable: false);
   }
 
   static String _ensureValidDateTime(String dateStr) {
@@ -98,4 +130,59 @@ class StudentNotification {
 
     return fallback;
   }
+}
+
+String _safeString(Object? value) {
+  if (value == null || value is Map || value is List) return '';
+  final String str = value.toString().trim();
+  return str == 'null' ? '' : str;
+}
+
+String _firstNonEmpty(List<String> values) {
+  for (final String value in values) {
+    final String normalized = value.trim();
+    if (normalized.isNotEmpty) {
+      return normalized;
+    }
+  }
+  return '';
+}
+
+bool _readBool(Object? value) {
+  if (value is bool) return value;
+  final String normalized = _safeString(value).toLowerCase();
+  return normalized == 'true' || normalized == '1' || normalized == 'yes';
+}
+
+List<dynamic> _readNotificationList(Object? response) {
+  if (response is String) {
+    try {
+      return _readNotificationList(jsonDecode(response));
+    } catch (_) {
+      return const <dynamic>[];
+    }
+  }
+  if (response is List<dynamic>) {
+    return response;
+  }
+  if (response is Map) {
+    final Map<String, dynamic> map = Map<String, dynamic>.from(response);
+    if (map.containsKey('notifications')) {
+      return _readNotificationList(map['notifications']);
+    }
+    for (final String key in const <String>[
+      'items',
+      'data',
+      'results',
+    ]) {
+      if (!map.containsKey(key)) {
+        continue;
+      }
+      final List<dynamic> nested = _readNotificationList(map[key]);
+      if (nested.isNotEmpty || map[key] is List) {
+        return nested;
+      }
+    }
+  }
+  return const <dynamic>[];
 }
