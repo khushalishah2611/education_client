@@ -185,7 +185,8 @@ class _PaymentsContentState extends State<PaymentsContent>
                   ),
                 ),
                 Text(
-                  '${amount.toStringAsFixed(0)} Omani Rial',
+                  '${amount.toStringAsFixed(0)} '
+                  '${context.l10n.text('omaniRial')}',
                   textAlign: TextAlign.center,
                   style: const TextStyle(
                     color: AppColors.accent,

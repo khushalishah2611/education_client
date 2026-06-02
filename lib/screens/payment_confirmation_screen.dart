@@ -227,7 +227,7 @@ class _PaymentConfirmationScreenState extends State<PaymentConfirmationScreen>
     return _textFrom(selectedCourse['courseName']);
   }
 
-  String get _displayApplicationFee {
+  String _displayApplicationFee(BuildContext context) {
     final Map<String, dynamic>? application = _primaryApplication;
     final Map<String, dynamic>? payload = _primaryPayload;
 
@@ -255,7 +255,7 @@ class _PaymentConfirmationScreenState extends State<PaymentConfirmationScreen>
         ? payloadFee ?? responseFee
         : responseFee;
 
-    const String currency = 'Omani Rial';
+    final String currency = context.l10n.text('omaniRial');
 
     if (fee == null) return currency;
 
@@ -569,7 +569,7 @@ class _PaymentConfirmationScreenState extends State<PaymentConfirmationScreen>
                           const SizedBox(height: 12),
                           Text(
                             '${context.l10n.text('paymentProcessedPrefix')} '
-                            '$_displayApplicationFee '
+                            '${_displayApplicationFee(context)} '
                             '${resolvedCourseTitle.isEmpty ? context.l10n.text('courseOrProgram') : resolvedCourseTitle} '
                             '${context.l10n.text('paymentProcessedSuffix')}',
                             textAlign: TextAlign.center,

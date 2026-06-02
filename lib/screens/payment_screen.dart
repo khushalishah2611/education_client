@@ -37,9 +37,6 @@ class _PaymentScreenState extends State<PaymentScreen>
   final ApplicationApiService _applicationApiService =
   const ApplicationApiService();
 
-  // FIXED OMANI RIAL CURRENCY
-  String get _applicationFeeCurrency => 'Omani Rial';
-
   double get _applicationFeeTotal {
     return widget.applicationsPayload.fold<double>(0, (total, payload) {
       final Object? selectedApplicationFeeTotal =
@@ -74,8 +71,7 @@ class _PaymentScreenState extends State<PaymentScreen>
     });
   }
 
-  // APPLICATION FEE TEXT WITH OMANI RIAL
-  String get _applicationFeeText {
+  String _applicationFeeText(BuildContext context) {
     final double total = _applicationFeeTotal;
 
     final String amount = total % 1 == 0
@@ -84,7 +80,7 @@ class _PaymentScreenState extends State<PaymentScreen>
         .toStringAsFixed(3)
         .replaceFirst(RegExp(r'0+$'), '');
 
-    return '$amount Omani Rial';
+    return '$amount ${context.l10n.text('omaniRial')}';
   }
 
   double? _parseApplicationFee(Object? value) {
@@ -250,7 +246,7 @@ class _PaymentScreenState extends State<PaymentScreen>
                                   const Spacer(),
 
                                   Text(
-                                    _applicationFeeText,
+                                    _applicationFeeText(context),
                                     style: const TextStyle(
                                       fontWeight:
                                       FontWeight.w700,
@@ -275,7 +271,7 @@ class _PaymentScreenState extends State<PaymentScreen>
                                   const Spacer(),
 
                                   Text(
-                                    _applicationFeeText,
+                                    _applicationFeeText(context),
                                     style: const TextStyle(
                                       fontSize: 18,
                                       fontWeight:

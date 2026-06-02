@@ -4,6 +4,7 @@ import 'package:shared_preferences/shared_preferences.dart';
 
 import '../../core/app_localizations.dart';
 import '../../core/app_theme.dart';
+import '../../core/bloc/app_cubit.dart';
 import '../../services/application_api_service.dart';
 import '../../services/notification_sync_service.dart';
 import 'side_menu_common.dart';
@@ -16,7 +17,7 @@ class NotificationsScreen extends StatefulWidget {
 }
 
 class _NotificationsScreenState extends State<NotificationsScreen>
-    with SingleTickerProviderStateMixin {
+    with SingleTickerProviderStateMixin, CubitStateMixin<NotificationsScreen> {
   final ApplicationApiService _api = ApplicationApiService();
 
   bool _loading = true;
@@ -61,7 +62,7 @@ class _NotificationsScreenState extends State<NotificationsScreen>
     }
   }
 
-  String _getGroupTitle(String dateStr) {
+  String _getGroupTitle(BuildContext context, String dateStr) {
     try {
       final date = DateTime.parse(dateStr).toLocal();
 
@@ -80,22 +81,25 @@ class _NotificationsScreenState extends State<NotificationsScreen>
       );
 
       if (itemDate == today) {
-        return 'Today';
+        return context.l10n.text('today');
       } else if (itemDate == yesterday) {
-        return 'Yesterday';
+        return context.l10n.text('yesterday');
       } else {
         return DateFormat('dd MMM yyyy').format(date);
       }
     } catch (e) {
-      return 'Others';
+      return context.l10n.text('others');
     }
   }
 
-  Map<String, List<Map<String, dynamic>>> _groupNotifications() {
+  Map<String, List<Map<String, dynamic>>> _groupNotifications(
+    BuildContext context,
+  ) {
     final Map<String, List<Map<String, dynamic>>> grouped = {};
 
     for (final item in _items) {
       final group = _getGroupTitle(
+        context,
         item['createdAt'] ?? '',
       );
 
@@ -122,7 +126,7 @@ class _NotificationsScreenState extends State<NotificationsScreen>
 
     if (!mounted) return;
 
-    setState(() {
+    updateView(() {
       _items = (notifications is List)
           ? notifications.map<Map<String, dynamic>>((item) {
               return {
@@ -173,7 +177,7 @@ class _NotificationsScreenState extends State<NotificationsScreen>
 
     if (!mounted) return;
 
-    setState(() {
+    updateView(() {
       _items[index]['isRead'] = true;
     });
 
@@ -183,20 +187,21 @@ class _NotificationsScreenState extends State<NotificationsScreen>
   }
 
   Future<void> _refresh() async {
-    setState(() => _loading = true);
+    updateView(() => _loading = true);
 
     await _load();
   }
 
   @override
   Widget build(BuildContext context) {
-    final groupedItems = _groupNotifications();
+    return buildCubitView((context) {
+      final groupedItems = _groupNotifications(context);
 
-    return SideMenuScaffold(
-      title: context.l10n.text('notifications'),
-      child: _loading
-          ? _buildShimmerList()
-          : RefreshIndicator(
+      return SideMenuScaffold(
+        title: context.l10n.text('notifications'),
+        child: _loading
+            ? _buildShimmerList()
+            : RefreshIndicator(
               onRefresh: _refresh,
               child: _items.isEmpty
                   ? ListView(
@@ -211,10 +216,10 @@ class _NotificationsScreenState extends State<NotificationsScreen>
                               color: const Color(0xFFE6E6E6),
                             ),
                           ),
-                          child: const Text(
-                            'No Notifications Found',
+                          child: Text(
+                            context.l10n.text('noNotificationsFound'),
                             textAlign: TextAlign.center,
-                            style: TextStyle(
+                            style: const TextStyle(
                               color: Color(0xFF616161),
                               fontWeight: FontWeight.w500,
                             ),
@@ -243,7 +248,8 @@ class _NotificationsScreenState extends State<NotificationsScreen>
                       }).toList(),
                     ),
             ),
-    );
+      );
+    });
   }
 
   Widget _buildShimmerList() {
@@ -391,7 +397,7 @@ class NotificationSection extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final isArabic = Localizations.localeOf(context).languageCode == 'ar';
+    final isArabic = context.l10n.isArabic;
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
@@ -459,12 +465,16 @@ class NotificationSection extends StatelessWidget {
                           child: GestureDetector(
                             onTap: () => onTap(item),
                             child: NotificationCard(
-                              title: isArabic
-                                  ? (item['titleAr'] ?? '')
-                                  : (item['titleEn'] ?? ''),
-                              description: isArabic
-                                  ? (item['messageAr'] ?? '')
-                                  : (item['messageEn'] ?? ''),
+                              title: (isArabic
+                                      ? item['titleAr']
+                                      : item['titleEn'])
+                                  .toString()
+                                  .trim(),
+                              description: (isArabic
+                                      ? item['messageAr']
+                                      : item['messageEn'])
+                                  .toString()
+                                  .trim(),
                               time: formatTime(
                                 item['createdAt'] ?? '',
                               ),
