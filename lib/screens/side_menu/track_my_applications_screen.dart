@@ -1,6 +1,7 @@
 import 'package:education/core/image_url_helper.dart';
 import 'package:education/services/application_api_service.dart';
 import 'package:flutter/material.dart';
+import 'package:intl/intl.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import '../../core/url_launcher_helper.dart';
 
@@ -392,8 +393,11 @@ class _TrackMyApplicationsScreenState extends State<TrackMyApplicationsScreen>
     showModalBottomSheet(
       context: context,
       isScrollControlled: true,
+      backgroundColor: AppColors.white,
       shape: const RoundedRectangleBorder(
-        borderRadius: BorderRadius.vertical(top: Radius.circular(12)),
+        borderRadius: BorderRadius.vertical(
+          top: Radius.circular(20),
+        ),
       ),
       builder: (_) {
         final history =
@@ -449,6 +453,12 @@ class _TrackMyApplicationsScreenState extends State<TrackMyApplicationsScreen>
                         color: AppColors.textMuted,
                       ),
                     ),
+                    Text(
+                      '${context.l10n.text('applicationFee')}: $fee ${context.l10n.text('omaniRial')}',
+                      style: const TextStyle(
+                        fontWeight: FontWeight.w600,
+                      ),
+                    ),
                     const SizedBox(height: 6),
                     const Divider(),
                     const SizedBox(height: 8),
@@ -464,7 +474,13 @@ class _TrackMyApplicationsScreenState extends State<TrackMyApplicationsScreen>
                             (hm['status'] ?? '').toString().toUpperCase();
                         final comment = hm['comment'] ?? '';
                         final date = hm['createdAt'] ?? '';
+                        String formattedDate = '';
 
+                        if (date != null && date.toString().isNotEmpty) {
+                          formattedDate = DateFormat('d MMMM yyyy, h:mm a')
+                              .format(
+                                  DateTime.parse(date.toString()).toLocal());
+                        }
                         return ListTile(
                             contentPadding: EdgeInsets.zero,
                             title: Text(_getStatusLabel(context, hs)),
@@ -473,8 +489,8 @@ class _TrackMyApplicationsScreenState extends State<TrackMyApplicationsScreen>
                               children: [
                                 if ((comment ?? '').toString().isNotEmpty)
                                   Text(comment.toString()),
-                                if ((date ?? '').toString().isNotEmpty)
-                                  Text(date.toString(),
+                                if ((formattedDate ?? '').toString().isNotEmpty)
+                                  Text(formattedDate.toString(),
                                       style: const TextStyle(
                                           fontSize: 12, color: Colors.black54)),
                               ],
@@ -485,7 +501,7 @@ class _TrackMyApplicationsScreenState extends State<TrackMyApplicationsScreen>
                     const SizedBox(height: 8),
                     Text(context.l10n.text('applicationLetter'),
                         style: const TextStyle(fontWeight: FontWeight.w700)),
-                    const SizedBox(height: 8),
+                    const SizedBox(height: 10),
                     if (offer.isEmpty && decision.isEmpty)
                       Text(context.l10n.text('noDocumentsUploaded'))
                     else
@@ -493,18 +509,50 @@ class _TrackMyApplicationsScreenState extends State<TrackMyApplicationsScreen>
                         crossAxisAlignment: CrossAxisAlignment.start,
                         children: [
                           if (offer.isNotEmpty)
-                            ListTile(
-                              contentPadding: EdgeInsets.zero,
-                              title: Text(context.l10n.text('offerLetter')),
-                              subtitle: Text(offer),
-                              onTap: () {},
+                            Container(
+                              margin: const EdgeInsets.only(bottom: 8),
+                              decoration: BoxDecoration(
+                                color: Colors.white,
+                                border:
+                                    Border.all(color: const Color(0xFFE0DDD8)),
+                                borderRadius: BorderRadius.circular(8),
+                              ),
+                              child: ListTile(
+                                leading: const Icon(Icons.description_outlined),
+                                title: Text(context.l10n.text('offerLetter')),
+                                trailing: const Icon(Icons.open_in_new),
+                                onTap: () async {
+                                  final url =
+                                      ImageUrlHelper.resolveUploadUrl(offer);
+
+                                  debugPrint('Offer Letter URL: $url');
+
+                                  await openExternalLink(url);
+                                },
+                              ),
                             ),
                           if (decision.isNotEmpty)
-                            ListTile(
-                              contentPadding: EdgeInsets.zero,
-                              title: Text(context.l10n.text('decisionLetter')),
-                              subtitle: Text(decision),
-                              onTap: () {},
+                            Container(
+                              decoration: BoxDecoration(
+                                color: Colors.white,
+                                border:
+                                    Border.all(color: const Color(0xFFE0DDD8)),
+                                borderRadius: BorderRadius.circular(8),
+                              ),
+                              child: ListTile(
+                                leading: const Icon(Icons.description_outlined),
+                                title:
+                                    Text(context.l10n.text('decisionLetter')),
+                                trailing: const Icon(Icons.open_in_new),
+                                onTap: () async {
+                                  final url =
+                                      ImageUrlHelper.resolveUploadUrl(decision);
+
+                                  debugPrint('Decision Letter URL: $url');
+
+                                  await openExternalLink(url);
+                                },
+                              ),
                             ),
                         ],
                       ),
