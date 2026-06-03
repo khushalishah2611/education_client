@@ -74,6 +74,7 @@ class _ProfileBodyState extends State<ProfileBody>
   static final RegExp _emailRegex = RegExp(
     r'^[^@\s]+@[^@\s]+\.[^@\s]+$',
   );
+  final Map<String, String> _fieldErrors = <String, String>{};
 
   @override
   void initState() {
@@ -332,13 +333,9 @@ class _ProfileBodyState extends State<ProfileBody>
 
   Future<void> _saveProfile() async {
     if (_studentUserId.isEmpty) return;
-    final String? validationError = _validateProfileForm();
-    if (validationError != null) {
-      showAppSnackBar(
-        context,
-        type: AppSnackBarType.error,
-        message: validationError,
-      );
+    final bool isValid = _validateProfileForm();
+    if (!isValid) {
+      setState(() {});
       return;
     }
 
@@ -429,68 +426,69 @@ class _ProfileBodyState extends State<ProfileBody>
     }
   }
 
-  String? _validateProfileForm() {
+  bool _validateProfileForm() {
+    _fieldErrors.clear();
     final String fullName = _fullNameController.text.trim();
     if (fullName.isEmpty) {
-      return 'Please enter full name.';
+      _fieldErrors['fullName'] = 'Please enter full name.';
     }
 
     final String dob = _dobController.text.trim();
     if (dob.isEmpty) {
-      return 'Please select date of birth.';
+      _fieldErrors['dob'] = 'Please select date of birth.';
     }
 
     final String country = (_selectedCountry?.value ?? '').trim();
     if (country.isEmpty) {
-      return 'Please select country.';
+      _fieldErrors['country'] = 'Please select country.';
     }
 
     final String phone = _phoneController.text.trim();
     if (phone.isEmpty) {
-      return 'Please enter mobile number.';
+      _fieldErrors['phone'] = 'Please enter mobile number.';
     }
 
     final String ageText = _ageController.text.trim();
     if (ageText.isEmpty) {
-      return 'Please enter age.';
+      _fieldErrors['age'] = 'Please enter age.';
     }
     final int? age = int.tryParse(ageText);
     if (age == null || age <= 0) {
-      return 'Please enter a valid age.';
+      _fieldErrors['age'] = 'Please enter a valid age.';
     }
 
     final String email = _emailController.text.trim();
     if (email.isEmpty) {
-      return 'Please enter email address.';
+      _fieldErrors['email'] = 'Please enter email address.';
     }
     if (!_emailRegex.hasMatch(email)) {
-      return 'Please enter a valid email address.';
+      _fieldErrors['email'] = 'Please enter a valid email address.';
     }
 
     final String guardian = _guardianController.text.trim();
     if (guardian.isEmpty) {
-      return 'Please enter guardian name.';
+      _fieldErrors['guardian'] = 'Please enter guardian name.';
     }
 
     final String relationship = _relationshipController.text.trim();
     if (relationship.isEmpty) {
-      return 'Please enter relationship.';
+      _fieldErrors['relationship'] = 'Please enter relationship.';
     }
 
     final String emergencyMobile = _emergencyMobileController.text.trim();
     if (emergencyMobile.isEmpty) {
-      return 'Please enter emergency mobile number.';
+      _fieldErrors['emergencyMobile'] = 'Please enter emergency mobile number.';
     }
 
     final String emergencyEmail = _emergencyEmailController.text.trim();
     if (emergencyEmail.isEmpty) {
-      return 'Please enter emergency email address.';
+      _fieldErrors['emergencyEmail'] = 'Please enter emergency email address.';
     }
     if (!_emailRegex.hasMatch(emergencyEmail)) {
-      return 'Please enter a valid emergency email address.';
+      _fieldErrors['emergencyEmail'] = 'Please enter a valid emergency email address.';
     }
 
-    return null;
+    return _fieldErrors.isEmpty;
   }
 
   @override
@@ -526,6 +524,8 @@ class _ProfileBodyState extends State<ProfileBody>
             controller: _fullNameController,
             hint: context.l10n.text('firstMiddleLast'),
             icon: Icons.person_outline_rounded,
+            errorText: _fieldErrors['fullName'],
+            onChanged: (_) => setState(() => _fieldErrors.remove('fullName')),
           ),
 
           const SizedBox(height: 14),
@@ -552,6 +552,8 @@ class _ProfileBodyState extends State<ProfileBody>
             Icons.calendar_month_outlined,
             readOnly: true,
             onTap: _pickDob,
+            errorText: _fieldErrors['dob'],
+            onChanged: (_) => setState(() => _fieldErrors.remove('dob')),
           ),
 
           const SizedBox(height: 14),
@@ -562,9 +564,11 @@ class _ProfileBodyState extends State<ProfileBody>
             countries: _countries,
             selectedCountry: _selectedCountry,
             isLoading: _isLoadingCountries,
+            errorText: _fieldErrors['country'],
             onCountryChanged: (v) {
               updateView(() {
                 _selectedCountry = v;
+                _fieldErrors.remove('country');
               });
             },
           ),
@@ -576,6 +580,8 @@ class _ProfileBodyState extends State<ProfileBody>
           MobileNumberField(
             dialCode: _selectedCountry?.dialCode ?? '',
             mobileController: _phoneController,
+            errorText: _fieldErrors['phone'],
+            onChanged: (_) => setState(() => _fieldErrors.remove('phone')),
           ),
 
           const SizedBox(height: 14),
@@ -586,6 +592,8 @@ class _ProfileBodyState extends State<ProfileBody>
             controller: _ageController,
             hint: context.l10n.text('age'),
             icon: Icons.numbers_outlined,
+            errorText: _fieldErrors['age'],
+            onChanged: (_) => setState(() => _fieldErrors.remove('age')),
           ),
 
           const SizedBox(height: 14),
@@ -598,6 +606,8 @@ class _ProfileBodyState extends State<ProfileBody>
             controller: _emailController,
             hint: context.l10n.text('emailAddress'),
             icon: Icons.mail_outline_rounded,
+            errorText: _fieldErrors['email'],
+            onChanged: (_) => setState(() => _fieldErrors.remove('email')),
           ),
 
           const SizedBox(height: 22),
@@ -618,6 +628,8 @@ class _ProfileBodyState extends State<ProfileBody>
             hint: context.l10n.text('guardianName'),
             icon:
             Icons.person_outline_rounded,
+            errorText: _fieldErrors['guardian'],
+            onChanged: (_) => setState(() => _fieldErrors.remove('guardian')),
           ),
 
           const SizedBox(height: 14),
@@ -632,6 +644,8 @@ class _ProfileBodyState extends State<ProfileBody>
             hint: context.l10n.text('relationship'),
             icon:
             Icons.people_outline_rounded,
+            errorText: _fieldErrors['relationship'],
+            onChanged: (_) => setState(() => _fieldErrors.remove('relationship')),
           ),
 
           const SizedBox(height: 14),
@@ -645,6 +659,8 @@ class _ProfileBodyState extends State<ProfileBody>
             _emergencyMobileController,
             hint: context.l10n.text('mobileNumber'),
             icon: Icons.call_outlined,
+            errorText: _fieldErrors['emergencyMobile'],
+            onChanged: (_) => setState(() => _fieldErrors.remove('emergencyMobile')),
           ),
 
           const SizedBox(height: 14),
@@ -659,6 +675,8 @@ class _ProfileBodyState extends State<ProfileBody>
             hint: context.l10n.text('emailAddress'),
             icon:
             Icons.mail_outline_rounded,
+            errorText: _fieldErrors['emergencyEmail'],
+            onChanged: (_) => setState(() => _fieldErrors.remove('emergencyEmail')),
           ),
 
           const SizedBox(height: 28),
@@ -792,6 +810,15 @@ class _ProfileShimmerState
           ],
         ),
       ),
+        if ((errorText ?? '').isNotEmpty)
+          Padding(
+            padding: const EdgeInsets.only(left: 12, top: 6),
+            child: Text(
+              errorText!,
+              style: const TextStyle(color: Colors.red, fontSize: 12),
+            ),
+          ),
+      ],
     );
   }
 }
@@ -803,48 +830,63 @@ class CountryDropdownField extends StatelessWidget {
     required this.selectedCountry,
     required this.isLoading,
     required this.onCountryChanged,
+    this.errorText,
   });
 
   final List<CountryMaster> countries;
   final CountryMaster? selectedCountry;
   final bool isLoading;
   final ValueChanged<CountryMaster?> onCountryChanged;
+  final String? errorText;
 
   @override
   Widget build(BuildContext context) {
-    return Container(
-      height: 56,
-      padding: const EdgeInsets.symmetric(horizontal: 12),
-      decoration: BoxDecoration(
-        color: Colors.white,
-        borderRadius: BorderRadius.circular(12),
-        border: Border.all(color: AppColors.border),
-      ),
-      child: DropdownButtonHideUnderline(
-        child: DropdownButton<CountryMaster>(
-          isExpanded: true,
-          value: selectedCountry,
-          borderRadius: BorderRadius.circular(12),
-          icon: const Icon(Icons.keyboard_arrow_down_rounded, size: 20),
-          style: const TextStyle(
-            fontSize: 15,
-            color: AppColors.text,
-            fontWeight: FontWeight.w500,
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        Container(
+          height: 56,
+          padding: const EdgeInsets.symmetric(horizontal: 12),
+          decoration: BoxDecoration(
+            color: Colors.white,
+            borderRadius: BorderRadius.circular(12),
+            border: Border.all(color: AppColors.border),
           ),
-          items: countries
-              .map(
-                (c) => DropdownMenuItem<CountryMaster>(
-                  value: c,
-                  child: Text(
-                    '${c.flagEmoji} ${c.nameEn}',
-                    overflow: TextOverflow.ellipsis,
-                  ),
-                ),
-              )
-              .toList(growable: false),
-          onChanged: isLoading ? null : onCountryChanged,
+          child: DropdownButtonHideUnderline(
+            child: DropdownButton<CountryMaster>(
+              isExpanded: true,
+              value: selectedCountry,
+              borderRadius: BorderRadius.circular(12),
+              icon: const Icon(Icons.keyboard_arrow_down_rounded, size: 20),
+              style: const TextStyle(
+                fontSize: 15,
+                color: AppColors.text,
+                fontWeight: FontWeight.w500,
+              ),
+              items: countries
+                  .map(
+                    (c) => DropdownMenuItem<CountryMaster>(
+                      value: c,
+                      child: Text(
+                        '${c.flagEmoji} ${c.nameEn}',
+                        overflow: TextOverflow.ellipsis,
+                      ),
+                    ),
+                  )
+                  .toList(growable: false),
+              onChanged: isLoading ? null : onCountryChanged,
+            ),
+          ),
         ),
-      ),
+        if ((errorText ?? '').isNotEmpty)
+          Padding(
+            padding: const EdgeInsets.only(left: 12, top: 6),
+            child: Text(
+              errorText!,
+              style: const TextStyle(color: Colors.red, fontSize: 12),
+            ),
+          ),
+      ],
     );
   }
 }
@@ -854,56 +896,74 @@ class MobileNumberField extends StatelessWidget {
     super.key,
     required this.dialCode,
     required this.mobileController,
+    this.errorText,
+    this.onChanged,
   });
 
   final String dialCode;
   final TextEditingController mobileController;
+  final String? errorText;
+  final ValueChanged<String>? onChanged;
 
   @override
   Widget build(BuildContext context) {
-    return Container(
-      height: 56,
-      decoration: BoxDecoration(
-        color: Colors.white,
-        borderRadius: BorderRadius.circular(12),
-        border: Border.all(color: AppColors.border),
-      ),
-      child: Row(
-        children: [
-          const SizedBox(width: 12),
-          Container(
-            padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 8),
-            decoration: BoxDecoration(
-              color: const Color(0xFFF4F4F4),
-              borderRadius: BorderRadius.circular(8),
-            ),
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        Container(
+          height: 56,
+          decoration: BoxDecoration(
+            color: Colors.white,
+            borderRadius: BorderRadius.circular(12),
+            border: Border.all(color: AppColors.border),
+          ),
+          child: Row(
+            children: [
+              const SizedBox(width: 12),
+              Container(
+                padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 8),
+                decoration: BoxDecoration(
+                  color: const Color(0xFFF4F4F4),
+                  borderRadius: BorderRadius.circular(8),
+                ),
+                child: Text(
+                  dialCode.isEmpty ? '--' : dialCode,
+                  style: const TextStyle(
+                    fontSize: 14,
+                    color: AppColors.text,
+                    fontWeight: FontWeight.w600,
+                  ),
+                ),
+              ),
+              const SizedBox(width: 10),
+              Container(width: 1, height: 30, color: AppColors.border),
+              const SizedBox(width: 10),
+              Expanded(
+                child: TextField(
+                  controller: mobileController,
+                  keyboardType: TextInputType.phone,
+                  onChanged: onChanged,
+                  decoration: InputDecoration(
+                    hintText: context.l10n.text('enterMobileNumber'),
+                    border: InputBorder.none,
+                    enabledBorder: InputBorder.none,
+                    focusedBorder: InputBorder.none,
+                  ),
+                ),
+              ),
+              const SizedBox(width: 12),
+            ],
+          ),
+        ),
+        if ((errorText ?? '').isNotEmpty)
+          Padding(
+            padding: const EdgeInsets.only(left: 12, top: 6),
             child: Text(
-              dialCode.isEmpty ? '--' : dialCode,
-              style: const TextStyle(
-                fontSize: 14,
-                color: AppColors.text,
-                fontWeight: FontWeight.w600,
-              ),
+              errorText!,
+              style: const TextStyle(color: Colors.red, fontSize: 12),
             ),
           ),
-          const SizedBox(width: 10),
-          Container(width: 1, height: 30, color: AppColors.border),
-          const SizedBox(width: 10),
-          Expanded(
-            child: TextField(
-              controller: mobileController,
-              keyboardType: TextInputType.phone,
-              decoration:  InputDecoration(
-                hintText: context.l10n.text('enterMobileNumber'),
-                border: InputBorder.none,
-                enabledBorder: InputBorder.none,
-                focusedBorder: InputBorder.none,
-              ),
-            ),
-          ),
-          const SizedBox(width: 12),
-        ],
-      ),
+      ],
     );
   }
 }
@@ -1043,6 +1103,8 @@ class ProfileInput extends StatelessWidget {
     required this.icon,
     this.readOnly = false,
     this.onTap,
+    this.errorText,
+    this.onChanged,
   });
 
   final TextEditingController controller;
@@ -1050,11 +1112,14 @@ class ProfileInput extends StatelessWidget {
   final IconData icon;
   final bool readOnly;
   final VoidCallback? onTap;
+  final String? errorText;
+  final ValueChanged<String>? onChanged;
 
   @override
   Widget build(BuildContext context) {
     return TextField(
       controller: controller,
+      onChanged: onChanged,
       readOnly: readOnly,
       onTap: onTap,
       decoration: InputDecoration(
@@ -1094,6 +1159,7 @@ class ProfileInput extends StatelessWidget {
             color: AppColors.accent,
           ),
         ),
+        errorText: errorText,
       ),
     );
   }
