@@ -1022,7 +1022,7 @@ class _CollegeAccordionState extends State<_CollegeAccordion> {
 
                                 final bool isSelected =
                                     widget.selectedCourses.contains(courseKey);
-                                final bool isBooked = details.isBooked == true ||
+                                final bool isBooked =
                                     widget.bookedCourseKeys.contains(courseKey);
 
                                 return _buildCourseRow(

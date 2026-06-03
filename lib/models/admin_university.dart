@@ -13,6 +13,28 @@ double? _toDouble(dynamic value) {
   return null;
 }
 
+bool? _toBool(dynamic value) {
+  if (value == null) {
+    return null;
+  }
+  if (value is bool) {
+    return value;
+  }
+  if (value is int) {
+    return value != 0;
+  }
+  if (value is String) {
+    final lower = value.toLowerCase().trim();
+    if (lower == 'true' || lower == '1' || lower == 'yes') {
+      return true;
+    }
+    if (lower == 'false' || lower == '0' || lower == 'no') {
+      return false;
+    }
+  }
+  return null;
+}
+
 dynamic _decodeJsonString(dynamic value) {
   if (value is! String) {
     return value;
@@ -678,7 +700,7 @@ class CourseDetails {
 
   CourseDetails.fromJson(Map<String, dynamic> json) {
     name = json['name'];
-    isBooked = json['isBooked'];
+    isBooked = _toBool(json['isBooked']);
     track = json['track'];
     duration = json['duration'];
     creditHours = _toDouble(json['creditHours']);
@@ -1062,7 +1084,7 @@ class Courses {
     academicProgram = json['academicProgram'];
     educationInstitute = json['educationInstitute'];
     name = json['name'];
-    isBooked = json['isBooked'];
+    isBooked = _toBool(json['isBooked']);
     track = json['track'];
     duration = json['duration'];
     creditHours = _toDouble(json['creditHours']);
