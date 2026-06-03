@@ -463,9 +463,7 @@ class _TrackApplicationScreenState extends State<TrackApplicationScreen>
                                 title: context.l10n.text(
                                   'underReview',
                                 ),
-                                subtitle: _latestStatusComment.isNotEmpty
-                                    ? _latestStatusComment
-                                    : context.l10n.text('applicationUnderReview'),
+                                subtitle: context.l10n.text('applicationUnderReview'),
                                 state: _stateForStep(2),
                                 showLine: true,
                               ),
