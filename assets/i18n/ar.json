@@ -241,5 +241,7 @@
   "applicationHistory": "سجل الطلب",
   "applicationLetter": "خطاب الطلب",
   "noDocumentsUploaded": "لا يوجد خطاب طلب",
-  "noApplicationHistory": "لا يوجد سجل للطلب"
+  "noApplicationHistory": "لا يوجد سجل للطلب",
+  "decisionLetter": "خطاب القرار",
+  "offerLetter": "خطاب العرض"
 }

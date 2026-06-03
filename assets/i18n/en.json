@@ -241,5 +241,8 @@
   "applicationHistory" : "Application History",
   "applicationLetter" : "Application Letter",
   "noDocumentsUploaded" : "No Application Letter",
-  "noApplicationHistory" : "No Application History"
+  "noApplicationHistory" : "No Application History",
+  "decisionLetter": "Decision Letter",
+  "offerLetter" : "offerLetter"
+
 }
