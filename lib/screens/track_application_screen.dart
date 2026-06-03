@@ -184,7 +184,11 @@ class _TrackApplicationScreenState extends State<TrackApplicationScreen>
     final Object? university = _application?['university'];
 
     if (university is Map) {
-      final String name = _textFrom(university['name']);
+      final String name = _localizedMapText(
+        university,
+        englishKeys: const ['name'],
+        arabicKeys: const ['nameAr'],
+      );
 
       if (name.isNotEmpty) {
         return name;
@@ -225,16 +229,14 @@ class _TrackApplicationScreenState extends State<TrackApplicationScreen>
       final Object? selectedCourse = selectedCourses.first;
 
       if (selectedCourse is Map) {
-        final String name = _textFrom(selectedCourse['name']);
+        final String localizedCourseName = _localizedMapText(
+          selectedCourse,
+          englishKeys: const ['name', 'courseName'],
+          arabicKeys: const ['nameAr', 'courseNameAr'],
+        );
 
-        if (name.isNotEmpty) {
-          return name;
-        }
-
-        final String courseName = _textFrom(selectedCourse['courseName']);
-
-        if (courseName.isNotEmpty) {
-          return courseName;
+        if (localizedCourseName.isNotEmpty) {
+          return localizedCourseName;
         }
       }
     }
@@ -242,7 +244,11 @@ class _TrackApplicationScreenState extends State<TrackApplicationScreen>
     final Object? program = _application?['program'];
 
     if (program is Map) {
-      final String programName = _textFrom(program['name']);
+      final String programName = _localizedMapText(
+        program,
+        englishKeys: const ['name'],
+        arabicKeys: const ['nameAr'],
+      );
 
       if (programName.isNotEmpty) {
         return programName;
@@ -261,8 +267,10 @@ class _TrackApplicationScreenState extends State<TrackApplicationScreen>
       final Object? selectedCourse = selectedCourses.first;
 
       if (selectedCourse is Map) {
-        final String educationInstitute = _textFrom(
-          selectedCourse['educationInstitute'],
+        final String educationInstitute = _localizedMapText(
+          selectedCourse,
+          englishKeys: const ['educationInstitute'],
+          arabicKeys: const ['educationInstituteAr'],
         );
 
         if (educationInstitute.isNotEmpty) {
@@ -392,6 +400,8 @@ class _TrackApplicationScreenState extends State<TrackApplicationScreen>
 
     final double horizontalPadding = context.responsiveHorizontalPadding;
 
+    final String latestStatusLabel = _localizedStatusName(_latestStatusFromHistory);
+
     return buildCubitView(
       (context) => WillPopScope(
         onWillPop: () async {
@@ -443,7 +453,7 @@ class _TrackApplicationScreenState extends State<TrackApplicationScreen>
                               ),
                               const SizedBox(height: 14),
                               Text(
-                                '${context.l10n.text('applicationStatus')} : ${_latestStatusFromHistory.replaceAll('_', ' ').trim()}',
+                                '${context.l10n.text('applicationStatus')} : $latestStatusLabel',
                                 style: TextStyle(
                                   fontSize: isSmallMobile ? 16 : 18,
                                   fontWeight: FontWeight.w700,
@@ -479,10 +489,7 @@ class _TrackApplicationScreenState extends State<TrackApplicationScreen>
                                 title: context.l10n.text(
                                   'acceptedRejected',
                                 ),
-                                subtitle: _latestStatusFromHistory.replaceAll(
-                                  '_',
-                                  ' ',
-                                ),
+                                subtitle: latestStatusLabel,
                                 state: [
                                   'ACCEPTED',
                                   'REJECTED',
@@ -503,6 +510,53 @@ class _TrackApplicationScreenState extends State<TrackApplicationScreen>
         ),
       ),
     );
+  }
+
+  String _localizedMapText(
+    Map<dynamic, dynamic> map, {
+    required List<String> englishKeys,
+    required List<String> arabicKeys,
+  }) {
+    final bool preferArabic = context.l10n.isArabic;
+    final List<String> searchKeys = preferArabic ? arabicKeys : englishKeys;
+    final List<String> fallbackKeys = preferArabic ? englishKeys : arabicKeys;
+
+    for (final String key in searchKeys) {
+      final String value = _textFrom(map[key]);
+      if (value.isNotEmpty) {
+        return value;
+      }
+    }
+
+    for (final String key in fallbackKeys) {
+      final String value = _textFrom(map[key]);
+      if (value.isNotEmpty) {
+        return value;
+      }
+    }
+
+    return '';
+  }
+
+  String _localizedStatusName(String status) {
+    switch (status.toUpperCase()) {
+      case 'NEW':
+        return context.l10n.text('statusNew');
+      case 'IN_PROCESS':
+        return context.l10n.text('statusInProcess');
+      case 'UNDER_REVIEW':
+        return context.l10n.text('statusUnderReview');
+      case 'ON_HOLD':
+        return context.l10n.text('statusOnHold');
+      case 'ACCEPTED':
+        return context.l10n.text('statusAccepted');
+      case 'REJECTED':
+        return context.l10n.text('statusRejected');
+      default:
+        return _textFrom(status).replaceAll('_', ' ').trim().ifEmpty(
+          context.l10n.text('statusUnknown'),
+        );
+    }
   }
 
   static String _textFrom(Object? value) => value?.toString().trim() ?? '';
