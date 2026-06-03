@@ -2,11 +2,11 @@ import 'package:education/core/image_url_helper.dart';
 import 'package:education/services/application_api_service.dart';
 import 'package:flutter/material.dart';
 import 'package:shared_preferences/shared_preferences.dart';
+import '../../core/url_launcher_helper.dart';
 
 import '../../core/app_localizations.dart';
 import '../../core/app_theme.dart';
 import '../../core/bloc/app_cubit.dart';
-import '../track_application_screen.dart';
 import 'side_menu_common.dart';
 
 class TrackMyApplicationsScreen extends StatefulWidget {
@@ -79,14 +79,27 @@ class _TrackMyApplicationsScreenState extends State<TrackMyApplicationsScreen>
 
               // university
               'universityName': uni['name'] ?? '',
+              'universityNameAr': uni['nameAr'] ?? '',
               'logoPath': uni['logoPath'] ?? '',
 
               // program
               'programName': program['name'] ?? '',
+              'programNameAr': program['nameAr'] ?? '',
 
               // selected course
               'college': firstCourse['college'] ?? '',
               'courseName': firstCourse['name'] ?? '',
+              'courseNameAr': firstCourse['nameAr'] ?? '',
+              'coursePrice':
+                  firstCourse['basePrice'] ?? firstCourse['totalCost'] ?? '',
+              // extra details
+              'history': map['history'] ?? [],
+              'offerLetterPath': map['offerLetterPath'] ?? '',
+              'decisionLetterPath': map['decisionLetterPath'] ?? '',
+              'selectedApplicationFeeTotal':
+                  map['selectedApplicationFeeTotal'] ??
+                      map['applicationFee'] ??
+                      0,
             };
           }).toList();
         }
@@ -112,6 +125,9 @@ class _TrackMyApplicationsScreenState extends State<TrackMyApplicationsScreen>
         return Colors.blue;
 
       case 'IN_PROGRESS':
+        return Colors.orange;
+
+      case 'IN_PROCESS':
         return Colors.orange;
 
       case 'ACCEPTED':
@@ -172,19 +188,7 @@ class _TrackMyApplicationsScreenState extends State<TrackMyApplicationsScreen>
     final resolvedCourseTitle = (item['courseName'] ?? '').toString();
     final appId = (item['id'] ?? '').toString();
     return InkWell(
-      onTap: () {
-        // Navigator.of(context).push(
-        //   MaterialPageRoute(
-        //     builder: (_) => TrackApplicationScreen(
-        //       universityName: resolvedUniversityName,
-        //       universityHeroImage: (item['logoPath'] ?? '').toString(),
-        //       courseTitle: resolvedCourseTitle,
-        //       applicationId: appId,
-        //       studentOverview: const <String, dynamic>{},
-        //     ),
-        //   ),
-        // );
-      },
+      onTap: () => _showApplicationDetails(context, item),
       child: Container(
         padding: const EdgeInsets.all(12),
         decoration: BoxDecoration(
@@ -236,7 +240,8 @@ class _TrackMyApplicationsScreenState extends State<TrackMyApplicationsScreen>
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
                       Text(
-                        item['universityName'] ?? '',
+                        _localizedLabel(context, item['universityName'],
+                            item['universityNameAr']),
                         style: const TextStyle(
                           fontSize: 16,
                           fontWeight: FontWeight.w700,
@@ -247,7 +252,7 @@ class _TrackMyApplicationsScreenState extends State<TrackMyApplicationsScreen>
 
                       // ✅ COLLEGE
                       Text(
-                        '${item['college'] ?? ''} (${item['programName'] ?? ''})',
+                        '${(item['college'] ?? '')} (${_localizedLabel(context, item['programName'], item['programNameAr'])})',
                         style: const TextStyle(
                           fontSize: 14,
                           fontWeight: FontWeight.w400,
@@ -258,12 +263,23 @@ class _TrackMyApplicationsScreenState extends State<TrackMyApplicationsScreen>
 
                       // ✅ COURSE
                       Text(
-                        item['courseName'] ?? '',
+                        _localizedLabel(
+                            context, item['courseName'], item['courseNameAr']),
                         style: const TextStyle(
                           fontSize: 13,
                           color: AppColors.textMuted,
                         ),
                       ),
+                      const SizedBox(height: 6),
+                      (() {
+                        final price = (item['coursePrice'] ?? '').toString();
+                        if (price.isEmpty) return const SizedBox.shrink();
+
+                        return Text(
+                            '${context.l10n.text('price')}: $price ${context.l10n.text('currency')}',
+                            style: const TextStyle(
+                                fontSize: 13, fontWeight: FontWeight.w600));
+                      })(),
                     ],
                   ),
                 ),
@@ -282,7 +298,7 @@ class _TrackMyApplicationsScreenState extends State<TrackMyApplicationsScreen>
             // ✅ STATUS SECTION
             Row(
               children: [
-                 Text(
+                Text(
                   context.l10n.text('applicationStatus'),
                   style: TextStyle(
                     fontSize: 16,
@@ -307,7 +323,7 @@ class _TrackMyApplicationsScreenState extends State<TrackMyApplicationsScreen>
                     ),
                   ),
                   child: Text(
-                    status,
+                    _getStatusLabel(context, status),
                     style: TextStyle(
                       fontSize: 12,
                       fontWeight: FontWeight.w700,
@@ -320,6 +336,215 @@ class _TrackMyApplicationsScreenState extends State<TrackMyApplicationsScreen>
           ],
         ),
       ),
+    );
+  }
+
+  String _getStatusLabel(BuildContext context, String status) {
+    final s = status.toUpperCase();
+
+    const ar = {
+      'NEW': 'جديد',
+      'IN_PROGRESS': 'قيد المعالجة',
+      'IN_PROCESS': 'قيد المعالجة',
+      'ACCEPTED': 'مقبول',
+      'ON_HOLD': 'معلق',
+      'REJECTED': 'مرفوض',
+    };
+
+    final english = (() {
+      switch (s) {
+        case 'NEW':
+          return 'New';
+        case 'IN_PROGRESS':
+        case 'IN_PROCESS':
+          return 'In Progress';
+        case 'ACCEPTED':
+          return 'Accepted';
+        case 'ON_HOLD':
+          return 'On Hold';
+        case 'REJECTED':
+          return 'Rejected';
+        default:
+          return s;
+      }
+    })();
+
+    final isArabic =
+        Localizations.localeOf(context).languageCode.toLowerCase() == 'ar';
+
+    if (isArabic) {
+      return ar[s] ?? english;
+    }
+
+    return english;
+  }
+
+  String _localizedLabel(
+    BuildContext context,
+    Object? enObj,
+    Object? arObj,
+  ) {
+    final en = (enObj ?? '').toString();
+    final ar = (arObj ?? '').toString();
+
+    final isArabic =
+        Localizations.localeOf(context).languageCode.toLowerCase() == 'ar';
+
+    if (isArabic) {
+      return ar.isNotEmpty ? ar : en;
+    }
+
+    return en.isNotEmpty ? en : ar;
+  }
+
+  void _showApplicationDetails(
+      BuildContext context, Map<String, dynamic> item) {
+    showModalBottomSheet(
+      context: context,
+      isScrollControlled: true,
+      shape: const RoundedRectangleBorder(
+        borderRadius: BorderRadius.vertical(top: Radius.circular(12)),
+      ),
+      builder: (_) {
+        final history =
+            (item['history'] is List) ? item['history'] as List : [];
+        final offer = (item['offerLetterPath'] ?? '').toString();
+        final decision = (item['decisionLetterPath'] ?? '').toString();
+        final fee = item['selectedApplicationFeeTotal']?.toString() ?? '';
+
+        return DraggableScrollableSheet(
+          expand: false,
+          initialChildSize: 0.6,
+          minChildSize: 0.3,
+          maxChildSize: 0.95,
+          builder: (context, ctl) {
+            return SingleChildScrollView(
+              controller: ctl,
+              child: Padding(
+                padding: const EdgeInsets.all(16),
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Center(
+                      child: Container(
+                        width: 48,
+                        height: 4,
+                        decoration: BoxDecoration(
+                          color: Colors.grey.shade300,
+                          borderRadius: BorderRadius.circular(4),
+                        ),
+                      ),
+                    ),
+                    const SizedBox(height: 12),
+                    Text(
+                      _localizedLabel(context, item['universityName'],
+                          item['universityNameAr']),
+                      style: const TextStyle(
+                          fontSize: 18, fontWeight: FontWeight.w800),
+                    ),
+                    const SizedBox(height: 6),
+                    Text(_localizedLabel(
+                        context, item['programName'], item['programNameAr'])),
+                    const SizedBox(height: 6),
+                    const Divider(),
+                    const SizedBox(height: 8),
+                    Text(context.l10n.text('applicationHistory'),
+                        style: const TextStyle(fontWeight: FontWeight.w700)),
+                    const SizedBox(height: 8),
+                    if (history.isEmpty)
+                      Text(context.l10n.text('noHistoryAvailable'))
+                    else
+                      ...history.map<Widget>((h) {
+                        final hm = Map<String, dynamic>.from(h ?? {});
+                        final hs =
+                            (hm['status'] ?? '').toString().toUpperCase();
+                        final comment = hm['comment'] ?? '';
+                        final date = hm['createdAt'] ?? '';
+
+                        return ListTile(
+                          contentPadding: EdgeInsets.zero,
+                          title: Text(_getStatusLabel(context, hs)),
+                          subtitle: Column(
+                            crossAxisAlignment: CrossAxisAlignment.start,
+                            children: [
+                              if ((comment ?? '').toString().isNotEmpty)
+                                Text(comment.toString()),
+                              if ((date ?? '').toString().isNotEmpty)
+                                Text(date.toString(),
+                                    style: const TextStyle(
+                                        fontSize: 12, color: Colors.black54)),
+                            ],
+                          ),
+                          trailing: (() {
+                            // show offer link for ACCEPTED, decision link for REJECTED
+                            if (hs == 'ACCEPTED' && offer.isNotEmpty) {
+                              return IconButton(
+                                icon: const Icon(Icons.attach_file),
+                                onPressed: () async {
+                                  try {
+                                    await openExternalLink(offer);
+                                  } catch (_) {
+                                    ScaffoldMessenger.of(context).showSnackBar(
+                                        SnackBar(content: Text(offer)));
+                                  }
+                                },
+                              );
+                            }
+
+                            if (hs == 'REJECTED' && decision.isNotEmpty) {
+                              return IconButton(
+                                icon: const Icon(Icons.attach_file),
+                                onPressed: () async {
+                                  try {
+                                    await openExternalLink(decision);
+                                  } catch (_) {
+                                    ScaffoldMessenger.of(context).showSnackBar(
+                                        SnackBar(content: Text(decision)));
+                                  }
+                                },
+                              );
+                            }
+
+                            return null;
+                          })(),
+                        );
+                      }).toList(),
+                    const SizedBox(height: 12),
+                    const Divider(),
+                    const SizedBox(height: 8),
+                    Text(context.l10n.text('selectedDocuments'),
+                        style: const TextStyle(fontWeight: FontWeight.w700)),
+                    const SizedBox(height: 8),
+                    if (offer.isEmpty && decision.isEmpty)
+                      Text(context.l10n.text('noDocumentsUploaded'))
+                    else
+                      Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          if (offer.isNotEmpty)
+                            ListTile(
+                              contentPadding: EdgeInsets.zero,
+                              title: Text(context.l10n.text('offerLetter')),
+                              subtitle: Text(offer),
+                              onTap: () {},
+                            ),
+                          if (decision.isNotEmpty)
+                            ListTile(
+                              contentPadding: EdgeInsets.zero,
+                              title: Text(context.l10n.text('decisionLetter')),
+                              subtitle: Text(decision),
+                              onTap: () {},
+                            ),
+                        ],
+                      ),
+                    const SizedBox(height: 20),
+                  ],
+                ),
+              ),
+            );
+          },
+        );
+      },
     );
   }
 
@@ -399,14 +624,14 @@ class _TrackMyApplicationsScreenState extends State<TrackMyApplicationsScreen>
           color: const Color(0xFFE6E6E6),
         ),
       ),
-      child:  Text(
+      child: Text(
         context.l10n.text('noApplicationsAvailable'),
         textAlign: TextAlign.center,
         style: TextStyle(
           color: Color(0xFF616161),
           fontWeight: FontWeight.w500,
         ),
-        ),
+      ),
     );
   }
 }
