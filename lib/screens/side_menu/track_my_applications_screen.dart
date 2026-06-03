@@ -83,8 +83,8 @@ class _TrackMyApplicationsScreenState extends State<TrackMyApplicationsScreen>
               'logoPath': uni['logoPath'] ?? '',
 
               // program
-              'programName': program['name'] ?? '',
-              'programNameAr': program['nameAr'] ?? '',
+              'programName': program['academicProgram'] ?? '',
+              'programNameAr': program['academicProgramAr'] ?? '',
 
               // selected course
               'college': firstCourse['college'] ?? '',
@@ -92,10 +92,14 @@ class _TrackMyApplicationsScreenState extends State<TrackMyApplicationsScreen>
               'courseNameAr': firstCourse['nameAr'] ?? '',
               'coursePrice':
                   firstCourse['basePrice'] ?? firstCourse['totalCost'] ?? '',
+              'courseCurrency':
+                  firstCourse['currency'] ?? firstCourse['currencyCode'] ?? '',
               // extra details
               'history': map['history'] ?? [],
               'offerLetterPath': map['offerLetterPath'] ?? '',
               'decisionLetterPath': map['decisionLetterPath'] ?? '',
+              'applicationFeeCurrency':
+                  map['applicationFeeCurrency'] ?? map['currency'] ?? '',
               'selectedApplicationFeeTotal':
                   map['selectedApplicationFeeTotal'] ??
                       map['applicationFee'] ??
@@ -184,9 +188,6 @@ class _TrackMyApplicationsScreenState extends State<TrackMyApplicationsScreen>
 
     final statusColor = _getStatusColor(status);
 
-    final resolvedUniversityName = (item['universityName'] ?? '').toString();
-    final resolvedCourseTitle = (item['courseName'] ?? '').toString();
-    final appId = (item['id'] ?? '').toString();
     return InkWell(
       onTap: () => _showApplicationDetails(context, item),
       child: Container(
@@ -250,7 +251,6 @@ class _TrackMyApplicationsScreenState extends State<TrackMyApplicationsScreen>
 
                       const SizedBox(height: 4),
 
-                      // ✅ COLLEGE
                       Text(
                         '${(item['college'] ?? '')} (${_localizedLabel(context, item['programName'], item['programNameAr'])})',
                         style: const TextStyle(
@@ -270,16 +270,6 @@ class _TrackMyApplicationsScreenState extends State<TrackMyApplicationsScreen>
                           color: AppColors.textMuted,
                         ),
                       ),
-                      const SizedBox(height: 6),
-                      (() {
-                        final price = (item['coursePrice'] ?? '').toString();
-                        if (price.isEmpty) return const SizedBox.shrink();
-
-                        return Text(
-                            '${context.l10n.text('price')}: $price ${context.l10n.text('currency')}',
-                            style: const TextStyle(
-                                fontSize: 13, fontWeight: FontWeight.w600));
-                      })(),
                     ],
                   ),
                 ),
@@ -442,9 +432,23 @@ class _TrackMyApplicationsScreenState extends State<TrackMyApplicationsScreen>
                       style: const TextStyle(
                           fontSize: 18, fontWeight: FontWeight.w800),
                     ),
-                    const SizedBox(height: 6),
-                    Text(_localizedLabel(
-                        context, item['programName'], item['programNameAr'])),
+                    Text(
+                      '${(item['college'] ?? '')} (${_localizedLabel(context, item['programName'], item['programNameAr'])})',
+                      style: const TextStyle(
+                        fontSize: 14,
+                        fontWeight: FontWeight.w400,
+                        color: Colors.black87,
+                      ),
+                    ),
+                    const SizedBox(height: 2),
+                    Text(
+                      _localizedLabel(
+                          context, item['courseName'], item['courseNameAr']),
+                      style: const TextStyle(
+                        fontSize: 13,
+                        color: AppColors.textMuted,
+                      ),
+                    ),
                     const SizedBox(height: 6),
                     const Divider(),
                     const SizedBox(height: 8),
@@ -452,7 +456,7 @@ class _TrackMyApplicationsScreenState extends State<TrackMyApplicationsScreen>
                         style: const TextStyle(fontWeight: FontWeight.w700)),
                     const SizedBox(height: 8),
                     if (history.isEmpty)
-                      Text(context.l10n.text('noHistoryAvailable'))
+                      Text(context.l10n.text('noApplicationHistory'))
                     else
                       ...history.map<Widget>((h) {
                         final hm = Map<String, dynamic>.from(h ?? {});
@@ -462,57 +466,24 @@ class _TrackMyApplicationsScreenState extends State<TrackMyApplicationsScreen>
                         final date = hm['createdAt'] ?? '';
 
                         return ListTile(
-                          contentPadding: EdgeInsets.zero,
-                          title: Text(_getStatusLabel(context, hs)),
-                          subtitle: Column(
-                            crossAxisAlignment: CrossAxisAlignment.start,
-                            children: [
-                              if ((comment ?? '').toString().isNotEmpty)
-                                Text(comment.toString()),
-                              if ((date ?? '').toString().isNotEmpty)
-                                Text(date.toString(),
-                                    style: const TextStyle(
-                                        fontSize: 12, color: Colors.black54)),
-                            ],
-                          ),
-                          trailing: (() {
-                            // show offer link for ACCEPTED, decision link for REJECTED
-                            if (hs == 'ACCEPTED' && offer.isNotEmpty) {
-                              return IconButton(
-                                icon: const Icon(Icons.attach_file),
-                                onPressed: () async {
-                                  try {
-                                    await openExternalLink(offer);
-                                  } catch (_) {
-                                    ScaffoldMessenger.of(context).showSnackBar(
-                                        SnackBar(content: Text(offer)));
-                                  }
-                                },
-                              );
-                            }
-
-                            if (hs == 'REJECTED' && decision.isNotEmpty) {
-                              return IconButton(
-                                icon: const Icon(Icons.attach_file),
-                                onPressed: () async {
-                                  try {
-                                    await openExternalLink(decision);
-                                  } catch (_) {
-                                    ScaffoldMessenger.of(context).showSnackBar(
-                                        SnackBar(content: Text(decision)));
-                                  }
-                                },
-                              );
-                            }
-
-                            return null;
-                          })(),
-                        );
-                      }).toList(),
+                            contentPadding: EdgeInsets.zero,
+                            title: Text(_getStatusLabel(context, hs)),
+                            subtitle: Column(
+                              crossAxisAlignment: CrossAxisAlignment.start,
+                              children: [
+                                if ((comment ?? '').toString().isNotEmpty)
+                                  Text(comment.toString()),
+                                if ((date ?? '').toString().isNotEmpty)
+                                  Text(date.toString(),
+                                      style: const TextStyle(
+                                          fontSize: 12, color: Colors.black54)),
+                              ],
+                            ));
+                      }),
                     const SizedBox(height: 12),
                     const Divider(),
                     const SizedBox(height: 8),
-                    Text(context.l10n.text('selectedDocuments'),
+                    Text(context.l10n.text('applicationLetter'),
                         style: const TextStyle(fontWeight: FontWeight.w700)),
                     const SizedBox(height: 8),
                     if (offer.isEmpty && decision.isEmpty)

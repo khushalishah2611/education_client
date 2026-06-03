@@ -237,5 +237,9 @@
   "Not mandatory": "Not mandatory",
   "Booked": "Booked",
   "facebook": "Facebook",
-  "updateProfile": "Profile"
+  "updateProfile": "Profile",
+  "applicationHistory" : "Application History",
+  "applicationLetter" : "Application Letter",
+  "noDocumentsUploaded" : "No Application Letter",
+  "noApplicationHistory" : "No Application History"
 }

@@ -237,5 +237,9 @@
   "Not mandatory": "غير إلزامي",
   "Booked": "محجوز",
   "facebook" : "فيسبوك",
-  "updateProfile" : "حساب تعريفي"
+  "updateProfile" : "حساب تعريفي",
+  "applicationHistory": "سجل الطلب",
+  "applicationLetter": "خطاب الطلب",
+  "noDocumentsUploaded": "لا يوجد خطاب طلب",
+  "noApplicationHistory": "لا يوجد سجل للطلب"
 }

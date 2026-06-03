@@ -177,7 +177,33 @@ class _TrackApplicationScreenState extends State<TrackApplicationScreen>
     final String id =
         _textFrom(_application?['id']).ifEmpty(widget.applicationId);
 
-    return id.isEmpty ? '-' : '#${_shortId(id)}';
+    return id.isEmpty ? '-' : '#$id';
+  }
+
+  String get _applicationCurrency {
+    final String currency = _textFrom(_application?['applicationFeeCurrency'])
+        .ifEmpty(_textFrom(_application?['currency']));
+
+    if (currency.toUpperCase() == 'OMR') {
+      return context.l10n.text('omaniRial');
+    }
+
+    return currency;
+  }
+
+  String get _applicationFeeAmount {
+    return _textFrom(_application?['selectedApplicationFeeTotal'])
+        .ifEmpty(_textFrom(_application?['applicationFee']));
+  }
+
+  String get _applicationFeeDisplay {
+    final String fee = _applicationFeeAmount;
+    if (fee.isEmpty) {
+      return '';
+    }
+
+    final String currency = _applicationCurrency;
+    return currency.isNotEmpty ? '$fee $currency' : fee;
   }
 
   String get _universityName {
@@ -449,6 +475,7 @@ class _TrackApplicationScreenState extends State<TrackApplicationScreen>
                                 courseTitle: _courseTitle,
                                 educationInstitute: _educationInstitute,
                                 universityHeroImage: _heroImage,
+                                applicationFeeDisplay: _applicationFeeDisplay,
                                 isSmallMobile: isSmallMobile,
                               ),
                               const SizedBox(height: 14),
@@ -571,6 +598,7 @@ class _ApplicationOverviewCard extends StatelessWidget {
     required this.courseTitle,
     required this.educationInstitute,
     required this.universityHeroImage,
+    required this.applicationFeeDisplay,
     required this.isSmallMobile,
   });
 
@@ -579,6 +607,7 @@ class _ApplicationOverviewCard extends StatelessWidget {
   final String courseTitle;
   final String educationInstitute;
   final String universityHeroImage;
+  final String applicationFeeDisplay;
   final bool isSmallMobile;
 
   @override
@@ -596,8 +625,8 @@ class _ApplicationOverviewCard extends StatelessWidget {
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           Text(
-            '${context.l10n.text('applicationId')}: $applicationId',
-            style: const TextStyle(fontSize: 11),
+            '${context.l10n.text('applicationId')}: ${applicationId.substring(0, 8)}',
+            style: const TextStyle(fontSize: 14),
           ),
           const SizedBox(height: 10),
           Text(
