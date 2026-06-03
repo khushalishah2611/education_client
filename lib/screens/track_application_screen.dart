@@ -347,7 +347,9 @@ class _TrackApplicationScreenState extends State<TrackApplicationScreen>
   }
 
   int get _progressIndex {
-    switch (_latestStatusFromHistory) {
+    final String status = _latestStatusFromHistory;
+
+    switch (status) {
       case 'NEW':
         return 1;
 
@@ -366,6 +368,13 @@ class _TrackApplicationScreenState extends State<TrackApplicationScreen>
   }
 
   _StepState _stateForStep(int stepIndex) {
+    // Final status reached
+    if (_progressIndex >= 4) {
+      if (stepIndex <= 4) {
+        return _StepState.done;
+      }
+    }
+
     if (_progressIndex > stepIndex) {
       return _StepState.done;
     }
@@ -476,7 +485,12 @@ class _TrackApplicationScreenState extends State<TrackApplicationScreen>
                                   '_',
                                   ' ',
                                 ),
-                                state: _stateForStep(4),
+                                state: [
+                                  'ACCEPTED',
+                                  'REJECTED',
+                                ].contains(_latestStatusFromHistory)
+                                    ? _StepState.done
+                                    : _stateForStep(4),
                                 showLine: false,
                               ),
                               const SizedBox(height: 24),
