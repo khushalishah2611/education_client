@@ -167,6 +167,15 @@ const Map<String, Map<String, dynamic>> _fallbackValues = {
         'program has been processed. Your application is now in the review queue.',
     'trackApplication': 'Track Application',
     'downloadReceipt': 'Download Receipt',
+    'applicationFailed': 'Application Failed',
+    'paymentUnsuccessful': 'Payment Unsuccessful',
+    'paymentCancelled': 'Payment Cancelled',
+    'paymentFailedDescription':
+        "We couldn't process your application fee of {amount}. This may be due to insufficient funds or a temporary connection issue with your bank.",
+    'paymentCancelledDescription':
+        'Your payment of {amount} was cancelled before it could be completed. You can retry the payment or contact support for help.',
+    'retryPayment': 'Retry payment',
+    'contactSupport': 'Contact Support',
     'applicationProgress': 'Application Progress',
     'submitted': 'Submitted',
     'completedOnDate': 'Completed on Feb 13',
@@ -317,6 +326,15 @@ const Map<String, Map<String, dynamic>> _fallbackValues = {
     'paymentProcessedSuffix': 'وأصبح طلبك الآن في قائمة المراجعة.',
     'trackApplication': 'تتبع الطلب',
     'downloadReceipt': 'تنزيل الإيصال',
+    'applicationFailed': 'فشل الطلب',
+    'paymentUnsuccessful': 'فشل الدفع',
+    'paymentCancelled': 'تم إلغاء الدفع',
+    'paymentFailedDescription':
+        'تعذر علينا معالجة رسوم الطلب البالغة {amount}. قد يكون ذلك بسبب عدم كفاية الرصيد أو مشكلة مؤقتة في الاتصال ببنكك.',
+    'paymentCancelledDescription':
+        'تم إلغاء دفعتك البالغة {amount} قبل اكتمالها. يمكنك إعادة محاولة الدفع أو التواصل مع الدعم للمساعدة.',
+    'retryPayment': 'إعادة محاولة الدفع',
+    'contactSupport': 'تواصل مع الدعم',
     'applicationProgress': 'تقدم الطلب',
     'submitted': 'تم الإرسال',
     'completedOnDate': 'اكتمل في 13 فبراير',

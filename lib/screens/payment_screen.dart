@@ -16,6 +16,7 @@ import '../services/auth_api_service.dart';
 import '../widgets/common_widgets.dart';
 import '../widgets/flow_widgets.dart';
 import 'payment_confirmation_screen.dart';
+import 'payment_failed_screen.dart';
 
 class PaymentScreen extends StatefulWidget {
   const PaymentScreen({
@@ -385,20 +386,40 @@ class _PaymentScreenState extends State<PaymentScreen>
             debugPrint('Payment Cancelled');
             debugPrint(response.toString());
 
-            showAppSnackBar(
-              context,
-              type: AppSnackBarType.error,
-              message: 'Payment Cancelled',
+            if (!mounted) return;
+
+            Navigator.of(context).pushReplacement(
+              MaterialPageRoute(
+                builder: (_) => PaymentFailedScreen(
+                  universityName: widget.universityName,
+                  universityHeroImage: widget.universityHeroImage,
+                  courseTitle: widget.courseTitle,
+                  applicationsPayload: widget.applicationsPayload,
+                  createdApplicationsResponse: createdApplicationsResponse,
+                  studentOverview: studentOverview,
+                  failureType: PaymentFailureType.cancelled,
+                ),
+              ),
             );
           },
           onError: (error) {
             debugPrint('Payment Error');
             debugPrint(error.toString());
 
-            showAppSnackBar(
-              context,
-              type: AppSnackBarType.error,
-              message: error.toString(),
+            if (!mounted) return;
+
+            Navigator.of(context).pushReplacement(
+              MaterialPageRoute(
+                builder: (_) => PaymentFailedScreen(
+                  universityName: widget.universityName,
+                  universityHeroImage: widget.universityHeroImage,
+                  courseTitle: widget.courseTitle,
+                  applicationsPayload: widget.applicationsPayload,
+                  createdApplicationsResponse: createdApplicationsResponse,
+                  studentOverview: studentOverview,
+                  failureType: PaymentFailureType.failed,
+                ),
+              ),
             );
           },
         );
