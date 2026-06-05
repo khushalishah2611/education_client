@@ -14,10 +14,10 @@ class HelpScreen extends StatelessWidget {
 
   // Social usernames
   static const String instagramUrl = 'https://www.instagram.com/universities_arab?utm_source=qr&igsh=dHJydWx3Nm5taTNr';
-  static const String facebookUrl = 'https://www.facebook.com/arabeducation';
+  static const String facebookUrl = 'https://www.facebook.com/share/1C1iY7eHcN/';
   static const String snapchatUrl = 'https://www.snapchat.com/add/universitiesara?share_id=C2ct2Rm65l8&locale=ar-AE';
   static const String twitterUrl = 'https://x.com/universities_ar';
-  static const String tiktokUrl = 'https://www.tiktok.com/@tiktok';
+  static const String tiktokUrl = 'https://www.tiktok.com/@.universities_ara?_r=1&_t=ZS-96tgGchWj5w';
 
   Future<void> _launch(Uri uri) async {
     try {
