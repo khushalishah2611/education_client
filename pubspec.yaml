@@ -45,6 +45,7 @@ dependencies:
   pdf:
   printing:
   intl:
+  thawani_payment: ^1.2.4+1
 
 dev_dependencies:
   flutter_test:

@@ -1,6 +1,9 @@
 import 'package:flutter/material.dart';
 import 'package:shared_preferences/shared_preferences.dart';
+import 'package:thawani_payment/models/products.dart';
+import 'package:thawani_payment/pay.dart';
 
+import '../core/api_config.dart';
 import '../core/app_localizations.dart';
 import '../core/responsive_helper.dart';
 import '../core/url_launcher_helper.dart';
@@ -10,7 +13,6 @@ import '../core/selected_course_storage.dart';
 import '../models/country_master.dart';
 import '../services/application_api_service.dart';
 import '../services/auth_api_service.dart';
-import '../services/thawani_service.dart';
 import '../widgets/common_widgets.dart';
 import '../widgets/flow_widgets.dart';
 import 'payment_confirmation_screen.dart';
@@ -35,20 +37,20 @@ class PaymentScreen extends StatefulWidget {
 
 class _PaymentScreenState extends State<PaymentScreen>
     with CubitStateMixin<PaymentScreen> {
+  static const List<String> _genderOptions = <String>['FEMALE', 'MALE'];
+
   int selected = 0;
   bool _isSubmitting = false;
 
   final ApplicationApiService _applicationApiService =
       const ApplicationApiService();
   final AuthApiService _authApiService = const AuthApiService();
-  final ThawaniApiService _thawaniApiService = const ThawaniApiService();
-
   final TextEditingController _fullNameController = TextEditingController();
   final TextEditingController _emailController = TextEditingController();
   final TextEditingController _phoneController = TextEditingController();
-  String _selectedCountry = 'India';
-  String _selectedCountryDialCode = '+91';
-  String _gender = 'FEMALE';
+  String _selectedCountry = '';
+  String _selectedCountryDialCode = '';
+  String _gender = _genderOptions.first;
   List<CountryMaster> _countries = const [];
   bool _isLoadingCountries = true;
   String _studentUserId = '';
@@ -116,6 +118,14 @@ class _PaymentScreenState extends State<PaymentScreen>
     }
   }
 
+  String _normalizeGender(String? raw) {
+    final String normalized = (raw ?? '').trim().toUpperCase();
+    if (_genderOptions.contains(normalized)) {
+      return normalized;
+    }
+    return _genderOptions.first;
+  }
+
   CountryMaster? _findMatchingLoginCountry() {
     for (final country in _countries) {
       if (country.nameEn == _selectedCountry ||
@@ -166,7 +176,7 @@ class _PaymentScreenState extends State<PaymentScreen>
             [first, middle, last].where((e) => e.isNotEmpty).join(' ');
         _emailController.text = (user['email'] ?? '').toString().trim();
         _phoneController.text = _phoneWithoutCode(fullPhone);
-        _gender = (current['gender'] ?? 'FEMALE').toString().trim();
+        _gender = _normalizeGender((current['gender'] ?? 'FEMALE').toString());
 
         if (country.isNotEmpty && _countries.isNotEmpty) {
           try {
@@ -318,38 +328,83 @@ class _PaymentScreenState extends State<PaymentScreen>
                     ? studentUserId
                     : DateTime.now().millisecondsSinceEpoch.toString();
 
-        final String sessionId = await _thawaniApiService.createCheckoutSession(
-          clientReferenceId: clientReferenceId,
-          totalAmount: total,
-          currency: 'OMR',
-          customerName: _fullNameController.text.trim(),
-          customerEmail: _emailController.text.trim(),
-          customerPhone:
-              '$_selectedCountryDialCode${_phoneController.text.trim()}',
-          metadata: <String, dynamic>{
+        Thawani.pay(
+          context,
+          testMode: true,
+          api: ApiConfig.secretKey,
+          pKey: ApiConfig.publishableKey,
+          clintID: studentUserId,
+          metadata: {
+            'order_id': clientReferenceId,
+            'customer_id': studentUserId,
+            'customer_name': _fullNameController.text.trim(),
+            'customer_email': _emailController.text.trim(),
             'platform': 'education_client',
           },
+          products: [
+            Product(
+              name: 'University Application Fee',
+              quantity: 1,
+              unitAmount: (total * 1000).toInt(),
+            ),
+          ],
+          saveCard: true,
+          getSavedCustomer: (customerId) {
+            debugPrint('Saved Customer ID: $customerId');
+          },
+          onCreateCustomer: (data) {
+            debugPrint('Customer Created: $data');
+          },
+          savedCards: (cards) {
+            debugPrint('Saved Cards: $cards');
+          },
+          onCreate: (response) {
+            debugPrint('Session Created');
+            debugPrint(response.data.toString());
+          },
+          onPaid: (response) async {
+            debugPrint('Payment Success');
+            debugPrint(response.toString());
+
+            await SelectedCourseStorage.clear();
+
+            if (!mounted) return;
+
+            Navigator.of(context).pushReplacement(
+              MaterialPageRoute(
+                builder: (_) => PaymentConfirmationScreen(
+                  universityName: widget.universityName,
+                  universityHeroImage: widget.universityHeroImage,
+                  courseTitle: widget.courseTitle,
+                  applicationsPayload: widget.applicationsPayload,
+                  createdApplicationsResponse: createdApplicationsResponse,
+                  studentOverview: studentOverview,
+                ),
+              ),
+            );
+          },
+          onCancelled: (response) {
+            debugPrint('Payment Cancelled');
+            debugPrint(response.toString());
+
+            showAppSnackBar(
+              context,
+              type: AppSnackBarType.error,
+              message: 'Payment Cancelled',
+            );
+          },
+          onError: (error) {
+            debugPrint('Payment Error');
+            debugPrint(error.toString());
+
+            showAppSnackBar(
+              context,
+              type: AppSnackBarType.error,
+              message: error.toString(),
+            );
+          },
         );
-
-        await openExternalLink(ThawaniApiService.checkoutUrl(sessionId));
       }
-
-      await SelectedCourseStorage.clear();
-
-      if (!mounted) return;
-
-      Navigator.of(context).push(
-        MaterialPageRoute(
-          builder: (_) => PaymentConfirmationScreen(
-            universityName: widget.universityName,
-            universityHeroImage: widget.universityHeroImage,
-            courseTitle: widget.courseTitle,
-            applicationsPayload: widget.applicationsPayload,
-            createdApplicationsResponse: createdApplicationsResponse,
-            studentOverview: studentOverview,
-          ),
-        ),
-      );
     } on ApplicationApiException catch (e) {
       if (e.statusCode == 409) {
         await SelectedCourseStorage.clear();
@@ -480,7 +535,7 @@ class _PaymentScreenState extends State<PaymentScreen>
         ),
       ),
       builder: (BuildContext context) {
-        String gender = _gender;
+        String gender = _normalizeGender(_gender);
         bool isUpdating = false;
 
         return StatefulBuilder(
@@ -662,7 +717,7 @@ class _PaymentScreenState extends State<PaymentScreen>
                         labelText: context.l10n.text('gender'),
                         border: const OutlineInputBorder(),
                       ),
-                      items: <String>['FEMALE', 'MALE']
+                      items: _genderOptions
                           .map(
                             (String value) => DropdownMenuItem<String>(
                               value: value,
