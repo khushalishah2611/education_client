@@ -281,160 +281,166 @@ class _PaymentScreenState extends State<PaymentScreen>
     return null;
   }
 
+  Future<void> _createApplicationsAfterPayment({
+    required String studentUserId,
+  }) async {
+    Map<String, dynamic>? createdApplicationsResponse;
+    Map<String, dynamic>? studentOverview;
+
+    createdApplicationsResponse =
+        await _applicationApiService.createBulkApplications(
+      studentUserId: studentUserId,
+      applications: widget.applicationsPayload,
+    );
+
+    if (createdApplicationsResponse['status'] == 201) {
+      try {
+        studentOverview = await _applicationApiService.fetchStudentOverview(
+          studentUserId: studentUserId,
+        );
+      } catch (_) {
+        studentOverview = null;
+      }
+    }
+
+    await SelectedCourseStorage.clear();
+
+    if (!mounted) return;
+
+    Navigator.of(context).pushReplacement(
+      MaterialPageRoute(
+        builder: (_) => PaymentConfirmationScreen(
+          universityName: widget.universityName,
+          universityHeroImage: widget.universityHeroImage,
+          courseTitle: widget.courseTitle,
+          applicationsPayload: widget.applicationsPayload,
+          createdApplicationsResponse: createdApplicationsResponse,
+          studentOverview: studentOverview,
+        ),
+      ),
+    );
+  }
+
   Future<void> _submitApplicationsAndPayOnline() async {
     if (_isSubmitting) return;
 
     updateView(() => _isSubmitting = true);
 
-    Map<String, dynamic>? createdApplicationsResponse;
-    Map<String, dynamic>? studentOverview;
-
     try {
-      if (widget.applicationsPayload.isNotEmpty) {
-        final SharedPreferences prefs = await SharedPreferences.getInstance();
-        final String studentUserId =
-            prefs.getString('studentUserId')?.trim() ?? '';
+      if (widget.applicationsPayload.isEmpty) return;
 
-        if (studentUserId.isNotEmpty) {
-          createdApplicationsResponse =
-              await _applicationApiService.createBulkApplications(
-            studentUserId: studentUserId,
-            applications: widget.applicationsPayload,
-          );
+      final SharedPreferences prefs = await SharedPreferences.getInstance();
+      final String studentUserId =
+          prefs.getString('studentUserId')?.trim() ?? '';
 
-          if (createdApplicationsResponse['status'] == 201) {
-            try {
-              studentOverview =
-                  await _applicationApiService.fetchStudentOverview(
-                studentUserId: studentUserId,
-              );
-            } catch (_) {
-              studentOverview = null;
-            }
-          }
-        }
-
-        if (createdApplicationsResponse == null) {
-          throw Exception('Unable to create applications before payment.');
-        }
-
-        final double total = _applicationFeeTotal;
-        final String clientReferenceId =
-            createdApplicationsResponse['data'] is Map
-                ? createdApplicationsResponse['data']['id']?.toString() ??
-                    studentUserId
-                : studentUserId.isNotEmpty
-                    ? studentUserId
-                    : DateTime.now().millisecondsSinceEpoch.toString();
-
-        Thawani.pay(
-          context,
-          testMode: true,
-          api: ApiConfig.secretKey,
-          pKey: ApiConfig.publishableKey,
-          clintID: studentUserId,
-          metadata: {
-            'order_id': clientReferenceId,
-            'customer_id': studentUserId,
-            'customer_name': _fullNameController.text.trim(),
-            'customer_email': _emailController.text.trim(),
-            'platform': 'education_client',
-          },
-          products: [
-            Product(
-              name: 'University Application Fee',
-              quantity: 1,
-              unitAmount: (total * 1000).toInt(),
-            ),
-          ],
-          saveCard: true,
-          getSavedCustomer: (customerId) {
-            debugPrint('Saved Customer ID: $customerId');
-          },
-          onCreateCustomer: (data) {
-            debugPrint('Customer Created: $data');
-          },
-          savedCards: (cards) {
-            debugPrint('Saved Cards: $cards');
-          },
-          onCreate: (response) {
-            debugPrint('Session Created');
-            debugPrint(response.data.toString());
-          },
-          onPaid: (response) async {
-            debugPrint('Payment Success');
-            debugPrint(response.toString());
-
-            await SelectedCourseStorage.clear();
-
-            if (!mounted) return;
-
-            Navigator.of(context).pushReplacement(
-              MaterialPageRoute(
-                builder: (_) => PaymentConfirmationScreen(
-                  universityName: widget.universityName,
-                  universityHeroImage: widget.universityHeroImage,
-                  courseTitle: widget.courseTitle,
-                  applicationsPayload: widget.applicationsPayload,
-                  createdApplicationsResponse: createdApplicationsResponse,
-                  studentOverview: studentOverview,
-                ),
-              ),
-            );
-          },
-          onCancelled: (response) {
-            debugPrint('Payment Cancelled');
-            debugPrint(response.toString());
-
-            if (!mounted) return;
-
-            Navigator.of(context).pushReplacement(
-              MaterialPageRoute(
-                builder: (_) => PaymentFailedScreen(
-                  universityName: widget.universityName,
-                  universityHeroImage: widget.universityHeroImage,
-                  courseTitle: widget.courseTitle,
-                  applicationsPayload: widget.applicationsPayload,
-                  createdApplicationsResponse: createdApplicationsResponse,
-                  studentOverview: studentOverview,
-                  failureType: PaymentFailureType.cancelled,
-                ),
-              ),
-            );
-          },
-          onError: (error) {
-            debugPrint('Payment Error');
-            debugPrint(error.toString());
-
-            if (!mounted) return;
-
-            Navigator.of(context).pushReplacement(
-              MaterialPageRoute(
-                builder: (_) => PaymentFailedScreen(
-                  universityName: widget.universityName,
-                  universityHeroImage: widget.universityHeroImage,
-                  courseTitle: widget.courseTitle,
-                  applicationsPayload: widget.applicationsPayload,
-                  createdApplicationsResponse: createdApplicationsResponse,
-                  studentOverview: studentOverview,
-                  failureType: PaymentFailureType.failed,
-                ),
-              ),
-            );
-          },
-        );
-      }
-    } on ApplicationApiException catch (e) {
-      if (e.statusCode == 409) {
-        await SelectedCourseStorage.clear();
+      if (studentUserId.isEmpty) {
+        throw Exception('Unable to find student user ID.');
       }
 
-      if (!mounted) return;
+      final double total = _applicationFeeTotal;
+      final String clientReferenceId =
+          '${studentUserId}_${DateTime.now().millisecondsSinceEpoch}';
 
-      showAppSnackBar(
+      Thawani.pay(
         context,
-        type: AppSnackBarType.error,
-        message: e.message,
+        testMode: true,
+        api: ApiConfig.secretKey,
+        pKey: ApiConfig.publishableKey,
+        clintID: studentUserId,
+        metadata: {
+          'order_id': clientReferenceId,
+          'customer_id': studentUserId,
+          'customer_name': _fullNameController.text.trim(),
+          'customer_email': _emailController.text.trim(),
+          'platform': 'education_client',
+        },
+        products: [
+          Product(
+            name: 'University Application Fee',
+            quantity: 1,
+            unitAmount: (total * 1000).toInt(),
+          ),
+        ],
+        saveCard: true,
+        getSavedCustomer: (customerId) {
+          debugPrint('Saved Customer ID: $customerId');
+        },
+        onCreateCustomer: (data) {
+          debugPrint('Customer Created: $data');
+        },
+        savedCards: (cards) {
+          debugPrint('Saved Cards: $cards');
+        },
+        onCreate: (response) {
+          debugPrint('Session Created');
+          debugPrint(response.data.toString());
+        },
+        onPaid: (response) async {
+          debugPrint('Payment Success');
+          debugPrint(response.toString());
+
+          try {
+            await _createApplicationsAfterPayment(
+              studentUserId: studentUserId,
+            );
+          } on ApplicationApiException catch (e) {
+            if (e.statusCode == 409) {
+              await SelectedCourseStorage.clear();
+            }
+
+            if (!mounted) return;
+
+            showAppSnackBar(
+              context,
+              type: AppSnackBarType.error,
+              message: e.message,
+            );
+          } catch (e) {
+            if (!mounted) return;
+
+            showAppSnackBar(
+              context,
+              type: AppSnackBarType.error,
+              message: e.toString(),
+            );
+          }
+        },
+        onCancelled: (response) {
+          debugPrint('Payment Cancelled');
+          debugPrint(response.toString());
+
+          if (!mounted) return;
+
+          Navigator.of(context).pushReplacement(
+            MaterialPageRoute(
+              builder: (_) => PaymentFailedScreen(
+                universityName: widget.universityName,
+                universityHeroImage: widget.universityHeroImage,
+                courseTitle: widget.courseTitle,
+                applicationsPayload: widget.applicationsPayload,
+                failureType: PaymentFailureType.cancelled,
+              ),
+            ),
+          );
+        },
+        onError: (error) {
+          debugPrint('Payment Error');
+          debugPrint(error.toString());
+
+          if (!mounted) return;
+
+          Navigator.of(context).pushReplacement(
+            MaterialPageRoute(
+              builder: (_) => PaymentFailedScreen(
+                universityName: widget.universityName,
+                universityHeroImage: widget.universityHeroImage,
+                courseTitle: widget.courseTitle,
+                applicationsPayload: widget.applicationsPayload,
+                failureType: PaymentFailureType.failed,
+              ),
+            ),
+          );
+        },
       );
     } catch (e) {
       if (!mounted) return;
