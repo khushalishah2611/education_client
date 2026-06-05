@@ -22,7 +22,10 @@ class _ArabUniversitiesAppState extends State<ArabUniversitiesApp> {
   void initState() {
     super.initState();
     _languageCubit = LanguageCubit();
-    _loadLanguageFuture = _languageCubit.loadSavedLocale();
+    _loadLanguageFuture = Future.wait<void>([
+      _languageCubit.loadSavedLocale(),
+      AppLocalizations.preloadEnglish(),
+    ]);
   }
 
   @override
