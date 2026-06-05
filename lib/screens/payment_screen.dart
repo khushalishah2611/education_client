@@ -136,13 +136,11 @@ class _PaymentScreenState extends State<PaymentScreen>
     try {
       final List<Map<String, dynamic>> students =
           await _applicationApiService.fetchStudents();
-      final Map<String, dynamic>? current = students
-          .cast<Map<String, dynamic>?>()
-          .firstWhere(
-            (item) =>
-                (item?['userId'] ?? '').toString() == studentUserId,
-            orElse: () => students.isNotEmpty ? students.first : null,
-          );
+      final Map<String, dynamic>? current =
+          students.cast<Map<String, dynamic>?>().firstWhere(
+                (item) => (item?['userId'] ?? '').toString() == studentUserId,
+                orElse: () => students.isNotEmpty ? students.first : null,
+              );
 
       if (current == null) {
         return;
@@ -156,22 +154,16 @@ class _PaymentScreenState extends State<PaymentScreen>
               ? current['user'] as Map<String, dynamic>
               : <String, dynamic>{};
 
-      final String first =
-          (current['firstName'] ?? '').toString().trim();
-      final String middle =
-          (current['middleName'] ?? '').toString().trim();
-      final String last =
-          (current['lastName'] ?? '').toString().trim();
+      final String first = (current['firstName'] ?? '').toString().trim();
+      final String middle = (current['middleName'] ?? '').toString().trim();
+      final String last = (current['lastName'] ?? '').toString().trim();
 
-      final String country =
-          (current['country'] ?? '').toString().trim();
-      final String fullPhone =
-          (current['phone'] ?? '').toString().trim();
+      final String country = (current['country'] ?? '').toString().trim();
+      final String fullPhone = (current['phone'] ?? '').toString().trim();
 
       updateView(() {
-        _fullNameController.text = [first, middle, last]
-            .where((e) => e.isNotEmpty)
-            .join(' ');
+        _fullNameController.text =
+            [first, middle, last].where((e) => e.isNotEmpty).join(' ');
         _emailController.text = (user['email'] ?? '').toString().trim();
         _phoneController.text = _phoneWithoutCode(fullPhone);
         _gender = (current['gender'] ?? 'FEMALE').toString().trim();
@@ -213,9 +205,9 @@ class _PaymentScreenState extends State<PaymentScreen>
     if (selected == 1) {
       await _submitApplicationsAndPayOnline();
       return;
+    } else {
+      await _submitApplicationsAndContinue();
     }
-
-    await _submitApplicationsAndContinue();
   }
 
   @override
@@ -318,12 +310,13 @@ class _PaymentScreenState extends State<PaymentScreen>
         }
 
         final double total = _applicationFeeTotal;
-        final String clientReferenceId = createdApplicationsResponse['data'] is Map
-            ? createdApplicationsResponse['data']['id']?.toString() ??
-                studentUserId
-            : studentUserId.isNotEmpty
-                ? studentUserId
-                : DateTime.now().millisecondsSinceEpoch.toString();
+        final String clientReferenceId =
+            createdApplicationsResponse['data'] is Map
+                ? createdApplicationsResponse['data']['id']?.toString() ??
+                    studentUserId
+                : studentUserId.isNotEmpty
+                    ? studentUserId
+                    : DateTime.now().millisecondsSinceEpoch.toString();
 
         final String sessionId = await _thawaniApiService.createCheckoutSession(
           clientReferenceId: clientReferenceId,
@@ -578,7 +571,7 @@ class _PaymentScreenState extends State<PaymentScreen>
                                   ),
                                 );
                               }
-                
+
                               return Expanded(
                                 child: DropdownButtonHideUnderline(
                                   child: DropdownButton<String>(
@@ -612,15 +605,18 @@ class _PaymentScreenState extends State<PaymentScreen>
                                         ? null
                                         : (value) {
                                             if (value == null) return;
-                                            final CountryMaster selectedCountry =
+                                            final CountryMaster
+                                                selectedCountry =
                                                 countryOptions.firstWhere(
-                                              (country) => country.nameEn == value,
+                                              (country) =>
+                                                  country.nameEn == value,
                                               orElse: () => CountryMaster(
                                                 id: 'fallback',
                                                 nameEn: value,
                                                 nameAr: '',
                                                 value: '',
-                                                dialCode: _selectedCountryDialCode,
+                                                dialCode:
+                                                    _selectedCountryDialCode,
                                                 flagEmoji: '🌍',
                                                 isActive: true,
                                               ),
@@ -693,7 +689,7 @@ class _PaymentScreenState extends State<PaymentScreen>
                               final String email = _emailController.text.trim();
                               final String phone = _phoneController.text.trim();
                               final String country = _selectedCountry.trim();
-                
+
                               if (fullName.isEmpty ||
                                   email.isEmpty ||
                                   phone.isEmpty ||
@@ -705,9 +701,9 @@ class _PaymentScreenState extends State<PaymentScreen>
                                 );
                                 return;
                               }
-                
+
                               setState(() => isUpdating = true);
-                
+
                               final List<String> parts = fullName
                                   .split(RegExp(r'\s+'))
                                   .where((e) => e.isNotEmpty)
@@ -716,7 +712,7 @@ class _PaymentScreenState extends State<PaymentScreen>
                                   parts.isNotEmpty ? parts.first : fullName;
                               final String lastName =
                                   parts.length > 1 ? parts.last : fullName;
-                
+
                               try {
                                 if (!context.mounted) return;
                                 setState(() => isUpdating = true);
@@ -883,9 +879,7 @@ class _PaymentScreenState extends State<PaymentScreen>
                           const SizedBox(height: 30),
                           AppPrimaryButton(
                             label: context.l10n.text('payNow'),
-                            onPressed: _isSubmitting
-                                ? null
-                                : _handlePayNow,
+                            onPressed: _isSubmitting ? null : _handlePayNow,
                           ),
                         ],
                       ),
