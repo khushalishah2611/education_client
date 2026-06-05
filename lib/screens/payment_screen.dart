@@ -53,7 +53,6 @@ class _PaymentScreenState extends State<PaymentScreen>
   String _gender = _genderOptions.first;
   List<CountryMaster> _countries = const [];
   bool _isLoadingCountries = true;
-  String _studentUserId = '';
   bool _profileLoaded = false;
 
   @override
@@ -155,8 +154,6 @@ class _PaymentScreenState extends State<PaymentScreen>
       if (current == null) {
         return;
       }
-
-      _studentUserId = studentUserId;
       _profileLoaded = true;
 
       final Map<String, dynamic> user =
@@ -207,7 +204,8 @@ class _PaymentScreenState extends State<PaymentScreen>
 
   Future<void> _handlePayNow() async {
     if (_isSubmitting) return;
-    if (_emailController.text.trim().isEmpty) {
+    if (_emailController.text.trim().isEmpty &&
+        _fullNameController.text.trim().isEmpty) {
       await _openUpdateProfileBottomSheet();
       return;
     }
@@ -996,8 +994,7 @@ class _PaymentMethodTile extends StatelessWidget {
         child: Row(
           children: [
             Container(
-              width: 30,
-              height: 18,
+              height: 20,
               alignment: Alignment.center,
               decoration: BoxDecoration(
                 color: const Color(0xFFF3F3F3),
