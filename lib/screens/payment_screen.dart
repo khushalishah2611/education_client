@@ -3,12 +3,14 @@ import 'package:shared_preferences/shared_preferences.dart';
 
 import '../core/app_localizations.dart';
 import '../core/responsive_helper.dart';
+import '../core/url_launcher_helper.dart';
 import '../core/app_theme.dart';
 import '../core/bloc/app_cubit.dart';
 import '../core/selected_course_storage.dart';
 import '../models/country_master.dart';
 import '../services/application_api_service.dart';
 import '../services/auth_api_service.dart';
+import '../services/thawani_service.dart';
 import '../widgets/common_widgets.dart';
 import '../widgets/flow_widgets.dart';
 import 'payment_confirmation_screen.dart';
@@ -39,6 +41,7 @@ class _PaymentScreenState extends State<PaymentScreen>
   final ApplicationApiService _applicationApiService =
       const ApplicationApiService();
   final AuthApiService _authApiService = const AuthApiService();
+  final ThawaniApiService _thawaniApiService = const ThawaniApiService();
 
   final TextEditingController _fullNameController = TextEditingController();
   final TextEditingController _emailController = TextEditingController();
@@ -207,6 +210,11 @@ class _PaymentScreenState extends State<PaymentScreen>
       return;
     }
 
+    if (selected == 1) {
+      await _submitApplicationsAndPayOnline();
+      return;
+    }
+
     await _submitApplicationsAndContinue();
   }
 
@@ -270,6 +278,110 @@ class _PaymentScreenState extends State<PaymentScreen>
     }
 
     return null;
+  }
+
+  Future<void> _submitApplicationsAndPayOnline() async {
+    if (_isSubmitting) return;
+
+    updateView(() => _isSubmitting = true);
+
+    Map<String, dynamic>? createdApplicationsResponse;
+    Map<String, dynamic>? studentOverview;
+
+    try {
+      if (widget.applicationsPayload.isNotEmpty) {
+        final SharedPreferences prefs = await SharedPreferences.getInstance();
+        final String studentUserId =
+            prefs.getString('studentUserId')?.trim() ?? '';
+
+        if (studentUserId.isNotEmpty) {
+          createdApplicationsResponse =
+              await _applicationApiService.createBulkApplications(
+            studentUserId: studentUserId,
+            applications: widget.applicationsPayload,
+          );
+
+          if (createdApplicationsResponse['status'] == 201) {
+            try {
+              studentOverview =
+                  await _applicationApiService.fetchStudentOverview(
+                studentUserId: studentUserId,
+              );
+            } catch (_) {
+              studentOverview = null;
+            }
+          }
+        }
+
+        if (createdApplicationsResponse == null) {
+          throw Exception('Unable to create applications before payment.');
+        }
+
+        final double total = _applicationFeeTotal;
+        final String clientReferenceId = createdApplicationsResponse['data'] is Map
+            ? createdApplicationsResponse['data']['id']?.toString() ??
+                studentUserId
+            : studentUserId.isNotEmpty
+                ? studentUserId
+                : DateTime.now().millisecondsSinceEpoch.toString();
+
+        final String sessionId = await _thawaniApiService.createCheckoutSession(
+          clientReferenceId: clientReferenceId,
+          totalAmount: total,
+          currency: 'OMR',
+          customerName: _fullNameController.text.trim(),
+          customerEmail: _emailController.text.trim(),
+          customerPhone:
+              '$_selectedCountryDialCode${_phoneController.text.trim()}',
+          metadata: <String, dynamic>{
+            'platform': 'education_client',
+          },
+        );
+
+        await openExternalLink(ThawaniApiService.checkoutUrl(sessionId));
+      }
+
+      await SelectedCourseStorage.clear();
+
+      if (!mounted) return;
+
+      Navigator.of(context).push(
+        MaterialPageRoute(
+          builder: (_) => PaymentConfirmationScreen(
+            universityName: widget.universityName,
+            universityHeroImage: widget.universityHeroImage,
+            courseTitle: widget.courseTitle,
+            applicationsPayload: widget.applicationsPayload,
+            createdApplicationsResponse: createdApplicationsResponse,
+            studentOverview: studentOverview,
+          ),
+        ),
+      );
+    } on ApplicationApiException catch (e) {
+      if (e.statusCode == 409) {
+        await SelectedCourseStorage.clear();
+      }
+
+      if (!mounted) return;
+
+      showAppSnackBar(
+        context,
+        type: AppSnackBarType.error,
+        message: e.message,
+      );
+    } catch (e) {
+      if (!mounted) return;
+
+      showAppSnackBar(
+        context,
+        type: AppSnackBarType.error,
+        message: e.toString(),
+      );
+    } finally {
+      if (mounted) {
+        updateView(() => _isSubmitting = false);
+      }
+    }
   }
 
   Future<void> _submitApplicationsAndContinue() async {
@@ -760,6 +872,13 @@ class _PaymentScreenState extends State<PaymentScreen>
                             iconText: 'COD',
                             selected: selected == 0,
                             onTap: () => updateView(() => selected = 0),
+                          ),
+                          const SizedBox(height: 12),
+                          _PaymentMethodTile(
+                            label: context.l10n.text('onlinePayment'),
+                            iconText: 'ONLINE',
+                            selected: selected == 1,
+                            onTap: () => updateView(() => selected = 1),
                           ),
                           const SizedBox(height: 30),
                           AppPrimaryButton(
