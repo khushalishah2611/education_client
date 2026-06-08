@@ -13,8 +13,7 @@ import 'package:intl/intl.dart';
 
 import '../../core/app_theme.dart';
 import '../../services/snackbar_service.dart';
-import '../../widgets/common_widgets.dart'
-    show AppPrimaryButton, AppSnackBarType, showAppSnackBar;
+import '../../widgets/common_widgets.dart' show AppPrimaryButton;
 import 'side_menu_common.dart';
 
 class ProfileScreen extends StatelessWidget {
@@ -329,11 +328,7 @@ class _ProfileBodyState extends State<ProfileBody>
     if (_studentUserId.isEmpty) return;
     final String? validationError = _validateProfileForm();
     if (validationError != null) {
-      showAppSnackBar(
-        context,
-        type: AppSnackBarType.error,
-        message: validationError,
-      );
+      snackBarService.showError(message: validationError);
       return;
     }
 

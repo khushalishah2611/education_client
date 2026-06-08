@@ -8,6 +8,7 @@ import '../models/agreement_template.dart';
 import '../models/country_master.dart';
 import '../models/student_login_response.dart';
 import '../services/auth_api_service.dart';
+import '../services/snackbar_service.dart';
 import '../widgets/common_widgets.dart';
 import 'verify_otp_screen.dart';
 
@@ -61,9 +62,7 @@ class _LoginScreenState extends State<LoginScreen>
       });
     } catch (_) {
       if (!mounted) return;
-      showAppSnackBar(
-        context,
-        type: AppSnackBarType.error,
+      snackBarService.showError(
         message: context.l10n.text('failedLoadLoginData'),
       );
     } finally {
@@ -75,27 +74,21 @@ class _LoginScreenState extends State<LoginScreen>
 
   Future<void> _onSendOtpTap() async {
     if (_mobileController.text.isEmpty) {
-      showAppSnackBar(
-        context,
-        type: AppSnackBarType.error,
+      snackBarService.showError(
         message: context.l10n.text('enterMobileNumber'),
       );
       return;
     }
 
     if (!_isChecked) {
-      showAppSnackBar(
-        context,
-        type: AppSnackBarType.error,
+      snackBarService.showError(
         message: context.l10n.text('pleaseAcceptTermsPrivacy'),
       );
       return;
     }
 
     if (_selectedCountry == null) {
-      showAppSnackBar(
-        context,
-        type: AppSnackBarType.error,
+      snackBarService.showError(
         message: context.l10n.text('selectCountryFirst'),
       );
       return;
@@ -114,11 +107,7 @@ class _LoginScreenState extends State<LoginScreen>
       }
       if (!mounted) return;
       if (!response.existingUser) {
-        showAppSnackBar(
-          context,
-          type: AppSnackBarType.success,
-          message: response.message,
-        );
+        snackBarService.showSuccess(message: response.message);
       }
 
       Navigator.of(context).push(
@@ -140,16 +129,10 @@ class _LoginScreenState extends State<LoginScreen>
     } on ApiResponseException catch (error) {
       debugPrint(error.toString());
       if (!mounted) return;
-      showAppSnackBar(
-        context,
-        type: AppSnackBarType.error,
-        message: error.message,
-      );
+      snackBarService.showError(message: error.message);
     } catch (_) {
       if (!mounted) return;
-      showAppSnackBar(
-        context,
-        type: AppSnackBarType.error,
+      snackBarService.showError(
         message: context.l10n.text('failedSendOtp'),
       );
     } finally {

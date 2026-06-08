@@ -7,6 +7,7 @@ import '../core/responsive_helper.dart';
 import '../core/app_theme.dart';
 import '../core/bloc/app_cubit.dart';
 import '../services/application_api_service.dart';
+import '../services/snackbar_service.dart';
 import '../widgets/common_widgets.dart';
 import '../widgets/flow_widgets.dart';
 import 'home_screen.dart';
@@ -84,20 +85,14 @@ class _TrackApplicationScreenState extends State<TrackApplicationScreen>
       });
 
       if (isRefresh) {
-        showAppSnackBar(
-          context,
-          type: AppSnackBarType.success,
+        snackBarService.showSuccess(
           message: context.l10n.text('applicationDataRefreshed'),
         );
       }
     } catch (e) {
       if (!mounted) return;
 
-      showAppSnackBar(
-        context,
-        type: AppSnackBarType.error,
-        message: e.toString(),
-      );
+      snackBarService.showError(message: e.toString());
     } finally {
       if (mounted) {
         updateView(() => _isLoading = false);

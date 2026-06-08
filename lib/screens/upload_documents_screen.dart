@@ -8,6 +8,7 @@ import '../core/responsive_helper.dart';
 import '../core/student_session.dart';
 import '../models/document_type.dart';
 import '../services/application_api_service.dart';
+import '../services/snackbar_service.dart';
 import '../widgets/common_widgets.dart';
 import '../widgets/flow_widgets.dart';
 import 'payment_screen.dart';
@@ -157,9 +158,7 @@ class _UploadDocumentsScreenState extends State<UploadDocumentsScreen>
     if (file.size > _maxUploadBytes) {
       if (!mounted) return;
 
-      showAppSnackBar(
-        context,
-        type: AppSnackBarType.error,
+      snackBarService.showError(
         message: 'File too large. Maximum allowed size is 5 MB.',
       );
 
@@ -211,19 +210,13 @@ class _UploadDocumentsScreenState extends State<UploadDocumentsScreen>
 
       if (!mounted) return;
 
-      showAppSnackBar(
-        context,
-        type: AppSnackBarType.success,
+      snackBarService.showSuccess(
         message: '${doc.title} uploaded successfully',
       );
     } catch (e) {
       if (!mounted) return;
 
-      showAppSnackBar(
-        context,
-        type: AppSnackBarType.error,
-        message: e.toString(),
-      );
+      snackBarService.showError(message: e.toString());
     } finally {
       if (mounted) {
         updateView(() {
@@ -285,9 +278,7 @@ class _UploadDocumentsScreenState extends State<UploadDocumentsScreen>
 
   Future<void> _onContinue() async {
     if (!_hasAllRequiredDocuments) {
-      showAppSnackBar(
-        context,
-        type: AppSnackBarType.error,
+      snackBarService.showError(
         message: context.l10n.text(
           'Please upload Passport and Secondary School Certificate before continuing',
         ),

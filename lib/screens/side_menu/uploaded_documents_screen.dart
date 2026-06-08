@@ -149,9 +149,7 @@ class _UploadedDocumentsContentState extends State<UploadedDocumentsContent>
 
       updateView(() => _loading = false);
 
-      showAppSnackBar(
-        context,
-        type: AppSnackBarType.error,
+      snackBarService.showError(
         message: context.l10n.text('failedLoadDocuments'),
       );
     }

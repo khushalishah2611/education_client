@@ -10,6 +10,7 @@ import '../core/responsive_helper.dart';
 import '../core/url_launcher_helper.dart';
 import '../core/student_session.dart';
 import '../services/auth_api_service.dart';
+import '../services/snackbar_service.dart';
 import '../widgets/common_widgets.dart';
 import 'home_screen.dart';
 
@@ -97,26 +98,16 @@ class _VerifyOtpScreenState extends State<VerifyOtpScreen>
         _currentExpectedOtp = response.otp;
         _currentWhatsappOtpLink = response.whatsappOtpLink;
       });
-      showAppSnackBar(
-        context,
-        type: AppSnackBarType.success,
-        message: response.message,
-      );
+      snackBarService.showSuccess(message: response.message);
       await openExternalLink(_currentWhatsappOtpLink);
     } on ApiResponseException catch (error) {
       debugPrint(error.toString());
       if (!mounted) return;
-      showAppSnackBar(
-        context,
-        type: AppSnackBarType.error,
-        message: error.message,
-      );
+      snackBarService.showError(message: error.message);
       return;
     } catch (_) {
       if (!mounted) return;
-      showAppSnackBar(
-        context,
-        type: AppSnackBarType.error,
+      snackBarService.showError(
         message: context.l10n.text('failedResendOtp'),
       );
       return;
@@ -144,9 +135,7 @@ class _VerifyOtpScreenState extends State<VerifyOtpScreen>
     final hasEmptyField = _otpControllers.any((c) => c.text.trim().isEmpty);
 
     if (hasEmptyField) {
-      showAppSnackBar(
-        context,
-        type: AppSnackBarType.error,
+      snackBarService.showError(
         message: context.l10n.text('pleaseEnterCompleteOtp'),
       );
       return;
@@ -155,9 +144,7 @@ class _VerifyOtpScreenState extends State<VerifyOtpScreen>
     final otp = _otpControllers.map((e) => e.text).join();
 
     if (otp != _currentExpectedOtp) {
-      showAppSnackBar(
-        context,
-        type: AppSnackBarType.error,
+      snackBarService.showError(
         message: context.l10n.text('invalidOtp'),
       );
       return;
@@ -177,9 +164,7 @@ class _VerifyOtpScreenState extends State<VerifyOtpScreen>
         authToken: response.accessToken,
       );
       if (!mounted) return;
-      showAppSnackBar(
-        context,
-        type: AppSnackBarType.success,
+      snackBarService.showSuccess(
         message: response.message.isNotEmpty
             ? response.message
             : (context.l10n.text('otpVerifiedSuccessfully')),
@@ -196,16 +181,10 @@ class _VerifyOtpScreenState extends State<VerifyOtpScreen>
     } on ApiResponseException catch (error) {
       debugPrint(error.toString());
       if (!mounted) return;
-      showAppSnackBar(
-        context,
-        type: AppSnackBarType.error,
-        message: error.message,
-      );
+      snackBarService.showError(message: error.message);
     } catch (_) {
       if (!mounted) return;
-      showAppSnackBar(
-        context,
-        type: AppSnackBarType.error,
+      snackBarService.showError(
         message: context.l10n.text('somethingWentWrong'),
       );
     } finally {

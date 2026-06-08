@@ -107,9 +107,7 @@ class _PaymentScreenState extends State<PaymentScreen>
       });
     } catch (_) {
       if (!mounted) return;
-      showAppSnackBar(
-        context,
-        type: AppSnackBarType.error,
+      snackBarService.showError(
         message: context.l10n.text('failedLoadLoginData'),
       );
     } finally {
@@ -513,9 +511,7 @@ class _PaymentScreenState extends State<PaymentScreen>
     final String studentUserId = prefs.getString('studentUserId')?.trim() ?? '';
 
     if (studentUserId.isEmpty) {
-      showAppSnackBar(
-        context,
-        type: AppSnackBarType.error,
+      snackBarService.showError(
         message: 'Unable to find student user ID.',
       );
       return;
@@ -745,9 +741,7 @@ class _PaymentScreenState extends State<PaymentScreen>
                                   email.isEmpty ||
                                   phone.isEmpty ||
                                   country.isEmpty) {
-                                showAppSnackBar(
-                                  context,
-                                  type: AppSnackBarType.error,
+                                snackBarService.showError(
                                   message: 'Please fill all fields.',
                                 );
                                 return;
@@ -788,18 +782,10 @@ class _PaymentScreenState extends State<PaymentScreen>
                                 await _submitApplicationsAndContinue();
                               } on ApplicationApiException catch (e) {
                                 if (!mounted) return;
-                                showAppSnackBar(
-                                  context,
-                                  type: AppSnackBarType.error,
-                                  message: e.message,
-                                );
+                                snackBarService.showError(message: e.message);
                               } catch (e) {
                                 if (!mounted) return;
-                                showAppSnackBar(
-                                  context,
-                                  type: AppSnackBarType.error,
-                                  message: e.toString(),
-                                );
+                                snackBarService.showError(message: e.toString());
                               } finally {
                                 if (context.mounted) {
                                   setState(() => isUpdating = false);

@@ -4,8 +4,6 @@ import '../core/app_localizations.dart';
 import '../core/app_theme.dart';
 import '../core/responsive_helper.dart';
 import '../screens/help_screen.dart';
-import '../services/snackbar_service.dart';
-
 /// Backward-compatible gradient transform that translates by [dx]/[dy].
 ///
 /// Some shimmer implementations reference `GradientTranslation` directly.
@@ -21,10 +19,6 @@ class GradientTranslation extends GradientTransform {
     return Matrix4.translationValues(dx, dy, 0);
   }
 }
-
-enum AppSnackBarType { success, error }
-
-
 
 class AppPageEntrance extends StatefulWidget {
   const AppPageEntrance({
