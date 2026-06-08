@@ -280,6 +280,20 @@ class _PaymentScreenState extends State<PaymentScreen>
     return null;
   }
 
+  Future<Map<String, dynamic>?> _fetchStudentOverview(
+    String studentUserId,
+  ) async {
+    if (studentUserId.isEmpty) return null;
+
+    try {
+      return await _applicationApiService.fetchStudentOverview(
+        studentUserId: studentUserId,
+      );
+    } catch (_) {
+      return null;
+    }
+  }
+
   Future<void> _createApplicationsAfterPayment({
     required String studentUserId,
   }) async {
@@ -292,15 +306,7 @@ class _PaymentScreenState extends State<PaymentScreen>
       applications: widget.applicationsPayload,
     );
 
-    if (createdApplicationsResponse['status'] == 201) {
-      try {
-        studentOverview = await _applicationApiService.fetchStudentOverview(
-          studentUserId: studentUserId,
-        );
-      } catch (_) {
-        studentOverview = null;
-      }
-    }
+    studentOverview = await _fetchStudentOverview(studentUserId);
 
     await SelectedCourseStorage.clear();
 
@@ -460,16 +466,7 @@ class _PaymentScreenState extends State<PaymentScreen>
             applications: widget.applicationsPayload,
           );
 
-          if (createdApplicationsResponse['status'] == 201) {
-            try {
-              studentOverview =
-                  await _applicationApiService.fetchStudentOverview(
-                studentUserId: studentUserId,
-              );
-            } catch (_) {
-              studentOverview = null;
-            }
-          }
+          studentOverview = await _fetchStudentOverview(studentUserId);
         }
       }
 

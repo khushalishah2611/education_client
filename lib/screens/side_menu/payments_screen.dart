@@ -1,11 +1,14 @@
+import 'dart:typed_data';
+
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
+import 'package:printing/printing.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
 import '../../core/app_localizations.dart';
 import '../../core/app_theme.dart';
 import '../../core/bloc/app_cubit.dart';
-import '../../widgets/common_widgets.dart';
+import '../../utils/payment_receipt_pdf.dart';
 import '../../services/snackbar_service.dart';
 import '../../services/application_api_service.dart';
 import 'side_menu_common.dart';
@@ -34,6 +37,7 @@ class _PaymentsContentState extends State<PaymentsContent>
   final ApplicationApiService _api = const ApplicationApiService();
 
   bool _loading = true;
+  String? _downloadingPaymentId;
 
   List<Map<String, dynamic>> _payments = <Map<String, dynamic>>[];
 
@@ -57,6 +61,14 @@ class _PaymentsContentState extends State<PaymentsContent>
     super.dispose();
   }
 
+  Map<String, dynamic> _overviewData(Map<String, dynamic> rawOverview) {
+    final Object? data = rawOverview['data'];
+    if (data is Map) {
+      return data.map((k, v) => MapEntry(k.toString(), v));
+    }
+    return rawOverview;
+  }
+
   Future<void> _load() async {
     updateView(() => _loading = true);
 
@@ -77,8 +89,10 @@ class _PaymentsContentState extends State<PaymentsContent>
         return;
       }
 
-      final Map<String, dynamic> overview = await _api.fetchStudentOverview(
-        studentUserId: studentUserId,
+      final Map<String, dynamic> overview = _overviewData(
+        await _api.fetchStudentOverview(
+          studentUserId: studentUserId,
+        ),
       );
 
       final Object? payments = overview['payments'];
@@ -111,6 +125,39 @@ class _PaymentsContentState extends State<PaymentsContent>
     }
   }
 
+  Future<void> _downloadReceipt(
+    BuildContext context,
+    Map<String, dynamic> payment,
+  ) async {
+    if (_downloadingPaymentId != null) return;
+
+    final String paymentId = resolvePaymentId(payment);
+    if (paymentId.isEmpty) {
+      snackBarService.showError(
+        message: context.l10n.text('receiptNotAvailableYet'),
+      );
+      return;
+    }
+
+    updateView(() => _downloadingPaymentId = paymentId);
+    try {
+      final String receiptHtml = await _api.fetchPaymentReceiptHtml(
+        paymentId: paymentId,
+      );
+      final Uint8List receiptPdf = await buildPaymentReceiptPdf(receiptHtml);
+      await Printing.sharePdf(
+        bytes: receiptPdf,
+        filename: 'payment_receipt_$paymentId.pdf',
+      );
+    } catch (e) {
+      snackBarService.showError(
+        message: e.toString(),
+      );
+    } finally {
+      if (mounted) updateView(() => _downloadingPaymentId = null);
+    }
+  }
+
   String _formatDate(DateTime date) {
     return DateFormat(
       'MMM dd, yyyy',
@@ -126,77 +173,116 @@ class _PaymentsContentState extends State<PaymentsContent>
   @override
   Widget build(BuildContext context) {
     return buildCubitView((context) {
-      if (_loading) {
-        return _buildShimmerList();
-      }
+      return Stack(
+        children: [
+          if (_loading)
+            _buildShimmerList()
+          else if (_payments.isEmpty)
+            _emptyState(context)
+          else
+            RefreshIndicator(
+              color: AppColors.primary,
+              onRefresh: _load,
+              child: ListView.separated(
+                padding: const EdgeInsets.all(12),
+                physics: const AlwaysScrollableScrollPhysics(),
+                itemCount: _payments.length,
+                separatorBuilder: (_, __) => const SizedBox(height: 10),
+                itemBuilder: (context, index) {
+                  final Map<String, dynamic> item = _payments[index];
 
-      if (_payments.isEmpty) {
-        return _emptyState(context);
-      }
+                  final DateTime? createdAt = DateTime.tryParse(
+                    item['createdAt']?.toString() ?? '',
+                  );
 
-      return RefreshIndicator(
-      color: AppColors.primary,
-      onRefresh: _load,
-      child: ListView.separated(
-        padding: const EdgeInsets.all(12),
-        physics: const AlwaysScrollableScrollPhysics(),
-        itemCount: _payments.length,
-        separatorBuilder: (_, __) => const SizedBox(height: 10),
-        itemBuilder: (context, index) {
-          final Map<String, dynamic> item = _payments[index];
+                  final String date =
+                      createdAt == null ? '-' : _formatDate(createdAt);
 
-          final DateTime? createdAt = DateTime.tryParse(
-            item['createdAt']?.toString() ?? '',
-          );
+                  final String time =
+                      createdAt == null ? '-' : _formatTime(createdAt);
 
-          final String date = createdAt == null ? '-' : _formatDate(createdAt);
+                  final num amount = (item['application'] is Map)
+                      ? ((item['application']
+                                  ['selectedApplicationFeeTotal'] as num?) ??
+                              0)
+                      : ((item['amount'] as num?) ?? 0);
 
-          final String time = createdAt == null ? '-' : _formatTime(createdAt);
-
-          final num amount = (item['application'] is Map)
-              ? ((item['application']['selectedApplicationFeeTotal'] as num?) ??
-                  0)
-              : ((item['amount'] as num?) ?? 0);
-
-          return Container(
-            padding: const EdgeInsets.symmetric(
-              horizontal: 12,
-              vertical: 12,
-            ),
-            decoration: BoxDecoration(
-              color: Colors.white,
-              borderRadius: BorderRadius.circular(10),
-              border: Border.all(
-                color: const Color(0xFFE6E0D8),
+                  return Container(
+                    padding: const EdgeInsets.symmetric(
+                      horizontal: 12,
+                      vertical: 12,
+                    ),
+                    decoration: BoxDecoration(
+                      color: Colors.white,
+                      borderRadius: BorderRadius.circular(10),
+                      border: Border.all(
+                        color: const Color(0xFFE6E0D8),
+                      ),
+                    ),
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        Row(
+                          mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
+                            Text(
+                              '$date  $time',
+                              style: const TextStyle(
+                                fontSize: 14,
+                                fontWeight: FontWeight.w600,
+                              ),
+                            ),
+                            Text(
+                              '${amount.toStringAsFixed(0)} '
+                              '${context.l10n.text('omaniRial')}',
+                              textAlign: TextAlign.center,
+                              style: const TextStyle(
+                                color: AppColors.accent,
+                                fontWeight: FontWeight.w700,
+                                fontSize: 16,
+                              ),
+                            ),
+                          ],
+                        ),
+                        const SizedBox(height: 10),
+                        Align(
+                          alignment: Alignment.centerRight,
+                          child: TextButton.icon(
+                            onPressed: _downloadingPaymentId != null
+                                ? null
+                                : () => _downloadReceipt(context, item),
+                            icon: const Icon(
+                              Icons.receipt_long_outlined,
+                              size: 18,
+                            ),
+                            label: Text(
+                              context.l10n.text('downloadReceipt'),
+                              style: const TextStyle(
+                                fontWeight: FontWeight.w600,
+                              ),
+                            ),
+                          ),
+                        ),
+                      ],
+                    ),
+                  );
+                },
               ),
             ),
-            child: Row(
-              mainAxisAlignment: MainAxisAlignment.spaceBetween,
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                Text(
-                  '$date  $time',
-                  style: const TextStyle(
-                    fontSize: 14,
-                    fontWeight: FontWeight.w600,
+          if (_downloadingPaymentId != null)
+            const Positioned.fill(
+              child: ColoredBox(
+                color: Color.fromRGBO(0, 0, 0, 0.15),
+                child: Center(
+                  child: CircularProgressIndicator(
+                    color: AppColors.primary,
                   ),
                 ),
-                Text(
-                  '${amount.toStringAsFixed(0)} '
-                  '${context.l10n.text('omaniRial')}',
-                  textAlign: TextAlign.center,
-                  style: const TextStyle(
-                    color: AppColors.accent,
-                    fontWeight: FontWeight.w700,
-                    fontSize: 16,
-                  ),
-                ),
-              ],
+              ),
             ),
-          );
-        },
-      ),
-    );
+        ],
+      );
     });
   }
 
