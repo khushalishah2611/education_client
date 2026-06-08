@@ -9,6 +9,7 @@ import '../core/app_localizations.dart';
 import '../core/responsive_helper.dart';
 import '../core/app_theme.dart';
 import '../core/bloc/app_cubit.dart';
+import '../services/snackbar_service.dart';
 import '../services/application_api_service.dart';
 import '../widgets/common_widgets.dart';
 import '../widgets/flow_widgets.dart';
@@ -283,9 +284,7 @@ class _PaymentConfirmationScreenState extends State<PaymentConfirmationScreen>
 
     final String paymentId = _paymentId;
     if (paymentId.isEmpty) {
-      showAppSnackBar(
-        context,
-        type: AppSnackBarType.error,
+      snackBarService.showError(
         message: context.l10n.text('receiptNotAvailableYet'),
       );
       return;
@@ -303,10 +302,7 @@ class _PaymentConfirmationScreenState extends State<PaymentConfirmationScreen>
         filename: 'payment_receipt_$paymentId.pdf',
       );
     } catch (e) {
-      if (!mounted) return;
-      showAppSnackBar(
-        context,
-        type: AppSnackBarType.error,
+      snackBarService.showError(
         message: e.toString(),
       );
     } finally {

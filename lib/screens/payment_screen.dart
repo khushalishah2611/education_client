@@ -13,6 +13,7 @@ import '../core/selected_course_storage.dart';
 import '../models/country_master.dart';
 import '../services/application_api_service.dart';
 import '../services/auth_api_service.dart';
+import '../services/snackbar_service.dart';
 import '../widgets/common_widgets.dart';
 import '../widgets/flow_widgets.dart';
 import 'payment_confirmation_screen.dart';
@@ -388,21 +389,9 @@ class _PaymentScreenState extends State<PaymentScreen>
               await SelectedCourseStorage.clear();
             }
 
-            if (!mounted) return;
-
-            showAppSnackBar(
-              context,
-              type: AppSnackBarType.error,
-              message: e.message,
-            );
+            snackBarService.showError(message: e.message);
           } catch (e) {
-            if (!mounted) return;
-
-            showAppSnackBar(
-              context,
-              type: AppSnackBarType.error,
-              message: e.toString(),
-            );
+            snackBarService.showError(message: e.toString());
           }
         },
         onCancelled: (response) {
@@ -443,13 +432,7 @@ class _PaymentScreenState extends State<PaymentScreen>
         },
       );
     } catch (e) {
-      if (!mounted) return;
-
-      showAppSnackBar(
-        context,
-        type: AppSnackBarType.error,
-        message: e.toString(),
-      );
+      snackBarService.showError(message: e.toString());
     } finally {
       if (mounted) {
         updateView(() => _isSubmitting = false);
@@ -513,21 +496,9 @@ class _PaymentScreenState extends State<PaymentScreen>
         await SelectedCourseStorage.clear();
       }
 
-      if (!mounted) return;
-
-      showAppSnackBar(
-        context,
-        type: AppSnackBarType.error,
-        message: e.message,
-      );
+      snackBarService.showError(message: e.message);
     } catch (e) {
-      if (!mounted) return;
-
-      showAppSnackBar(
-        context,
-        type: AppSnackBarType.error,
-        message: e.toString(),
-      );
+      snackBarService.showError(message: e.toString());
     } finally {
       if (mounted) {
         updateView(() => _isSubmitting = false);

@@ -4,6 +4,7 @@ import '../core/app_localizations.dart';
 import '../core/app_theme.dart';
 import '../core/responsive_helper.dart';
 import '../screens/help_screen.dart';
+import '../services/snackbar_service.dart';
 
 /// Backward-compatible gradient transform that translates by [dx]/[dy].
 ///
@@ -28,18 +29,26 @@ void showAppSnackBar(
   required String message,
   AppSnackBarType type = AppSnackBarType.success,
 }) {
-  final messenger = ScaffoldMessenger.of(context);
-  messenger
-    ..hideCurrentSnackBar()
-    ..showSnackBar(
-      SnackBar(
-        content: Text(message),
-        backgroundColor: type == AppSnackBarType.success
-            ? const Color(0xFF2E7D32)
-            : Colors.red.shade700,
-        behavior: SnackBarBehavior.floating,
-      ),
+  try {
+    final messenger = ScaffoldMessenger.of(context);
+    messenger
+      ..hideCurrentSnackBar()
+      ..showSnackBar(
+        SnackBar(
+          content: Text(message),
+          backgroundColor: type == AppSnackBarType.success
+              ? const Color(0xFF2E7D32)
+              : Colors.red.shade700,
+          behavior: SnackBarBehavior.floating,
+        ),
+      );
+  } catch (e) {
+    // Fallback to global SnackBar service if context is not available
+    snackBarService.show(
+      message: message,
+      isError: type == AppSnackBarType.error,
     );
+  }
 }
 
 class AppPageEntrance extends StatefulWidget {

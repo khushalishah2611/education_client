@@ -5,6 +5,7 @@ import '../../core/app_localizations.dart';
 import '../../core/app_theme.dart';
 import '../../core/bloc/app_cubit.dart';
 import '../../core/student_session.dart';
+import '../../services/snackbar_service.dart';
 import '../../widgets/common_widgets.dart';
 import '../../services/application_api_service.dart';
 import 'side_menu_common.dart';
@@ -165,11 +166,7 @@ class _UploadedDocumentsContentState extends State<UploadedDocumentsContent>
         studentUserId: studentUserId,
       );
 
-      if (!mounted) return;
-
-      showAppSnackBar(
-        context,
-        type: AppSnackBarType.success,
+      snackBarService.showSuccess(
         message: context.l10n.text('documentDeletedSuccessfully'),
       );
 
@@ -177,9 +174,7 @@ class _UploadedDocumentsContentState extends State<UploadedDocumentsContent>
     } catch (e) {
       debugPrint('Delete document error: $e');
 
-      showAppSnackBar(
-        context,
-        type: AppSnackBarType.error,
+      snackBarService.showError(
         message: context.l10n.text('failedDeleteDocument'),
       );
     }
@@ -191,9 +186,7 @@ class _UploadedDocumentsContentState extends State<UploadedDocumentsContent>
       final documentId = doc['id']?.toString() ?? '';
 
       if (filePath.isEmpty) {
-        showAppSnackBar(
-          context,
-          type: AppSnackBarType.error,
+        snackBarService.showError(
           message: context.l10n.text('documentPathNotFound'),
         );
         return;
@@ -214,23 +207,17 @@ class _UploadedDocumentsContentState extends State<UploadedDocumentsContent>
         mode: LaunchMode.externalApplication,
       );
 
-      if (!launched && mounted) {
-        showAppSnackBar(
-          context,
-          type: AppSnackBarType.error,
+      if (!launched) {
+        snackBarService.showError(
           message: context.l10n.text('unableOpenDocument'),
         );
       }
     } catch (e) {
       debugPrint('Open document error: $e');
 
-      if (mounted) {
-        showAppSnackBar(
-          context,
-          type: AppSnackBarType.error,
-          message: context.l10n.text('failedOpenDocument'),
-        );
-      }
+      snackBarService.showError(
+        message: context.l10n.text('failedOpenDocument'),
+      );
     } finally {
       if (mounted) {
         updateView(() {

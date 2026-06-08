@@ -12,6 +12,7 @@ import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
 
 import '../../core/app_theme.dart';
+import '../../services/snackbar_service.dart';
 import '../../widgets/common_widgets.dart'
     show AppPrimaryButton, AppSnackBarType, showAppSnackBar;
 import 'side_menu_common.dart';
@@ -236,13 +237,7 @@ class _ProfileBodyState extends State<ProfileBody>
         refreshView();
       }
     } catch (e) {
-      if (mounted) {
-        showAppSnackBar(
-          context,
-          type: AppSnackBarType.error,
-          message: e.toString(),
-        );
-      }
+      snackBarService.showError(message: e.toString());
     }
   }
 
@@ -399,9 +394,7 @@ class _ProfileBodyState extends State<ProfileBody>
 
       if (!mounted) return;
 
-      showAppSnackBar(
-        context,
-        type: AppSnackBarType.success,
+      snackBarService.showSuccess(
         message:
         res['message']?.toString() ??
             'Student updated successfully.',
@@ -413,13 +406,7 @@ class _ProfileBodyState extends State<ProfileBody>
         ),
       );
     } catch (e) {
-      if (mounted) {
-        showAppSnackBar(
-          context,
-          type: AppSnackBarType.error,
-          message: e.toString(),
-        );
-      }
+      snackBarService.showError(message: e.toString());
     } finally {
       if (mounted) {
         updateView(() {

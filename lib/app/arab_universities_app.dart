@@ -6,6 +6,7 @@ import '../core/app_localizations.dart';
 import '../core/bloc/app_cubit.dart';
 import '../core/app_theme.dart';
 import '../screens/splash_screen.dart';
+import '../services/snackbar_service.dart';
 
 class ArabUniversitiesApp extends StatefulWidget {
   const ArabUniversitiesApp({super.key});
@@ -17,6 +18,8 @@ class ArabUniversitiesApp extends StatefulWidget {
 class _ArabUniversitiesAppState extends State<ArabUniversitiesApp> {
   late final LanguageCubit _languageCubit;
   late final Future<void> _loadLanguageFuture;
+  final GlobalKey<ScaffoldMessengerState> _scaffoldMessengerKey =
+      GlobalKey<ScaffoldMessengerState>();
 
   @override
   void initState() {
@@ -26,6 +29,8 @@ class _ArabUniversitiesAppState extends State<ArabUniversitiesApp> {
       _languageCubit.loadSavedLocale(),
       AppLocalizations.preloadEnglish(),
     ]);
+    // Initialize SnackBar service with the global key
+    snackBarService.initialize(_scaffoldMessengerKey);
   }
 
   @override
@@ -65,6 +70,7 @@ class _ArabUniversitiesAppState extends State<ArabUniversitiesApp> {
                     title: 'Arab Universities',
                     theme: AppTheme.theme,
                     locale: locale,
+                    scaffoldMessengerKey: _scaffoldMessengerKey,
                     supportedLocales: AppLocalizations.supportedLanguageCodes
                         .map(Locale.new)
                         .toList(growable: false),

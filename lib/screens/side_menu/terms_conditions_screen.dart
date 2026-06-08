@@ -4,6 +4,7 @@ import 'package:shared_preferences/shared_preferences.dart';
 import '../../core/app_localizations.dart';
 import '../../core/app_theme.dart';
 import '../../core/bloc/app_cubit.dart';
+import '../../services/snackbar_service.dart';
 import '../../services/application_api_service.dart';
 import '../../widgets/common_widgets.dart';
 import 'side_menu_common.dart';
@@ -80,13 +81,9 @@ class _TermsConditionsScreenState extends State<TermsConditionsScreen>
         _loading = false;
       });
     } catch (_) {
-      if (!mounted) return;
-
       updateView(() => _loading = false);
 
-      showAppSnackBar(
-        context,
-        type: AppSnackBarType.error,
+      snackBarService.showError(
         message: context.l10n.text('failedLoadTermsConditions'),
       );
     }
