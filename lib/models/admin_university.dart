@@ -13,6 +13,14 @@ double? _toDouble(dynamic value) {
   return null;
 }
 
+String? _semesterDisplayValue(double? value) {
+  if (value == null) return null;
+  if (value == value.roundToDouble()) {
+    return value.toInt().toString();
+  }
+  return value.toString();
+}
+
 bool? _toBool(dynamic value) {
   if (value == null) {
     return null;
@@ -1058,8 +1066,10 @@ class Courses {
       duration: details.duration,
       creditHours: details.creditHours,
       totalFees: details.totalFees,
-      semesters: details.semesters.toString(),
-      totalSemesters: details.totalSemesters.toString(),
+      semesters: _semesterDisplayValue(details.semesters),
+      totalSemesters: _semesterDisplayValue(
+        details.totalSemesters ?? details.semesters,
+      ),
       feePerCredit: details.feePerCredit,
       semesterFee: details.semesterFee,
       annualFee: details.annualFee,

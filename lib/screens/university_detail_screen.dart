@@ -1190,6 +1190,26 @@ class _CollegeAccordionState extends State<_CollegeAccordion> {
     return '$id::$index';
   }
 
+  bool _isInvalidPayloadValue(Object? value) {
+    if (value == null) return true;
+    if (value is String) {
+      final String trimmed = value.trim();
+      return trimmed.isEmpty || trimmed.toLowerCase() == 'null';
+    }
+    return false;
+  }
+
+  String? _resolveTotalSemesters(Courses courseDetails) {
+    for (final String? candidate in <String?>[
+      courseDetails.totalSemesters,
+      courseDetails.semesters,
+    ]) {
+      if (_isInvalidPayloadValue(candidate)) continue;
+      return candidate!.trim();
+    }
+    return null;
+  }
+
   Map<String, dynamic> _buildApplicationPayload({
     required AdminUniversity adminUniversity,
     required String collegeName,
@@ -1214,17 +1234,13 @@ class _CollegeAccordionState extends State<_CollegeAccordion> {
       'track': courseDetails.track,
       'college': collegeName,
       'educationInstitute': collegeName,
-      'totalSemesters': courseDetails.totalSemesters,
+      'totalSemesters': _resolveTotalSemesters(courseDetails),
       'applicationFee': applicationFee,
       'basePrice': basePrice.toInt().toString(),
       'discountedPrice': basePrice,
       'discountedScore': discountedScore,
       'currency': currency,
-    }..removeWhere((_, value) {
-        if (value == null) return true;
-        if (value is String) return value.trim().isEmpty;
-        return false;
-      });
+    }..removeWhere((_, value) => _isInvalidPayloadValue(value));
 
     final Map<String, dynamic> payload = <String, dynamic>{
       'universityId': adminUniversity.id,
@@ -1236,8 +1252,7 @@ class _CollegeAccordionState extends State<_CollegeAccordion> {
     };
 
     payload.removeWhere((_, value) {
-      if (value == null) return true;
-      if (value is String) return value.trim().isEmpty;
+      if (_isInvalidPayloadValue(value)) return true;
       if (value is Map) return value.isEmpty;
       return false;
     });
