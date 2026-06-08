@@ -283,6 +283,34 @@ class _UniversityDetailScreenState extends State<UniversityDetailScreen>
     return (value ?? '').trim().toUpperCase();
   }
 
+  static String _buildCourseKeyStatic({
+    required String academicName,
+    required String collegeName,
+    required String programId,
+    required String courseName,
+  }) {
+    return [
+      academicName.trim(),
+      collegeName.trim(),
+      programId.trim(),
+      courseName.trim(),
+    ].where((e) => e.isNotEmpty).join('-');
+  }
+
+  String _buildCourseKey({
+    required String academicName,
+    required String collegeName,
+    required String programId,
+    required String courseName,
+  }) {
+    return _buildCourseKeyStatic(
+      academicName: academicName,
+      collegeName: collegeName,
+      programId: programId,
+      courseName: courseName,
+    );
+  }
+
   String get _universityKey => data.id?.trim().isNotEmpty == true
       ? data.id!.trim()
       : (data.name ?? '').trim().toLowerCase();
@@ -323,8 +351,14 @@ class _UniversityDetailScreenState extends State<UniversityDetailScreen>
       );
       final Set<String> bookedKeys = _bookedCourseKeysFromOverview(overview);
 
-      if (!mounted || bookedKeys.isEmpty) return;
+      if (!mounted) return;
 
+      debugPrint('===== BOOKED KEYS FROM API =====');
+      for (final key in bookedKeys) {
+        debugPrint('  => $key');
+      }
+      debugPrint('================================');
+      
       updateView(() {
         _bookedCourseKeys
           ..clear()
@@ -348,26 +382,10 @@ class _UniversityDetailScreenState extends State<UniversityDetailScreen>
       if (item is! Map) continue;
 
       final Map application = item;
-      final Object? selectedCourseKeys = application['selectedCourseKeys'];
-      if (selectedCourseKeys is List) {
-        keys.addAll(
-          selectedCourseKeys
-              .map((key) => key.toString().trim())
-              .where((key) => key.isNotEmpty),
-        );
-      }
-
       final Object? selectedCourses = application['selectedCourses'];
       if (selectedCourses is List) {
         for (final Object? selectedCourse in selectedCourses) {
           if (selectedCourse is! Map) continue;
-
-          final String directKey =
-              (selectedCourse['key'] ?? '').toString().trim();
-          if (directKey.isNotEmpty) {
-            keys.add(directKey);
-            continue;
-          }
 
           final String collegeName = (selectedCourse['college'] ??
                   selectedCourse['educationInstitute'] ??
@@ -376,23 +394,28 @@ class _UniversityDetailScreenState extends State<UniversityDetailScreen>
               .trim();
           final String courseName =
               (selectedCourse['name'] ?? '').toString().trim();
-          final Map program = application['program'] is Map
-              ? application['program'] as Map
-              : <String, dynamic>{};
-          final String academicName =
-              (program['academicProgram'] ?? '').toString().trim();
-          final String programId = (program['id'] ?? program['programId'] ?? '')
+          
+          // Try to get programId from selectedCourse or parent application
+          String programId = (selectedCourse['programId'] ?? '').toString().trim();
+          if (programId.isEmpty) {
+            programId = (application['programId'] ?? '').toString().trim();
+          }
+
+          final String academicName = (selectedCourse['academicProgram'] ?? '')
               .toString()
               .trim();
 
-          final String fallbackKey = <String>[
-            academicName,
-            collegeName,
-            programId,
-            courseName,
-          ].map((value) => value.trim()).join('-');
-          if (fallbackKey.replaceAll('-', '').trim().isNotEmpty) {
-            keys.add(fallbackKey);
+          // Build key using same logic as UI
+          final String courseKey = _buildCourseKeyStatic(
+            academicName: academicName,
+            collegeName: collegeName,
+            programId: programId,
+            courseName: courseName,
+          );
+          
+          if (courseKey.isNotEmpty && courseKey.replaceAll('-', '').trim().isNotEmpty) {
+            keys.add(courseKey);
+            debugPrint('  API parsed key => $courseKey');
           }
         }
       }
@@ -1011,19 +1034,33 @@ class _CollegeAccordionState extends State<_CollegeAccordion> {
                                 final int index = entry.key;
                                 final Courses details = entry.value;
 
-                                final String courseKey = [
-                                  academicName,
-                                  collegeName,
-                                  details.programId ??
-                                      details.programName ??
-                                      '',
-                                  details.name ?? '',
-                                ].map((e) => e.trim()).join('-');
+                                final String courseKey =
+                                    _UniversityDetailScreenState
+                                        ._buildCourseKeyStatic(
+                                      academicName: academicName,
+                                      collegeName: collegeName,
+                                      programId:
+                                          (details.programId ?? '').trim(),
+                                      courseName: (details.name ?? '').trim(),
+                                    );
 
                                 final bool isSelected =
                                     widget.selectedCourses.contains(courseKey);
-                                final bool isBooked =
+                                
+                                // Try exact match first, then fallback
+                                bool isBooked =
                                     widget.bookedCourseKeys.contains(courseKey);
+                                if (!isBooked &&
+                                    (details.programId ?? '').trim().isNotEmpty &&
+                                    (details.name ?? '').trim().isNotEmpty) {
+                                  final String programId =
+                                      (details.programId ?? '').trim();
+                                  final String courseName =
+                                      (details.name ?? '').trim();
+                                  isBooked = widget.bookedCourseKeys.any((key) =>
+                                      key.contains(programId) &&
+                                      key.contains(courseName));
+                                }
 
                                 return _buildCourseRow(
                                   index: index,
@@ -1144,25 +1181,42 @@ class _CollegeAccordionState extends State<_CollegeAccordion> {
     );
   }
 
+  String _generateApiCourseKey({
+    required String? programId,
+    required int index,
+  }) {
+    final String id = (programId ?? '').trim();
+    if (id.isEmpty) return '::$index';
+    return '$id::$index';
+  }
+
   Map<String, dynamic> _buildApplicationPayload({
     required AdminUniversity adminUniversity,
     required String collegeName,
     required Courses courseDetails,
     required String courseKey,
+    required int courseIndex,
   }) {
     final double applicationFee = courseDetails.applicationFee ?? 0;
     final double basePrice = courseDetails.basePrice ?? 0;
     const int discountedScore = 0;
     final String currency = (courseDetails.currency ?? '').trim();
+    
+    // Generate API-compatible courseKey format: "programId::index"
+    final String apiCourseKey = _generateApiCourseKey(
+      programId: courseDetails.programId,
+      index: courseIndex,
+    );
+
     final Map<String, dynamic> selectedCourse = <String, dynamic>{
-      'key': courseKey,
+      'key': apiCourseKey,
       'name': courseDetails.name,
       'track': courseDetails.track,
       'college': collegeName,
-      'educationInstitute': courseDetails.educationInstitute ?? collegeName,
+      'educationInstitute': collegeName,
       'totalSemesters': courseDetails.totalSemesters,
       'applicationFee': applicationFee,
-      'basePrice': basePrice,
+      'basePrice': basePrice.toInt().toString(),
       'discountedPrice': basePrice,
       'discountedScore': discountedScore,
       'currency': currency,
@@ -1175,7 +1229,7 @@ class _CollegeAccordionState extends State<_CollegeAccordion> {
     final Map<String, dynamic> payload = <String, dynamic>{
       'universityId': adminUniversity.id,
       'programId': courseDetails.programId,
-      'selectedCourseKeys': <String>[courseKey],
+      'selectedCourseKeys': <String>[apiCourseKey],
       'selectedCollege': collegeName,
       'selectedCourses': <Map<String, dynamic>>[selectedCourse],
       'selectedApplicationFeeTotal': applicationFee,
@@ -1203,12 +1257,26 @@ class _CollegeAccordionState extends State<_CollegeAccordion> {
     required bool isSmallMobile,
     required double tableWidth,
   }) {
-    final String courseKey = [
-      academicProgram.academicname ?? '',
-      collegeName,
-      details.programId ?? details.programName ?? '',
-      details.name ?? '',
-    ].map((e) => e.trim()).join('-');
+    final String academicName = academicProgram.academicname ?? '';
+    final String programId = (details.programId ?? '').trim();
+    final String courseName = (details.name ?? '').trim();
+
+    final String courseKey =
+        _UniversityDetailScreenState._buildCourseKeyStatic(
+      academicName: academicName,
+      collegeName: collegeName,
+      programId: programId,
+      courseName: courseName,
+    );
+
+    if (programId.isNotEmpty && courseName.isNotEmpty) {
+      debugPrint('===== COURSE MATCH =====');
+      debugPrint('Course: $courseName');
+      debugPrint('Program: $programId');
+      debugPrint('Key: $courseKey');
+      debugPrint('Booked: $isBooked');
+      debugPrint('========================');
+    }
 
     return InkWell(
       onTap: onTap,
@@ -1343,6 +1411,7 @@ class _CollegeAccordionState extends State<_CollegeAccordion> {
                                         collegeName: collegeName,
                                         courseDetails: details,
                                         courseKey: courseKey,
+                                        courseIndex: index,
                                       ),
                                     ],
                                   ),
