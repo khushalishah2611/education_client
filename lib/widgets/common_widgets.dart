@@ -24,32 +24,7 @@ class GradientTranslation extends GradientTransform {
 
 enum AppSnackBarType { success, error }
 
-void showAppSnackBar(
-  BuildContext context, {
-  required String message,
-  AppSnackBarType type = AppSnackBarType.success,
-}) {
-  try {
-    final messenger = ScaffoldMessenger.of(context);
-    messenger
-      ..hideCurrentSnackBar()
-      ..showSnackBar(
-        SnackBar(
-          content: Text(message),
-          backgroundColor: type == AppSnackBarType.success
-              ? const Color(0xFF2E7D32)
-              : Colors.red.shade700,
-          behavior: SnackBarBehavior.floating,
-        ),
-      );
-  } catch (e) {
-    // Fallback to global SnackBar service if context is not available
-    snackBarService.show(
-      message: message,
-      isError: type == AppSnackBarType.error,
-    );
-  }
-}
+
 
 class AppPageEntrance extends StatefulWidget {
   const AppPageEntrance({
