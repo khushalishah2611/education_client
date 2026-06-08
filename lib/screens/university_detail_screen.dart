@@ -9,6 +9,7 @@ import 'package:education/models/master_option.dart';
 import 'package:education/services/application_api_service.dart';
 import 'package:flutter/material.dart';
 import '../core/app_theme.dart';
+import '../core/responsive_helper.dart';
 import '../widgets/common_widgets.dart';
 import '../widgets/flow_widgets.dart';
 import 'course_detail_screen.dart';
@@ -470,15 +471,9 @@ class _UniversityDetailScreenState extends State<UniversityDetailScreen>
 
   @override
   Widget build(BuildContext context) {
-    final double screenWidth = MediaQuery.sizeOf(context).width;
-    final bool isSmallMobile = screenWidth <= 360;
-    final bool isMediumMobile = screenWidth > 360 && screenWidth <= 420;
-    final double headerHeight = isSmallMobile
-        ? 220
-        : isMediumMobile
-            ? 245
-            : 280;
-    final double topGap = isSmallMobile ? 52 : 60;
+    final bool isSmallMobile = context.isSmallMobile;
+    final double bannerHeight = context.responsiveUniversityBannerHeight;
+    final double topGap = context.responsiveUniversityDetailTopGap;
     final double sectionPadding = isSmallMobile ? 14 : 16;
 
     return buildCubitView(
@@ -497,7 +492,7 @@ class _UniversityDetailScreenState extends State<UniversityDetailScreen>
                         bottom: Radius.circular(20),
                       ),
                       child: SizedBox(
-                        height: headerHeight,
+                        height: bannerHeight,
                         width: double.infinity,
                         child: Image.network(
                           ImageUrlHelper.resolveUploadUrl(data.coverImagePath),

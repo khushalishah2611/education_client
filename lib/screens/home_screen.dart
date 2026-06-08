@@ -59,7 +59,7 @@ class _HomeScreenState extends State<HomeScreen> {
     _refreshUnreadNotifications();
     _notificationTimer = Timer.periodic(
       const Duration(seconds: 20),
-      (_) => _refreshUnreadNotifications(),
+          (_) => _refreshUnreadNotifications(),
     );
   }
 
@@ -154,7 +154,6 @@ class _HomeScreenState extends State<HomeScreen> {
     final double horizontalPadding = context.responsiveHorizontalPadding;
     final int gridColumns = context.responsiveGridColumns;
     final double gridAspectRatio = context.isSmallMobile ? 0.92 : 0.8;
-
     return AppCubitBuilder<HomeController, int>(
       cubit: _controller,
       builder: (context, _) {
@@ -172,187 +171,26 @@ class _HomeScreenState extends State<HomeScreen> {
                   child: Column(
                     children: [
                       if (_activeTab == 0) ...[
-                        SizedBox(
-                          height: MediaQuery.of(context).size.height * 0.50,
-                          child: Stack(
-                            children: [
-                              Image.asset(
-                                'assets/images/img.png',
-                                width: double.infinity,
-                                height: double.infinity,
-                                fit: BoxFit.cover,
-                              ),
-                              Positioned(
-                                top: MediaQuery.of(context).padding.top,
-                                left: horizontalPadding,
-                                right: horizontalPadding,
-                                child: Row(
-                                  children: [
-                                    _CircleIconButton(
-                                      icon: Icons.menu_rounded,
-                                      onTap: () => _scaffoldKey.currentState
-                                          ?.openDrawer(),
-                                    ),
-                                    const Spacer(),
-                                    const AppLogo(compact: true, center: true),
-                                    const Spacer(),
-                                    InkWell(
-                                      borderRadius: BorderRadius.circular(20),
-                                      onTap: () {
-                                        Navigator.of(context).push(
-                                          MaterialPageRoute(
-                                            builder: (_) =>
-                                                const NotificationsScreen(),
-                                          ),
-                                        );
-                                      },
-                                      child: ValueListenableBuilder<int>(
-                                        valueListenable: NotificationSyncService
-                                            .instance.unreadCount,
-                                        builder: (_, unread, __) {
-                                          return Stack(
-                                            clipBehavior: Clip.none,
-                                            children: [
-                                              const Icon(
-                                                Icons
-                                                    .notifications_none_rounded,
-                                                size: 26,
-                                              ),
-                                              if (unread > 0)
-                                                Positioned(
-                                                  right: 2,
-                                                  top: 2,
-                                                  child: Container(
-                                                    width: 8,
-                                                    height: 8,
-                                                    decoration: BoxDecoration(
-                                                      color: Colors.red,
-                                                      borderRadius:
-                                                          BorderRadius.circular(
-                                                        10,
-                                                      ),
-                                                    ),
-                                                  ),
-                                                ),
-                                            ],
-                                          );
-                                        },
-                                      ),
-                                    ),
-                                  ],
-                                ),
-                              ),
-                              SizedBox(
-                                height: 10,
-                              ),
-                              Positioned(
-                                top: MediaQuery.of(context).size.height * 0.12,
-                                left: horizontalPadding,
-                                right: horizontalPadding,
-                                child: Column(
-                                  mainAxisSize: MainAxisSize.min,
-                                  children: [
-                                    /// Country
-                                    InkWell(
-                                      onTap: _openCountryDialog,
-                                      child: Container(
-                                        height: 44,
-                                        padding: const EdgeInsets.symmetric(
-                                          horizontal: 14,
-                                        ),
-                                        decoration: BoxDecoration(
-                                          color: Colors.white,
-                                          borderRadius:
-                                              BorderRadius.circular(6),
-                                          border: Border.all(
-                                            color: Color(0xFFE4B88B),
-                                          ),
-                                        ),
-                                        child: Row(
-                                          children: [
-                                            Expanded(
-                                              child: Text(
-                                                _localizedSelectedCountryLabel(
-                                                      context,
-                                                    ) ??
-                                                    context.l10n
-                                                        .text('selectCountry'),
-                                                overflow: TextOverflow.ellipsis,
-                                              ),
-                                            ),
-                                            const Icon(
-                                              Icons.keyboard_arrow_down_rounded,
-                                            ),
-                                          ],
-                                        ),
-                                      ),
-                                    ),
-
-                                    const SizedBox(height: 12),
-
-                                    /// Advance Search
-                                    InkWell(
-                                      onTap: _openAdvanceSearchDialog,
-                                      child: Container(
-                                        height: 44,
-                                        alignment: Alignment.center,
-                                        decoration: BoxDecoration(
-                                          borderRadius:
-                                              BorderRadius.circular(6),
-                                          border: Border.all(
-                                            color: Color(0xFFE4B88B),
-                                          ),
-                                          color: Colors.white,
-                                        ),
-                                        child: Row(
-                                          mainAxisAlignment:
-                                              MainAxisAlignment.center,
-                                          children: [
-                                            const Icon(
-                                              Icons.tune_rounded,
-                                              color: AppColors.accent,
-                                            ),
-                                            const SizedBox(width: 8),
-                                            Text(
-                                              context.l10n
-                                                  .text('advanceSearch'),
-                                              style: TextStyle(
-                                                color: AppColors.accent,
-                                              ),
-                                            ),
-                                          ],
-                                        ),
-                                      ),
-                                    ),
-
-                                    const SizedBox(height: 16),
-
-                                    _DiscoverBanner(
-                                      banners: _controller.banners,
-                                      isLoading: _controller.isLoadingBanners,
-                                      pageController: _bannerPageController,
-                                      onPageChanged: (index) {
-                                        if (!mounted) return;
-                                        _activeBannerIndex = index;
-                                        _controller.refreshView();
-                                      },
-                                    ),
-
-                                    const SizedBox(height: 8),
-
-                                    _BannerIndicator(
-                                      count: _controller.banners.isEmpty
-                                          ? 1
-                                          : _controller.banners.length,
-                                      activeIndex: _activeBannerIndex,
-                                    ),
-                                  ],
-                                ),
-                              ),
-                            ],
-                          ),
+                        _HomeSearchHeader(
+                          scaffoldKey: _scaffoldKey,
+                          horizontalPadding: horizontalPadding,
+                          selectedCountryLabel:
+                              _localizedSelectedCountryLabel(context),
+                          onOpenCountryDialog: _openCountryDialog,
+                          onOpenAdvanceSearchDialog: _openAdvanceSearchDialog,
+                          banners: _controller.banners,
+                          isLoadingBanners: _controller.isLoadingBanners,
+                          bannerPageController: _bannerPageController,
+                          activeBannerIndex: _activeBannerIndex,
+                          onBannerPageChanged: (index) {
+                            if (!mounted) return;
+                            _activeBannerIndex = index;
+                            _controller.refreshView();
+                          },
                         ),
-                        SizedBox(height: 10),
+                        SizedBox(
+                          height: context.isVeryShortScreen ? 6 : 10,
+                        ),
                         Expanded(
                           child: RefreshIndicator(
                             onRefresh: _refreshHomeData,
@@ -399,103 +237,103 @@ class _HomeScreenState extends State<HomeScreen> {
                                     Expanded(
                                       child: context.isSmallMobile
                                           ? ListView.separated(
-                                              itemCount: _controller
-                                                      .isLoadingUniversities
-                                                  ? 4
-                                                  : _controller
-                                                      .universities.length,
-                                              separatorBuilder: (_, __) =>
-                                                  const SizedBox(height: 8),
-                                              itemBuilder: (context, index) {
-                                                if (_controller
-                                                    .isLoadingUniversities) {
-                                                  return const _UniversityCardShimmer();
-                                                }
-                                                final item = _controller
-                                                    .universities[index];
-                                                return _UniversityCard(
-                                                  data: item,
-                                                  onTap: () =>
-                                                      Navigator.of(context)
-                                                          .push(
-                                                    MaterialPageRoute(
-                                                      builder: (_) =>
-                                                          UniversityDetailScreen(
-                                                        data: item,
-                                                        selectedAcademic:
-                                                            _controller
-                                                                .selectedAcademic,
-                                                        selectedTrack:
-                                                            _controller
-                                                                .selectedTrack,
-                                                        selectedResult:
-                                                            _controller
-                                                                .resultController
-                                                                .text,
-                                                        academicOptions:
-                                                            _controller
-                                                                .academicOptions,
-                                                        trackOptions:
-                                                            _controller
-                                                                .trackOptions,
-                                                      ),
-                                                    ),
+                                        itemCount: _controller
+                                            .isLoadingUniversities
+                                            ? 4
+                                            : _controller
+                                            .universities.length,
+                                        separatorBuilder: (_, __) =>
+                                        const SizedBox(height: 8),
+                                        itemBuilder: (context, index) {
+                                          if (_controller
+                                              .isLoadingUniversities) {
+                                            return const _UniversityCardShimmer();
+                                          }
+                                          final item = _controller
+                                              .universities[index];
+                                          return _UniversityCard(
+                                            data: item,
+                                            onTap: () =>
+                                                Navigator.of(context)
+                                                    .push(
+                                                  MaterialPageRoute(
+                                                    builder: (_) =>
+                                                        UniversityDetailScreen(
+                                                          data: item,
+                                                          selectedAcademic:
+                                                          _controller
+                                                              .selectedAcademic,
+                                                          selectedTrack:
+                                                          _controller
+                                                              .selectedTrack,
+                                                          selectedResult:
+                                                          _controller
+                                                              .resultController
+                                                              .text,
+                                                          academicOptions:
+                                                          _controller
+                                                              .academicOptions,
+                                                          trackOptions:
+                                                          _controller
+                                                              .trackOptions,
+                                                        ),
                                                   ),
-                                                );
-                                              },
-                                            )
+                                                ),
+                                          );
+                                        },
+                                      )
                                           : GridView.builder(
-                                              itemCount: _controller
-                                                      .isLoadingUniversities
-                                                  ? 4
-                                                  : _controller
-                                                      .universities.length,
-                                              gridDelegate:
-                                                  SliverGridDelegateWithFixedCrossAxisCount(
-                                                crossAxisCount: gridColumns,
-                                                mainAxisSpacing: 8,
-                                                crossAxisSpacing: 8,
-                                                childAspectRatio:
-                                                    gridAspectRatio,
-                                              ),
-                                              itemBuilder: (context, index) {
-                                                if (_controller
-                                                    .isLoadingUniversities) {
-                                                  return const _UniversityCardShimmer();
-                                                }
-                                                final item = _controller
-                                                    .universities[index];
-                                                return _UniversityCard(
-                                                  data: item,
-                                                  onTap: () =>
-                                                      Navigator.of(context)
-                                                          .push(
-                                                    MaterialPageRoute(
-                                                      builder: (_) =>
-                                                          UniversityDetailScreen(
-                                                        data: item,
-                                                        selectedAcademic:
-                                                            _controller
-                                                                .selectedAcademic,
-                                                        selectedTrack:
-                                                            _controller
-                                                                .selectedTrack,
-                                                        selectedResult:
-                                                            _controller
-                                                                .resultController
-                                                                .text,
-                                                        academicOptions:
-                                                            _controller
-                                                                .academicOptions,
-                                                        trackOptions:
-                                                            _controller
-                                                                .trackOptions,
-                                                      ),
-                                                    ),
+                                        itemCount: _controller
+                                            .isLoadingUniversities
+                                            ? 4
+                                            : _controller
+                                            .universities.length,
+                                        gridDelegate:
+                                        SliverGridDelegateWithFixedCrossAxisCount(
+                                          crossAxisCount: gridColumns,
+                                          mainAxisSpacing: 8,
+                                          crossAxisSpacing: 8,
+                                          childAspectRatio:
+                                          gridAspectRatio,
+                                        ),
+                                        itemBuilder: (context, index) {
+                                          if (_controller
+                                              .isLoadingUniversities) {
+                                            return const _UniversityCardShimmer();
+                                          }
+                                          final item = _controller
+                                              .universities[index];
+                                          return _UniversityCard(
+                                            data: item,
+                                            onTap: () =>
+                                                Navigator.of(context)
+                                                    .push(
+                                                  MaterialPageRoute(
+                                                    builder: (_) =>
+                                                        UniversityDetailScreen(
+                                                          data: item,
+                                                          selectedAcademic:
+                                                          _controller
+                                                              .selectedAcademic,
+                                                          selectedTrack:
+                                                          _controller
+                                                              .selectedTrack,
+                                                          selectedResult:
+                                                          _controller
+                                                              .resultController
+                                                              .text,
+                                                          academicOptions:
+                                                          _controller
+                                                              .academicOptions,
+                                                          trackOptions:
+                                                          _controller
+                                                              .trackOptions,
+                                                        ),
                                                   ),
-                                                );
-                                              },
-                                            ),
+                                                ),
+                                          );
+                                        },
+                                      ),
                                     ),
                                 ],
                               ),
@@ -508,14 +346,14 @@ class _HomeScreenState extends State<HomeScreen> {
                         // ),
                         Expanded(
                             child: Center(
-                          child: Text(context.l10n.text('ComingSoon')),
-                        ))
+                              child: Text(context.l10n.text('ComingSoon')),
+                            ))
                       ] else if (_activeTab == 2) ...[
                         // Expanded(child: UploadedDocumentsScreen(activeTab: false)),
                         Expanded(
                             child: Center(
-                          child: Text(context.l10n.text('ComingSoon')),
-                        ))
+                              child: Text(context.l10n.text('ComingSoon')),
+                            ))
                       ] else ...[
                         Expanded(child: LatestUpdatesScreen(activeTab: false)),
                       ],
@@ -547,15 +385,230 @@ String _localizedCountryName(BuildContext context, CountryOption country) {
 }
 
 String _localizedUniversityText(
-  BuildContext context,
-  String? englishValue,
-  String? arabicValue,
-) {
+    BuildContext context,
+    String? englishValue,
+    String? arabicValue,
+    ) {
   final localized = context.l10n.isArabic ? arabicValue : englishValue;
   if ((localized ?? '').trim().isNotEmpty) return localized!.trim();
 
   final fallback = context.l10n.isArabic ? englishValue : arabicValue;
   return (fallback ?? '').trim();
+}
+
+class _HomeSearchHeader extends StatelessWidget {
+  const _HomeSearchHeader({
+    required this.scaffoldKey,
+    required this.horizontalPadding,
+    required this.selectedCountryLabel,
+    required this.onOpenCountryDialog,
+    required this.onOpenAdvanceSearchDialog,
+    required this.banners,
+    required this.isLoadingBanners,
+    required this.bannerPageController,
+    required this.activeBannerIndex,
+    required this.onBannerPageChanged,
+  });
+
+  final GlobalKey<ScaffoldState> scaffoldKey;
+  final double horizontalPadding;
+  final String? selectedCountryLabel;
+  final VoidCallback onOpenCountryDialog;
+  final VoidCallback onOpenAdvanceSearchDialog;
+  final List<BannerItem> banners;
+  final bool isLoadingBanners;
+  final PageController bannerPageController;
+  final int activeBannerIndex;
+  final ValueChanged<int> onBannerPageChanged;
+
+  @override
+  Widget build(BuildContext context) {
+    final double headerHeight = context.responsiveHomeHeaderHeight;
+    final double searchFieldHeight = context.responsiveHomeSearchFieldHeight;
+    final double sectionSpacing = context.responsiveHomeSectionSpacing;
+    final double bannerHeight = context.responsiveDiscoverBannerHeight;
+    final double searchFontSize = context.responsiveHomeSearchFontSize;
+    final double toolbarHeight = context.responsiveHomeToolbarHeight;
+    final double indicatorGap = context.responsiveHomeBannerIndicatorGap;
+
+    return SizedBox(
+      height: headerHeight,
+      child: Stack(
+        fit: StackFit.expand,
+        children: [
+          Image.asset(
+            'assets/images/img.png',
+            width: double.infinity,
+            height: double.infinity,
+            fit: BoxFit.cover,
+          ),
+          Padding(
+            padding: EdgeInsets.symmetric(horizontal: horizontalPadding),
+            child: Column(
+              children: [
+                SizedBox(
+                  height: toolbarHeight,
+                  child: Row(
+                    children: [
+                      _CircleIconButton(
+                        icon: Icons.menu_rounded,
+                        onTap: () => scaffoldKey.currentState?.openDrawer(),
+                      ),
+                      const Spacer(),
+                      const AppLogo(compact: true, center: true),
+                      const Spacer(),
+                      InkWell(
+                        borderRadius: BorderRadius.circular(20),
+                        onTap: () {
+                          Navigator.of(context).push(
+                            MaterialPageRoute(
+                              builder: (_) => const NotificationsScreen(),
+                            ),
+                          );
+                        },
+                        child: ValueListenableBuilder<int>(
+                          valueListenable:
+                              NotificationSyncService.instance.unreadCount,
+                          builder: (_, unread, __) {
+                            return Stack(
+                              clipBehavior: Clip.none,
+                              children: [
+                                Icon(
+                                  Icons.notifications_none_rounded,
+                                  size: context.responsiveHomeNotificationIconSize,
+                                ),
+                                if (unread > 0)
+                                  Positioned(
+                                    right: 2,
+                                    top: 2,
+                                    child: Container(
+                                      width: 8,
+                                      height: 8,
+                                      decoration: BoxDecoration(
+                                        color: Colors.red,
+                                        borderRadius: BorderRadius.circular(10),
+                                      ),
+                                    ),
+                                  ),
+                              ],
+                            );
+                          },
+                        ),
+                      ),
+                    ],
+                  ),
+                ),
+                SizedBox(height: sectionSpacing),
+                _HomeSearchField(
+                  height: searchFieldHeight,
+                  fontSize: searchFontSize,
+                  label: selectedCountryLabel ??
+                      context.l10n.text('selectCountry'),
+                  trailing: const Icon(Icons.keyboard_arrow_down_rounded),
+                  onTap: onOpenCountryDialog,
+                ),
+                SizedBox(height: sectionSpacing),
+                _HomeSearchField(
+                  height: searchFieldHeight,
+                  fontSize: searchFontSize,
+                  label: context.l10n.text('advanceSearch'),
+                  leading: const Icon(
+                    Icons.tune_rounded,
+                    color: AppColors.accent,
+                  ),
+                  labelColor: AppColors.accent,
+                  centerLabel: true,
+                  onTap: onOpenAdvanceSearchDialog,
+                ),
+                SizedBox(height: sectionSpacing),
+                _DiscoverBanner(
+                  banners: banners,
+                  isLoading: isLoadingBanners,
+                  pageController: bannerPageController,
+                  height: bannerHeight,
+                  onPageChanged: onBannerPageChanged,
+                ),
+                SizedBox(height: indicatorGap),
+                _BannerIndicator(
+                  count: banners.isEmpty ? 1 : banners.length,
+                  activeIndex: activeBannerIndex,
+                ),
+              ],
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+}
+
+class _HomeSearchField extends StatelessWidget {
+  const _HomeSearchField({
+    required this.height,
+    required this.fontSize,
+    required this.label,
+    required this.onTap,
+    this.leading,
+    this.trailing,
+    this.labelColor,
+    this.centerLabel = false,
+  });
+
+  final double height;
+  final double fontSize;
+  final String label;
+  final VoidCallback onTap;
+  final Widget? leading;
+  final Widget? trailing;
+  final Color? labelColor;
+  final bool centerLabel;
+
+  @override
+  Widget build(BuildContext context) {
+    return InkWell(
+      onTap: onTap,
+      child: Container(
+        height: height,
+        padding: const EdgeInsets.symmetric(horizontal: 14),
+        alignment: centerLabel ? Alignment.center : null,
+        decoration: BoxDecoration(
+          color: Colors.white,
+          borderRadius: BorderRadius.circular(6),
+          border: Border.all(color: const Color(0xFFE4B88B)),
+        ),
+        child: Row(
+          mainAxisAlignment:
+              centerLabel ? MainAxisAlignment.center : MainAxisAlignment.start,
+          children: [
+            if (leading != null) ...[
+              leading!,
+              const SizedBox(width: 8),
+            ],
+            if (centerLabel)
+              Text(
+                label,
+                style: TextStyle(
+                  color: labelColor ?? AppColors.text,
+                  fontSize: fontSize,
+                ),
+              )
+            else
+              Expanded(
+                child: Text(
+                  label,
+                  overflow: TextOverflow.ellipsis,
+                  style: TextStyle(
+                    color: labelColor ?? AppColors.text,
+                    fontSize: fontSize,
+                  ),
+                ),
+              ),
+            if (trailing != null) trailing!,
+          ],
+        ),
+      ),
+    );
+  }
 }
 
 class _CircleIconButton extends StatelessWidget {
@@ -566,17 +619,20 @@ class _CircleIconButton extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final double size = context.responsiveHomeCircleButtonSize;
+    final double iconSize = context.responsiveHomeToolbarIconSize;
+
     return InkWell(
       onTap: onTap,
-      borderRadius: BorderRadius.circular(24),
+      borderRadius: BorderRadius.circular(size / 2),
       child: Container(
-        width: 40,
-        height: 40,
+        width: size,
+        height: size,
         decoration: const BoxDecoration(
           color: Colors.white,
           shape: BoxShape.circle,
         ),
-        child: Icon(icon, color: AppColors.text, size: 26),
+        child: Icon(icon, color: AppColors.text, size: iconSize),
       ),
     );
   }
@@ -588,23 +644,23 @@ class _DiscoverBanner extends StatelessWidget {
     required this.isLoading,
     required this.pageController,
     required this.onPageChanged,
+    required this.height,
   });
 
   final List<BannerItem> banners;
   final bool isLoading;
   final PageController pageController;
   final ValueChanged<int> onPageChanged;
+  final double height;
 
   @override
   Widget build(BuildContext context) {
-    if (isLoading) {
-      return const _BannerShimmer();
+    if (isLoading || banners.isEmpty) {
+      return _BannerShimmer(height: height);
     }
-    if (banners.isEmpty) {
-      return const _BannerShimmer();
-    }
+
     return Container(
-      height: 160,
+      height: height,
       width: double.infinity,
       decoration: BoxDecoration(borderRadius: BorderRadius.circular(14)),
       child: ClipRRect(
@@ -615,35 +671,14 @@ class _DiscoverBanner extends StatelessWidget {
           onPageChanged: onPageChanged,
           itemBuilder: (_, index) {
             final banner = banners[index];
-            return Stack(
-              fit: StackFit.expand,
-              children: [
-                Image.network(
-                  banner.imageUrl,
-                  fit: BoxFit.fill,
-                  errorBuilder: (_, __, ___) => const _BannerShimmer(),
-                  loadingBuilder: (_, child, progress) {
-                    if (progress == null) return child;
-                    return const _BannerShimmer();
-                  },
-                ),
-                if (banner.title.isNotEmpty)
-                  Positioned(
-                    left: 10,
-                    right: 10,
-                    bottom: 10,
-                    child: Text(
-                      banner.title,
-                      maxLines: 1,
-                      overflow: TextOverflow.ellipsis,
-                      style: const TextStyle(
-                        color: Colors.white,
-                        fontWeight: FontWeight.w700,
-                        shadows: [Shadow(color: Colors.black54, blurRadius: 4)],
-                      ),
-                    ),
-                  ),
-              ],
+            return Image.network(
+              banner.imageUrl,
+              fit: BoxFit.cover,
+              errorBuilder: (_, __, ___) => _BannerShimmer(height: height),
+              loadingBuilder: (_, child, progress) {
+                if (progress == null) return child;
+                return _BannerShimmer(height: height);
+              },
             );
           },
         ),
@@ -653,21 +688,26 @@ class _DiscoverBanner extends StatelessWidget {
 }
 
 class _BannerShimmer extends StatelessWidget {
-  const _BannerShimmer();
+  const _BannerShimmer({this.height});
+
+  final double? height;
 
   @override
   Widget build(BuildContext context) {
+    final double bannerHeight =
+        height ?? context.responsiveDiscoverBannerHeight;
+
     return Container(
-      height: 120,
+      height: bannerHeight,
       padding: const EdgeInsets.all(8),
       decoration: BoxDecoration(
         color: Colors.white,
         borderRadius: BorderRadius.circular(12),
         border: Border.all(color: const Color(0xFFE8E3DB)),
       ),
-      child: const Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [_ShimmerBlock(height: 100, borderRadius: 8)],
+      child: _ShimmerBlock(
+        height: bannerHeight - 16,
+        borderRadius: 8,
       ),
     );
   }
@@ -740,9 +780,9 @@ class _CountrySelectionDialogState extends State<_CountrySelectionDialog>
       _filteredCountries = widget.countries
           .where(
             (country) =>
-                country.nameEn.toLowerCase().contains(normalized) ||
-                country.nameAr.toLowerCase().contains(normalized),
-          )
+        country.nameEn.toLowerCase().contains(normalized) ||
+            country.nameAr.toLowerCase().contains(normalized),
+      )
           .toList(growable: false);
     });
   }
@@ -751,7 +791,7 @@ class _CountrySelectionDialogState extends State<_CountrySelectionDialog>
   Widget build(BuildContext context) {
     final bool isSmall = context.isSmallMobile;
     return buildCubitView(
-      (context) => SafeArea(
+          (context) => SafeArea(
         child: Container(
           decoration: const BoxDecoration(
             color: Colors.white,
@@ -812,41 +852,41 @@ class _CountrySelectionDialogState extends State<_CountrySelectionDialog>
                   constraints: const BoxConstraints(maxHeight: 320),
                   child: _filteredCountries.isEmpty
                       ? Center(
-                          child: Padding(
-                            padding: const EdgeInsets.all(16),
-                            child: Text(context.l10n.text('noCountriesFound')),
-                          ),
-                        )
+                    child: Padding(
+                      padding: const EdgeInsets.all(16),
+                      child: Text(context.l10n.text('noCountriesFound')),
+                    ),
+                  )
                       : ListView.separated(
-                          shrinkWrap: true,
-                          itemCount: _filteredCountries.length,
-                          separatorBuilder: (_, __) => const Divider(height: 1),
-                          itemBuilder: (_, index) {
-                            final country = _filteredCountries[index];
+                    shrinkWrap: true,
+                    itemCount: _filteredCountries.length,
+                    separatorBuilder: (_, __) => const Divider(height: 1),
+                    itemBuilder: (_, index) {
+                      final country = _filteredCountries[index];
 
-                            return Material(
-                              color: Colors.transparent,
-                              child: ListTile(
-                                dense: true,
-                                contentPadding: EdgeInsets.zero,
-                                // leading: _CountryFlag(country: country),
-                                title: Text(
-                                  country.displayName(
-                                    isArabic: context.l10n.isArabic,
-                                  ),
-                                  style: TextStyle(
-                                    fontWeight: widget.selected == country.key
-                                        ? FontWeight.w700
-                                        : FontWeight.w500,
-                                  ),
-                                ),
-                                onTap: () {
-                                  Navigator.of(context).pop(country);
-                                },
-                              ),
-                            );
+                      return Material(
+                        color: Colors.transparent,
+                        child: ListTile(
+                          dense: true,
+                          contentPadding: EdgeInsets.zero,
+                          // leading: _CountryFlag(country: country),
+                          title: Text(
+                            country.displayName(
+                              isArabic: context.l10n.isArabic,
+                            ),
+                            style: TextStyle(
+                              fontWeight: widget.selected == country.key
+                                  ? FontWeight.w700
+                                  : FontWeight.w500,
+                            ),
+                          ),
+                          onTap: () {
+                            Navigator.of(context).pop(country);
                           },
                         ),
+                      );
+                    },
+                  ),
                 ),
               ],
             ),
@@ -973,8 +1013,8 @@ class _AdvanceSearchDialogState extends State<_AdvanceSearchDialog>
                   options.isEmpty
                       ? context.l10n.text('noOptionsFound')
                       : context.l10n
-                          .text('selectOption')
-                          .replaceAll('{title}', title),
+                      .text('selectOption')
+                      .replaceAll('{title}', title),
                   style: const TextStyle(
                     color: Color(0xFF8A8A8A),
                     fontSize: 14,
@@ -1046,23 +1086,23 @@ class _AdvanceSearchDialogState extends State<_AdvanceSearchDialog>
             onTap: !enabled || widget.countryOptions.isEmpty
                 ? null
                 : () async {
-                    final selected = await showModalBottomSheet<CountryOption>(
-                      context: context,
-                      isScrollControlled: true,
-                      useSafeArea: true,
-                      backgroundColor: Colors.white,
-                      builder: (_) => _CountrySelectionDialog(
-                        countries: widget.countryOptions,
-                        selected: _selectedCountry,
-                      ),
-                    );
-                    if (selected == null || !context.mounted) return;
-                    updateView(() {
-                      _selectedCountry = selected.nameEn;
-                      _filteredCountryOptions = widget.countryOptions;
-                    });
-                    onChanged(selected.nameEn);
-                  },
+              final selected = await showModalBottomSheet<CountryOption>(
+                context: context,
+                isScrollControlled: true,
+                useSafeArea: true,
+                backgroundColor: Colors.white,
+                builder: (_) => _CountrySelectionDialog(
+                  countries: widget.countryOptions,
+                  selected: _selectedCountry,
+                ),
+              );
+              if (selected == null || !context.mounted) return;
+              updateView(() {
+                _selectedCountry = selected.nameEn;
+                _filteredCountryOptions = widget.countryOptions;
+              });
+              onChanged(selected.nameEn);
+            },
             child: Container(
               height: 45,
               padding: const EdgeInsets.symmetric(horizontal: 12),
@@ -1081,10 +1121,10 @@ class _AdvanceSearchDialogState extends State<_AdvanceSearchDialog>
                     child: Text(
                       displayValue.isEmpty
                           ? (options.isEmpty
-                              ? context.l10n.text('noOptionsFound')
-                              : context.l10n
-                                  .text('selectOption')
-                                  .replaceAll('{title}', title))
+                          ? context.l10n.text('noOptionsFound')
+                          : context.l10n
+                          .text('selectOption')
+                          .replaceAll('{title}', title))
                           : displayValue,
                       overflow: TextOverflow.ellipsis,
                       style: TextStyle(
@@ -1121,7 +1161,7 @@ class _AdvanceSearchDialogState extends State<_AdvanceSearchDialog>
     };
 
     return buildCubitView(
-      (context) => SafeArea(
+          (context) => SafeArea(
         child: Container(
           decoration: const BoxDecoration(
             color: Colors.white,
@@ -1175,9 +1215,9 @@ class _AdvanceSearchDialogState extends State<_AdvanceSearchDialog>
                   options: academicByKey.keys.toList(growable: false),
                   value: _selectedAcademic,
                   labelBuilder: (value) =>
-                      academicByKey[value]?.displayName(
-                        isArabic: context.l10n.isArabic,
-                      ) ??
+                  academicByKey[value]?.displayName(
+                    isArabic: context.l10n.isArabic,
+                  ) ??
                       value,
                   onChanged: (value) => updateView(() {
                     _selectedAcademic = value;
@@ -1192,13 +1232,13 @@ class _AdvanceSearchDialogState extends State<_AdvanceSearchDialog>
                   opacity: shouldDisableDetails ? 0.55 : 1,
                   child: dropdownTile(
                     title:
-                        context.l10n.text('secondarySchoolCertificateProgram'),
+                    context.l10n.text('secondarySchoolCertificateProgram'),
                     options: trackByKey.keys.toList(growable: false),
                     value: _selectedTrack,
                     labelBuilder: (value) =>
-                        trackByKey[value]?.displayName(
-                          isArabic: context.l10n.isArabic,
-                        ) ??
+                    trackByKey[value]?.displayName(
+                      isArabic: context.l10n.isArabic,
+                    ) ??
                         value,
                     onChanged: (value) =>
                         updateView(() => _selectedTrack = value),

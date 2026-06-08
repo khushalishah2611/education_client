@@ -93,67 +93,62 @@ class TopRoundedHeader extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final double screenWidth = MediaQuery.sizeOf(context).width;
-    final bool isSmallMobile = screenWidth <= 360;
-    final bool isMediumMobile = screenWidth > 360 && screenWidth <= 420;
-    final double headerHeight = isSmallMobile
-        ? 70
-        : isMediumMobile
-            ? 76
-            : 80;
-    final double leftPadding = isSmallMobile ? 12 : 16;
-    final double horizontalTitlePadding = isSmallMobile ? 42 : 50;
-    final double titleFontSize = isSmallMobile ? 16 : 18;
+    final double topInset = MediaQuery.paddingOf(context).top;
+    final double contentHeight = context.responsiveAppBarContentHeight;
+    final double sidePadding = context.responsiveHorizontalPadding;
+    final double backButtonSize = context.responsiveAppBarButtonSize;
+    final double titleFontSize = context.responsiveAppBarTitleSize;
+    final double backIconSize = context.isSmallMobile ? 16 : 18;
 
     return Container(
-      height: headerHeight,
       decoration: const BoxDecoration(
         color: Colors.white,
         borderRadius: BorderRadius.vertical(bottom: Radius.circular(22)),
       ),
-      child: SafeArea(
-        bottom: false,
-        child: Stack(
-          alignment: Alignment.center,
+      padding: EdgeInsets.only(
+        top: topInset,
+        left: sidePadding,
+        right: sidePadding,
+        bottom: 8,
+      ),
+      child: SizedBox(
+        height: contentHeight,
+        child: Row(
+          crossAxisAlignment: CrossAxisAlignment.center,
           children: [
-            /// BACK BUTTON (LEFT)
-            Align(
-              alignment: Alignment.centerLeft,
+            InkWell(
+              onTap: onBack ?? () => Navigator.of(context).pop(),
+              borderRadius: BorderRadius.circular(20),
+              child: Container(
+                width: backButtonSize,
+                height: backButtonSize,
+                decoration: const BoxDecoration(
+                  color: Color(0xFFF6F6F6),
+                  shape: BoxShape.circle,
+                ),
+                child: Icon(
+                  Icons.arrow_back_ios_new_rounded,
+                  size: backIconSize,
+                ),
+              ),
+            ),
+            Expanded(
               child: Padding(
-                padding: EdgeInsets.only(left: leftPadding),
-                child: InkWell(
-                  onTap: onBack ?? () => Navigator.of(context).pop(),
-                  borderRadius: BorderRadius.circular(20),
-                  child: Container(
-                    width: 34,
-                    height: 34,
-                    decoration: const BoxDecoration(
-                      color: Color(0xFFF6F6F6),
-                      shape: BoxShape.circle,
-                    ),
-                    child: const Icon(
-                      Icons.arrow_back_ios_new_rounded,
-                      size: 18,
-                    ),
+                padding: const EdgeInsets.symmetric(horizontal: 8),
+                child: Text(
+                  title,
+                  textAlign: TextAlign.center,
+                  maxLines: context.responsiveAppBarTitleMaxLines,
+                  overflow: TextOverflow.ellipsis,
+                  style: TextStyle(
+                    fontSize: titleFontSize,
+                    fontWeight: FontWeight.w700,
+                    height: 1.2,
                   ),
                 ),
               ),
             ),
-
-            /// TITLE (PERFECT CENTER)
-            Padding(
-              padding: EdgeInsets.symmetric(horizontal: horizontalTitlePadding),
-              child: Text(
-                title,
-                textAlign: TextAlign.center,
-                maxLines: 1,
-                overflow: TextOverflow.ellipsis,
-                style: const TextStyle(
-                  fontSize: 18,
-                  fontWeight: FontWeight.w700,
-                ).copyWith(fontSize: titleFontSize),
-              ),
-            ),
+            SizedBox(width: backButtonSize),
           ],
         ),
       ),
