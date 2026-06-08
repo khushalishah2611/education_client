@@ -1,5 +1,6 @@
 import 'dart:io';
 
+import 'package:education/core/api_config.dart';
 import 'package:education/core/app_localizations.dart';
 import 'package:education/core/bloc/app_cubit.dart';
 import 'package:education/core/student_session.dart';
@@ -139,9 +140,14 @@ class _ProfileBodyState extends State<ProfileBody>
 
       if (_countries.isNotEmpty) {
         _selectedCountry = _countries.first;
+      } else {
+        _selectedCountry = null;
       }
-    } catch (e) {
-      debugPrint(e.toString());
+    } catch (_) {
+      if (!mounted) return;
+      snackBarService.showError(
+        message: context.l10n.text('failedLoadLoginData'),
+      );
     } finally {
       if (mounted) {
         updateView(() {
@@ -892,6 +898,12 @@ class CountryDropdownField extends StatelessWidget {
     final bool hasError = (errorText ?? '').isNotEmpty;
     final Color borderColor =
         hasError ? Colors.red.shade700 : AppColors.border;
+    final CountryMaster? dropdownValue = selectedCountry == null
+        ? null
+        : countries.cast<CountryMaster?>().firstWhere(
+              (country) => country?.id == selectedCountry!.id,
+              orElse: () => null,
+            );
 
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
@@ -907,7 +919,7 @@ class CountryDropdownField extends StatelessWidget {
           child: DropdownButtonHideUnderline(
             child: DropdownButton<CountryMaster>(
               isExpanded: true,
-              value: selectedCountry,
+              value: dropdownValue,
               borderRadius: BorderRadius.circular(12),
               icon: const Icon(Icons.keyboard_arrow_down_rounded, size: 20),
               style: const TextStyle(
@@ -1050,7 +1062,7 @@ class ProfileAvatar extends StatelessWidget {
     final String url =
     (imagePath ?? '').startsWith('http')
         ? imagePath!
-        : 'https://arab.vedx.cloud${imagePath ?? ''}';
+        : '${ApiConfig.baseUrl}${imagePath ?? ''}';
 
     return Center(
       child: Stack(

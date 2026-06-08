@@ -80,12 +80,19 @@ extension ResponsiveHelper on BuildContext {
   }
 
   double get responsiveDiscoverBannerHeight {
-    if (isVeryShortScreen) return 110;
-    if (isShortScreen || isSmallMobile) return 125;
-    if (isMediumMobile) return 135;
-    return 150;
-  }
+    double height;
 
+    if (isVeryShortScreen) {
+      height = 145;
+    } else if (isShortScreen || isSmallMobile) {
+      height = 160;
+    } else if (isMediumMobile) {
+      height = 170;
+    } else {
+      height = 160;
+    }
+    return height;
+  }
   double get responsiveHomeSearchFieldHeight {
     if (isVeryShortScreen) return 38;
     if (isShortScreen || isSmallMobile) return 40;

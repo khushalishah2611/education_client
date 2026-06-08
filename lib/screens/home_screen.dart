@@ -673,7 +673,7 @@ class _DiscoverBanner extends StatelessWidget {
             final banner = banners[index];
             return Image.network(
               banner.imageUrl,
-              fit: BoxFit.cover,
+              fit: BoxFit.fill,
               errorBuilder: (_, __, ___) => _BannerShimmer(height: height),
               loadingBuilder: (_, child, progress) {
                 if (progress == null) return child;
