@@ -30,8 +30,12 @@ String resolvePaymentId(Map<String, dynamic>? payment) {
   return '';
 }
 
+PaymentReceiptData parsePaymentReceiptHtml(String receiptHtml) {
+  return PaymentReceiptData.parse(receiptHtml);
+}
+
 Future<Uint8List> buildPaymentReceiptPdf(String receiptHtml) async {
-  final _ReceiptHtmlData receipt = _ReceiptHtmlData.parse(receiptHtml);
+  final PaymentReceiptData receipt = PaymentReceiptData.parse(receiptHtml);
   final pw.Document document = pw.Document();
   final PdfColor primary = PdfColor.fromHex('#3f3a2a');
   final PdfColor muted = PdfColor.fromHex('#726a4b');
@@ -162,8 +166,8 @@ Future<Uint8List> buildPaymentReceiptPdf(String receiptHtml) async {
   return document.save();
 }
 
-class _ReceiptHtmlData {
-  const _ReceiptHtmlData({
+class PaymentReceiptData {
+  const PaymentReceiptData({
     required this.title,
     required this.generatedOn,
     required this.cards,
@@ -174,12 +178,12 @@ class _ReceiptHtmlData {
 
   final String title;
   final String generatedOn;
-  final List<_ReceiptInfoCard> cards;
+  final List<PaymentReceiptInfoCard> cards;
   final List<String> headers;
   final List<List<String>> rows;
   final String notes;
 
-  static _ReceiptHtmlData parse(String html) {
+  static PaymentReceiptData parse(String html) {
     final String normalized = html.replaceAll(RegExp(r'\s+'), ' ');
     final String title = _decodeHtml(_firstMatch(
       normalized,
@@ -201,11 +205,11 @@ class _ReceiptHtmlData {
       ),
     ));
 
-    final List<_ReceiptInfoCard> cards = RegExp(
+    final List<PaymentReceiptInfoCard> cards = RegExp(
       r'<div[^>]*class="label"[^>]*>(.*?)</div>\s*<div[^>]*class="value"[^>]*>(.*?)</div>',
       caseSensitive: false,
     ).allMatches(normalized).map((match) {
-      return _ReceiptInfoCard(
+      return PaymentReceiptInfoCard(
         label: _decodeHtml(match.group(1) ?? ''),
         value: _decodeHtml(match.group(2) ?? ''),
       );
@@ -235,7 +239,7 @@ class _ReceiptHtmlData {
       ),
     ));
 
-    return _ReceiptHtmlData(
+    return PaymentReceiptData(
       title: title,
       generatedOn: generatedOn,
       cards: cards,
@@ -275,8 +279,8 @@ class _ReceiptHtmlData {
   }
 }
 
-class _ReceiptInfoCard {
-  const _ReceiptInfoCard({required this.label, required this.value});
+class PaymentReceiptInfoCard {
+  const PaymentReceiptInfoCard({required this.label, required this.value});
 
   final String label;
   final String value;

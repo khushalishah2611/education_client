@@ -187,6 +187,7 @@
   "unableOpenDocument": "تعذر فتح المستند.",
   "failedOpenDocument": "فشل فتح المستند.",
   "noApplicationsAvailable": "لا توجد طلبات متاحة",
+  "noPaymentsAvailable": "لا توجد مدفوعات متاحة",
   "guardianName": "اسم ولي الأمر",
   "relationship": "صلة القرابة",
   "emailAddress": "البريد الإلكتروني",

@@ -1,8 +1,5 @@
-import 'dart:typed_data';
-
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
-import 'package:printing/printing.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
 import '../../core/app_localizations.dart';
@@ -11,6 +8,7 @@ import '../../core/bloc/app_cubit.dart';
 import '../../utils/payment_receipt_pdf.dart';
 import '../../services/snackbar_service.dart';
 import '../../services/application_api_service.dart';
+import 'payment_receipt_screen.dart';
 import 'side_menu_common.dart';
 
 class PaymentsScreen extends StatelessWidget {
@@ -143,11 +141,17 @@ class _PaymentsContentState extends State<PaymentsContent>
     try {
       final String receiptHtml = await _api.fetchPaymentReceiptHtml(
         paymentId: paymentId,
+        language: context.l10n.locale.languageCode,
       );
-      final Uint8List receiptPdf = await buildPaymentReceiptPdf(receiptHtml);
-      await Printing.sharePdf(
-        bytes: receiptPdf,
-        filename: 'payment_receipt_$paymentId.pdf',
+
+      if (!mounted) return;
+
+      await Navigator.of(context).push(
+        MaterialPageRoute<void>(
+          builder: (_) => PaymentReceiptScreen(
+            receiptHtml: receiptHtml,
+          ),
+        ),
       );
     } catch (e) {
       snackBarService.showError(
@@ -158,16 +162,18 @@ class _PaymentsContentState extends State<PaymentsContent>
     }
   }
 
-  String _formatDate(DateTime date) {
+  String _formatDate(DateTime date, String locale) {
     return DateFormat(
       'MMM dd, yyyy',
-    ).format(date);
+      locale,
+    ).format(date.toLocal());
   }
 
-  String _formatTime(DateTime date) {
+  String _formatTime(DateTime date, String locale) {
     return DateFormat(
       'hh:mm a',
-    ).format(date);
+      locale,
+    ).format(date.toLocal());
   }
 
   @override
@@ -195,76 +201,65 @@ class _PaymentsContentState extends State<PaymentsContent>
                     item['createdAt']?.toString() ?? '',
                   );
 
+                  final String locale = context.l10n.locale.languageCode;
+
                   final String date =
-                      createdAt == null ? '-' : _formatDate(createdAt);
+                      createdAt == null ? '-' : _formatDate(createdAt, locale);
 
                   final String time =
-                      createdAt == null ? '-' : _formatTime(createdAt);
+                      createdAt == null ? '-' : _formatTime(createdAt, locale);
 
                   final num amount = (item['application'] is Map)
-                      ? ((item['application']
-                                  ['selectedApplicationFeeTotal'] as num?) ??
-                              0)
+                      ? ((item['application']['selectedApplicationFeeTotal']
+                              as num?) ??
+                          0)
                       : ((item['amount'] as num?) ?? 0);
 
-                  return Container(
-                    padding: const EdgeInsets.symmetric(
-                      horizontal: 12,
-                      vertical: 12,
-                    ),
-                    decoration: BoxDecoration(
-                      color: Colors.white,
-                      borderRadius: BorderRadius.circular(10),
-                      border: Border.all(
-                        color: const Color(0xFFE6E0D8),
+                  return GestureDetector(
+                    onTap: _downloadingPaymentId != null
+                        ? null
+                        : () => _downloadReceipt(context, item),
+                    child: Container(
+                      padding: const EdgeInsets.symmetric(
+                        horizontal: 12,
+                        vertical: 12,
                       ),
-                    ),
-                    child: Column(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: [
-                        Row(
-                          mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                          crossAxisAlignment: CrossAxisAlignment.start,
-                          children: [
-                            Text(
-                              '$date  $time',
+                      decoration: BoxDecoration(
+                        color: Colors.white,
+                        borderRadius: BorderRadius.circular(10),
+                        border: Border.all(
+                          color: const Color(0xFFE6E0D8),
+                        ),
+                      ),
+                      child: Row(
+                        children: [
+                          Expanded(
+                            flex: 3,
+                            child: Text(
+                              '$date  •  $time',
+                              maxLines: 1,
+                              overflow: TextOverflow.ellipsis,
                               style: const TextStyle(
                                 fontSize: 14,
                                 fontWeight: FontWeight.w600,
                               ),
                             ),
-                            Text(
+                          ),
+                          Expanded(
+                            flex: 2,
+                            child: Text(
                               '${amount.toStringAsFixed(0)} '
                               '${context.l10n.text('omaniRial')}',
                               textAlign: TextAlign.center,
                               style: const TextStyle(
                                 color: AppColors.accent,
                                 fontWeight: FontWeight.w700,
-                                fontSize: 16,
-                              ),
-                            ),
-                          ],
-                        ),
-                        const SizedBox(height: 10),
-                        Align(
-                          alignment: Alignment.centerRight,
-                          child: TextButton.icon(
-                            onPressed: _downloadingPaymentId != null
-                                ? null
-                                : () => _downloadReceipt(context, item),
-                            icon: const Icon(
-                              Icons.receipt_long_outlined,
-                              size: 18,
-                            ),
-                            label: Text(
-                              context.l10n.text('downloadReceipt'),
-                              style: const TextStyle(
-                                fontWeight: FontWeight.w600,
+                                fontSize: 15,
                               ),
                             ),
                           ),
-                        ),
-                      ],
+                        ],
+                      ),
                     ),
                   );
                 },
@@ -387,9 +382,9 @@ class _PaymentsContentState extends State<PaymentsContent>
                 color: Colors.white,
               ),
               child: Text(
-                'No payments available',
+                context.l10n.text('noPaymentsAvailable'),
                 textAlign: TextAlign.center,
-                style: TextStyle(
+                style: const TextStyle(
                   color: Color(0xFF616161),
                   fontWeight: FontWeight.w600,
                   fontSize: 15,

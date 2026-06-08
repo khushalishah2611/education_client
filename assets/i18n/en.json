@@ -187,6 +187,7 @@
   "unableOpenDocument": "Unable to open document.",
   "failedOpenDocument": "Failed to open document.",
   "noApplicationsAvailable": "No applications available",
+  "noPaymentsAvailable": "No payments available",
   "guardianName": "Guardian Name",
   "relationship": "Relationship",
   "emailAddress": "Email Address",

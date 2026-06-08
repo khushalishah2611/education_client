@@ -1,7 +1,4 @@
-import 'dart:typed_data';
-
 import 'package:flutter/material.dart';
-import 'package:printing/printing.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
 import '../core/app_localizations.dart';
@@ -14,6 +11,7 @@ import '../utils/payment_receipt_pdf.dart';
 import '../widgets/common_widgets.dart';
 import '../widgets/flow_widgets.dart';
 import 'home_screen.dart';
+import 'side_menu/payment_receipt_screen.dart';
 import 'track_application_screen.dart';
 
 class PaymentConfirmationScreen extends StatefulWidget {
@@ -299,11 +297,17 @@ class _PaymentConfirmationScreenState extends State<PaymentConfirmationScreen>
       final String receiptHtml =
           await _applicationApiService.fetchPaymentReceiptHtml(
         paymentId: paymentId,
+        language: context.l10n.locale.languageCode,
       );
-      final Uint8List receiptPdf = await buildPaymentReceiptPdf(receiptHtml);
-      await Printing.sharePdf(
-        bytes: receiptPdf,
-        filename: 'payment_receipt_$paymentId.pdf',
+
+      if (!mounted) return;
+
+      await Navigator.of(context).push(
+        MaterialPageRoute<void>(
+          builder: (_) => PaymentReceiptScreen(
+            receiptHtml: receiptHtml,
+          ),
+        ),
       );
     } catch (e) {
       snackBarService.showError(

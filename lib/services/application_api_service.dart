@@ -123,9 +123,12 @@ class ApplicationApiService {
 
   Future<String> fetchPaymentReceiptHtml({
     required String paymentId,
+    required String language,
   }) async {
     final Uri uri = ApiConfig.uri(
       '/api/payments/${Uri.encodeComponent(paymentId)}/receipt',
+    ).replace(
+      queryParameters: <String, String>{'language': language},
     );
     final response = await http.get(
       uri,

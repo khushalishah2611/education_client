@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_localizations/flutter_localizations.dart';
+import 'package:intl/date_symbol_data_local.dart';
 
 import '../controllers/language_controller.dart';
 import '../core/app_localizations.dart';
@@ -28,6 +29,8 @@ class _ArabUniversitiesAppState extends State<ArabUniversitiesApp> {
     _loadLanguageFuture = Future.wait<void>([
       _languageCubit.loadSavedLocale(),
       AppLocalizations.preloadEnglish(),
+      initializeDateFormatting('ar'),
+      initializeDateFormatting('en'),
     ]);
     // Initialize SnackBar service with the global key
     snackBarService.initialize(_scaffoldMessengerKey);
