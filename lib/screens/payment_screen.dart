@@ -41,7 +41,7 @@ class _PaymentScreenState extends State<PaymentScreen>
     with CubitStateMixin<PaymentScreen> {
   static const List<String> _genderOptions = <String>['FEMALE', 'MALE'];
 
-  int selected = 0;
+  int selected = 1;
   bool _isSubmitting = false;
 
   final ApplicationApiService _applicationApiService =
@@ -210,12 +210,7 @@ class _PaymentScreenState extends State<PaymentScreen>
       return;
     }
 
-    if (selected == 1) {
-      await _submitApplicationsAndPayOnline();
-      return;
-    } else {
-      await _submitApplicationsAndContinue();
-    }
+    await _submitApplicationsAndPayOnline();
   }
 
   @override
@@ -384,17 +379,33 @@ class _PaymentScreenState extends State<PaymentScreen>
           debugPrint('Payment Success');
           debugPrint(response.toString());
 
+          if (!mounted) return;
+
+          _showProcessingDialog();
+
           try {
             await _createApplicationsAfterPayment(
               studentUserId: studentUserId,
             );
+
+            if (mounted && Navigator.canPop(context)) {
+              Navigator.of(context).pop(); // dismiss loading dialog
+            }
           } on ApplicationApiException catch (e) {
+            if (mounted && Navigator.canPop(context)) {
+              Navigator.of(context).pop();
+            }
+
             if (e.statusCode == 409) {
               await SelectedCourseStorage.clear();
             }
 
             snackBarService.showError(message: e.message);
           } catch (e) {
+            if (mounted && Navigator.canPop(context)) {
+              Navigator.of(context).pop();
+            }
+
             snackBarService.showError(message: e.toString());
           }
         },
@@ -782,7 +793,8 @@ class _PaymentScreenState extends State<PaymentScreen>
                                 snackBarService.showError(message: e.message);
                               } catch (e) {
                                 if (!mounted) return;
-                                snackBarService.showError(message: e.toString());
+                                snackBarService.showError(
+                                    message: e.toString());
                               } finally {
                                 if (context.mounted) {
                                   setState(() => isUpdating = false);
@@ -889,28 +901,28 @@ class _PaymentScreenState extends State<PaymentScreen>
                             ),
                           ),
                           const SizedBox(height: 18),
-                          Text(
-                            context.l10n.text('paymentMethod'),
-                            style: TextStyle(
-                              fontSize: isSmallMobile ? 16 : 18,
-                              fontWeight: FontWeight.w700,
-                            ),
-                          ),
-                          const SizedBox(height: 12),
-                          _PaymentMethodTile(
-                            label: context.l10n.text('COD'),
-                            iconText: 'COD',
-                            selected: selected == 0,
-                            onTap: () => updateView(() => selected = 0),
-                          ),
-                          const SizedBox(height: 12),
-                          _PaymentMethodTile(
-                            label: context.l10n.text('onlinePayment'),
-                            iconText: 'ONLINE',
-                            selected: selected == 1,
-                            onTap: () => updateView(() => selected = 1),
-                          ),
-                          const SizedBox(height: 30),
+                          // Text(
+                          //   context.l10n.text('paymentMethod'),
+                          //   style: TextStyle(
+                          //     fontSize: isSmallMobile ? 16 : 18,
+                          //     fontWeight: FontWeight.w700,
+                          //   ),
+                          // ),
+                          // const SizedBox(height: 12),
+                          // _PaymentMethodTile(
+                          //   label: context.l10n.text('COD'),
+                          //   iconText: 'COD',
+                          //   selected: selected == 0,
+                          //   onTap: () => updateView(() => selected = 0),
+                          // ),
+                          // const SizedBox(height: 12),
+                          // _PaymentMethodTile(
+                          //   label: context.l10n.text('onlinePayment'),
+                          //   iconText: 'ONLINE',
+                          //   selected: selected == 1,
+                          //   onTap: () => updateView(() => selected = 1),
+                          // ),
+                          // const SizedBox(height: 30),
                           AppPrimaryButton(
                             label: context.l10n.text('payNow'),
                             onPressed: _isSubmitting ? null : _handlePayNow,
@@ -933,6 +945,27 @@ class _PaymentScreenState extends State<PaymentScreen>
                   ),
               ],
             ),
+          ),
+        ),
+      ),
+    );
+  }
+
+  void _showProcessingDialog() {
+    showDialog(
+      context: context,
+      barrierDismissible: false,
+      builder: (_) => const PopScope(
+        canPop: false,
+        child: AlertDialog(
+          content: Row(
+            children: [
+              CircularProgressIndicator(),
+              SizedBox(width: 16),
+              Expanded(
+                child: Text('Payment received. Processing application...'),
+              ),
+            ],
           ),
         ),
       ),
