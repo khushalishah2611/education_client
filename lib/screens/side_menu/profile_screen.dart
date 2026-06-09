@@ -41,24 +41,17 @@ class _ProfileBodyState extends State<ProfileBody>
   final ApplicationApiService _api = const ApplicationApiService();
   final AuthApiService _authApi = const AuthApiService();
 
-  final TextEditingController _fullNameController =
-  TextEditingController();
-  final TextEditingController _emailController =
-  TextEditingController();
-  final TextEditingController _ageController =
-  TextEditingController();
-  final TextEditingController _dobController =
-  TextEditingController();
-  final TextEditingController _phoneController =
-  TextEditingController();
-  final TextEditingController _guardianController =
-  TextEditingController();
-  final TextEditingController _relationshipController =
-  TextEditingController();
+  final TextEditingController _fullNameController = TextEditingController();
+  final TextEditingController _emailController = TextEditingController();
+  final TextEditingController _ageController = TextEditingController();
+  final TextEditingController _dobController = TextEditingController();
+  final TextEditingController _phoneController = TextEditingController();
+  final TextEditingController _guardianController = TextEditingController();
+  final TextEditingController _relationshipController = TextEditingController();
   final TextEditingController _emergencyMobileController =
-  TextEditingController();
+      TextEditingController();
   final TextEditingController _emergencyEmailController =
-  TextEditingController();
+      TextEditingController();
 
   bool _isLoading = true;
   bool _isSaving = false;
@@ -133,8 +126,7 @@ class _ProfileBodyState extends State<ProfileBody>
 
       /// CALL API
       /// https://arab.vedx.cloud/api/admin/masters/country
-      final List<CountryMaster> countries =
-      await _authApi.fetchCountries();
+      final List<CountryMaster> countries = await _authApi.fetchCountries();
 
       _countries = countries;
 
@@ -159,41 +151,32 @@ class _ProfileBodyState extends State<ProfileBody>
 
   Future<void> _loadProfile() async {
     try {
-      final String userId =
-      await StudentSession.currentStudentUserId();
+      final String userId = await StudentSession.currentStudentUserId();
 
-      final List<Map<String, dynamic>> students =
-      await _api.fetchStudents();
+      final List<Map<String, dynamic>> students = await _api.fetchStudents();
 
       final Map<String, dynamic>? current =
-      students.cast<Map<String, dynamic>?>().firstWhere(
-            (item) =>
-        (item?['userId'] ?? '').toString() ==
-            userId,
-        orElse: () =>
-        students.isNotEmpty ? students.first : null,
-      );
+          students.cast<Map<String, dynamic>?>().firstWhere(
+                (item) => (item?['userId'] ?? '').toString() == userId,
+                orElse: () => students.isNotEmpty ? students.first : null,
+              );
 
       if (current == null) {
         throw Exception('Student not found');
       }
 
-      _studentUserId =
-          (current['userId'] ?? '').toString();
+      _studentUserId = (current['userId'] ?? '').toString();
 
       final Map<String, dynamic> user =
-      (current['user'] is Map<String, dynamic>)
-          ? current['user'] as Map<String, dynamic>
-          : <String, dynamic>{};
+          (current['user'] is Map<String, dynamic>)
+              ? current['user'] as Map<String, dynamic>
+              : <String, dynamic>{};
 
-      final String first =
-      (current['firstName'] ?? '').toString().trim();
+      final String first = (current['firstName'] ?? '').toString().trim();
 
-      final String middle =
-      (current['middleName'] ?? '').toString().trim();
+      final String middle = (current['middleName'] ?? '').toString().trim();
 
-      final String last =
-      (current['lastName'] ?? '').toString().trim();
+      final String last = (current['lastName'] ?? '').toString().trim();
 
       _fullNameController.text = [
         first,
@@ -201,11 +184,9 @@ class _ProfileBodyState extends State<ProfileBody>
         last,
       ].where((e) => e.isNotEmpty).join(' ');
 
-      _emailController.text =
-          (user['email'] ?? '').toString();
+      _emailController.text = (user['email'] ?? '').toString();
 
-      _ageController.text =
-          (current['age'] ?? '').toString();
+      _ageController.text = (current['age'] ?? '').toString();
 
       _dobController.text = _displayDate(
         (current['dateOfBirth'] ?? '').toString(),
@@ -216,40 +197,30 @@ class _ProfileBodyState extends State<ProfileBody>
       );
 
       _guardianController.text =
-          (current['emergencyContactGuardianName'] ?? '')
-              .toString();
+          (current['emergencyContactGuardianName'] ?? '').toString();
 
       _relationshipController.text =
-          (current['emergencyContactRelationship'] ?? '')
-              .toString();
+          (current['emergencyContactRelationship'] ?? '').toString();
 
       _emergencyMobileController.text =
-          (current['emergencyContactMobile'] ?? '')
-              .toString();
+          (current['emergencyContactMobile'] ?? '').toString();
 
       _emergencyEmailController.text =
-          (current['emergencyContactEmail'] ?? '')
-              .toString();
+          (current['emergencyContactEmail'] ?? '').toString();
 
-      _gender =
-          (current['gender'] ?? 'FEMALE').toString();
+      _gender = (current['gender'] ?? 'FEMALE').toString();
 
-      _profileImagePath =
-          (current['profileImagePath'] ?? '').toString();
+      _profileImagePath = (current['profileImagePath'] ?? '').toString();
 
       /// COUNTRY BIND
-      final String country =
-      (current['country'] ?? '').toString().trim();
+      final String country = (current['country'] ?? '').toString().trim();
 
-      if (country.isNotEmpty &&
-          _countries.isNotEmpty) {
+      if (country.isNotEmpty && _countries.isNotEmpty) {
         try {
           _selectedCountry = _countries.firstWhere(
-                (c) =>
-            c.value.toLowerCase() ==
-                country.toLowerCase() ||
-                c.nameEn.toLowerCase() ==
-                    country.toLowerCase(),
+            (c) =>
+                c.value.toLowerCase() == country.toLowerCase() ||
+                c.nameEn.toLowerCase() == country.toLowerCase(),
           );
         } catch (_) {}
       }
@@ -266,8 +237,7 @@ class _ProfileBodyState extends State<ProfileBody>
     if (raw.isEmpty) return '';
 
     try {
-      return DateFormat('dd-MM-yyyy')
-          .format(DateTime.parse(raw));
+      return DateFormat('dd-MM-yyyy').format(DateTime.parse(raw));
     } catch (_) {
       return raw;
     }
@@ -276,8 +246,7 @@ class _ProfileBodyState extends State<ProfileBody>
   String _apiDate(String raw) {
     if (raw.isEmpty) return '';
 
-    for (final String format
-    in <String>['dd-MM-yyyy', 'yyyy-MM-dd']) {
+    for (final String format in <String>['dd-MM-yyyy', 'yyyy-MM-dd']) {
       try {
         return DateFormat('yyyy-MM-dd').format(
           DateFormat(format).parseStrict(raw),
@@ -289,11 +258,9 @@ class _ProfileBodyState extends State<ProfileBody>
   }
 
   String _phoneWithoutCode(String full) {
-    final String dial =
-        _selectedCountry?.dialCode ?? '';
+    final String dial = _selectedCountry?.dialCode ?? '';
 
-    if (dial.isNotEmpty &&
-        full.startsWith(dial)) {
+    if (dial.isNotEmpty && full.startsWith(dial)) {
       return full.substring(dial.length).trim();
     }
 
@@ -301,18 +268,15 @@ class _ProfileBodyState extends State<ProfileBody>
   }
 
   Future<void> _pickDob() async {
-    DateTime initialDate =
-    DateTime.now().subtract(
+    DateTime initialDate = DateTime.now().subtract(
       const Duration(days: 365 * 18),
     );
 
     try {
-      initialDate = DateFormat('dd-MM-yyyy')
-          .parseStrict(_dobController.text);
+      initialDate = DateFormat('dd-MM-yyyy').parseStrict(_dobController.text);
     } catch (_) {}
 
-    final DateTime? date =
-    await showDatePicker(
+    final DateTime? date = await showDatePicker(
       context: context,
       initialDate: initialDate,
       firstDate: DateTime(1950),
@@ -321,29 +285,24 @@ class _ProfileBodyState extends State<ProfileBody>
 
     if (date != null) {
       updateView(() {
-        _dobController.text =
-            DateFormat('dd-MM-yyyy')
-                .format(date);
+        _dobController.text = DateFormat('dd-MM-yyyy').format(date);
         _fieldErrors.remove('dateOfBirth');
       });
     }
   }
 
   Future<void> _pickProfileImage() async {
-    final result =
-    await FilePicker.platform.pickFiles(
+    final result = await FilePicker.platform.pickFiles(
       type: FileType.image,
       allowMultiple: false,
     );
 
-    if (result == null ||
-        result.files.isEmpty) {
+    if (result == null || result.files.isEmpty) {
       return;
     }
 
     updateView(() {
-      _selectedProfileImage =
-          result.files.first;
+      _selectedProfileImage = result.files.first;
     });
   }
 
@@ -361,8 +320,7 @@ class _ProfileBodyState extends State<ProfileBody>
       for (final String fieldKey in _fieldKeys.keys) {
         if (!errors.containsKey(fieldKey)) continue;
 
-        final BuildContext? fieldContext =
-            _fieldKeys[fieldKey]?.currentContext;
+        final BuildContext? fieldContext = _fieldKeys[fieldKey]?.currentContext;
         if (fieldContext == null) return;
 
         Scrollable.ensureVisible(
@@ -387,18 +345,15 @@ class _ProfileBodyState extends State<ProfileBody>
       return;
     }
 
-    final List<String> parts =
-    _fullNameController.text
+    final List<String> parts = _fullNameController.text
         .trim()
         .split(RegExp(r'\s+'))
         .where((e) => e.isNotEmpty)
         .toList(growable: false);
 
-    final String first =
-    parts.isNotEmpty ? parts.first : '';
+    final String first = parts.isNotEmpty ? parts.first : '';
 
-    final String last =
-    parts.length > 1 ? parts.last : '';
+    final String last = parts.length > 1 ? parts.last : '';
 
     final String mobile =
         '${_selectedCountry?.dialCode ?? ''}${_phoneController.text.trim()}';
@@ -409,46 +364,32 @@ class _ProfileBodyState extends State<ProfileBody>
     });
 
     try {
-      final res =
-      await _api.updateStudentProfile(
+      final res = await _api.updateStudentProfile(
         studentUserId: _studentUserId,
-        fullName:
-        _fullNameController.text.trim(),
+        fullName: _fullNameController.text.trim(),
         firstName: first,
         lastName: last,
         email: _emailController.text.trim(),
-        country:
-        _selectedCountry?.value ?? '',
+        country: _selectedCountry?.value ?? '',
         age: int.tryParse(
           _ageController.text.trim(),
         ),
-        dateOfBirth:
-        _apiDate(_dobController.text.trim()),
+        dateOfBirth: _apiDate(_dobController.text.trim()),
         phone: mobile,
         gender: _gender,
-        emergencyContactGuardianName:
-        _guardianController.text.trim(),
-        emergencyContactRelationship:
-        _relationshipController.text.trim(),
-        emergencyContactMobile:
-        _emergencyMobileController.text
-            .trim(),
-        emergencyContactEmail:
-        _emergencyEmailController.text
-            .trim(),
+        emergencyContactGuardianName: _guardianController.text.trim(),
+        emergencyContactRelationship: _relationshipController.text.trim(),
+        emergencyContactMobile: _emergencyMobileController.text.trim(),
+        emergencyContactEmail: _emergencyEmailController.text.trim(),
         isActive: true,
-        profileImagePath:
-        _selectedProfileImage?.path,
-        profileImageName:
-        _selectedProfileImage?.name,
+        profileImagePath: _selectedProfileImage?.path,
+        profileImageName: _selectedProfileImage?.name,
       );
 
       if (!mounted) return;
 
       snackBarService.showSuccess(
-        message:
-        res['message']?.toString() ??
-            'Student updated successfully.',
+        message: res['message']?.toString() ?? 'Student updated successfully.',
       );
 
       Navigator.of(context).push(
@@ -526,7 +467,8 @@ class _ProfileBodyState extends State<ProfileBody>
     if (emergencyEmail.isEmpty) {
       errors['emergencyEmail'] = 'Please enter emergency email address.';
     } else if (!_emailRegex.hasMatch(emergencyEmail)) {
-      errors['emergencyEmail'] = 'Please enter a valid emergency email address.';
+      errors['emergencyEmail'] =
+          'Please enter a valid emergency email address.';
     }
 
     return errors;
@@ -536,222 +478,180 @@ class _ProfileBodyState extends State<ProfileBody>
   Widget build(BuildContext context) {
     return buildCubitView((context) {
       if (_isLoading) {
-      return const _ProfileShimmer();
-    }
+        return const _ProfileShimmer();
+      }
 
-    return Padding(
-      padding: const EdgeInsets.all(16),
-      child: ListView(
-        controller: _scrollController,
-        children: [
-          const SizedBox(height: 8),
-
-          ProfileAvatar(
-            imagePath: _profileImagePath,
-            selectedImagePath: _selectedProfileImage?.path,
-            onEdit: _pickProfileImage,
-          ),
-
-          const SizedBox(height: 22),
-
-          ProfileSectionTitle(
-            context.l10n.text('basicInformation'),
-          ),
-
-          const SizedBox(height: 14),
-
-          ProfileLabel(context.l10n.text('fullName')),
-
-          KeyedSubtree(
-            key: _fieldKeys['fullName'],
-            child: ProfileInput(
-              controller: _fullNameController,
-              hint: context.l10n.text('firstMiddleLast'),
-              icon: Icons.person_outline_rounded,
-              errorText: _fieldErrors['fullName'],
-              onChanged: (_) => _clearFieldError('fullName'),
+      return Padding(
+        padding: const EdgeInsets.all(16),
+        child: ListView(
+          controller: _scrollController,
+          children: [
+            const SizedBox(height: 8),
+            ProfileAvatar(
+              imagePath: _profileImagePath,
+              selectedImagePath: _selectedProfileImage?.path,
+              onEdit: _pickProfileImage,
             ),
-          ),
-
-          const SizedBox(height: 14),
-
-          ProfileLabel(context.l10n.text('gender')),
-
-          GenderSelector(
-            selected: _gender,
-            onChanged: (v) {
-              updateView(() {
-                _gender = v;
-              });
-            },
-          ),
-
-          const SizedBox(height: 14),
-
-          ProfileLabel(context.l10n.text('dateOfBirth')),
-
-          KeyedSubtree(
-            key: _fieldKeys['dateOfBirth'],
-            child: ProfileInput(
-              controller: _dobController,
-              hint: 'DD-MM-YYYY',
-              icon: Icons.calendar_month_outlined,
-              readOnly: true,
-              errorText: _fieldErrors['dateOfBirth'],
-              onTap: _pickDob,
+            const SizedBox(height: 22),
+            ProfileSectionTitle(
+              context.l10n.text('basicInformation'),
             ),
-          ),
-
-          const SizedBox(height: 14),
-
-          ProfileLabel(context.l10n.text('country')),
-
-          KeyedSubtree(
-            key: _fieldKeys['country'],
-            child: CountryDropdownField(
-              countries: _countries,
-              selectedCountry: _selectedCountry,
-              isLoading: _isLoadingCountries,
-              errorText: _fieldErrors['country'],
-              onCountryChanged: (v) {
+            const SizedBox(height: 14),
+            ProfileLabel(context.l10n.text('fullName')),
+            KeyedSubtree(
+              key: _fieldKeys['fullName'],
+              child: ProfileInput(
+                controller: _fullNameController,
+                hint: context.l10n.text('firstMiddleLast'),
+                icon: Icons.person_outline_rounded,
+                errorText: _fieldErrors['fullName'],
+                onChanged: (_) => _clearFieldError('fullName'),
+              ),
+            ),
+            const SizedBox(height: 14),
+            ProfileLabel(context.l10n.text('gender')),
+            GenderSelector(
+              selected: _gender,
+              onChanged: (v) {
                 updateView(() {
-                  _selectedCountry = v;
-                  _fieldErrors.remove('country');
+                  _gender = v;
                 });
               },
             ),
-          ),
-
-          const SizedBox(height: 14),
-
-          ProfileLabel(context.l10n.text('mobileNumber')),
-
-          KeyedSubtree(
-            key: _fieldKeys['mobileNumber'],
-            child: MobileNumberField(
-              dialCode: _selectedCountry?.dialCode ?? '',
-              mobileController: _phoneController,
-              errorText: _fieldErrors['mobileNumber'],
-              onChanged: (_) => _clearFieldError('mobileNumber'),
+            const SizedBox(height: 14),
+            ProfileLabel(context.l10n.text('dateOfBirth')),
+            KeyedSubtree(
+              key: _fieldKeys['dateOfBirth'],
+              child: ProfileInput(
+                controller: _dobController,
+                hint: 'DD-MM-YYYY',
+                icon: Icons.calendar_month_outlined,
+                readOnly: true,
+                errorText: _fieldErrors['dateOfBirth'],
+                onTap: _pickDob,
+              ),
             ),
-          ),
-
-          const SizedBox(height: 14),
-
-          ProfileLabel(context.l10n.text('age')),
-
-          KeyedSubtree(
-            key: _fieldKeys['age'],
-            child: ProfileInput(
-              controller: _ageController,
-              hint: context.l10n.text('age'),
-              icon: Icons.numbers_outlined,
-              errorText: _fieldErrors['age'],
-              onChanged: (_) => _clearFieldError('age'),
+            const SizedBox(height: 14),
+            ProfileLabel(context.l10n.text('country')),
+            KeyedSubtree(
+              key: _fieldKeys['country'],
+              child: CountryDropdownField(
+                countries: _countries,
+                selectedCountry: _selectedCountry,
+                isLoading: _isLoadingCountries,
+                errorText: _fieldErrors['country'],
+                onCountryChanged: (v) {
+                  updateView(() {
+                    _selectedCountry = v;
+                    _fieldErrors.remove('country');
+                  });
+                },
+              ),
             ),
-          ),
-
-          const SizedBox(height: 14),
-
-          ProfileLabel(
-            context.l10n.text('emailAddress'),
-          ),
-
-          KeyedSubtree(
-            key: _fieldKeys['email'],
-            child: ProfileInput(
-              controller: _emailController,
-              hint: context.l10n.text('emailAddress'),
-              icon: Icons.mail_outline_rounded,
-              errorText: _fieldErrors['email'],
-              onChanged: (_) => _clearFieldError('email'),
+            const SizedBox(height: 14),
+            ProfileLabel(context.l10n.text('mobileNumber')),
+            KeyedSubtree(
+              key: _fieldKeys['mobileNumber'],
+              child: MobileNumberField(
+                dialCode: _selectedCountry?.dialCode ?? '',
+                mobileController: _phoneController,
+                errorText: _fieldErrors['mobileNumber'],
+                onChanged: (_) => _clearFieldError('mobileNumber'),
+              ),
             ),
-          ),
-
-          const SizedBox(height: 22),
-
-          ProfileSectionTitle(
-            context.l10n.text('emergencyContact'),
-          ),
-
-          const SizedBox(height: 14),
-
-          ProfileLabel(
-            context.l10n.text('guardianName'),
-          ),
-
-          KeyedSubtree(
-            key: _fieldKeys['guardianName'],
-            child: ProfileInput(
-              controller: _guardianController,
-              hint: context.l10n.text('guardianName'),
-              icon: Icons.person_outline_rounded,
-              errorText: _fieldErrors['guardianName'],
-              onChanged: (_) => _clearFieldError('guardianName'),
+            const SizedBox(height: 14),
+            ProfileLabel(context.l10n.text('age')),
+            KeyedSubtree(
+              key: _fieldKeys['age'],
+              child: ProfileInput(
+                controller: _ageController,
+                hint: context.l10n.text('age'),
+                icon: Icons.numbers_outlined,
+                errorText: _fieldErrors['age'],
+                onChanged: (_) => _clearFieldError('age'),
+              ),
             ),
-          ),
-
-          const SizedBox(height: 14),
-
-          ProfileLabel(
-            context.l10n.text('relationship'),
-          ),
-
-          KeyedSubtree(
-            key: _fieldKeys['relationship'],
-            child: ProfileInput(
-              controller: _relationshipController,
-              hint: context.l10n.text('relationship'),
-              icon: Icons.people_outline_rounded,
-              errorText: _fieldErrors['relationship'],
-              onChanged: (_) => _clearFieldError('relationship'),
+            const SizedBox(height: 14),
+            ProfileLabel(
+              context.l10n.text('emailAddress'),
             ),
-          ),
-
-          const SizedBox(height: 14),
-
-          ProfileLabel(
-            context.l10n.text('mobileNumber'),
-          ),
-
-          KeyedSubtree(
-            key: _fieldKeys['emergencyMobile'],
-            child: ProfileInput(
-              controller: _emergencyMobileController,
-              hint: context.l10n.text('mobileNumber'),
-              icon: Icons.call_outlined,
-              errorText: _fieldErrors['emergencyMobile'],
-              onChanged: (_) => _clearFieldError('emergencyMobile'),
+            KeyedSubtree(
+              key: _fieldKeys['email'],
+              child: ProfileInput(
+                controller: _emailController,
+                hint: context.l10n.text('emailAddress'),
+                icon: Icons.mail_outline_rounded,
+                errorText: _fieldErrors['email'],
+                onChanged: (_) => _clearFieldError('email'),
+              ),
             ),
-          ),
-
-          const SizedBox(height: 14),
-
-          ProfileLabel(
-            context.l10n.text('emailAddress'),
-          ),
-
-          KeyedSubtree(
-            key: _fieldKeys['emergencyEmail'],
-            child: ProfileInput(
-              controller: _emergencyEmailController,
-              hint: context.l10n.text('emailAddress'),
-              icon: Icons.mail_outline_rounded,
-              errorText: _fieldErrors['emergencyEmail'],
-              onChanged: (_) => _clearFieldError('emergencyEmail'),
+            const SizedBox(height: 22),
+            ProfileSectionTitle(
+              context.l10n.text('emergencyContact'),
             ),
-          ),
-
-          const SizedBox(height: 28),
-
-          AppPrimaryButton(
-            label: context.l10n.text('save'),
-            onPressed:
-            _isSaving ? null : _saveProfile,
-          ),
-
-          const SizedBox(height: 20),
-        ],
+            const SizedBox(height: 14),
+            ProfileLabel(
+              context.l10n.text('guardianName'),
+            ),
+            KeyedSubtree(
+              key: _fieldKeys['guardianName'],
+              child: ProfileInput(
+                controller: _guardianController,
+                hint: context.l10n.text('guardianName'),
+                icon: Icons.person_outline_rounded,
+                errorText: _fieldErrors['guardianName'],
+                onChanged: (_) => _clearFieldError('guardianName'),
+              ),
+            ),
+            const SizedBox(height: 14),
+            ProfileLabel(
+              context.l10n.text('relationship'),
+            ),
+            KeyedSubtree(
+              key: _fieldKeys['relationship'],
+              child: ProfileInput(
+                controller: _relationshipController,
+                hint: context.l10n.text('relationship'),
+                icon: Icons.people_outline_rounded,
+                errorText: _fieldErrors['relationship'],
+                onChanged: (_) => _clearFieldError('relationship'),
+              ),
+            ),
+            const SizedBox(height: 14),
+            ProfileLabel(
+              context.l10n.text('mobileNumber'),
+            ),
+            KeyedSubtree(
+              key: _fieldKeys['emergencyMobile'],
+              child: ProfileInput(
+                controller: _emergencyMobileController,
+                hint: context.l10n.text('mobileNumber'),
+                icon: Icons.call_outlined,
+                errorText: _fieldErrors['emergencyMobile'],
+                onChanged: (_) => _clearFieldError('emergencyMobile'),
+              ),
+            ),
+            const SizedBox(height: 14),
+            ProfileLabel(
+              context.l10n.text('emailAddress'),
+            ),
+            KeyedSubtree(
+              key: _fieldKeys['emergencyEmail'],
+              child: ProfileInput(
+                controller: _emergencyEmailController,
+                hint: context.l10n.text('emailAddress'),
+                icon: Icons.mail_outline_rounded,
+                errorText: _fieldErrors['emergencyEmail'],
+                onChanged: (_) => _clearFieldError('emergencyEmail'),
+              ),
+            ),
+            const SizedBox(height: 28),
+            AppPrimaryButton(
+              label: context.l10n.text('save'),
+              onPressed: _isSaving ? null : _saveProfile,
+            ),
+            const SizedBox(height: 20),
+          ],
         ),
       );
     });
@@ -762,15 +662,12 @@ class _ProfileShimmer extends StatefulWidget {
   const _ProfileShimmer();
 
   @override
-  State<_ProfileShimmer> createState() =>
-      _ProfileShimmerState();
+  State<_ProfileShimmer> createState() => _ProfileShimmerState();
 }
 
-class _ProfileShimmerState
-    extends State<_ProfileShimmer>
+class _ProfileShimmerState extends State<_ProfileShimmer>
     with SingleTickerProviderStateMixin {
-  late final AnimationController
-  _controller;
+  late final AnimationController _controller;
 
   @override
   void initState() {
@@ -778,8 +675,7 @@ class _ProfileShimmerState
 
     _controller = AnimationController(
       vsync: this,
-      duration:
-      const Duration(milliseconds: 1300),
+      duration: const Duration(milliseconds: 1300),
     )..repeat();
   }
 
@@ -795,25 +691,21 @@ class _ProfileShimmerState
       animation: _controller,
       builder: (_, __) {
         return Padding(
-          padding:
-          const EdgeInsets.all(16),
+          padding: const EdgeInsets.all(16),
           child: ListView(
             children: [
               Center(
                 child: _shimmerCircle(100),
               ),
-
-              const SizedBox(height: 24),
-
+              const SizedBox(height: 10),
               ...List.generate(
                 10,
-                    (index) => Padding(
-                  padding:
-                  const EdgeInsets.only(
+                (index) => Padding(
+                  padding: const EdgeInsets.only(
                     bottom: 16,
                   ),
                   child: _shineBox(
-                    height: 58,
+                    height: 45,
                   ),
                 ),
               ),
@@ -830,8 +722,7 @@ class _ProfileShimmerState
     return Container(
       height: height,
       decoration: BoxDecoration(
-        borderRadius:
-        BorderRadius.circular(14),
+        borderRadius: BorderRadius.circular(14),
         gradient: LinearGradient(
           begin: Alignment(
             -1 + 2 * _controller.value,
@@ -896,8 +787,7 @@ class CountryDropdownField extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final bool hasError = (errorText ?? '').isNotEmpty;
-    final Color borderColor =
-        hasError ? Colors.red.shade700 : AppColors.border;
+    final Color borderColor = hasError ? Colors.red.shade700 : AppColors.border;
     final CountryMaster? dropdownValue = selectedCountry == null
         ? null
         : countries.cast<CountryMaster?>().firstWhere(
@@ -909,7 +799,7 @@ class CountryDropdownField extends StatelessWidget {
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
         Container(
-          height: 56,
+          height: 50,
           padding: const EdgeInsets.symmetric(horizontal: 12),
           decoration: BoxDecoration(
             color: Colors.white,
@@ -975,14 +865,13 @@ class MobileNumberField extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final bool hasError = (errorText ?? '').isNotEmpty;
-    final Color borderColor =
-        hasError ? Colors.red.shade700 : AppColors.border;
+    final Color borderColor = hasError ? Colors.red.shade700 : AppColors.border;
 
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
         Container(
-          height: 56,
+          height: 50,
           decoration: BoxDecoration(
             color: Colors.white,
             borderRadius: BorderRadius.circular(12),
@@ -1015,11 +904,14 @@ class MobileNumberField extends StatelessWidget {
                   controller: mobileController,
                   keyboardType: TextInputType.phone,
                   onChanged: onChanged,
+                  textAlignVertical: TextAlignVertical.center,
                   decoration: InputDecoration(
                     hintText: context.l10n.text('enterMobileNumber'),
                     border: InputBorder.none,
                     enabledBorder: InputBorder.none,
                     focusedBorder: InputBorder.none,
+                    isDense: true,
+                    contentPadding: const EdgeInsets.symmetric(vertical: 10),
                   ),
                 ),
               ),
@@ -1057,10 +949,8 @@ class ProfileAvatar extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final bool hasSelectedImage =
-        (selectedImagePath ?? '').trim().isNotEmpty;
-    final String url =
-    (imagePath ?? '').startsWith('http')
+    final bool hasSelectedImage = (selectedImagePath ?? '').trim().isNotEmpty;
+    final String url = (imagePath ?? '').startsWith('http')
         ? imagePath!
         : '${ApiConfig.baseUrl}${imagePath ?? ''}';
 
@@ -1070,8 +960,7 @@ class ProfileAvatar extends StatelessWidget {
           Container(
             width: 110,
             height: 110,
-            padding:
-            const EdgeInsets.all(4),
+            padding: const EdgeInsets.all(4),
             decoration: BoxDecoration(
               shape: BoxShape.circle,
               border: Border.all(
@@ -1083,21 +972,17 @@ class ProfileAvatar extends StatelessWidget {
               backgroundImage: hasSelectedImage
                   ? FileImage(File(selectedImagePath!)) as ImageProvider
                   : (imagePath ?? '').isEmpty
-                  ? null
-                  : NetworkImage(url) as ImageProvider,
-              child:
-              (imagePath ?? '').isEmpty &&
-                  !hasSelectedImage
+                      ? null
+                      : NetworkImage(url) as ImageProvider,
+              child: (imagePath ?? '').isEmpty && !hasSelectedImage
                   ? const Icon(
-                Icons.person,
-                size: 42,
-                color:
-                AppColors.textMuted,
-              )
+                      Icons.person,
+                      size: 42,
+                      color: AppColors.textMuted,
+                    )
                   : null,
             ),
           ),
-
           Positioned(
             bottom: 4,
             right: 0,
@@ -1106,8 +991,7 @@ class ProfileAvatar extends StatelessWidget {
               child: Container(
                 width: 30,
                 height: 30,
-                decoration:
-                const BoxDecoration(
+                decoration: const BoxDecoration(
                   color: Colors.white,
                   shape: BoxShape.circle,
                 ),
@@ -1125,12 +1009,11 @@ class ProfileAvatar extends StatelessWidget {
   }
 }
 
-class ProfileSectionTitle
-    extends StatelessWidget {
+class ProfileSectionTitle extends StatelessWidget {
   const ProfileSectionTitle(
-      this.title, {
-        super.key,
-      });
+    this.title, {
+    super.key,
+  });
 
   final String title;
 
@@ -1148,17 +1031,16 @@ class ProfileSectionTitle
 
 class ProfileLabel extends StatelessWidget {
   const ProfileLabel(
-      this.text, {
-        super.key,
-      });
+    this.text, {
+    super.key,
+  });
 
   final String text;
 
   @override
   Widget build(BuildContext context) {
     return Padding(
-      padding:
-      const EdgeInsets.only(bottom: 8),
+      padding: const EdgeInsets.only(bottom: 8),
       child: Text(
         text,
         style: const TextStyle(
@@ -1192,57 +1074,60 @@ class ProfileInput extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return TextField(
-      controller: controller,
-      readOnly: readOnly,
-      onTap: onTap,
-      onChanged: onChanged,
-      decoration: InputDecoration(
-        prefixIcon: Icon(
-          icon,
-          size: 18,
-          color: AppColors.textMuted,
-        ),
-        hintText: hint,
-        errorText: errorText,
-        filled: true,
-        fillColor: const Color(0xFFF4F4F4),
-        contentPadding: const EdgeInsets.symmetric(
-          vertical: 16,
-          horizontal: 14,
-        ),
-        border: OutlineInputBorder(
-          borderRadius: BorderRadius.circular(12),
-          borderSide: const BorderSide(
-            color: Color(0xFFD7D5D3),
+    return SizedBox(
+      height: 50,
+      child: TextField(
+        controller: controller,
+        readOnly: readOnly,
+        onTap: onTap,
+        onChanged: onChanged,
+        decoration: InputDecoration(
+          prefixIcon: Icon(
+            icon,
+            size: 18,
+            color: AppColors.textMuted,
           ),
-        ),
-        enabledBorder: OutlineInputBorder(
-          borderRadius: BorderRadius.circular(12),
-          borderSide: BorderSide(
-            color: (errorText ?? '').isNotEmpty
-                ? Colors.red.shade700
-                : const Color(0xFFD7D5D3),
+          hintText: hint,
+          errorText: errorText,
+          filled: true,
+          fillColor: const Color(0xFFF4F4F4),
+          contentPadding: const EdgeInsets.symmetric(
+            vertical: 16,
+            horizontal: 14,
           ),
-        ),
-        focusedBorder: OutlineInputBorder(
-          borderRadius: BorderRadius.circular(12),
-          borderSide: BorderSide(
-            color: (errorText ?? '').isNotEmpty
-                ? Colors.red.shade700
-                : AppColors.accent,
+          border: OutlineInputBorder(
+            borderRadius: BorderRadius.circular(12),
+            borderSide: const BorderSide(
+              color: Color(0xFFD7D5D3),
+            ),
           ),
-        ),
-        errorBorder: OutlineInputBorder(
-          borderRadius: BorderRadius.circular(12),
-          borderSide: BorderSide(
-            color: Colors.red.shade700,
+          enabledBorder: OutlineInputBorder(
+            borderRadius: BorderRadius.circular(12),
+            borderSide: BorderSide(
+              color: (errorText ?? '').isNotEmpty
+                  ? Colors.red.shade700
+                  : const Color(0xFFD7D5D3),
+            ),
           ),
-        ),
-        focusedErrorBorder: OutlineInputBorder(
-          borderRadius: BorderRadius.circular(12),
-          borderSide: BorderSide(
-            color: Colors.red.shade700,
+          focusedBorder: OutlineInputBorder(
+            borderRadius: BorderRadius.circular(12),
+            borderSide: BorderSide(
+              color: (errorText ?? '').isNotEmpty
+                  ? Colors.red.shade700
+                  : AppColors.accent,
+            ),
+          ),
+          errorBorder: OutlineInputBorder(
+            borderRadius: BorderRadius.circular(12),
+            borderSide: BorderSide(
+              color: Colors.red.shade700,
+            ),
+          ),
+          focusedErrorBorder: OutlineInputBorder(
+            borderRadius: BorderRadius.circular(12),
+            borderSide: BorderSide(
+              color: Colors.red.shade700,
+            ),
           ),
         ),
       ),
@@ -1267,18 +1152,14 @@ class GenderSelector extends StatelessWidget {
         Radio<String>(
           value: 'MALE',
           groupValue: selected,
-          onChanged: (v) =>
-              onChanged(v ?? 'MALE'),
+          onChanged: (v) => onChanged(v ?? 'MALE'),
         ),
         Text(context.l10n.text('male')),
-
         const SizedBox(width: 14),
-
         Radio<String>(
           value: 'FEMALE',
           groupValue: selected,
-          onChanged: (v) =>
-              onChanged(v ?? 'FEMALE'),
+          onChanged: (v) => onChanged(v ?? 'FEMALE'),
         ),
         Text(context.l10n.text('female')),
       ],

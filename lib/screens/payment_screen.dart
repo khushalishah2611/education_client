@@ -41,7 +41,6 @@ class _PaymentScreenState extends State<PaymentScreen>
     with CubitStateMixin<PaymentScreen> {
   static const List<String> _genderOptions = <String>['FEMALE', 'MALE'];
 
-  int selected = 1;
   bool _isSubmitting = false;
 
   final ApplicationApiService _applicationApiService =
@@ -471,9 +470,7 @@ class _PaymentScreenState extends State<PaymentScreen>
     final String studentUserId = prefs.getString('studentUserId')?.trim() ?? '';
 
     if (studentUserId.isEmpty) {
-      snackBarService.showError(
-        message: 'Unable to find student user ID.',
-      );
+      // Show inline error — no snackbar
       return;
     }
 
@@ -489,6 +486,13 @@ class _PaymentScreenState extends State<PaymentScreen>
       builder: (BuildContext context) {
         String gender = _normalizeGender(_gender);
         bool isUpdating = false;
+
+        // Inline field error strings
+        String? fullNameError;
+        String? emailError;
+        String? phoneError;
+        String? countryError;
+        String? apiError;
 
         return StatefulBuilder(
           builder: (BuildContext context, StateSetter setState) {
@@ -527,9 +531,15 @@ class _PaymentScreenState extends State<PaymentScreen>
                     TextFormField(
                       controller: _fullNameController,
                       textInputAction: TextInputAction.next,
+                      onChanged: (_) {
+                        if (fullNameError != null) {
+                          setState(() => fullNameError = null);
+                        }
+                      },
                       decoration: InputDecoration(
                         labelText: context.l10n.text('fullName'),
                         border: const OutlineInputBorder(),
+                        errorText: fullNameError,
                       ),
                     ),
                     const SizedBox(height: 12),
@@ -537,9 +547,15 @@ class _PaymentScreenState extends State<PaymentScreen>
                       controller: _emailController,
                       keyboardType: TextInputType.emailAddress,
                       textInputAction: TextInputAction.next,
+                      onChanged: (_) {
+                        if (emailError != null) {
+                          setState(() => emailError = null);
+                        }
+                      },
                       decoration: InputDecoration(
                         labelText: context.l10n.text('email'),
                         border: const OutlineInputBorder(),
+                        errorText: emailError,
                       ),
                     ),
                     const SizedBox(height: 12),
@@ -549,116 +565,153 @@ class _PaymentScreenState extends State<PaymentScreen>
                     ),
                     const SizedBox(height: 10),
                     Container(
-                      height: 50,
                       decoration: BoxDecoration(
                         color: Colors.white,
                         borderRadius: BorderRadius.circular(12),
-                        border: Border.all(color: AppColors.border),
+                        border: Border.all(
+                          color: countryError != null
+                              ? Colors.red.shade700
+                              : AppColors.border,
+                        ),
                       ),
-                      child: Row(
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
                         children: [
-                          const SizedBox(width: 12),
-                          Builder(
-                            builder: (BuildContext context) {
-                              final List<CountryMaster> countryOptions =
-                                  <CountryMaster>[..._countries];
-                              if (_selectedCountry.isNotEmpty &&
-                                  countryOptions.every((entry) =>
-                                      entry.nameEn != _selectedCountry)) {
-                                countryOptions.insert(
-                                  0,
-                                  CountryMaster(
-                                    id: 'fallback',
-                                    nameEn: _selectedCountry,
-                                    nameAr: '',
-                                    value: '',
-                                    dialCode: _selectedCountryDialCode,
-                                    flagEmoji: '🌍',
-                                    isActive: true,
-                                  ),
-                                );
-                              }
+                          SizedBox(
+                            height: 50,
+                            child: Row(
+                              children: [
+                                const SizedBox(width: 12),
+                                Builder(
+                                  builder: (BuildContext context) {
+                                    final List<CountryMaster> countryOptions =
+                                        <CountryMaster>[..._countries];
+                                    if (_selectedCountry.isNotEmpty &&
+                                        countryOptions.every((entry) =>
+                                            entry.nameEn != _selectedCountry)) {
+                                      countryOptions.insert(
+                                        0,
+                                        CountryMaster(
+                                          id: 'fallback',
+                                          nameEn: _selectedCountry,
+                                          nameAr: '',
+                                          value: '',
+                                          dialCode: _selectedCountryDialCode,
+                                          flagEmoji: '🌍',
+                                          isActive: true,
+                                        ),
+                                      );
+                                    }
 
-                              return Expanded(
-                                child: DropdownButtonHideUnderline(
-                                  child: DropdownButton<String>(
-                                    value: _selectedCountry.isNotEmpty
-                                        ? _selectedCountry
-                                        : null,
-                                    hint: Text(_isLoadingCountries
-                                        ? 'Loading countries...'
-                                        : context.l10n.text('selectCountry')),
-                                    isExpanded: true,
-                                    borderRadius: BorderRadius.circular(12),
-                                    icon: const Icon(
-                                      Icons.keyboard_arrow_down_rounded,
-                                      size: 18,
-                                    ),
-                                    style: const TextStyle(
-                                      fontSize: 16,
-                                      color: AppColors.text,
-                                    ),
-                                    items: countryOptions
-                                        .map(
-                                          (country) => DropdownMenuItem<String>(
-                                            value: country.nameEn,
-                                            child: Text(
-                                              '${country.nameEn} ${country.dialCode}',
-                                            ),
+                                    return Expanded(
+                                      child: DropdownButtonHideUnderline(
+                                        child: DropdownButton<String>(
+                                          value: _selectedCountry.isNotEmpty
+                                              ? _selectedCountry
+                                              : null,
+                                          hint: Text(_isLoadingCountries
+                                              ? 'Loading countries...'
+                                              : context.l10n
+                                                  .text('selectCountry')),
+                                          isExpanded: true,
+                                          borderRadius:
+                                              BorderRadius.circular(12),
+                                          icon: const Icon(
+                                            Icons.keyboard_arrow_down_rounded,
+                                            size: 18,
                                           ),
-                                        )
-                                        .toList(growable: false),
-                                    onChanged: countryOptions.isEmpty
-                                        ? null
-                                        : (value) {
-                                            if (value == null) return;
-                                            final CountryMaster
-                                                selectedCountry =
-                                                countryOptions.firstWhere(
-                                              (country) =>
-                                                  country.nameEn == value,
-                                              orElse: () => CountryMaster(
-                                                id: 'fallback',
-                                                nameEn: value,
-                                                nameAr: '',
-                                                value: '',
-                                                dialCode:
-                                                    _selectedCountryDialCode,
-                                                flagEmoji: '🌍',
-                                                isActive: true,
-                                              ),
-                                            );
-                                            setState(() {
-                                              _selectedCountry = value;
-                                              _selectedCountryDialCode =
-                                                  selectedCountry.dialCode;
-                                            });
-                                          },
+                                          style: const TextStyle(
+                                            fontSize: 16,
+                                            color: AppColors.text,
+                                          ),
+                                          items: countryOptions
+                                              .map(
+                                                (country) =>
+                                                    DropdownMenuItem<String>(
+                                                  value: country.nameEn,
+                                                  child: Text(
+                                                    '${country.nameEn} ${country.dialCode}',
+                                                  ),
+                                                ),
+                                              )
+                                              .toList(growable: false),
+                                          onChanged: countryOptions.isEmpty
+                                              ? null
+                                              : (value) {
+                                                  if (value == null) return;
+                                                  final CountryMaster
+                                                      selectedCountry =
+                                                      countryOptions.firstWhere(
+                                                    (country) =>
+                                                        country.nameEn == value,
+                                                    orElse: () => CountryMaster(
+                                                      id: 'fallback',
+                                                      nameEn: value,
+                                                      nameAr: '',
+                                                      value: '',
+                                                      dialCode:
+                                                          _selectedCountryDialCode,
+                                                      flagEmoji: '🌍',
+                                                      isActive: true,
+                                                    ),
+                                                  );
+                                                  setState(() {
+                                                    _selectedCountry = value;
+                                                    _selectedCountryDialCode =
+                                                        selectedCountry
+                                                            .dialCode;
+                                                    countryError = null;
+                                                  });
+                                                },
+                                        ),
+                                      ),
+                                    );
+                                  },
+                                ),
+                                const SizedBox(width: 10),
+                                Container(
+                                    width: 1,
+                                    height: 30,
+                                    color: AppColors.border),
+                                Expanded(
+                                  child: TextField(
+                                    controller: _phoneController,
+                                    keyboardType: TextInputType.phone,
+                                    readOnly: true,
+                                    onChanged: (_) {
+                                      if (phoneError != null) {
+                                        setState(() => phoneError = null);
+                                      }
+                                    },
+                                    decoration: InputDecoration(
+                                      contentPadding:
+                                          const EdgeInsets.all(5),
+                                      hintText: _phoneController.text.isEmpty
+                                          ? context.l10n
+                                              .text('enterMobileNumber')
+                                          : null,
+                                      border: InputBorder.none,
+                                      focusedBorder: InputBorder.none,
+                                      enabledBorder: InputBorder.none,
+                                    ),
                                   ),
                                 ),
-                              );
-                            },
-                          ),
-                          const SizedBox(width: 10),
-                          Container(
-                              width: 1, height: 30, color: AppColors.border),
-                          Expanded(
-                            child: TextField(
-                              controller: _phoneController,
-                              keyboardType: TextInputType.phone,
-                              readOnly: true,
-                              decoration: InputDecoration(
-                                contentPadding: const EdgeInsets.all(5),
-                                hintText: _phoneController.text.isEmpty
-                                    ? context.l10n.text('enterMobileNumber')
-                                    : null,
-                                border: InputBorder.none,
-                                focusedBorder: InputBorder.none,
-                                enabledBorder: InputBorder.none,
-                              ),
+                                const SizedBox(width: 12),
+                              ],
                             ),
                           ),
-                          const SizedBox(width: 12),
+                          if (countryError != null)
+                            Padding(
+                              padding: const EdgeInsets.only(
+                                  left: 12, bottom: 8, top: 4),
+                              child: Text(
+                                countryError!,
+                                style: TextStyle(
+                                  fontSize: 12,
+                                  color: Colors.red.shade700,
+                                ),
+                              ),
+                            ),
                         ],
                       ),
                     ),
@@ -673,7 +726,11 @@ class _PaymentScreenState extends State<PaymentScreen>
                           .map(
                             (String value) => DropdownMenuItem<String>(
                               value: value,
-                              child: Text(value),
+                              child: Text(
+                                value == 'MALE'
+                                    ? context.l10n.text('male')
+                                    : context.l10n.text('female'),
+                              ),
                             ),
                           )
                           .toList(),
@@ -685,6 +742,17 @@ class _PaymentScreenState extends State<PaymentScreen>
                         }
                       },
                     ),
+                    // API-level error (e.g. network failure after submit)
+                    if (apiError != null) ...[
+                      const SizedBox(height: 10),
+                      Text(
+                        apiError!,
+                        style: TextStyle(
+                          fontSize: 13,
+                          color: Colors.red.shade700,
+                        ),
+                      ),
+                    ],
                     const SizedBox(height: 20),
                     AppPrimaryButton(
                       label: context.l10n.text('updateProfile'),
@@ -697,13 +765,39 @@ class _PaymentScreenState extends State<PaymentScreen>
                               final String phone = _phoneController.text.trim();
                               final String country = _selectedCountry.trim();
 
-                              if (fullName.isEmpty ||
-                                  email.isEmpty ||
-                                  phone.isEmpty ||
-                                  country.isEmpty) {
-                                snackBarService.showError(
-                                  message: 'Please fill all fields.',
-                                );
+                              // Inline validation — no snackbar
+                              String? fnErr;
+                              String? emErr;
+                              String? phErr;
+                              String? coErr;
+
+                              if (fullName.isEmpty) {
+                                fnErr = context.l10n
+                                    .text('pleaseEnterFullName');
+                              }
+                              if (email.isEmpty) {
+                                emErr = context.l10n
+                                    .text('pleaseEnterEmailAddress');
+                              }
+                              if (phone.isEmpty) {
+                                phErr = context.l10n
+                                    .text('pleaseEnterMobileNumber');
+                              }
+                              if (country.isEmpty) {
+                                coErr =
+                                    context.l10n.text('pleaseSelectCountry');
+                              }
+
+                              if (fnErr != null ||
+                                  emErr != null ||
+                                  phErr != null ||
+                                  coErr != null) {
+                                setState(() {
+                                  fullNameError = fnErr;
+                                  emailError = emErr;
+                                  phoneError = phErr;
+                                  countryError = coErr;
+                                });
                                 return;
                               }
 
@@ -720,7 +814,6 @@ class _PaymentScreenState extends State<PaymentScreen>
 
                               try {
                                 if (!context.mounted) return;
-                                setState(() => isUpdating = true);
 
                                 await _applicationApiService
                                     .updateStudentProfileQuick(
@@ -741,12 +834,11 @@ class _PaymentScreenState extends State<PaymentScreen>
                                 Navigator.of(context).pop(true);
                                 await _submitApplicationsAndPayOnline();
                               } on ApplicationApiException catch (e) {
-                                if (!mounted) return;
-                                snackBarService.showError(message: e.message);
+                                if (!context.mounted) return;
+                                setState(() => apiError = e.message);
                               } catch (e) {
-                                if (!mounted) return;
-                                snackBarService.showError(
-                                    message: e.toString());
+                                if (!context.mounted) return;
+                                setState(() => apiError = e.toString());
                               } finally {
                                 if (context.mounted) {
                                   setState(() => isUpdating = false);
@@ -852,29 +944,7 @@ class _PaymentScreenState extends State<PaymentScreen>
                               ],
                             ),
                           ),
-                          const SizedBox(height: 18),
-                          // Text(
-                          //   context.l10n.text('paymentMethod'),
-                          //   style: TextStyle(
-                          //     fontSize: isSmallMobile ? 16 : 18,
-                          //     fontWeight: FontWeight.w700,
-                          //   ),
-                          // ),
-                          // const SizedBox(height: 12),
-                          // _PaymentMethodTile(
-                          //   label: context.l10n.text('COD'),
-                          //   iconText: 'COD',
-                          //   selected: selected == 0,
-                          //   onTap: () => updateView(() => selected = 0),
-                          // ),
-                          // const SizedBox(height: 12),
-                          // _PaymentMethodTile(
-                          //   label: context.l10n.text('onlinePayment'),
-                          //   iconText: 'ONLINE',
-                          //   selected: selected == 1,
-                          //   onTap: () => updateView(() => selected = 1),
-                          // ),
-                          // const SizedBox(height: 30),
+                          const SizedBox(height: 30),
                           AppPrimaryButton(
                             label: context.l10n.text('payNow'),
                             onPressed: _isSubmitting ? null : _handlePayNow,
@@ -925,85 +995,3 @@ class _PaymentScreenState extends State<PaymentScreen>
   }
 }
 
-class _PaymentMethodTile extends StatelessWidget {
-  const _PaymentMethodTile({
-    required this.label,
-    required this.iconText,
-    required this.selected,
-    required this.onTap,
-  });
-
-  final String label;
-  final String iconText;
-  final bool selected;
-  final VoidCallback onTap;
-
-  @override
-  Widget build(BuildContext context) {
-    final bool isSmallMobile = context.isSmallMobile;
-
-    return InkWell(
-      onTap: onTap,
-      borderRadius: BorderRadius.circular(10),
-      child: Container(
-        padding: const EdgeInsets.symmetric(
-          horizontal: 12,
-          vertical: 14,
-        ),
-        decoration: BoxDecoration(
-          color: Colors.white,
-          borderRadius: BorderRadius.circular(10),
-          border: Border.all(
-            color: selected ? AppColors.accent : const Color(0xFFE8E2D9),
-          ),
-        ),
-        child: Row(
-          children: [
-            Container(
-              height: 20,
-              alignment: Alignment.center,
-              decoration: BoxDecoration(
-                color: const Color(0xFFF3F3F3),
-                borderRadius: BorderRadius.circular(4),
-              ),
-              child: Text(
-                iconText,
-                style: const TextStyle(
-                  fontSize: 9,
-                  fontWeight: FontWeight.w700,
-                ),
-              ),
-            ),
-            const SizedBox(width: 10),
-            Text(
-              label,
-              style: TextStyle(
-                fontSize: isSmallMobile ? 14 : 16,
-                color: AppColors.textMuted,
-              ),
-            ),
-            const Spacer(),
-            Container(
-              width: 18,
-              height: 18,
-              decoration: BoxDecoration(
-                shape: BoxShape.circle,
-                border: Border.all(
-                  color: selected ? AppColors.accent : AppColors.textMuted,
-                ),
-              ),
-              child: selected
-                  ? const Center(
-                      child: CircleAvatar(
-                        radius: 5,
-                        backgroundColor: AppColors.accent,
-                      ),
-                    )
-                  : null,
-            ),
-          ],
-        ),
-      ),
-    );
-  }
-}
