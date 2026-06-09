@@ -6,7 +6,6 @@ import 'package:thawani_payment/pay.dart';
 import '../core/api_config.dart';
 import '../core/app_localizations.dart';
 import '../core/responsive_helper.dart';
-import '../core/url_launcher_helper.dart';
 import '../core/app_theme.dart';
 import '../core/bloc/app_cubit.dart';
 import '../core/selected_course_storage.dart';
@@ -307,6 +306,13 @@ class _PaymentScreenState extends State<PaymentScreen>
 
     if (!mounted) return;
 
+    // Dismiss processing dialog before navigation
+    if (Navigator.canPop(context)) {
+      Navigator.of(context).pop();
+    }
+
+    if (!mounted) return;
+
     Navigator.of(context).pushReplacement(
       MaterialPageRoute(
         builder: (_) => PaymentConfirmationScreen(
@@ -387,13 +393,9 @@ class _PaymentScreenState extends State<PaymentScreen>
             await _createApplicationsAfterPayment(
               studentUserId: studentUserId,
             );
-
-            if (mounted && Navigator.canPop(context)) {
-              Navigator.of(context).pop(); // dismiss loading dialog
-            }
           } on ApplicationApiException catch (e) {
             if (mounted && Navigator.canPop(context)) {
-              Navigator.of(context).pop();
+              Navigator.of(context).pop(); // dismiss processing dialog
             }
 
             if (e.statusCode == 409) {
@@ -403,7 +405,7 @@ class _PaymentScreenState extends State<PaymentScreen>
             snackBarService.showError(message: e.message);
           } catch (e) {
             if (mounted && Navigator.canPop(context)) {
-              Navigator.of(context).pop();
+              Navigator.of(context).pop(); // dismiss processing dialog
             }
 
             snackBarService.showError(message: e.toString());
@@ -446,63 +448,6 @@ class _PaymentScreenState extends State<PaymentScreen>
           );
         },
       );
-    } catch (e) {
-      snackBarService.showError(message: e.toString());
-    } finally {
-      if (mounted) {
-        updateView(() => _isSubmitting = false);
-      }
-    }
-  }
-
-  Future<void> _submitApplicationsAndContinue() async {
-    if (_isSubmitting) return;
-
-    updateView(() => _isSubmitting = true);
-
-    Map<String, dynamic>? createdApplicationsResponse;
-    Map<String, dynamic>? studentOverview;
-
-    try {
-      if (widget.applicationsPayload.isNotEmpty) {
-        final SharedPreferences prefs = await SharedPreferences.getInstance();
-
-        final String studentUserId =
-            prefs.getString('studentUserId')?.trim() ?? '';
-
-        if (studentUserId.isNotEmpty) {
-          createdApplicationsResponse =
-              await _applicationApiService.createBulkApplications(
-            studentUserId: studentUserId,
-            applications: widget.applicationsPayload,
-          );
-
-          studentOverview = await _fetchStudentOverview(studentUserId);
-        }
-      }
-
-      await SelectedCourseStorage.clear();
-
-      if (!mounted) return;
-
-      Navigator.of(context).push(
-        MaterialPageRoute(
-          builder: (_) => PaymentConfirmationScreen(
-            universityName: widget.universityName,
-            universityHeroImage: widget.universityHeroImage,
-            courseTitle: widget.courseTitle,
-            applicationsPayload: widget.applicationsPayload,
-            createdApplicationsResponse: createdApplicationsResponse,
-            studentOverview: studentOverview,
-          ),
-        ),
-      );
-    } on ApplicationApiException catch (e) {
-      if (e.statusCode == 409) {
-        await SelectedCourseStorage.clear();
-      }
-
-      snackBarService.showError(message: e.message);
     } catch (e) {
       snackBarService.showError(message: e.toString());
     } finally {
@@ -787,7 +732,7 @@ class _PaymentScreenState extends State<PaymentScreen>
 
                                 if (!mounted) return;
                                 Navigator.of(context).pop(true);
-                                await _submitApplicationsAndContinue();
+                                await _submitApplicationsAndPayOnline();
                               } on ApplicationApiException catch (e) {
                                 if (!mounted) return;
                                 snackBarService.showError(message: e.message);
