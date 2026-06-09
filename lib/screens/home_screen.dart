@@ -20,6 +20,7 @@ import '../controllers/home_controller.dart';
 import '../models/country_option.dart';
 import '../models/master_option.dart';
 import '../services/home_api_service.dart';
+import '../utils/auth_utils.dart';
 import '../widgets/app_drawer.dart';
 import '../widgets/common_widgets.dart';
 import 'side_menu/notifications_screen.dart';
@@ -83,6 +84,11 @@ class _HomeScreenState extends State<HomeScreen> {
           .where((item) => !item.isRead)
           .length;
       NotificationSyncService.instance.updateUnreadCount(unread);
+    } on ApplicationApiException catch (e) {
+      // Auto-logout if student user not found (404)
+      if (isStudentNotFoundError(e)) {
+        await performLogout(context);
+      }
     } catch (_) {}
   }
 

@@ -13,6 +13,7 @@ import '../models/country_master.dart';
 import '../services/application_api_service.dart';
 import '../services/auth_api_service.dart';
 import '../services/snackbar_service.dart';
+import '../utils/auth_utils.dart';
 import '../widgets/common_widgets.dart';
 import '../widgets/flow_widgets.dart';
 import 'payment_confirmation_screen.dart';
@@ -283,6 +284,12 @@ class _PaymentScreenState extends State<PaymentScreen>
       return await _applicationApiService.fetchStudentOverview(
         studentUserId: studentUserId,
       );
+    } on ApplicationApiException catch (e) {
+      // Auto-logout if student user not found (404)
+      if (isStudentNotFoundError(e)) {
+        await performLogout(context);
+      }
+      return null;
     } catch (_) {
       return null;
     }

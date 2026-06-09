@@ -6,6 +6,7 @@ import '../../core/app_theme.dart';
 import '../../core/bloc/app_cubit.dart';
 import '../../services/snackbar_service.dart';
 import '../../services/application_api_service.dart';
+import '../../utils/auth_utils.dart';
 import '../../widgets/common_widgets.dart';
 import 'side_menu_common.dart';
 
@@ -80,6 +81,18 @@ class _TermsConditionsScreenState extends State<TermsConditionsScreen>
 
         _loading = false;
       });
+    } on ApplicationApiException catch (e) {
+      // Auto-logout if student user not found (404)
+      if (isStudentNotFoundError(e)) {
+        await performLogout(context);
+        return;
+      }
+
+      updateView(() => _loading = false);
+
+      snackBarService.showError(
+        message: context.l10n.text('failedLoadTermsConditions'),
+      );
     } catch (_) {
       updateView(() => _loading = false);
 

@@ -8,6 +8,7 @@ import '../../core/student_session.dart';
 import '../../services/snackbar_service.dart';
 import '../../widgets/common_widgets.dart';
 import '../../services/application_api_service.dart';
+import '../../utils/auth_utils.dart';
 import 'side_menu_common.dart';
 
 class UploadedDocumentsScreen extends StatelessWidget {
@@ -142,6 +143,22 @@ class _UploadedDocumentsContentState extends State<UploadedDocumentsContent>
 
         _loading = false;
       });
+    } on ApplicationApiException catch (e) {
+      // Auto-logout if student user not found (404)
+      if (isStudentNotFoundError(e)) {
+        await performLogout(context);
+        return;
+      }
+
+      debugPrint('Load documents error: $e');
+
+      if (!mounted) return;
+
+      updateView(() => _loading = false);
+
+      snackBarService.showError(
+        message: context.l10n.text('failedLoadDocuments'),
+      );
     } catch (e) {
       debugPrint('Load documents error: $e');
 

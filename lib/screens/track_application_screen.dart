@@ -8,6 +8,7 @@ import '../core/app_theme.dart';
 import '../core/bloc/app_cubit.dart';
 import '../services/application_api_service.dart';
 import '../services/snackbar_service.dart';
+import '../utils/auth_utils.dart';
 import '../widgets/common_widgets.dart';
 import '../widgets/flow_widgets.dart';
 import 'home_screen.dart';
@@ -89,6 +90,16 @@ class _TrackApplicationScreenState extends State<TrackApplicationScreen>
           message: context.l10n.text('applicationDataRefreshed'),
         );
       }
+    } on ApplicationApiException catch (e) {
+      if (!mounted) return;
+
+      // Auto-logout if student user not found (404)
+      if (isStudentNotFoundError(e)) {
+        await performLogout(context);
+        return;
+      }
+
+      snackBarService.showError(message: e.toString());
     } catch (e) {
       if (!mounted) return;
 

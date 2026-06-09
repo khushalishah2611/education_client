@@ -10,6 +10,7 @@ import 'package:education/services/application_api_service.dart';
 import 'package:flutter/material.dart';
 import '../core/app_theme.dart';
 import '../core/responsive_helper.dart';
+import '../utils/auth_utils.dart';
 import '../widgets/common_widgets.dart';
 import '../widgets/flow_widgets.dart';
 import 'course_detail_screen.dart';
@@ -367,6 +368,14 @@ class _UniversityDetailScreenState extends State<UniversityDetailScreen>
         _selectedCourses.removeWhere(bookedKeys.contains);
       });
       await _syncSelectedCourses();
+    } on ApplicationApiException catch (e) {
+      // Auto-logout if student user not found (404)
+      if (isStudentNotFoundError(e)) {
+        await performLogout(context);
+        return;
+      }
+
+      debugPrint(e.toString());
     } catch (e) {
       debugPrint(e.toString());
     }

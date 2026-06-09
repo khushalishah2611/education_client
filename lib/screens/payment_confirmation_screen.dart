@@ -7,6 +7,7 @@ import '../core/app_theme.dart';
 import '../core/bloc/app_cubit.dart';
 import '../services/snackbar_service.dart';
 import '../services/application_api_service.dart';
+import '../utils/auth_utils.dart';
 import '../utils/payment_receipt_pdf.dart';
 import '../widgets/common_widgets.dart';
 import '../widgets/flow_widgets.dart';
@@ -71,6 +72,12 @@ class _PaymentConfirmationScreenState extends State<PaymentConfirmationScreen>
       if (!mounted) return;
 
       updateView(() => _studentOverview = overview);
+    } on ApplicationApiException catch (e) {
+      // Auto-logout if student user not found (404)
+      if (isStudentNotFoundError(e)) {
+        await performLogout(context);
+      }
+      // Keep using createdApplicationsResponse fallbacks for payment details.
     } catch (_) {
       // Keep using createdApplicationsResponse fallbacks for payment details.
     }

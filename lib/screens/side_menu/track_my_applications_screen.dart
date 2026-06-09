@@ -8,6 +8,7 @@ import '../../core/url_launcher_helper.dart';
 import '../../core/app_localizations.dart';
 import '../../core/app_theme.dart';
 import '../../core/bloc/app_cubit.dart';
+import '../../utils/auth_utils.dart';
 import 'side_menu_common.dart';
 
 class TrackMyApplicationsScreen extends StatefulWidget {
@@ -111,6 +112,21 @@ class _TrackMyApplicationsScreenState extends State<TrackMyApplicationsScreen>
 
         _loading = false;
       });
+    } on ApplicationApiException catch (e) {
+      if (!mounted) return;
+
+      // Auto-logout if student user not found (404)
+      if (isStudentNotFoundError(e)) {
+        await performLogout(context);
+        return;
+      }
+
+      updateView(() {
+        _apps = [];
+        _loading = false;
+      });
+
+      debugPrint(e.toString());
     } catch (e) {
       if (!mounted) return;
 

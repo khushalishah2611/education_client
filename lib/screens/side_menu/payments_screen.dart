@@ -5,6 +5,7 @@ import 'package:shared_preferences/shared_preferences.dart';
 import '../../core/app_localizations.dart';
 import '../../core/app_theme.dart';
 import '../../core/bloc/app_cubit.dart';
+import '../../utils/auth_utils.dart';
 import '../../utils/payment_receipt_pdf.dart';
 import '../../services/snackbar_service.dart';
 import '../../services/application_api_service.dart';
@@ -114,6 +115,18 @@ class _PaymentsContentState extends State<PaymentsContent>
 
         _loading = false;
       });
+    } on ApplicationApiException catch (e) {
+      // Auto-logout if student user not found (404)
+      if (isStudentNotFoundError(e)) {
+        await performLogout(context);
+        return;
+      }
+
+      updateView(() => _loading = false);
+
+      snackBarService.showError(
+        message: context.l10n.text('failedLoadPayments'),
+      );
     } catch (e) {
       updateView(() => _loading = false);
 

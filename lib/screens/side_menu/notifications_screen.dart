@@ -7,6 +7,7 @@ import '../../core/app_theme.dart';
 import '../../core/bloc/app_cubit.dart';
 import '../../services/application_api_service.dart';
 import '../../services/notification_sync_service.dart';
+import '../../utils/auth_utils.dart';
 import 'side_menu_common.dart';
 
 class NotificationsScreen extends StatefulWidget {
@@ -114,47 +115,63 @@ class _NotificationsScreenState extends State<NotificationsScreen>
   }
 
   Future<void> _load() async {
-    final prefs = await SharedPreferences.getInstance();
+    try {
+      final prefs = await SharedPreferences.getInstance();
 
-    final studentUserId = prefs.getString('studentUserId')?.trim() ?? '';
+      final studentUserId = prefs.getString('studentUserId')?.trim() ?? '';
 
-    final data = await _api.fetchStudentOverview(
-      studentUserId: studentUserId,
-    );
+      final data = await _api.fetchStudentOverview(
+        studentUserId: studentUserId,
+      );
 
-    final notifications = data['notifications'];
+      final notifications = data['notifications'];
 
-    if (!mounted) return;
+      if (!mounted) return;
 
-    updateView(() {
-      _items = (notifications is List)
-          ? notifications.map<Map<String, dynamic>>((item) {
-              return {
-                'id': item['id'] ?? '',
-                'titleEn': item['title'] ?? '',
-                'titleAr': item['titleAr'] ?? '',
-                'messageEn': item['message'] ?? '',
-                'messageAr': item['messageAr'] ?? '',
-                'createdAt': item['createdAt'] ?? '',
-                'isRead': item['isRead'] == true,
-              };
-            }).toList()
-          : [];
+      updateView(() {
+        _items = (notifications is List)
+            ? notifications.map<Map<String, dynamic>>((item) {
+                return {
+                  'id': item['id'] ?? '',
+                  'titleEn': item['title'] ?? '',
+                  'titleAr': item['titleAr'] ?? '',
+                  'messageEn': item['message'] ?? '',
+                  'messageAr': item['messageAr'] ?? '',
+                  'createdAt': item['createdAt'] ?? '',
+                  'isRead': item['isRead'] == true,
+                };
+              }).toList()
+            : [];
 
-      _items.sort((a, b) {
-        final aDate = DateTime.tryParse(a['createdAt'] ?? '') ?? DateTime.now();
+        _items.sort((a, b) {
+          final aDate = DateTime.tryParse(a['createdAt'] ?? '') ?? DateTime.now();
 
-        final bDate = DateTime.tryParse(b['createdAt'] ?? '') ?? DateTime.now();
+          final bDate = DateTime.tryParse(b['createdAt'] ?? '') ?? DateTime.now();
 
-        return bDate.compareTo(aDate);
+          return bDate.compareTo(aDate);
+        });
+
+        final unread = _items.where((item) => item['isRead'] != true).length;
+
+        NotificationSyncService.instance.updateUnreadCount(unread);
+
+        _loading = false;
       });
+    } on ApplicationApiException catch (e) {
+      // Auto-logout if student user not found (404)
+      if (isStudentNotFoundError(e)) {
+        await performLogout(context);
+        return;
+      }
 
-      final unread = _items.where((item) => item['isRead'] != true).length;
-
-      NotificationSyncService.instance.updateUnreadCount(unread);
-
-      _loading = false;
-    });
+      if (mounted) {
+        updateView(() => _loading = false);
+      }
+    } catch (e) {
+      if (mounted) {
+        updateView(() => _loading = false);
+      }
+    }
   }
 
   Future<void> _markAsRead(int index) async {

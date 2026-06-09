@@ -9,6 +9,7 @@ import '../core/student_session.dart';
 import '../models/document_type.dart';
 import '../services/application_api_service.dart';
 import '../services/snackbar_service.dart';
+import '../utils/auth_utils.dart';
 import '../widgets/common_widgets.dart';
 import '../widgets/flow_widgets.dart';
 import 'payment_screen.dart';
@@ -123,6 +124,14 @@ class _UploadDocumentsScreenState extends State<UploadDocumentsScreen>
         _documentTypes = types;
         _docs = docs;
       });
+    } on ApplicationApiException catch (e) {
+      // Auto-logout if student user not found (404)
+      if (isStudentNotFoundError(e)) {
+        await performLogout(context);
+        return;
+      }
+
+      debugPrint(e.toString());
     } catch (e) {
       debugPrint(e.toString());
     } finally {
