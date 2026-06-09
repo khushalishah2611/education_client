@@ -1241,7 +1241,7 @@ class _CollegeAccordionState extends State<_CollegeAccordion> {
       'universityId': adminUniversity.id,
       'programId': courseDetails.programId,
       'selectedCourseKeys': <String>[apiCourseKey],
-      'selectedCollege': collegeName,
+      'selectedCollege': collegeName.split('-').first.trim(),
       'selectedCourses': <Map<String, dynamic>>[selectedCourse],
       'selectedApplicationFeeTotal': applicationFee,
     };
