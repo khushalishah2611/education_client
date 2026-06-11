@@ -1,3 +1,4 @@
+import 'dart:async';
 import 'dart:io';
 
 import 'package:education/core/api_config.dart';
@@ -69,20 +70,8 @@ class _ProfileBodyState extends State<ProfileBody>
     r'^[^@\s]+@[^@\s]+\.[^@\s]+$',
   );
 
-  final ScrollController _scrollController = ScrollController();
-  final Map<String, GlobalKey> _fieldKeys = <String, GlobalKey>{
-    'fullName': GlobalKey(),
-    'dateOfBirth': GlobalKey(),
-    'country': GlobalKey(),
-    'mobileNumber': GlobalKey(),
-    'age': GlobalKey(),
-    'email': GlobalKey(),
-    'guardianName': GlobalKey(),
-    'relationship': GlobalKey(),
-    'emergencyMobile': GlobalKey(),
-    'emergencyEmail': GlobalKey(),
-  };
-  Map<String, String> _fieldErrors = <String, String>{};
+  String? _validationMessage;
+  Timer? _validationTimer;
 
   @override
   void initState() {
@@ -105,7 +94,6 @@ class _ProfileBodyState extends State<ProfileBody>
 
   @override
   void dispose() {
-    _scrollController.dispose();
     _fullNameController.dispose();
     _emailController.dispose();
     _ageController.dispose();
@@ -115,6 +103,7 @@ class _ProfileBodyState extends State<ProfileBody>
     _relationshipController.dispose();
     _emergencyMobileController.dispose();
     _emergencyEmailController.dispose();
+    _validationTimer?.cancel();
     super.dispose();
   }
 
@@ -137,9 +126,7 @@ class _ProfileBodyState extends State<ProfileBody>
       }
     } catch (_) {
       if (!mounted) return;
-      snackBarService.showError(
-        message: context.l10n.text('failedLoadLoginData'),
-      );
+      _showValidationError(context.l10n.text('failedLoadLoginData'));
     } finally {
       if (mounted) {
         updateView(() {
@@ -228,8 +215,8 @@ class _ProfileBodyState extends State<ProfileBody>
       if (mounted) {
         refreshView();
       }
-    } catch (e) {
-      snackBarService.showError(message: e.toString());
+    } catch (_) {
+      // Keep login session defaults when profile load fails.
     }
   }
 
@@ -286,9 +273,29 @@ class _ProfileBodyState extends State<ProfileBody>
     if (date != null) {
       updateView(() {
         _dobController.text = DateFormat('dd-MM-yyyy').format(date);
-        _fieldErrors.remove('dateOfBirth');
+        _validationMessage = null;
       });
     }
+  }
+
+  void _showValidationError(String message) {
+    _validationTimer?.cancel();
+    updateView(() {
+      _validationMessage = message;
+    });
+    _validationTimer = Timer(const Duration(seconds: 3), () {
+      if (mounted) {
+        _clearValidationError();
+      }
+    });
+  }
+
+  void _clearValidationError() {
+    _validationTimer?.cancel();
+    if (_validationMessage == null) return;
+    updateView(() {
+      _validationMessage = null;
+    });
   }
 
   Future<void> _pickProfileImage() async {
@@ -306,42 +313,14 @@ class _ProfileBodyState extends State<ProfileBody>
     });
   }
 
-  void _clearFieldError(String fieldKey) {
-    if (!_fieldErrors.containsKey(fieldKey)) return;
-    updateView(() {
-      _fieldErrors.remove(fieldKey);
-    });
-  }
-
-  void _scrollToFirstError(Map<String, String> errors) {
-    if (errors.isEmpty) return;
-
-    WidgetsBinding.instance.addPostFrameCallback((_) {
-      for (final String fieldKey in _fieldKeys.keys) {
-        if (!errors.containsKey(fieldKey)) continue;
-
-        final BuildContext? fieldContext = _fieldKeys[fieldKey]?.currentContext;
-        if (fieldContext == null) return;
-
-        Scrollable.ensureVisible(
-          fieldContext,
-          duration: const Duration(milliseconds: 300),
-          curve: Curves.easeInOut,
-          alignment: 0.2,
-        );
-        return;
-      }
-    });
-  }
-
   Future<void> _saveProfile() async {
     if (_studentUserId.isEmpty) return;
-    final Map<String, String> validationErrors = _validateProfileForm();
-    if (validationErrors.isNotEmpty) {
-      updateView(() {
-        _fieldErrors = validationErrors;
-      });
-      _scrollToFirstError(validationErrors);
+
+    final String? validationMessage = _firstValidationMessage(
+      _validateProfileForm(),
+    );
+    if (validationMessage != null) {
+      _showValidationError(validationMessage);
       return;
     }
 
@@ -360,7 +339,7 @@ class _ProfileBodyState extends State<ProfileBody>
 
     updateView(() {
       _isSaving = true;
-      _fieldErrors = <String, String>{};
+      _validationMessage = null;
     });
 
     try {
@@ -389,7 +368,8 @@ class _ProfileBodyState extends State<ProfileBody>
       if (!mounted) return;
 
       snackBarService.showSuccess(
-        message: res['message']?.toString() ?? 'Student updated successfully.',
+        message: res['message']?.toString() ??
+            context.l10n.text('studentUpdatedSuccessfully'),
       );
 
       Navigator.of(context).push(
@@ -397,8 +377,12 @@ class _ProfileBodyState extends State<ProfileBody>
           builder: (_) => const HomeScreen(),
         ),
       );
-    } catch (e) {
-      snackBarService.showError(message: e.toString());
+    } on ApplicationApiException catch (e) {
+      if (!mounted) return;
+      _showValidationError(e.message);
+    } catch (_) {
+      if (!mounted) return;
+      _showValidationError(context.l10n.text('somethingWentWrong'));
     } finally {
       if (mounted) {
         updateView(() {
@@ -409,69 +393,91 @@ class _ProfileBodyState extends State<ProfileBody>
   }
 
   Map<String, String> _validateProfileForm() {
+    final AppLocalizations l10n = context.l10n;
     final Map<String, String> errors = <String, String>{};
 
-    final String fullName = _fullNameController.text.trim();
-    if (fullName.isEmpty) {
-      errors['fullName'] = 'Please enter full name.';
+    if (_fullNameController.text.trim().isEmpty) {
+      errors['fullName'] = l10n.text('pleaseEnterFullName');
     }
 
-    final String dob = _dobController.text.trim();
-    if (dob.isEmpty) {
-      errors['dateOfBirth'] = 'Please select date of birth.';
+    if (_dobController.text.trim().isEmpty) {
+      errors['dateOfBirth'] = l10n.text('pleaseSelectDateOfBirth');
     }
 
-    final String country = (_selectedCountry?.value ?? '').trim();
-    if (country.isEmpty) {
-      errors['country'] = 'Please select country.';
+    if ((_selectedCountry?.value ?? '').trim().isEmpty) {
+      errors['country'] = l10n.text('pleaseSelectCountry');
     }
 
-    final String phone = _phoneController.text.trim();
-    if (phone.isEmpty) {
-      errors['mobileNumber'] = 'Please enter mobile number.';
+    if (_phoneController.text.trim().isEmpty) {
+      errors['mobileNumber'] = l10n.text('pleaseEnterMobileNumber');
     }
 
     final String ageText = _ageController.text.trim();
     if (ageText.isEmpty) {
-      errors['age'] = 'Please enter age.';
+      errors['age'] = l10n.text('pleaseEnterAge');
     } else {
       final int? age = int.tryParse(ageText);
       if (age == null || age <= 0) {
-        errors['age'] = 'Please enter a valid age.';
+        errors['age'] = l10n.text('pleaseEnterValidAge');
       }
     }
 
     final String email = _emailController.text.trim();
     if (email.isEmpty) {
-      errors['email'] = 'Please enter email address.';
+      errors['email'] = l10n.text('pleaseEnterEmailAddress');
     } else if (!_emailRegex.hasMatch(email)) {
-      errors['email'] = 'Please enter a valid email address.';
+      errors['email'] = l10n.text('pleaseEnterValidEmailAddress');
     }
 
-    final String guardian = _guardianController.text.trim();
-    if (guardian.isEmpty) {
-      errors['guardianName'] = 'Please enter guardian name.';
+    if (_guardianController.text.trim().isEmpty) {
+      errors['guardianName'] = l10n.text('pleaseEnterGuardianName');
     }
 
-    final String relationship = _relationshipController.text.trim();
-    if (relationship.isEmpty) {
-      errors['relationship'] = 'Please enter relationship.';
+    if (_relationshipController.text.trim().isEmpty) {
+      errors['relationship'] = l10n.text('pleaseEnterRelationship');
     }
 
-    final String emergencyMobile = _emergencyMobileController.text.trim();
-    if (emergencyMobile.isEmpty) {
-      errors['emergencyMobile'] = 'Please enter emergency mobile number.';
+    if (_emergencyMobileController.text.trim().isEmpty) {
+      errors['emergencyMobile'] =
+          l10n.text('pleaseEnterEmergencyMobileNumber');
     }
 
     final String emergencyEmail = _emergencyEmailController.text.trim();
     if (emergencyEmail.isEmpty) {
-      errors['emergencyEmail'] = 'Please enter emergency email address.';
+      errors['emergencyEmail'] =
+          l10n.text('pleaseEnterEmergencyEmailAddress');
     } else if (!_emailRegex.hasMatch(emergencyEmail)) {
       errors['emergencyEmail'] =
-          'Please enter a valid emergency email address.';
+          l10n.text('pleaseEnterValidEmergencyEmailAddress');
     }
 
     return errors;
+  }
+
+  String? _firstValidationMessage(Map<String, String> errors) {
+    if (errors.isEmpty) return null;
+
+    const List<String> fieldOrder = <String>[
+      'fullName',
+      'dateOfBirth',
+      'country',
+      'mobileNumber',
+      'age',
+      'email',
+      'guardianName',
+      'relationship',
+      'emergencyMobile',
+      'emergencyEmail',
+    ];
+
+    for (final String fieldKey in fieldOrder) {
+      final String? message = errors[fieldKey];
+      if (message != null && message.isNotEmpty) {
+        return message;
+      }
+    }
+
+    return errors.values.first;
   }
 
   @override
@@ -481,178 +487,147 @@ class _ProfileBodyState extends State<ProfileBody>
         return const _ProfileShimmer();
       }
 
-      return Padding(
-        padding: const EdgeInsets.all(16),
-        child: ListView(
-          controller: _scrollController,
-          children: [
-            const SizedBox(height: 8),
-            ProfileAvatar(
-              imagePath: _profileImagePath,
-              selectedImagePath: _selectedProfileImage?.path,
-              onEdit: _pickProfileImage,
-            ),
-            const SizedBox(height: 22),
-            ProfileSectionTitle(
-              context.l10n.text('basicInformation'),
-            ),
-            const SizedBox(height: 14),
-            ProfileLabel(context.l10n.text('fullName')),
-            KeyedSubtree(
-              key: _fieldKeys['fullName'],
-              child: ProfileInput(
-                controller: _fullNameController,
-                hint: context.l10n.text('firstMiddleLast'),
-                icon: Icons.person_outline_rounded,
-                errorText: _fieldErrors['fullName'],
-                onChanged: (_) => _clearFieldError('fullName'),
+      final AppLocalizations l10n = context.l10n;
+
+      return Column(
+        children: [
+          Expanded(
+            child: Padding(
+              padding: const EdgeInsets.all(16),
+              child: ListView(
+                children: [
+                  const SizedBox(height: 8),
+                  ProfileAvatar(
+                    imagePath: _profileImagePath,
+                    selectedImagePath: _selectedProfileImage?.path,
+                    onEdit: _pickProfileImage,
+                  ),
+                  const SizedBox(height: 22),
+                  ProfileSectionTitle(
+                    l10n.text('basicInformation'),
+                  ),
+                  const SizedBox(height: 14),
+                  ProfileLabel(l10n.text('fullName')),
+                  ProfileInput(
+                    controller: _fullNameController,
+                    hint: l10n.text('firstMiddleLast'),
+                    icon: Icons.person_outline_rounded,
+                    onChanged: (_) => _clearValidationError(),
+                  ),
+                  const SizedBox(height: 14),
+                  ProfileLabel(l10n.text('gender')),
+                  GenderSelector(
+                    selected: _gender,
+                    onChanged: (v) {
+                      updateView(() {
+                        _gender = v;
+                        _validationMessage = null;
+                      });
+                    },
+                  ),
+                  const SizedBox(height: 14),
+                  ProfileLabel(l10n.text('dateOfBirth')),
+                  ProfileInput(
+                    controller: _dobController,
+                    hint: l10n.text('dateFormatHint'),
+                    icon: Icons.calendar_month_outlined,
+                    readOnly: true,
+                    onTap: _pickDob,
+                  ),
+                  const SizedBox(height: 14),
+                  ProfileLabel(l10n.text('country')),
+                  CountryDropdownField(
+                    countries: _countries,
+                    selectedCountry: _selectedCountry,
+                    isLoading: _isLoadingCountries,
+                    onCountryChanged: (CountryMaster? value) {
+                      updateView(() {
+                        _selectedCountry = value;
+                        _validationMessage = null;
+                      });
+                    },
+                  ),
+                  const SizedBox(height: 14),
+                  ProfileLabel(l10n.text('mobileNumber')),
+                  MobileNumberField(
+                    dialCode: _selectedCountry?.dialCode ?? '',
+                    mobileController: _phoneController,
+                    onChanged: (_) => _clearValidationError(),
+                  ),
+                  const SizedBox(height: 14),
+                  ProfileLabel(l10n.text('age')),
+                  ProfileInput(
+                    controller: _ageController,
+                    hint: l10n.text('age'),
+                    icon: Icons.numbers_outlined,
+                    keyboardType: TextInputType.number,
+                    onChanged: (_) => _clearValidationError(),
+                  ),
+                  const SizedBox(height: 14),
+                  ProfileLabel(l10n.text('emailAddress')),
+                  ProfileInput(
+                    controller: _emailController,
+                    hint: l10n.text('emailAddress'),
+                    icon: Icons.mail_outline_rounded,
+                    keyboardType: TextInputType.emailAddress,
+                    onChanged: (_) => _clearValidationError(),
+                  ),
+                  const SizedBox(height: 22),
+                  ProfileSectionTitle(
+                    l10n.text('emergencyContact'),
+                  ),
+                  const SizedBox(height: 14),
+                  ProfileLabel(l10n.text('guardianName')),
+                  ProfileInput(
+                    controller: _guardianController,
+                    hint: l10n.text('guardianName'),
+                    icon: Icons.person_outline_rounded,
+                    onChanged: (_) => _clearValidationError(),
+                  ),
+                  const SizedBox(height: 14),
+                  ProfileLabel(l10n.text('relationship')),
+                  ProfileInput(
+                    controller: _relationshipController,
+                    hint: l10n.text('relationship'),
+                    icon: Icons.people_outline_rounded,
+                    onChanged: (_) => _clearValidationError(),
+                  ),
+                  const SizedBox(height: 14),
+                  ProfileLabel(l10n.text('mobileNumber')),
+                  ProfileInput(
+                    controller: _emergencyMobileController,
+                    hint: l10n.text('mobileNumber'),
+                    icon: Icons.call_outlined,
+                    keyboardType: TextInputType.phone,
+                    onChanged: (_) => _clearValidationError(),
+                  ),
+                  const SizedBox(height: 14),
+                  ProfileLabel(l10n.text('emailAddress')),
+                  ProfileInput(
+                    controller: _emergencyEmailController,
+                    hint: l10n.text('emailAddress'),
+                    icon: Icons.mail_outline_rounded,
+                    keyboardType: TextInputType.emailAddress,
+                    onChanged: (_) => _clearValidationError(),
+                  ),
+                  const SizedBox(height: 20),
+                ],
               ),
             ),
-            const SizedBox(height: 14),
-            ProfileLabel(context.l10n.text('gender')),
-            GenderSelector(
-              selected: _gender,
-              onChanged: (v) {
-                updateView(() {
-                  _gender = v;
-                });
-              },
-            ),
-            const SizedBox(height: 14),
-            ProfileLabel(context.l10n.text('dateOfBirth')),
-            KeyedSubtree(
-              key: _fieldKeys['dateOfBirth'],
-              child: ProfileInput(
-                controller: _dobController,
-                hint: 'DD-MM-YYYY',
-                icon: Icons.calendar_month_outlined,
-                readOnly: true,
-                errorText: _fieldErrors['dateOfBirth'],
-                onTap: _pickDob,
+          ),
+          if (_validationMessage != null)
+            _ProfileValidationBanner(message: _validationMessage!),
+          SafeArea(
+            top: false,
+            child: Padding(
+              padding: const EdgeInsets.fromLTRB(16, 0, 16, 16),
+              child: AppPrimaryButton(
+                label: l10n.text('save'),
+                onPressed: _isSaving ? null : _saveProfile,
               ),
             ),
-            const SizedBox(height: 14),
-            ProfileLabel(context.l10n.text('country')),
-            KeyedSubtree(
-              key: _fieldKeys['country'],
-              child: CountryDropdownField(
-                countries: _countries,
-                selectedCountry: _selectedCountry,
-                isLoading: _isLoadingCountries,
-                errorText: _fieldErrors['country'],
-                onCountryChanged: (v) {
-                  updateView(() {
-                    _selectedCountry = v;
-                    _fieldErrors.remove('country');
-                  });
-                },
-              ),
-            ),
-            const SizedBox(height: 14),
-            ProfileLabel(context.l10n.text('mobileNumber')),
-            KeyedSubtree(
-              key: _fieldKeys['mobileNumber'],
-              child: MobileNumberField(
-                dialCode: _selectedCountry?.dialCode ?? '',
-                mobileController: _phoneController,
-                errorText: _fieldErrors['mobileNumber'],
-                onChanged: (_) => _clearFieldError('mobileNumber'),
-              ),
-            ),
-            const SizedBox(height: 14),
-            ProfileLabel(context.l10n.text('age')),
-            KeyedSubtree(
-              key: _fieldKeys['age'],
-              child: ProfileInput(
-                controller: _ageController,
-                hint: context.l10n.text('age'),
-                icon: Icons.numbers_outlined,
-                errorText: _fieldErrors['age'],
-                onChanged: (_) => _clearFieldError('age'),
-              ),
-            ),
-            const SizedBox(height: 14),
-            ProfileLabel(
-              context.l10n.text('emailAddress'),
-            ),
-            KeyedSubtree(
-              key: _fieldKeys['email'],
-              child: ProfileInput(
-                controller: _emailController,
-                hint: context.l10n.text('emailAddress'),
-                icon: Icons.mail_outline_rounded,
-                errorText: _fieldErrors['email'],
-                onChanged: (_) => _clearFieldError('email'),
-              ),
-            ),
-            const SizedBox(height: 22),
-            ProfileSectionTitle(
-              context.l10n.text('emergencyContact'),
-            ),
-            const SizedBox(height: 14),
-            ProfileLabel(
-              context.l10n.text('guardianName'),
-            ),
-            KeyedSubtree(
-              key: _fieldKeys['guardianName'],
-              child: ProfileInput(
-                controller: _guardianController,
-                hint: context.l10n.text('guardianName'),
-                icon: Icons.person_outline_rounded,
-                errorText: _fieldErrors['guardianName'],
-                onChanged: (_) => _clearFieldError('guardianName'),
-              ),
-            ),
-            const SizedBox(height: 14),
-            ProfileLabel(
-              context.l10n.text('relationship'),
-            ),
-            KeyedSubtree(
-              key: _fieldKeys['relationship'],
-              child: ProfileInput(
-                controller: _relationshipController,
-                hint: context.l10n.text('relationship'),
-                icon: Icons.people_outline_rounded,
-                errorText: _fieldErrors['relationship'],
-                onChanged: (_) => _clearFieldError('relationship'),
-              ),
-            ),
-            const SizedBox(height: 14),
-            ProfileLabel(
-              context.l10n.text('mobileNumber'),
-            ),
-            KeyedSubtree(
-              key: _fieldKeys['emergencyMobile'],
-              child: ProfileInput(
-                controller: _emergencyMobileController,
-                hint: context.l10n.text('mobileNumber'),
-                icon: Icons.call_outlined,
-                errorText: _fieldErrors['emergencyMobile'],
-                onChanged: (_) => _clearFieldError('emergencyMobile'),
-              ),
-            ),
-            const SizedBox(height: 14),
-            ProfileLabel(
-              context.l10n.text('emailAddress'),
-            ),
-            KeyedSubtree(
-              key: _fieldKeys['emergencyEmail'],
-              child: ProfileInput(
-                controller: _emergencyEmailController,
-                hint: context.l10n.text('emailAddress'),
-                icon: Icons.mail_outline_rounded,
-                errorText: _fieldErrors['emergencyEmail'],
-                onChanged: (_) => _clearFieldError('emergencyEmail'),
-              ),
-            ),
-            const SizedBox(height: 28),
-            AppPrimaryButton(
-              label: context.l10n.text('save'),
-              onPressed: _isSaving ? null : _saveProfile,
-            ),
-            const SizedBox(height: 20),
-          ],
-        ),
+          ),
+        ],
       );
     });
   }
@@ -1060,8 +1035,8 @@ class ProfileInput extends StatelessWidget {
     required this.icon,
     this.readOnly = false,
     this.onTap,
-    this.errorText,
     this.onChanged,
+    this.keyboardType,
   });
 
   final TextEditingController controller;
@@ -1069,8 +1044,8 @@ class ProfileInput extends StatelessWidget {
   final IconData icon;
   final bool readOnly;
   final VoidCallback? onTap;
-  final String? errorText;
   final ValueChanged<String>? onChanged;
+  final TextInputType? keyboardType;
 
   @override
   Widget build(BuildContext context) {
@@ -1081,6 +1056,7 @@ class ProfileInput extends StatelessWidget {
         readOnly: readOnly,
         onTap: onTap,
         onChanged: onChanged,
+        keyboardType: keyboardType,
         decoration: InputDecoration(
           prefixIcon: Icon(
             icon,
@@ -1088,7 +1064,6 @@ class ProfileInput extends StatelessWidget {
             color: AppColors.textMuted,
           ),
           hintText: hint,
-          errorText: errorText,
           filled: true,
           fillColor: const Color(0xFFF4F4F4),
           contentPadding: const EdgeInsets.symmetric(
@@ -1103,31 +1078,52 @@ class ProfileInput extends StatelessWidget {
           ),
           enabledBorder: OutlineInputBorder(
             borderRadius: BorderRadius.circular(12),
-            borderSide: BorderSide(
-              color: (errorText ?? '').isNotEmpty
-                  ? Colors.red.shade700
-                  : const Color(0xFFD7D5D3),
+            borderSide: const BorderSide(
+              color: Color(0xFFD7D5D3),
             ),
           ),
           focusedBorder: OutlineInputBorder(
             borderRadius: BorderRadius.circular(12),
-            borderSide: BorderSide(
-              color: (errorText ?? '').isNotEmpty
-                  ? Colors.red.shade700
-                  : AppColors.accent,
+            borderSide: const BorderSide(
+              color: AppColors.accent,
             ),
           ),
-          errorBorder: OutlineInputBorder(
-            borderRadius: BorderRadius.circular(12),
-            borderSide: BorderSide(
-              color: Colors.red.shade700,
-            ),
-          ),
-          focusedErrorBorder: OutlineInputBorder(
-            borderRadius: BorderRadius.circular(12),
-            borderSide: BorderSide(
-              color: Colors.red.shade700,
-            ),
+        ),
+      ),
+    );
+  }
+}
+
+class _ProfileValidationBanner extends StatelessWidget {
+  const _ProfileValidationBanner({
+    required this.message,
+  });
+
+  final String message;
+
+  @override
+  Widget build(BuildContext context) {
+    return SafeArea(
+      top: false,
+      child: Container(
+        width: double.infinity,
+        margin: const EdgeInsets.symmetric(horizontal: 16),
+        padding: const EdgeInsets.symmetric(
+          horizontal: 16,
+          vertical: 12,
+        ),
+        decoration: BoxDecoration(
+          color: Colors.red.shade700,
+          borderRadius: BorderRadius.circular(12),
+        ),
+        child: Text(
+          message,
+          textAlign: TextAlign.center,
+          style: const TextStyle(
+            color: Colors.white,
+            fontSize: 14,
+            fontWeight: FontWeight.w500,
+            height: 1.35,
           ),
         ),
       ),

@@ -1,3 +1,5 @@
+import 'dart:async';
+
 import 'package:flutter/material.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:thawani_payment/models/products.dart';
@@ -55,7 +57,6 @@ class _PaymentScreenState extends State<PaymentScreen>
   List<CountryMaster> _countries = const [];
   bool _isLoadingCountries = true;
   bool _profileLoaded = false;
-
   @override
   void initState() {
     super.initState();
@@ -409,12 +410,14 @@ class _PaymentScreenState extends State<PaymentScreen>
             }
 
             snackBarService.showError(message: e.message);
-          } catch (e) {
+          } catch (_) {
             if (mounted && Navigator.canPop(context)) {
               Navigator.of(context).pop(); // dismiss processing dialog
             }
 
-            snackBarService.showError(message: e.toString());
+            snackBarService.showError(
+              message: context.l10n.text('somethingWentWrong'),
+            );
           }
         },
         onCancelled: (response) {
@@ -454,8 +457,11 @@ class _PaymentScreenState extends State<PaymentScreen>
           );
         },
       );
-    } catch (e) {
-      snackBarService.showError(message: e.toString());
+    } catch (_) {
+      if (!mounted) return;
+      snackBarService.showError(
+        message: context.l10n.text('somethingWentWrong'),
+      );
     } finally {
       if (mounted) {
         updateView(() => _isSubmitting = false);
@@ -474,6 +480,8 @@ class _PaymentScreenState extends State<PaymentScreen>
       return;
     }
 
+    Timer? validationTimer;
+
     await showModalBottomSheet<bool>(
       context: context,
       isScrollControlled: true,
@@ -486,28 +494,40 @@ class _PaymentScreenState extends State<PaymentScreen>
       builder: (BuildContext context) {
         String gender = _normalizeGender(_gender);
         bool isUpdating = false;
-
-        // Inline field error strings
-        String? fullNameError;
-        String? emailError;
-        String? phoneError;
-        String? countryError;
-        String? apiError;
+        String? validationMessage;
 
         return StatefulBuilder(
           builder: (BuildContext context, StateSetter setState) {
+            void showValidationError(String msg) {
+              validationTimer?.cancel();
+              setState(() {
+                validationMessage = msg;
+              });
+              validationTimer = Timer(const Duration(seconds: 3), () {
+                if (context.mounted) {
+                  setState(() {
+                    validationMessage = null;
+                  });
+                }
+              });
+            }
+
             return Padding(
               padding: EdgeInsets.only(
                 left: 20,
                 right: 20,
                 top: 20,
-                bottom: MediaQuery.of(context).viewInsets.bottom + 20,
+                bottom: MediaQuery.of(context).viewInsets.bottom,
               ),
-              child: SingleChildScrollView(
-                child: Column(
-                  mainAxisSize: MainAxisSize.min,
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
+              child: Column(
+                mainAxisSize: MainAxisSize.min,
+                children: [
+                  Flexible(
+                    child: SingleChildScrollView(
+                      child: Column(
+                        mainAxisSize: MainAxisSize.min,
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
                     Align(
                       alignment: Alignment.center,
                       child: Container(
@@ -531,15 +551,9 @@ class _PaymentScreenState extends State<PaymentScreen>
                     TextFormField(
                       controller: _fullNameController,
                       textInputAction: TextInputAction.next,
-                      onChanged: (_) {
-                        if (fullNameError != null) {
-                          setState(() => fullNameError = null);
-                        }
-                      },
                       decoration: InputDecoration(
                         labelText: context.l10n.text('fullName'),
                         border: const OutlineInputBorder(),
-                        errorText: fullNameError,
                       ),
                     ),
                     const SizedBox(height: 12),
@@ -547,15 +561,9 @@ class _PaymentScreenState extends State<PaymentScreen>
                       controller: _emailController,
                       keyboardType: TextInputType.emailAddress,
                       textInputAction: TextInputAction.next,
-                      onChanged: (_) {
-                        if (emailError != null) {
-                          setState(() => emailError = null);
-                        }
-                      },
                       decoration: InputDecoration(
                         labelText: context.l10n.text('email'),
                         border: const OutlineInputBorder(),
-                        errorText: emailError,
                       ),
                     ),
                     const SizedBox(height: 12),
@@ -568,18 +576,11 @@ class _PaymentScreenState extends State<PaymentScreen>
                       decoration: BoxDecoration(
                         color: Colors.white,
                         borderRadius: BorderRadius.circular(12),
-                        border: Border.all(
-                          color: countryError != null
-                              ? Colors.red.shade700
-                              : AppColors.border,
-                        ),
+                        border: Border.all(color: AppColors.border),
                       ),
-                      child: Column(
-                        crossAxisAlignment: CrossAxisAlignment.start,
-                        children: [
-                          SizedBox(
-                            height: 50,
-                            child: Row(
+                      child: SizedBox(
+                        height: 50,
+                        child: Row(
                               children: [
                                 const SizedBox(width: 12),
                                 Builder(
@@ -660,7 +661,6 @@ class _PaymentScreenState extends State<PaymentScreen>
                                                     _selectedCountryDialCode =
                                                         selectedCountry
                                                             .dialCode;
-                                                    countryError = null;
                                                   });
                                                 },
                                         ),
@@ -678,11 +678,6 @@ class _PaymentScreenState extends State<PaymentScreen>
                                     controller: _phoneController,
                                     keyboardType: TextInputType.phone,
                                     readOnly: true,
-                                    onChanged: (_) {
-                                      if (phoneError != null) {
-                                        setState(() => phoneError = null);
-                                      }
-                                    },
                                     decoration: InputDecoration(
                                       contentPadding:
                                           const EdgeInsets.all(5),
@@ -699,20 +694,6 @@ class _PaymentScreenState extends State<PaymentScreen>
                                 const SizedBox(width: 12),
                               ],
                             ),
-                          ),
-                          if (countryError != null)
-                            Padding(
-                              padding: const EdgeInsets.only(
-                                  left: 12, bottom: 8, top: 4),
-                              child: Text(
-                                countryError!,
-                                style: TextStyle(
-                                  fontSize: 12,
-                                  color: Colors.red.shade700,
-                                ),
-                              ),
-                            ),
-                        ],
                       ),
                     ),
                     const SizedBox(height: 12),
@@ -736,25 +717,41 @@ class _PaymentScreenState extends State<PaymentScreen>
                           .toList(),
                       onChanged: (String? value) {
                         if (value != null) {
-                          setState(() {
-                            gender = value;
-                          });
+                          setState(() => gender = value);
                         }
                       },
                     ),
-                    // API-level error (e.g. network failure after submit)
-                    if (apiError != null) ...[
-                      const SizedBox(height: 10),
-                      Text(
-                        apiError!,
-                        style: TextStyle(
-                          fontSize: 13,
-                          color: Colors.red.shade700,
+                    const SizedBox(height: 12),
+                        ],
+                      ),
+                    ),
+                  ),
+                  if (validationMessage != null)
+                    Container(
+                      width: double.infinity,
+                      margin: const EdgeInsets.only(top: 12),
+                      padding: const EdgeInsets.symmetric(
+                        horizontal: 16,
+                        vertical: 12,
+                      ),
+                      decoration: BoxDecoration(
+                        color: Colors.red.shade700,
+                        borderRadius: BorderRadius.circular(12),
+                      ),
+                      child: Text(
+                        validationMessage!,
+                        textAlign: TextAlign.center,
+                        style: const TextStyle(
+                          color: Colors.white,
+                          fontSize: 14,
+                          fontWeight: FontWeight.w500,
+                          height: 1.35,
                         ),
                       ),
-                    ],
-                    const SizedBox(height: 20),
-                    AppPrimaryButton(
+                    ),
+                  Padding(
+                    padding: const EdgeInsets.fromLTRB(0, 12, 0, 20),
+                    child: AppPrimaryButton(
                       label: context.l10n.text('updateProfile'),
                       onPressed: isUpdating
                           ? null
@@ -765,39 +762,23 @@ class _PaymentScreenState extends State<PaymentScreen>
                               final String phone = _phoneController.text.trim();
                               final String country = _selectedCountry.trim();
 
-                              // Inline validation — no snackbar
-                              String? fnErr;
-                              String? emErr;
-                              String? phErr;
-                              String? coErr;
-
+                              String? message;
                               if (fullName.isEmpty) {
-                                fnErr = context.l10n
+                                message = context.l10n
                                     .text('pleaseEnterFullName');
-                              }
-                              if (email.isEmpty) {
-                                emErr = context.l10n
+                              } else if (email.isEmpty) {
+                                message = context.l10n
                                     .text('pleaseEnterEmailAddress');
-                              }
-                              if (phone.isEmpty) {
-                                phErr = context.l10n
+                              } else if (phone.isEmpty) {
+                                message = context.l10n
                                     .text('pleaseEnterMobileNumber');
-                              }
-                              if (country.isEmpty) {
-                                coErr =
+                              } else if (country.isEmpty) {
+                                message =
                                     context.l10n.text('pleaseSelectCountry');
                               }
 
-                              if (fnErr != null ||
-                                  emErr != null ||
-                                  phErr != null ||
-                                  coErr != null) {
-                                setState(() {
-                                  fullNameError = fnErr;
-                                  emailError = emErr;
-                                  phoneError = phErr;
-                                  countryError = coErr;
-                                });
+                              if (message != null) {
+                                showValidationError(message);
                                 return;
                               }
 
@@ -835,10 +816,12 @@ class _PaymentScreenState extends State<PaymentScreen>
                                 await _submitApplicationsAndPayOnline();
                               } on ApplicationApiException catch (e) {
                                 if (!context.mounted) return;
-                                setState(() => apiError = e.message);
-                              } catch (e) {
+                                showValidationError(e.message);
+                              } catch (_) {
                                 if (!context.mounted) return;
-                                setState(() => apiError = e.toString());
+                                showValidationError(
+                                  context.l10n.text('somethingWentWrong'),
+                                );
                               } finally {
                                 if (context.mounted) {
                                   setState(() => isUpdating = false);
@@ -846,15 +829,16 @@ class _PaymentScreenState extends State<PaymentScreen>
                               }
                             },
                     ),
-                    const SizedBox(height: 12),
-                  ],
-                ),
+                  ),
+                ],
               ),
             );
           },
         );
       },
-    );
+    ).whenComplete(() {
+      validationTimer?.cancel();
+    });
   }
 
   @override
@@ -944,12 +928,17 @@ class _PaymentScreenState extends State<PaymentScreen>
                               ],
                             ),
                           ),
-                          const SizedBox(height: 30),
-                          AppPrimaryButton(
-                            label: context.l10n.text('payNow'),
-                            onPressed: _isSubmitting ? null : _handlePayNow,
-                          ),
                         ],
+                      ),
+                    ),
+                    SafeArea(
+                      top: false,
+                      child: Padding(
+                        padding: const EdgeInsets.all(16),
+                        child: AppPrimaryButton(
+                          label: context.l10n.text('payNow'),
+                          onPressed: _isSubmitting ? null : _handlePayNow,
+                        ),
                       ),
                     ),
                   ],
@@ -974,18 +963,21 @@ class _PaymentScreenState extends State<PaymentScreen>
   }
 
   void _showProcessingDialog() {
+    final String message =
+        context.l10n.text('paymentReceivedProcessing');
+
     showDialog(
       context: context,
       barrierDismissible: false,
-      builder: (_) => const PopScope(
+      builder: (_) => PopScope(
         canPop: false,
         child: AlertDialog(
           content: Row(
             children: [
-              CircularProgressIndicator(),
-              SizedBox(width: 16),
+              const CircularProgressIndicator(),
+              const SizedBox(width: 16),
               Expanded(
-                child: Text('Payment received. Processing application...'),
+                child: Text(message),
               ),
             ],
           ),

@@ -260,5 +260,22 @@
   "noDocumentsUploaded": "لا يوجد خطاب طلب",
   "noApplicationHistory": "لا يوجد سجل للطلب",
   "decisionLetter": "خطاب القرار",
-  "offerLetter": "خطاب العرض"
+  "offerLetter": "خطاب العرض",
+  "pleaseEnterFullName": "يرجى إدخال الاسم الكامل.",
+  "pleaseSelectDateOfBirth": "يرجى اختيار تاريخ الميلاد.",
+  "pleaseSelectCountry": "يرجى اختيار الدولة.",
+  "pleaseEnterMobileNumber": "يرجى إدخال رقم الهاتف.",
+  "pleaseEnterAge": "يرجى إدخال العمر.",
+  "pleaseEnterValidAge": "يرجى إدخال عمر صالح.",
+  "pleaseEnterEmailAddress": "يرجى إدخال البريد الإلكتروني.",
+  "pleaseEnterValidEmailAddress": "يرجى إدخال بريد إلكتروني صالح.",
+  "pleaseEnterGuardianName": "يرجى إدخال اسم ولي الأمر.",
+  "pleaseEnterRelationship": "يرجى إدخال صلة القرابة.",
+  "pleaseEnterEmergencyMobileNumber": "يرجى إدخال رقم هاتف الطوارئ.",
+  "pleaseEnterEmergencyEmailAddress": "يرجى إدخال بريد الطوارئ الإلكتروني.",
+  "pleaseEnterValidEmergencyEmailAddress": "يرجى إدخال بريد إلكتروني صالح لجهة الطوارئ.",
+  "dateFormatHint": "DD-MM-YYYY",
+  "paymentReceivedProcessing": "تم استلام الدفع. جارٍ معالجة الطلب...",
+  "failedLoadProfile": "فشل تحميل الملف الشخصي.",
+  "studentUpdatedSuccessfully": "تم تحديث بيانات الطالب بنجاح."
 }

@@ -260,6 +260,23 @@
   "noDocumentsUploaded" : "No Application Letter",
   "noApplicationHistory" : "No Application History",
   "decisionLetter": "Decision Letter",
-  "offerLetter" : "offerLetter"
+  "offerLetter" : "offerLetter",
+  "pleaseEnterFullName": "Please enter full name.",
+  "pleaseSelectDateOfBirth": "Please select date of birth.",
+  "pleaseSelectCountry": "Please select country.",
+  "pleaseEnterMobileNumber": "Please enter mobile number.",
+  "pleaseEnterAge": "Please enter age.",
+  "pleaseEnterValidAge": "Please enter a valid age.",
+  "pleaseEnterEmailAddress": "Please enter email address.",
+  "pleaseEnterValidEmailAddress": "Please enter a valid email address.",
+  "pleaseEnterGuardianName": "Please enter guardian name.",
+  "pleaseEnterRelationship": "Please enter relationship.",
+  "pleaseEnterEmergencyMobileNumber": "Please enter emergency mobile number.",
+  "pleaseEnterEmergencyEmailAddress": "Please enter emergency email address.",
+  "pleaseEnterValidEmergencyEmailAddress": "Please enter a valid emergency email address.",
+  "dateFormatHint": "DD-MM-YYYY",
+  "paymentReceivedProcessing": "Payment received. Processing application...",
+  "failedLoadProfile": "Failed to load profile.",
+  "studentUpdatedSuccessfully": "Student updated successfully."
 
 }
