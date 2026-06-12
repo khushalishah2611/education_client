@@ -489,6 +489,7 @@ class _TrackMyApplicationsScreenState extends State<TrackMyApplicationsScreen>
                         final hs =
                             (hm['status'] ?? '').toString().toUpperCase();
                         final comment = hm['comment'] ?? '';
+                        final commentAr = hm['commentAr'] ?? '';
                         final date = hm['createdAt'] ?? '';
                         String formattedDate = '';
 
@@ -503,8 +504,8 @@ class _TrackMyApplicationsScreenState extends State<TrackMyApplicationsScreen>
                             subtitle: Column(
                               crossAxisAlignment: CrossAxisAlignment.start,
                               children: [
-                                if ((comment ?? '').toString().isNotEmpty)
-                                  Text(comment.toString()),
+                                if (_localizedLabel(context, comment, commentAr).toString().isNotEmpty)
+                                  Text(_localizedLabel(context, comment, commentAr)),
                                 if ((formattedDate ?? '').toString().isNotEmpty)
                                   Text(formattedDate.toString(),
                                       style: const TextStyle(

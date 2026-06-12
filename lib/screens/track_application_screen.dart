@@ -374,18 +374,6 @@ class _TrackApplicationScreenState extends State<TrackApplicationScreen>
     return _status;
   }
 
-  String get _latestStatusComment {
-    for (final Map<String, dynamic> item in _applicationHistory.reversed) {
-      final String comment = _textFrom(item['comment']);
-
-      if (comment.isNotEmpty) {
-        return comment;
-      }
-    }
-
-    return '';
-  }
-
   int get _progressIndex {
     final String status = _latestStatusFromHistory;
 
