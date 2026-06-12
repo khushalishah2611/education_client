@@ -121,6 +121,33 @@ class ApplicationApiService {
     return decoded;
   }
 
+  Future<List<Map<String, dynamic>>> fetchRefundPolicy() async {
+    final Uri uri = ApiConfig.uri('/api/admin/refund-policy');
+    final response = await http.get(uri);
+    final Object? parsed = jsonDecode(response.body);
+
+    logApiCall(
+      method: 'GET',
+      url: uri.toString(),
+      statusCode: response.statusCode,
+      requestBody: null,
+      responseBody: parsed,
+    );
+
+    if (!ApiStatus.isSuccess(response.statusCode)) {
+      throw ApplicationApiException(
+        statusCode: response.statusCode,
+        message: 'Failed to fetch refund policy',
+      );
+    }
+
+    if (parsed is List<dynamic>) {
+      return parsed.whereType<Map<String, dynamic>>().toList(growable: false);
+    }
+
+    return <Map<String, dynamic>>[];
+  }
+
   Future<String> fetchPaymentReceiptHtml({
     required String paymentId,
     required String language,

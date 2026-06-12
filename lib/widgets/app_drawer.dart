@@ -109,6 +109,12 @@ class _CommonSideMenuState extends State<CommonSideMenu>
         screen: const TermsConditionsScreen(),
       ),
       (
+        icon: Icons.receipt_long_outlined,
+        label: context.l10n.text('refundPolicy'),
+        danger: false,
+        screen: const RefundPolicyScreen(),
+      ),
+      (
         icon: Icons.support_agent_outlined,
         label: context.l10n.text('help'),
         danger: false,
