@@ -66,8 +66,9 @@ class StudentApiService {
     required double rating,
     required String remark,
   }) async {
+    final String studentUserId = await StudentSession.currentStudentUserId();
     final Uri uri = ApiConfig.uri(
-      '/api/universities/${Uri.encodeComponent(universityId)}/rating',
+      '/api/universities/${Uri.encodeComponent(universityId)}/rating?studentUserId=$studentUserId',
     );
     final Map<String, String> headers = await _authHeaders();
 

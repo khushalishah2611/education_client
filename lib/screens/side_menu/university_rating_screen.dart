@@ -337,9 +337,11 @@ class _UniversityRatingScreenState extends State<UniversityRatingScreen>
       title: context.l10n.text('universityRating'),
       child: buildCubitView(
         (context) {
-          return Align(
-            alignment: Alignment.topCenter,
-            child: SingleChildScrollView(
+          return Stack(
+            children: [
+              Align(
+                alignment: Alignment.topCenter,
+                child: SingleChildScrollView(
               padding: const EdgeInsets.all(12),
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.stretch,
@@ -418,16 +420,26 @@ class _UniversityRatingScreenState extends State<UniversityRatingScreen>
                   const SizedBox(height: 16),
                   AppPrimaryButton(
                     label: context.l10n.text('submitRating'),
-                    isLoading: _isSubmitting,
                     onPressed: _isSubmitting ? null : _submitRating,
                   ),
                 ],
               ),
             ),
-          );
-        },
-      ),
-    );
+          ),
+          if (_isSubmitting)
+            const Positioned.fill(
+              child: ColoredBox(
+                color: Color.fromRGBO(0, 0, 0, 0.25),
+                child: Center(
+                  child: CircularProgressIndicator(color: AppColors.primary),
+                ),
+              ),
+            ),
+        ],
+      );
+    },
+  ),
+);
   }
 
   InputDecoration _fieldDecoration({String? hintText}) {
