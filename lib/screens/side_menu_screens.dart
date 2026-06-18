@@ -8,4 +8,5 @@ export 'side_menu/terms_conditions_screen.dart';
 export 'side_menu/refund_policy_screen.dart';
 export 'side_menu/track_my_applications_screen.dart';
 export 'side_menu/uploaded_documents_screen.dart';
+export 'side_menu/university_rating_screen.dart';
 export 'latest_updates_screen.dart';

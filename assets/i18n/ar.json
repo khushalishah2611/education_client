@@ -278,5 +278,16 @@
   "dateFormatHint": "DD-MM-YYYY",
   "paymentReceivedProcessing": "تم استلام الدفع. جارٍ معالجة الطلب...",
   "failedLoadProfile": "فشل تحميل الملف الشخصي.",
-  "studentUpdatedSuccessfully": "تم تحديث بيانات الطالب بنجاح."
+  "studentUpdatedSuccessfully": "تم تحديث بيانات الطالب بنجاح.",
+  "languageUpdatedSuccessfully": "تم تحديث اللغة بنجاح.",
+  "failedUpdateLanguage": "فشل تحديث اللغة.",
+  "universityRating": "تصنيف",
+  "selectUniversity": "اختر الجامعة",
+  "yourRating": "تقييمك",
+  "writeRemark": "اكتب ملاحظتك",
+  "submitRating": "إرسال التقييم",
+  "ratingUpdatedSuccessfully": "تم تحديث التقييم بنجاح.",
+  "failedSubmitRating": "فشل إرسال التقييم.",
+  "pleaseSelectUniversity": "يرجى اختيار جامعة.",
+  "pleaseEnterRemark": "يرجى إدخال ملاحظة."
 }

@@ -127,6 +127,12 @@ class _CommonSideMenuState extends State<CommonSideMenu>
         screen: const ChangeLanguageScreen(),
       ),
       (
+        icon: Icons.star_outline_rounded,
+        label: context.l10n.text('universityRating'),
+        danger: false,
+        screen: const UniversityRatingScreen(),
+      ),
+      (
         icon: Icons.logout,
         label: context.l10n.text('logout'),
         danger: true,

@@ -278,6 +278,17 @@
   "dateFormatHint": "DD-MM-YYYY",
   "paymentReceivedProcessing": "Payment received. Processing application...",
   "failedLoadProfile": "Failed to load profile.",
-  "studentUpdatedSuccessfully": "Student updated successfully."
+  "studentUpdatedSuccessfully": "Student updated successfully.",
+  "languageUpdatedSuccessfully": "Language updated successfully.",
+  "failedUpdateLanguage": "Failed to update language.",
+  "universityRating": "Rating",
+  "selectUniversity": "Select University",
+  "yourRating": "Your Rating",
+  "writeRemark": "Write your remark",
+  "submitRating": "Submit Rating",
+  "ratingUpdatedSuccessfully": "Rating updated successfully.",
+  "failedSubmitRating": "Failed to submit rating.",
+  "pleaseSelectUniversity": "Please select a university.",
+  "pleaseEnterRemark": "Please enter a remark."
 
 }
