@@ -5,8 +5,8 @@
 //   static Uri uri(String path) => Uri.parse('$baseUrl$path');
 // }
 class ApiConfig {
-  static const String baseUrl = 'https://arab.vedx.cloud';
-  static const String publishableKey = 'HGvTMLDssJghr9tlN9gr4DVYt0qyBy';
-  static const String secretKey = 'rRQ26GcsZzoEhbrP2HZvLYDbn9C9et';
+  static const String baseUrl = 'https://api.arabuniversity.cloud';
+  static const String publishableKey = '6G1t5NZsWUYyTxu8r57qqQxbe3uBtU';
+  static const String secretKey = '2LI86VTesxPujLmfHuUXyUEhUHQmvT';
   static Uri uri(String path) => Uri.parse('$baseUrl$path');
 }

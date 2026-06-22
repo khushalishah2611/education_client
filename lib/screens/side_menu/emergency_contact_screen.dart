@@ -4,6 +4,7 @@ import 'package:url_launcher/url_launcher.dart';
 import '../../core/app_localizations.dart';
 import '../../core/app_theme.dart';
 import '../../widgets/contact_support_section.dart';
+import '../../widgets/common_widgets.dart';
 import 'side_menu_common.dart';
 
 class EmergencyContactScreen extends StatelessWidget {
@@ -27,8 +28,9 @@ class EmergencyContactScreen extends StatelessWidget {
 class EmergencyContactCard extends StatelessWidget {
   const EmergencyContactCard({super.key});
 
-  static const String whatsappNumber = '96877428887';
+  static const String whatsappNumber = '0096877428887';
   static const String emailAddress = 'arabuapp@gmail.com';
+  static const String helpHubWhatsAppLink = 'https://wa.me/message/IPVKKNJSQMO2K1';
   static const String instagramUrl = 'https://www.instagram.com/universities_arab?utm_source=qr&igsh=dHJydWx3Nm5taTNr';
   static const String facebookUrl = 'https://www.facebook.com/share/1C1iY7eHcN/';
   static const String snapchatUrl = 'https://www.snapchat.com/add/universitiesara?share_id=C2ct2Rm65l8&locale=ar-AE';
@@ -82,6 +84,11 @@ class EmergencyContactCard extends StatelessWidget {
       queryParameters: {'subject': 'Help Support'},
     );
     await launchUrl(emailUri);
+  }
+
+  Future<void> _openHelpHub() async {
+    final Uri uri = Uri.parse(helpHubWhatsAppLink);
+    await launchUrl(uri);
   }
 
   @override
@@ -148,6 +155,10 @@ class EmergencyContactCard extends StatelessWidget {
             onOpenTwitter: _openTwitter,
             onOpenEmail: _openEmail,
             onOpenTikTok: _openTikTok,
+          ),
+          const SizedBox(height: 16),
+          HelpHubButton(
+            onTap: _openHelpHub,
           ),
         ],
       ),

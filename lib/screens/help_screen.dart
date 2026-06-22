@@ -9,7 +9,8 @@ import '../widgets/contact_support_section.dart';
 class HelpScreen extends StatelessWidget {
   const HelpScreen({super.key});
 
-  static const String whatsappNumber = '96877428887';
+  static const String whatsappNumber = '0096877428887';
+  static const String helpHubWhatsAppLink = 'https://wa.me/message/IPVKKNJSQMO2K1';
   static const String emailAddress = 'arabuapp@gmail.com';
 
   // Social usernames
@@ -75,6 +76,11 @@ class HelpScreen extends StatelessWidget {
     await _launch(emailUri);
   }
 
+  Future<void> _openHelpHub() async {
+    final Uri uri = Uri.parse(helpHubWhatsAppLink);
+    await _launch(uri);
+  }
+
   @override
   Widget build(BuildContext context) {
     return Directionality(
@@ -119,6 +125,10 @@ class HelpScreen extends StatelessWidget {
                           onOpenTwitter: _openTwitter,
                           onOpenEmail: _openEmail,
                           onOpenTikTok: _openTikTok,
+                        ),
+                        const SizedBox(height: 24),
+                        HelpHubButton(
+                          onTap: _openHelpHub,
                         ),
                       ],
                     ),
@@ -237,3 +247,4 @@ class _LanguageDropdownChip extends StatelessWidget {
     );
   }
 }
+
