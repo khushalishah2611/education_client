@@ -101,8 +101,12 @@ class _PaymentScreenState extends State<PaymentScreen>
           _selectedCountry = matchedCountry.nameEn;
           _selectedCountryDialCode = matchedCountry.dialCode;
         } else if (_countries.isNotEmpty && _selectedCountry.trim().isEmpty) {
-          _selectedCountry = _countries.first.nameEn;
-          _selectedCountryDialCode = _countries.first.dialCode;
+          final CountryMaster defaultCountry = _countries.firstWhere(
+            (c) => c.nameEn.toLowerCase() == 'oman',
+            orElse: () => _countries.first,
+          );
+          _selectedCountry = defaultCountry.nameEn;
+          _selectedCountryDialCode = defaultCountry.dialCode;
         }
       });
     } catch (_) {

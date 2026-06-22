@@ -11,6 +11,7 @@ abstract class AppCubit<State> {
 
   State get state => _state;
   Stream<State> get stream => _controller.stream;
+  bool get isClosed => _controller.isClosed;
 
   void emit(State state) {
     if (_state == state) return;

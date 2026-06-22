@@ -1,3 +1,4 @@
+import 'dart:async';
 import 'package:flutter/material.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
@@ -8,6 +9,7 @@ import '../models/country_option.dart';
 import '../models/master_option.dart';
 import '../services/home_api_service.dart';
 import '../core/bloc/app_cubit.dart';
+import '../services/network_event_service.dart';
 
 class HomeController extends AppCubit<int> {
   HomeController({
@@ -23,9 +25,16 @@ class HomeController extends AppCubit<int> {
     _loginDialCode = initialDialCode?.trim().isNotEmpty == true
         ? initialDialCode!.trim()
         : null;
+
+    _networkSubscription = NetworkEventService.onInternetRestored.listen((_) {
+      if (!isClosed) {
+        refreshHomeData();
+      }
+    });
   }
 
   final HomeApiService _homeApiService;
+  late final StreamSubscription<void> _networkSubscription;
 
   bool isLoadingUniversities = true;
   bool isLoadingBanners = true;
@@ -384,11 +393,7 @@ class HomeController extends AppCubit<int> {
   String? _resolveAutoCountry(
     List<CountryMaster> countries,
   ) {
-    if ((_loginDialCode ?? '').trim() == '+968') {
-      return _selectedCountry ?? 'Oman';
-    }
-
-    return null;
+    return _selectedCountry ?? 'Oman';
   }
 
   Set<String> _trackTypes(AdminUniversity u) {
@@ -518,7 +523,13 @@ class HomeController extends AppCubit<int> {
   }
 
   void dispose() {
-    resultController.dispose();
     close();
+  }
+
+  @override
+  Future<void> close() {
+    resultController.dispose();
+    _networkSubscription.cancel();
+    return super.close();
   }
 }

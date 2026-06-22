@@ -1,5 +1,6 @@
 import 'dart:convert';
 import 'package:http/http.dart' as http;
+import '../core/http_client.dart';
 import '../core/api_config.dart';
 import '../core/api_logger.dart';
 import '../core/api_status.dart';
@@ -30,7 +31,7 @@ class ApplicationApiService {
     ).replace(
       queryParameters: <String, String>{'studentUserId': studentUserId},
     );
-    final response = await http.patch(
+    final response = await AppHttpClient.client.patch(
       uri,
     );
     final decoded = _decodeMap(response.body);
@@ -65,7 +66,7 @@ class ApplicationApiService {
       'applications': applications,
     };
 
-    final response = await http.post(
+    final response = await AppHttpClient.client.post(
       uri,
       headers: const <String, String>{
         'Content-Type': 'application/json',
@@ -98,7 +99,7 @@ class ApplicationApiService {
     final Uri uri = ApiConfig.uri(
       '/api/admin/students/${Uri.encodeComponent(studentUserId)}/overview',
     );
-    final response = await http.get(
+    final response = await AppHttpClient.client.get(
       uri,
     );
     final decoded = _decodeMap(response.body);
@@ -123,7 +124,7 @@ class ApplicationApiService {
 
   Future<List<Map<String, dynamic>>> fetchRefundPolicy() async {
     final Uri uri = ApiConfig.uri('/api/admin/refund-policy');
-    final response = await http.get(uri);
+    final response = await AppHttpClient.client.get(uri);
     final Object? parsed = jsonDecode(response.body);
 
     logApiCall(
@@ -157,7 +158,7 @@ class ApplicationApiService {
     ).replace(
       queryParameters: <String, String>{'language': language},
     );
-    final response = await http.get(
+    final response = await AppHttpClient.client.get(
       uri,
     );
 
@@ -184,7 +185,7 @@ class ApplicationApiService {
 extension ApplicationApiDocumentTypes on ApplicationApiService {
   Future<List<DocumentTypeItem>> fetchDocumentTypes() async {
     final Uri uri = ApiConfig.uri('/api/student/document-types');
-    final response = await http.get(
+    final response = await AppHttpClient.client.get(
       uri,
     );
     final decoded = _decodeMap(response.body);
@@ -237,7 +238,7 @@ extension ApplicationApiDocuments on ApplicationApiService {
         ),
       );
 
-    final streamedResponse = await request.send();
+    final streamedResponse = await AppHttpClient.client.send(request);
     final response = await http.Response.fromStream(streamedResponse);
     final decoded = _decodeMap(response.body);
 
@@ -288,7 +289,7 @@ extension ApplicationApiDocuments on ApplicationApiService {
         ),
       );
 
-    final streamedResponse = await request.send();
+    final streamedResponse = await AppHttpClient.client.send(request);
     final response = await http.Response.fromStream(streamedResponse);
     final decoded = _decodeMap(response.body);
 
@@ -325,7 +326,7 @@ extension ApplicationApiDocuments on ApplicationApiService {
         .replace(
       queryParameters: <String, String>{'studentUserId': studentUserId},
     );
-    final response = await http.delete(
+    final response = await AppHttpClient.client.delete(
       uri,
     );
     final decoded = _decodeMap(response.body);
@@ -345,7 +346,7 @@ extension ApplicationApiDocuments on ApplicationApiService {
 extension ApplicationApiStudents on ApplicationApiService {
   Future<List<Map<String, dynamic>>> fetchStudents() async {
     final Uri uri = ApiConfig.uri('/api/admin/students');
-    final response = await http.get(uri);
+    final response = await AppHttpClient.client.get(uri);
     final Object? parsed = jsonDecode(response.body);
 
     logApiCall(
@@ -423,7 +424,7 @@ extension ApplicationApiStudents on ApplicationApiService {
       );
     }
 
-    final streamed = await request.send();
+    final streamed = await AppHttpClient.client.send(request);
     final response = await http.Response.fromStream(streamed);
     final decoded = _decodeMap(response.body);
 
@@ -473,7 +474,7 @@ extension ApplicationApiStudents on ApplicationApiService {
       'isActive': isActive,
     };
 
-    final response = await http.put(
+    final response = await AppHttpClient.client.put(
       uri,
       headers: const <String, String>{
         'Content-Type': 'application/json',

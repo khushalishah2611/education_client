@@ -173,8 +173,7 @@ class LanguageDropdownChip extends StatelessWidget {
         child: Row(
           mainAxisSize: MainAxisSize.min,
           children: [
-            Text(!isArabic ? "🇮🇳" : '🇵🇸', style: TextStyle(fontSize: 14)),
-            const SizedBox(width: 5),
+
             Text(
               !isArabic ? 'English' : 'عربي',
               style: const TextStyle(
@@ -347,11 +346,15 @@ class AppPrimaryButton extends StatelessWidget {
     required this.label,
     required this.onPressed,
     this.isLoading = false,
+    this.icon,
+    this.trailingIcon,
   });
 
   final String label;
   final VoidCallback? onPressed;
   final bool isLoading;
+  final Widget? icon;
+  final Widget? trailingIcon;
 
   @override
   Widget build(BuildContext context) {
@@ -385,7 +388,20 @@ class AppPrimaryButton extends StatelessWidget {
                   color: AppColors.text,
                 ),
               )
-            : Text(label),
+            : Row(
+                mainAxisAlignment: MainAxisAlignment.center,
+                children: [
+                  if (icon != null) ...[
+                    icon!,
+                    const SizedBox(width: 8),
+                  ],
+                  Text(label),
+                  if (trailingIcon != null) ...[
+                    const SizedBox(width: 8),
+                    trailingIcon!,
+                  ],
+                ],
+              ),
       ),
     );
   }

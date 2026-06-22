@@ -8,6 +8,7 @@ import '../core/bloc/app_cubit.dart';
 import '../core/app_theme.dart';
 import '../screens/splash_screen.dart';
 import '../services/snackbar_service.dart';
+import '../widgets/network_connectivity_wrapper.dart';
 
 class ArabUniversitiesApp extends StatefulWidget {
   const ArabUniversitiesApp({super.key});
@@ -99,24 +100,26 @@ class _ArabUniversitiesAppState extends State<ArabUniversitiesApp> {
                         textDirection: localizations.textDirection,
                         child: MediaQuery(
                           data: media.copyWith(textScaler: clampedScale),
-                          child: LayoutBuilder(
-                            builder: (context, constraints) {
-                              final bool shouldConstrain =
-                                  constraints.maxWidth > 520;
-                              if (!shouldConstrain) {
-                                return child ?? const SizedBox.shrink();
-                              }
-                              return ColoredBox(
-                                color: const Color(0xFFFFFAF5),
-                                child: Center(
-                                  child: ConstrainedBox(
-                                    constraints:
-                                        const BoxConstraints(maxWidth: 520),
-                                    child: child ?? const SizedBox.shrink(),
+                          child: NetworkConnectivityWrapper(
+                            child: LayoutBuilder(
+                              builder: (context, constraints) {
+                                final bool shouldConstrain =
+                                    constraints.maxWidth > 520;
+                                if (!shouldConstrain) {
+                                  return child ?? const SizedBox.shrink();
+                                }
+                                return ColoredBox(
+                                  color: const Color(0xFFFFFAF5),
+                                  child: Center(
+                                    child: ConstrainedBox(
+                                      constraints:
+                                          const BoxConstraints(maxWidth: 520),
+                                      child: child ?? const SizedBox.shrink(),
+                                    ),
                                   ),
-                                ),
-                              );
-                            },
+                                );
+                              },
+                            ),
                           ),
                         ),
                       );

@@ -1,6 +1,7 @@
 import 'dart:convert';
 
 import 'package:http/http.dart' as http;
+import '../core/http_client.dart';
 
 import '../core/api_config.dart';
 import '../core/api_logger.dart';
@@ -14,7 +15,7 @@ class AuthApiService {
 
   Future<List<CountryMaster>> fetchCountries() async {
     const path = '/api/admin/masters/country';
-    final response = await http.get(ApiConfig.uri(path));
+    final response = await AppHttpClient.client.get(ApiConfig.uri(path));
     logApiCall(
       method: 'GET',
       url: ApiConfig.uri(path).toString(),
@@ -41,7 +42,7 @@ class AuthApiService {
 
   Future<List<AgreementTemplate>> fetchAgreementTemplates() async {
     const path = '/api/student/agreements/templates';
-    final response = await http.get(ApiConfig.uri(path));
+    final response = await AppHttpClient.client.get(ApiConfig.uri(path));
     logApiCall(
       method: 'GET',
       url: ApiConfig.uri(path).toString(),
@@ -113,7 +114,7 @@ class AuthApiService {
       'isActive': true,
       'preferredLanguage': preferredLanguage,
     };
-    final response = await http.post(
+    final response = await AppHttpClient.client.post(
       ApiConfig.uri(path),
       headers: const {'Content-Type': 'application/json'},
       body: jsonEncode(requestBody),
@@ -142,7 +143,7 @@ class AuthApiService {
     required String studentId,
   }) async {
     final path = '/api/admin/students/$studentId/resend-otp';
-    final response = await http.post(ApiConfig.uri(path));
+    final response = await AppHttpClient.client.post(ApiConfig.uri(path));
     final decoded = _decodeObject(response.body);
     logApiCall(
       method: 'POST',
@@ -170,7 +171,7 @@ class AuthApiService {
   }) async {
     final path = '/api/admin/students/$studentId/verify-otp';
     final requestBody = <String, dynamic>{'otp': otp};
-    final response = await http.post(
+    final response = await AppHttpClient.client.post(
       ApiConfig.uri(path),
       headers: const {'Content-Type': 'application/json'},
       body: jsonEncode(requestBody),

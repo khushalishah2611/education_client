@@ -58,7 +58,12 @@ class _LoginScreenState extends State<LoginScreen>
         if (_agreementTemplates.isNotEmpty) {
           debugPrint('_loadMetaData: first agreement=${_agreementTemplates.first.toJson()}');
         }
-        _selectedCountry = countries.isEmpty ? null : countries.first;
+        _selectedCountry = countries.isEmpty
+            ? null
+            : countries.firstWhere(
+                (c) => c.nameEn.toLowerCase() == 'oman',
+                orElse: () => countries.first,
+              );
       });
     } catch (_) {
       if (!mounted) return;
@@ -345,6 +350,16 @@ class _LoginScreenState extends State<LoginScreen>
             const SizedBox(height: 26),
             AppPrimaryButton(
               label: context.l10n.text('sendOtp'),
+              icon: Image.asset(
+                'assets/images/whatsapp.png',
+                width: 22,
+                height: 22,
+              ),
+              trailingIcon: const Icon(
+                Icons.arrow_forward_ios_rounded,
+                size: 16,
+                color: AppColors.text,
+              ),
               onPressed: _isLoadingMeta || _isSubmitting ? null : _onSendOtpTap,
             ),
             const SizedBox(height: 14),

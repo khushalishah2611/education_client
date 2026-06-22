@@ -120,7 +120,10 @@ class _ProfileBodyState extends State<ProfileBody>
       _countries = countries;
 
       if (_countries.isNotEmpty) {
-        _selectedCountry = _countries.first;
+        _selectedCountry = _countries.firstWhere(
+          (c) => c.nameEn.toLowerCase() == 'oman',
+          orElse: () => _countries.first,
+        );
       } else {
         _selectedCountry = null;
       }

@@ -1,6 +1,7 @@
 import 'dart:convert';
 
 import 'package:http/http.dart' as http;
+import '../core/http_client.dart';
 
 import '../core/api_config.dart';
 import '../core/api_logger.dart';
@@ -18,7 +19,7 @@ class HomeApiService {
     final Uri url = ApiConfig.uri(
       '/api/admin/banners',
     ).replace(queryParameters: {'page': '$page', 'limit': '$limit'});
-    final response = await http.get(url);
+    final response = await AppHttpClient.client.get(url);
     final decoded = _decode(response.body);
 
     logApiCall(
@@ -69,7 +70,7 @@ class HomeApiService {
     final Uri url = ApiConfig.uri('/api/admin/latest-updates').replace(
       queryParameters: {'page': '$page', 'limit': '$limit'},
     );
-    final response = await http.get(url);
+    final response = await AppHttpClient.client.get(url);
     final decoded = _decode(response.body);
     logApiCall(
       method: 'GET',
@@ -109,7 +110,7 @@ class HomeApiService {
     final uri = ApiConfig.uri(path).replace(
       queryParameters: queryParameters.isEmpty ? null : queryParameters,
     );
-    final response = await http.get(uri);
+    final response = await AppHttpClient.client.get(uri);
     final decoded = _decode(response.body);
     logApiCall(
       method: 'GET',
@@ -150,7 +151,7 @@ class HomeApiService {
 
   Future<List<HomeProgram>> fetchPrograms() async {
     const path = '/api/admin/programs';
-    final response = await http.get(ApiConfig.uri(path));
+    final response = await AppHttpClient.client.get(ApiConfig.uri(path));
     final decoded = _decode(response.body);
     logApiCall(
       method: 'GET',
@@ -181,7 +182,7 @@ class HomeApiService {
 
   Future<List<CountryMaster>> fetchCountries() async {
     const path = '/api/admin/masters/country';
-    final response = await http.get(ApiConfig.uri(path));
+    final response = await AppHttpClient.client.get(ApiConfig.uri(path));
     final decoded = _decode(response.body);
     logApiCall(
       method: 'GET',
@@ -205,7 +206,7 @@ class HomeApiService {
   }
 
   Future<List<MasterOption>> _fetchMasterValues(String path) async {
-    final response = await http.get(ApiConfig.uri(path));
+    final response = await AppHttpClient.client.get(ApiConfig.uri(path));
     final decoded = _decode(response.body);
     logApiCall(
       method: 'GET',

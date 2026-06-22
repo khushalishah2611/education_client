@@ -1,6 +1,7 @@
 import 'dart:convert';
 
 import 'package:http/http.dart' as http;
+import '../core/http_client.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
 import '../core/api_config.dart';
@@ -35,7 +36,7 @@ class StudentApiService {
     };
     final Map<String, String> headers = await _jsonAuthHeaders();
 
-    final http.Response response = await http.patch(
+    final http.Response response = await AppHttpClient.client.patch(
       uri,
       headers: headers,
       body: jsonEncode(body),
@@ -77,7 +78,7 @@ class StudentApiService {
       ..fields['rating'] = rating.toString()
       ..fields['remark'] = remark.trim();
 
-    final http.StreamedResponse streamed = await request.send();
+    final http.StreamedResponse streamed = await AppHttpClient.client.send(request);
     final http.Response response = await http.Response.fromStream(streamed);
     final Map<String, dynamic> decoded = _decodeMap(response.body);
 
