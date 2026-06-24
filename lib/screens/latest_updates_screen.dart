@@ -6,11 +6,11 @@ import 'package:http/http.dart' as http;
 import 'package:intl/intl.dart';
 import 'package:printing/printing.dart';
 
+import '../core/api_config.dart';
 import '../core/app_localizations.dart';
 import '../core/app_theme.dart';
-import '../core/responsive_helper.dart';
 import '../core/bloc/app_cubit.dart';
-import '../core/api_config.dart';
+import '../core/responsive_helper.dart';
 import '../models/latest_update.dart';
 import '../services/home_api_service.dart';
 

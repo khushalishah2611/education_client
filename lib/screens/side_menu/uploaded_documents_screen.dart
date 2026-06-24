@@ -1,13 +1,13 @@
 import 'package:education/core/image_url_helper.dart';
 import 'package:flutter/material.dart';
 import 'package:url_launcher/url_launcher.dart';
+
 import '../../core/app_localizations.dart';
 import '../../core/app_theme.dart';
 import '../../core/bloc/app_cubit.dart';
 import '../../core/student_session.dart';
-import '../../services/snackbar_service.dart';
-import '../../widgets/common_widgets.dart';
 import '../../services/application_api_service.dart';
+import '../../services/snackbar_service.dart';
 import '../../utils/auth_utils.dart';
 import 'side_menu_common.dart';
 

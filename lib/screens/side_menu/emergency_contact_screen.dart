@@ -3,8 +3,8 @@ import 'package:url_launcher/url_launcher.dart';
 
 import '../../core/app_localizations.dart';
 import '../../core/app_theme.dart';
-import '../../widgets/contact_support_section.dart';
 import '../../widgets/common_widgets.dart';
+import '../../widgets/contact_support_section.dart';
 import 'side_menu_common.dart';
 
 class EmergencyContactScreen extends StatelessWidget {

@@ -4,10 +4,11 @@ import 'package:education/core/image_url_helper.dart';
 import 'package:education/core/selected_course_storage.dart';
 import 'package:education/core/student_session.dart';
 import 'package:education/models/admin_university.dart';
-import 'package:education/models/selected_course_data.dart';
 import 'package:education/models/master_option.dart';
+import 'package:education/models/selected_course_data.dart';
 import 'package:education/services/application_api_service.dart';
 import 'package:flutter/material.dart';
+
 import '../core/app_theme.dart';
 import '../core/responsive_helper.dart';
 import '../utils/auth_utils.dart';

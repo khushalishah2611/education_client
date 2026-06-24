@@ -2,7 +2,6 @@ import 'package:education/screens/side_menu/side_menu_common.dart';
 import 'package:flutter/material.dart';
 
 import '../../core/app_localizations.dart';
-import '../../core/app_theme.dart';
 import '../../utils/payment_receipt_pdf.dart';
 
 class PaymentReceiptScreen extends StatelessWidget {

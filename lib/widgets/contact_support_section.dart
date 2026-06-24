@@ -3,7 +3,6 @@ import 'dart:ui';
 import 'package:flutter/material.dart';
 
 import '../core/app_localizations.dart';
-import '../core/app_theme.dart';
 
 class ContactSupportSection extends StatelessWidget {
   const ContactSupportSection({

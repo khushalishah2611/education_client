@@ -4,8 +4,8 @@ import 'package:intl/date_symbol_data_local.dart';
 
 import '../controllers/language_controller.dart';
 import '../core/app_localizations.dart';
-import '../core/bloc/app_cubit.dart';
 import '../core/app_theme.dart';
+import '../core/bloc/app_cubit.dart';
 import '../screens/splash_screen.dart';
 import '../services/snackbar_service.dart';
 import '../widgets/network_connectivity_wrapper.dart';

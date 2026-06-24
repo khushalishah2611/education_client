@@ -1,14 +1,15 @@
 import 'dart:async';
+
 import 'package:flutter/material.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
+import '../core/bloc/app_cubit.dart';
 import '../models/admin_university.dart';
 import '../models/banner_item.dart';
 import '../models/country_master.dart';
 import '../models/country_option.dart';
 import '../models/master_option.dart';
 import '../services/home_api_service.dart';
-import '../core/bloc/app_cubit.dart';
 import '../services/network_event_service.dart';
 
 class HomeController extends AppCubit<int> {

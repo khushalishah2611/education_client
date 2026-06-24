@@ -1,12 +1,12 @@
 import 'dart:convert';
 
 import 'package:http/http.dart' as http;
-import '../core/http_client.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
 import '../core/api_config.dart';
 import '../core/api_logger.dart';
 import '../core/api_status.dart';
+import '../core/http_client.dart';
 import '../core/student_session.dart';
 
 class StudentApiException implements Exception {

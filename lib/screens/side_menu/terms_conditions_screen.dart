@@ -4,10 +4,9 @@ import 'package:shared_preferences/shared_preferences.dart';
 import '../../core/app_localizations.dart';
 import '../../core/app_theme.dart';
 import '../../core/bloc/app_cubit.dart';
-import '../../services/snackbar_service.dart';
 import '../../services/application_api_service.dart';
+import '../../services/snackbar_service.dart';
 import '../../utils/auth_utils.dart';
-import '../../widgets/common_widgets.dart';
 import 'side_menu_common.dart';
 
 class TermsConditionsScreen extends StatefulWidget {

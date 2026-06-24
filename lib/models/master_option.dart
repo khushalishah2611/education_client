@@ -1,10 +1,12 @@
 class MasterOption {
   const MasterOption({
+    this.id,
     required this.nameEn,
     required this.nameAr,
     required this.value,
   });
 
+  final String? id;
   final String nameEn;
   final String nameAr;
   final String value;

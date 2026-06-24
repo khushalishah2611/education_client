@@ -1,11 +1,9 @@
 import 'dart:convert';
 
-import 'package:http/http.dart' as http;
-import '../core/http_client.dart';
-
 import '../core/api_config.dart';
 import '../core/api_logger.dart';
 import '../core/api_status.dart';
+import '../core/http_client.dart';
 import '../models/admin_university.dart';
 import '../models/banner_item.dart';
 import '../models/country_master.dart';
@@ -290,7 +288,8 @@ class HomeApiService {
       if (key.isEmpty || !seen.add(key.toUpperCase())) {
         continue;
       }
-      values.add(MasterOption(nameEn: nameEn, nameAr: nameAr, value: value));
+      final String? id = item['id'] as String?;
+      values.add(MasterOption(id: id, nameEn: nameEn, nameAr: nameAr, value: value));
     }
     return values;
   }

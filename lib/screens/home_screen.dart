@@ -6,25 +6,23 @@ import 'package:education/models/student_notification.dart';
 import 'package:education/screens/latest_updates_screen.dart';
 import 'package:education/services/application_api_service.dart';
 import 'package:education/services/notification_sync_service.dart';
-import 'package:education/screens/side_menu/track_my_applications_screen.dart';
-import 'package:education/screens/side_menu/uploaded_documents_screen.dart';
 import 'package:flutter/material.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
+import '../controllers/home_controller.dart';
 import '../core/app_localizations.dart';
-import '../core/bloc/app_cubit.dart';
 import '../core/app_theme.dart';
+import '../core/bloc/app_cubit.dart';
 import '../core/image_url_helper.dart';
 import '../core/responsive_helper.dart';
-import '../controllers/home_controller.dart';
 import '../models/country_option.dart';
 import '../models/master_option.dart';
 import '../services/home_api_service.dart';
 import '../utils/auth_utils.dart';
 import '../widgets/app_drawer.dart';
 import '../widgets/common_widgets.dart';
-import 'side_menu/notifications_screen.dart';
 import '../widgets/flow_widgets.dart';
+import 'side_menu/notifications_screen.dart';
 import 'university_detail_screen.dart';
 
 class HomeScreen extends StatefulWidget {
@@ -60,7 +58,7 @@ class _HomeScreenState extends State<HomeScreen> {
     _refreshUnreadNotifications();
     _notificationTimer = Timer.periodic(
       const Duration(seconds: 20),
-          (_) => _refreshUnreadNotifications(),
+      (_) => _refreshUnreadNotifications(),
     );
   }
 
@@ -243,103 +241,103 @@ class _HomeScreenState extends State<HomeScreen> {
                                     Expanded(
                                       child: context.isSmallMobile
                                           ? ListView.separated(
-                                        itemCount: _controller
-                                            .isLoadingUniversities
-                                            ? 4
-                                            : _controller
-                                            .universities.length,
-                                        separatorBuilder: (_, __) =>
-                                        const SizedBox(height: 8),
-                                        itemBuilder: (context, index) {
-                                          if (_controller
-                                              .isLoadingUniversities) {
-                                            return const _UniversityCardShimmer();
-                                          }
-                                          final item = _controller
-                                              .universities[index];
-                                          return _UniversityCard(
-                                            data: item,
-                                            onTap: () =>
-                                                Navigator.of(context)
-                                                    .push(
-                                                  MaterialPageRoute(
-                                                    builder: (_) =>
-                                                        UniversityDetailScreen(
-                                                          data: item,
-                                                          selectedAcademic:
-                                                          _controller
-                                                              .selectedAcademic,
-                                                          selectedTrack:
-                                                          _controller
-                                                              .selectedTrack,
-                                                          selectedResult:
-                                                          _controller
-                                                              .resultController
-                                                              .text,
-                                                          academicOptions:
-                                                          _controller
-                                                              .academicOptions,
-                                                          trackOptions:
-                                                          _controller
-                                                              .trackOptions,
-                                                        ),
+                                              itemCount: _controller
+                                                      .isLoadingUniversities
+                                                  ? 4
+                                                  : _controller
+                                                      .universities.length,
+                                              separatorBuilder: (_, __) =>
+                                                  const SizedBox(height: 8),
+                                              itemBuilder: (context, index) {
+                                                if (_controller
+                                                    .isLoadingUniversities) {
+                                                  return const _UniversityCardShimmer();
+                                                }
+                                                final item = _controller
+                                                    .universities[index];
+                                                return _UniversityCard(
+                                                  data: item,
+                                                  onTap: () =>
+                                                      Navigator.of(context)
+                                                          .push(
+                                                    MaterialPageRoute(
+                                                      builder: (_) =>
+                                                          UniversityDetailScreen(
+                                                        data: item,
+                                                        selectedAcademic:
+                                                            _controller
+                                                                .selectedAcademic,
+                                                        selectedTrack:
+                                                            _controller
+                                                                .selectedTrack,
+                                                        selectedResult:
+                                                            _controller
+                                                                .resultController
+                                                                .text,
+                                                        academicOptions:
+                                                            _controller
+                                                                .academicOptions,
+                                                        trackOptions:
+                                                            _controller
+                                                                .trackOptions,
+                                                      ),
+                                                    ),
                                                   ),
-                                                ),
-                                          );
-                                        },
-                                      )
+                                                );
+                                              },
+                                            )
                                           : GridView.builder(
-                                        itemCount: _controller
-                                            .isLoadingUniversities
-                                            ? 4
-                                            : _controller
-                                            .universities.length,
-                                        gridDelegate:
-                                        SliverGridDelegateWithFixedCrossAxisCount(
-                                          crossAxisCount: gridColumns,
-                                          mainAxisSpacing: 8,
-                                          crossAxisSpacing: 8,
-                                          childAspectRatio:
-                                          gridAspectRatio,
-                                        ),
-                                        itemBuilder: (context, index) {
-                                          if (_controller
-                                              .isLoadingUniversities) {
-                                            return const _UniversityCardShimmer();
-                                          }
-                                          final item = _controller
-                                              .universities[index];
-                                          return _UniversityCard(
-                                            data: item,
-                                            onTap: () =>
-                                                Navigator.of(context)
-                                                    .push(
-                                                  MaterialPageRoute(
-                                                    builder: (_) =>
-                                                        UniversityDetailScreen(
-                                                          data: item,
-                                                          selectedAcademic:
-                                                          _controller
-                                                              .selectedAcademic,
-                                                          selectedTrack:
-                                                          _controller
-                                                              .selectedTrack,
-                                                          selectedResult:
-                                                          _controller
-                                                              .resultController
-                                                              .text,
-                                                          academicOptions:
-                                                          _controller
-                                                              .academicOptions,
-                                                          trackOptions:
-                                                          _controller
-                                                              .trackOptions,
-                                                        ),
+                                              itemCount: _controller
+                                                      .isLoadingUniversities
+                                                  ? 4
+                                                  : _controller
+                                                      .universities.length,
+                                              gridDelegate:
+                                                  SliverGridDelegateWithFixedCrossAxisCount(
+                                                crossAxisCount: gridColumns,
+                                                mainAxisSpacing: 8,
+                                                crossAxisSpacing: 8,
+                                                childAspectRatio:
+                                                    gridAspectRatio,
+                                              ),
+                                              itemBuilder: (context, index) {
+                                                if (_controller
+                                                    .isLoadingUniversities) {
+                                                  return const _UniversityCardShimmer();
+                                                }
+                                                final item = _controller
+                                                    .universities[index];
+                                                return _UniversityCard(
+                                                  data: item,
+                                                  onTap: () =>
+                                                      Navigator.of(context)
+                                                          .push(
+                                                    MaterialPageRoute(
+                                                      builder: (_) =>
+                                                          UniversityDetailScreen(
+                                                        data: item,
+                                                        selectedAcademic:
+                                                            _controller
+                                                                .selectedAcademic,
+                                                        selectedTrack:
+                                                            _controller
+                                                                .selectedTrack,
+                                                        selectedResult:
+                                                            _controller
+                                                                .resultController
+                                                                .text,
+                                                        academicOptions:
+                                                            _controller
+                                                                .academicOptions,
+                                                        trackOptions:
+                                                            _controller
+                                                                .trackOptions,
+                                                      ),
+                                                    ),
                                                   ),
-                                                ),
-                                          );
-                                        },
-                                      ),
+                                                );
+                                              },
+                                            ),
                                     ),
                                 ],
                               ),
@@ -352,14 +350,14 @@ class _HomeScreenState extends State<HomeScreen> {
                         // ),
                         Expanded(
                             child: Center(
-                              child: Text(context.l10n.text('ComingSoon')),
-                            ))
+                          child: Text(context.l10n.text('ComingSoon')),
+                        ))
                       ] else if (_activeTab == 2) ...[
                         // Expanded(child: UploadedDocumentsScreen(activeTab: false)),
                         Expanded(
                             child: Center(
-                              child: Text(context.l10n.text('ComingSoon')),
-                            ))
+                          child: Text(context.l10n.text('ComingSoon')),
+                        ))
                       ] else ...[
                         Expanded(child: LatestUpdatesScreen(activeTab: false)),
                       ],
@@ -391,10 +389,10 @@ String _localizedCountryName(BuildContext context, CountryOption country) {
 }
 
 String _localizedUniversityText(
-    BuildContext context,
-    String? englishValue,
-    String? arabicValue,
-    ) {
+  BuildContext context,
+  String? englishValue,
+  String? arabicValue,
+) {
   final localized = context.l10n.isArabic ? arabicValue : englishValue;
   if ((localized ?? '').trim().isNotEmpty) return localized!.trim();
 
@@ -481,7 +479,8 @@ class _HomeSearchHeader extends StatelessWidget {
                               children: [
                                 Icon(
                                   Icons.notifications_none_rounded,
-                                  size: context.responsiveHomeNotificationIconSize,
+                                  size: context
+                                      .responsiveHomeNotificationIconSize,
                                 ),
                                 if (unread > 0)
                                   Positioned(
@@ -786,9 +785,9 @@ class _CountrySelectionDialogState extends State<_CountrySelectionDialog>
       _filteredCountries = widget.countries
           .where(
             (country) =>
-        country.nameEn.toLowerCase().contains(normalized) ||
-            country.nameAr.toLowerCase().contains(normalized),
-      )
+                country.nameEn.toLowerCase().contains(normalized) ||
+                country.nameAr.toLowerCase().contains(normalized),
+          )
           .toList(growable: false);
     });
   }
@@ -797,7 +796,7 @@ class _CountrySelectionDialogState extends State<_CountrySelectionDialog>
   Widget build(BuildContext context) {
     final bool isSmall = context.isSmallMobile;
     return buildCubitView(
-          (context) => SafeArea(
+      (context) => SafeArea(
         child: Container(
           decoration: const BoxDecoration(
             color: Colors.white,
@@ -858,41 +857,41 @@ class _CountrySelectionDialogState extends State<_CountrySelectionDialog>
                   constraints: const BoxConstraints(maxHeight: 320),
                   child: _filteredCountries.isEmpty
                       ? Center(
-                    child: Padding(
-                      padding: const EdgeInsets.all(16),
-                      child: Text(context.l10n.text('noCountriesFound')),
-                    ),
-                  )
-                      : ListView.separated(
-                    shrinkWrap: true,
-                    itemCount: _filteredCountries.length,
-                    separatorBuilder: (_, __) => const Divider(height: 1),
-                    itemBuilder: (_, index) {
-                      final country = _filteredCountries[index];
-
-                      return Material(
-                        color: Colors.transparent,
-                        child: ListTile(
-                          dense: true,
-                          contentPadding: EdgeInsets.zero,
-                          // leading: _CountryFlag(country: country),
-                          title: Text(
-                            country.displayName(
-                              isArabic: context.l10n.isArabic,
-                            ),
-                            style: TextStyle(
-                              fontWeight: widget.selected == country.key
-                                  ? FontWeight.w700
-                                  : FontWeight.w500,
-                            ),
+                          child: Padding(
+                            padding: const EdgeInsets.all(16),
+                            child: Text(context.l10n.text('noCountriesFound')),
                           ),
-                          onTap: () {
-                            Navigator.of(context).pop(country);
+                        )
+                      : ListView.separated(
+                          shrinkWrap: true,
+                          itemCount: _filteredCountries.length,
+                          separatorBuilder: (_, __) => const Divider(height: 1),
+                          itemBuilder: (_, index) {
+                            final country = _filteredCountries[index];
+
+                            return Material(
+                              color: Colors.transparent,
+                              child: ListTile(
+                                dense: true,
+                                contentPadding: EdgeInsets.zero,
+                                // leading: _CountryFlag(country: country),
+                                title: Text(
+                                  country.displayName(
+                                    isArabic: context.l10n.isArabic,
+                                  ),
+                                  style: TextStyle(
+                                    fontWeight: widget.selected == country.key
+                                        ? FontWeight.w700
+                                        : FontWeight.w500,
+                                  ),
+                                ),
+                                onTap: () {
+                                  Navigator.of(context).pop(country);
+                                },
+                              ),
+                            );
                           },
                         ),
-                      );
-                    },
-                  ),
                 ),
               ],
             ),
@@ -954,26 +953,26 @@ class _AdvanceSearchDialogState extends State<_AdvanceSearchDialog>
     _filteredCountryOptions = widget.countryOptions;
   }
 
-  void _filterCountryOptions(String query) {
-    final normalized = query.trim().toLowerCase();
-    updateView(() {
-      if (normalized.isEmpty) {
-        _filteredCountryOptions = widget.countryOptions;
-      } else {
-        _filteredCountryOptions = widget.countryOptions
-            .where((country) => country.matchesQuery(normalized))
-            .toList(growable: false);
-      }
-    });
-  }
-
   bool _isOnlyCountryAndAcademicAllowed(String? academicValue) {
-    final normalized = academicValue?.trim().toLowerCase() ?? '';
-    if (normalized.isEmpty) return false;
-    return normalized.contains('master') ||
-        normalized.contains('phd') ||
-        normalized.contains('doctor') ||
-        normalized.contains('teach');
+    if (academicValue == null || academicValue.trim().isEmpty) return false;
+
+    final option = widget.academicOptions.firstWhere(
+      (opt) => opt.key == academicValue,
+      orElse: () => const MasterOption(nameEn: '', nameAr: '', value: ''),
+    );
+
+    // Exact IDs from the API
+    if (option.id == 'cmmugc0do001kfdm1mwn8oh1n' || // Master's
+        option.id == 'cmmugc0dr001lfdm14glqduh6' || // PhD
+        option.id == 'cmo7892ps000c2smjoaha4ei9') {
+      // Teaching qualification
+      return true;
+    }
+
+    final val = option.value.trim().toUpperCase();
+
+    // Fallback: Match exactly by the backend value/ID
+    return val == 'MASTERS' || val == 'PHD' || val == 'TEACHING_QUALIFICATION';
   }
 
   @override
@@ -1019,8 +1018,8 @@ class _AdvanceSearchDialogState extends State<_AdvanceSearchDialog>
                   options.isEmpty
                       ? context.l10n.text('noOptionsFound')
                       : context.l10n
-                      .text('selectOption')
-                      .replaceAll('{title}', title),
+                          .text('selectOption')
+                          .replaceAll('{title}', title),
                   style: const TextStyle(
                     color: Color(0xFF8A8A8A),
                     fontSize: 14,
@@ -1086,29 +1085,29 @@ class _AdvanceSearchDialogState extends State<_AdvanceSearchDialog>
             title,
             style: const TextStyle(fontSize: 14, fontWeight: FontWeight.w600),
           ),
-          const SizedBox(height: 8),
+          const SizedBox(height: 10),
           InkWell(
             borderRadius: BorderRadius.circular(10),
             onTap: !enabled || widget.countryOptions.isEmpty
                 ? null
                 : () async {
-              final selected = await showModalBottomSheet<CountryOption>(
-                context: context,
-                isScrollControlled: true,
-                useSafeArea: true,
-                backgroundColor: Colors.white,
-                builder: (_) => _CountrySelectionDialog(
-                  countries: widget.countryOptions,
-                  selected: _selectedCountry,
-                ),
-              );
-              if (selected == null || !context.mounted) return;
-              updateView(() {
-                _selectedCountry = selected.nameEn;
-                _filteredCountryOptions = widget.countryOptions;
-              });
-              onChanged(selected.nameEn);
-            },
+                    final selected = await showModalBottomSheet<CountryOption>(
+                      context: context,
+                      isScrollControlled: true,
+                      useSafeArea: true,
+                      backgroundColor: Colors.white,
+                      builder: (_) => _CountrySelectionDialog(
+                        countries: widget.countryOptions,
+                        selected: _selectedCountry,
+                      ),
+                    );
+                    if (selected == null || !context.mounted) return;
+                    updateView(() {
+                      _selectedCountry = selected.nameEn;
+                      _filteredCountryOptions = widget.countryOptions;
+                    });
+                    onChanged(selected.nameEn);
+                  },
             child: Container(
               height: 45,
               padding: const EdgeInsets.symmetric(horizontal: 12),
@@ -1127,10 +1126,10 @@ class _AdvanceSearchDialogState extends State<_AdvanceSearchDialog>
                     child: Text(
                       displayValue.isEmpty
                           ? (options.isEmpty
-                          ? context.l10n.text('noOptionsFound')
-                          : context.l10n
-                          .text('selectOption')
-                          .replaceAll('{title}', title))
+                              ? context.l10n.text('noOptionsFound')
+                              : context.l10n
+                                  .text('selectOption')
+                                  .replaceAll('{title}', title))
                           : displayValue,
                       overflow: TextOverflow.ellipsis,
                       style: TextStyle(
@@ -1154,157 +1153,158 @@ class _AdvanceSearchDialogState extends State<_AdvanceSearchDialog>
       );
     }
 
-    final shouldDisableDetails = _isOnlyCountryAndAcademicAllowed(
-      _selectedAcademic,
-    );
-    final academicByKey = <String, MasterOption>{
-      for (final option in widget.academicOptions)
-        if (option.key.isNotEmpty) option.key: option,
-    };
-    final trackByKey = <String, MasterOption>{
-      for (final option in widget.trackOptions)
-        if (option.key.isNotEmpty) option.key: option,
-    };
+    return buildCubitView((context) {
+      final shouldDisableDetails = _isOnlyCountryAndAcademicAllowed(
+        _selectedAcademic,
+      );
+      final academicByKey = <String, MasterOption>{
+        for (final option in widget.academicOptions)
+          if (option.key.isNotEmpty) option.key: option,
+      };
+      final trackByKey = <String, MasterOption>{
+        for (final option in widget.trackOptions)
+          if (option.key.isNotEmpty) option.key: option,
+      };
 
-    return buildCubitView(
-          (context) => SafeArea(
-        child: Container(
-          decoration: const BoxDecoration(
-            color: Colors.white,
-            borderRadius: BorderRadius.vertical(top: Radius.circular(18)),
-          ),
-          child: Padding(
-            padding: const EdgeInsets.fromLTRB(12, 14, 12, 12),
-            child: Column(
-              mainAxisSize: MainAxisSize.min,
-              children: [
-                Container(
-                  width: 44,
-                  height: 4,
-                  margin: const EdgeInsets.only(bottom: 10),
-                  decoration: BoxDecoration(
-                    color: const Color(0xFFD1D1D1),
-                    borderRadius: BorderRadius.circular(99),
-                  ),
+      return SafeArea(
+          child: Container(
+        decoration: const BoxDecoration(
+          color: Colors.white,
+          borderRadius: BorderRadius.vertical(top: Radius.circular(18)),
+        ),
+        child: Padding(
+          padding: const EdgeInsets.fromLTRB(12, 14, 12, 12),
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              Container(
+                width: 44,
+                height: 4,
+                margin: const EdgeInsets.only(bottom: 10),
+                decoration: BoxDecoration(
+                  color: const Color(0xFFD1D1D1),
+                  borderRadius: BorderRadius.circular(99),
                 ),
-                Row(
-                  children: [
-                    Expanded(
-                      child: Text(
-                        context.l10n.text('advanceSearch'),
-                        style: TextStyle(
-                          fontSize: context.isSmallMobile ? 16 : 18,
-                          fontWeight: FontWeight.w700,
-                          color: AppColors.text,
-                        ),
+              ),
+              Row(
+                children: [
+                  Expanded(
+                    child: Text(
+                      context.l10n.text('advanceSearch'),
+                      style: TextStyle(
+                        fontSize: context.isSmallMobile ? 16 : 18,
+                        fontWeight: FontWeight.w700,
+                        color: AppColors.text,
                       ),
                     ),
-                    IconButton(
-                      onPressed: () => Navigator.of(context).pop(),
-                      icon: const Icon(Icons.close),
-                    ),
-                  ],
-                ),
-                const SizedBox(height: 8),
-                countryDropdownTile(
-                  title: context.l10n.text('country'),
-                  options: _filteredCountryOptions,
-                  value: _selectedCountry,
-                  onChanged: (value) async {
-                    updateView(() => _selectedCountry = value);
-                    widget.onCountryChanged(value);
-                    await widget.onApplyFilters();
-                  },
-                ),
-                dropdownTile(
-                  title: context.l10n.text('academicQualification'),
-                  options: academicByKey.keys.toList(growable: false),
-                  value: _selectedAcademic,
-                  labelBuilder: (value) =>
-                  academicByKey[value]?.displayName(
-                    isArabic: context.l10n.isArabic,
-                  ) ??
-                      value,
-                  onChanged: (value) => updateView(() {
-                    _selectedAcademic = value;
-                    if (_isOnlyCountryAndAcademicAllowed(value)) {
-                      _selectedTrack = null;
-                      widget.resultController.clear();
-                    }
-                  }),
-                  icon: Icons.school_outlined,
-                ),
-                Opacity(
-                  opacity: shouldDisableDetails ? 0.55 : 1,
-                  child: dropdownTile(
-                    title:
-                    context.l10n.text('secondarySchoolCertificateProgram'),
-                    options: trackByKey.keys.toList(growable: false),
-                    value: _selectedTrack,
-                    labelBuilder: (value) =>
-                    trackByKey[value]?.displayName(
+                  ),
+                  IconButton(
+                    onPressed: () => Navigator.of(context).pop(),
+                    icon: const Icon(Icons.close),
+                  ),
+                ],
+              ),
+              const SizedBox(height: 8),
+              countryDropdownTile(
+                title: context.l10n.text('country'),
+                options: _filteredCountryOptions,
+                value: _selectedCountry,
+                onChanged: (value) async {
+                  updateView(() => _selectedCountry = value);
+                  widget.onCountryChanged(value);
+                  await widget.onApplyFilters();
+                },
+              ),
+              dropdownTile(
+                title: context.l10n.text('academicQualification'),
+                options: academicByKey.keys.toList(growable: false),
+                value: _selectedAcademic,
+                labelBuilder: (value) =>
+                    academicByKey[value]?.displayName(
                       isArabic: context.l10n.isArabic,
                     ) ??
-                        value,
-                    onChanged: (value) =>
-                        updateView(() => _selectedTrack = value),
-                    icon: Icons.menu_book_outlined,
-                    enabled: !shouldDisableDetails,
-                  ),
-                ),
-                Opacity(
-                  opacity: shouldDisableDetails ? 0.55 : 1,
-                  child: IgnorePointer(
-                    ignoring: shouldDisableDetails,
-                    child: AppTextField(
-                      label: widget.currencyOptions.isNotEmpty
-                          ? '${context.l10n.text('highSchoolGraduationRate')} (${widget.currencyOptions.first})'
-                          : context.l10n.text('highSchoolGraduationRate'),
-                      hint: context.l10n.text('enterHighSchoolGraduationRate'),
-                      controller: widget.resultController,
-                      keyboardType: TextInputType.number,
-                      height: 48,
-                    ),
-                  ),
-                ),
-                const SizedBox(height: 10),
-                Row(
-                  children: [
-                    Expanded(
-                      child: AppOutlinedButton(
-                        label: context.l10n.text('reset'),
-                        onPressed: () async {
-                          updateView(() {
-                            _selectedCountry = null;
-                            _selectedAcademic = null;
-                            _selectedTrack = null;
-                            widget.resultController.clear();
-                          });
-                          widget.onResetFilters();
-                        },
+                    value,
+                onChanged: (value) => updateView(() {
+                  _selectedAcademic = value;
+                  if (_isOnlyCountryAndAcademicAllowed(value)) {
+                    _selectedTrack = null;
+                    widget.resultController.clear();
+                  }
+                }),
+                icon: Icons.school_outlined,
+              ),
+              AnimatedSize(
+                duration: const Duration(milliseconds: 250),
+                curve: Curves.easeInOut,
+                child: shouldDisableDetails
+                    ? const SizedBox.shrink()
+                    : Column(
+                        mainAxisSize: MainAxisSize.min,
+                        children: [
+                          dropdownTile(
+                            title: context.l10n
+                                .text('secondarySchoolCertificateProgram'),
+                            options: trackByKey.keys.toList(growable: false),
+                            value: _selectedTrack,
+                            labelBuilder: (value) =>
+                                trackByKey[value]?.displayName(
+                                  isArabic: context.l10n.isArabic,
+                                ) ??
+                                value,
+                            onChanged: (value) =>
+                                updateView(() => _selectedTrack = value),
+                            icon: Icons.menu_book_outlined,
+                          ),
+                          AppTextField(
+                            label: widget.currencyOptions.isNotEmpty
+                                ? '${context.l10n.text('highSchoolGraduationRate')} (${widget.currencyOptions.first})'
+                                : context.l10n.text('highSchoolGraduationRate'),
+                            hint: context.l10n
+                                .text('enterHighSchoolGraduationRate'),
+                            controller: widget.resultController,
+                            keyboardType: TextInputType.number,
+                            height: 48,
+                          ),
+                        ],
                       ),
+              ),
+              const SizedBox(height: 10),
+              Row(
+                children: [
+                  Expanded(
+                    child: AppOutlinedButton(
+                      label: context.l10n.text('reset'),
+                      onPressed: () async {
+                        updateView(() {
+                          _selectedCountry = null;
+                          _selectedAcademic = null;
+                          _selectedTrack = null;
+                          widget.resultController.clear();
+                        });
+                        widget.onResetFilters();
+                      },
                     ),
-                    const SizedBox(width: 8),
-                    Expanded(
-                      child: AppPrimaryButton(
-                        label: context.l10n.text('continue'),
-                        onPressed: () async {
-                          widget.onCountryChanged(_selectedCountry);
-                          widget.onAcademicChanged(_selectedAcademic);
-                          widget.onTrackChanged(_selectedTrack);
-                          Navigator.of(context).pop();
-                          await widget.onApplyFilters();
-                        },
-                      ),
+                  ),
+                  const SizedBox(width: 8),
+                  Expanded(
+                    child: AppPrimaryButton(
+                      label: context.l10n.text('continue'),
+                      onPressed: () async {
+                        widget.onCountryChanged(_selectedCountry);
+                        widget.onAcademicChanged(_selectedAcademic);
+                        widget.onTrackChanged(_selectedTrack);
+                        Navigator.of(context).pop();
+                        await widget.onApplyFilters();
+                      },
                     ),
-                  ],
-                ),
-              ],
-            ),
+                  ),
+                ],
+              ),
+            ],
           ),
         ),
-      ),
-    );
+      ));
+    });
   }
 }
 
