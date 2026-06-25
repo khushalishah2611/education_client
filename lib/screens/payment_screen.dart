@@ -360,7 +360,7 @@ class _PaymentScreenState extends State<PaymentScreen>
 
       Thawani.pay(
         context,
-        testMode: true,
+        testMode: false,
         api: ApiConfig.secretKey,
         pKey: ApiConfig.publishableKey,
         clintID: studentUserId,
