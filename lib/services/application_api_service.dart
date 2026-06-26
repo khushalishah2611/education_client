@@ -6,6 +6,7 @@ import '../core/api_config.dart';
 import '../core/api_logger.dart';
 import '../core/api_status.dart';
 import '../core/http_client.dart';
+import '../models/agreement_template.dart';
 import '../models/document_type.dart';
 
 class ApplicationApiException implements Exception {
@@ -501,6 +502,57 @@ extension ApplicationApiStudents on ApplicationApiService {
     }
 
     return decoded;
+  }
+}
+
+extension ApplicationApiAgreements on ApplicationApiService {
+  Future<List<AgreementTemplate>> fetchAgreementTemplates() async {
+    const path = '/api/student/agreements/templates';
+    final response = await AppHttpClient.client.get(ApiConfig.uri(path));
+    final Object? parsed = jsonDecode(response.body);
+
+    logApiCall(
+      method: 'GET',
+      url: ApiConfig.uri(path).toString(),
+      statusCode: response.statusCode,
+      requestBody: null,
+      responseBody: parsed,
+    );
+
+    if (!ApiStatus.isSuccess(response.statusCode)) {
+      final Map<String, dynamic> decoded = _decodeMap(response.body);
+      throw ApplicationApiException(
+        statusCode: response.statusCode,
+        message: decoded['message']?.toString() ??
+            'Failed to load agreement templates',
+      );
+    }
+
+    // Flexible parsing: handle various API shapes
+    List<dynamic> items = <dynamic>[];
+    try {
+      if (parsed is List<dynamic>) {
+        items = parsed;
+      } else if (parsed is Map<String, dynamic>) {
+        final dynamic data = parsed['data'] ??
+            parsed['templates'] ??
+            parsed['agreements'] ??
+            parsed['result'];
+        if (data is List<dynamic>) {
+          items = data;
+        } else if (data is Map<String, dynamic>) {
+          items = [data];
+        }
+      }
+    } catch (e) {
+      // parsing fallback
+      items = <dynamic>[];
+    }
+
+    return items
+        .map((item) =>
+            AgreementTemplate.fromJson(item as Map<String, dynamic>))
+        .toList(growable: false);
   }
 }
 

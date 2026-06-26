@@ -1,9 +1,9 @@
 import 'package:flutter/material.dart';
-import 'package:shared_preferences/shared_preferences.dart';
 
 import '../../core/app_localizations.dart';
 import '../../core/app_theme.dart';
 import '../../core/bloc/app_cubit.dart';
+import '../../models/agreement_template.dart';
 import '../../services/application_api_service.dart';
 import '../../services/snackbar_service.dart';
 import '../../utils/auth_utils.dart';
@@ -50,33 +50,20 @@ class _TermsConditionsScreenState extends State<TermsConditionsScreen>
     updateView(() => _loading = true);
 
     try {
-      final SharedPreferences prefs = await SharedPreferences.getInstance();
-
-      final String studentUserId =
-          prefs.getString('studentUserId')?.trim() ?? '';
-
-      final Map<String, dynamic> overview = await _api.fetchStudentOverview(
-        studentUserId: studentUserId,
-      );
-
-      final Object? templates = overview['agreementTemplates'];
+      final List<AgreementTemplate> templates =
+          await _api.fetchAgreementTemplates();
 
       if (!mounted) return;
 
       updateView(() {
-        _agreements = templates is List
-            ? templates
-                .whereType<Map>()
-                .map(
-                  (e) => e.map(
-                    (k, v) => MapEntry(
-                      k.toString(),
-                      v,
-                    ),
-                  ),
-                )
-                .toList()
-            : <Map<String, dynamic>>[];
+        _agreements = templates
+            .map<Map<String, dynamic>>((template) => {
+                  'titleEn': template.titleEn,
+                  'titleAr': template.titleAr,
+                  'contentEn': template.contentEn,
+                  'contentAr': template.contentAr,
+                })
+            .toList();
 
         _loading = false;
       });

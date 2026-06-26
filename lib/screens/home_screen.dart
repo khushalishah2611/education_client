@@ -1262,7 +1262,7 @@ class _AdvanceSearchDialogState extends State<_AdvanceSearchDialog>
                             hint: context.l10n
                                 .text('enterHighSchoolGraduationRate'),
                             controller: widget.resultController,
-                            keyboardType: TextInputType.number,
+                            keyboardType: TextInputType.text,
                             height: 48,
                           ),
                         ],
